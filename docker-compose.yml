@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    container_name: corplms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: corplms
+      POSTGRES_USER: lms
+      POSTGRES_PASSWORD: lms_dev_password
+    ports:
+      - "55434:5432"
+    volumes:
+      - corplms_postgres_canonical:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lms -d corplms"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: corplms-valkey
+    restart: unless-stopped
+    ports:
+      - "56379:6379"
+    volumes:
+      - corplms_valkey:/data
+    command: ["valkey-server", "--appendonly", "yes"]
+volumes:
+  corplms_postgres_canonical:
+  corplms_valkey:

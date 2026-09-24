@@ -1,0 +1,119 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: corplms
+      POSTGRES_USER: lms
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - corplms_postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lms -d corplms"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    restart: unless-stopped
+    command: ["valkey-server", "--appendonly", "yes"]
+    volumes:
+      - corplms_valkey:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: "no"
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+asyncpg://lms:${POSTGRES_PASSWORD}@postgres:5432/corplms
+      REDIS_URL: redis://valkey:6379/7
+      WEB_ORIGIN: ${WEB_ORIGIN:?Set WEB_ORIGIN}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS}
+      API_ORIGIN: ${API_ORIGIN:?Set API_ORIGIN}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_NAME: Corporate LMS API
+      DATABASE_URL: postgresql+asyncpg://lms:${POSTGRES_PASSWORD}@postgres:5432/corplms
+      REDIS_URL: redis://valkey:6379/7
+      WEB_ORIGIN: ${WEB_ORIGIN:?Set WEB_ORIGIN}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS}
+      API_ORIGIN: ${API_ORIGIN:?Set API_ORIGIN}
+      SESSION_COOKIE_NAME: corp_lms_session
+      SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-28800}
+      COOKIE_SECURE: "true"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      MAX_FAILED_LOGIN_ATTEMPTS: ${MAX_FAILED_LOGIN_ATTEMPTS:-5}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-15}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    environment:
+      APP_ENV: production
+      APP_NAME: Corporate LMS Worker
+      DATABASE_URL: postgresql+asyncpg://lms:${POSTGRES_PASSWORD}@postgres:5432/corplms
+      REDIS_URL: redis://valkey:6379/7
+      WEB_ORIGIN: ${WEB_ORIGIN:?Set WEB_ORIGIN}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS}
+      API_ORIGIN: ${API_ORIGIN:?Set API_ORIGIN}
+      SESSION_COOKIE_NAME: corp_lms_session
+      SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-28800}
+      COOKIE_SECURE: "true"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      MAX_FAILED_LOGIN_ATTEMPTS: ${MAX_FAILED_LOGIN_ATTEMPTS:-5}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-15}
+    depends_on:
+      api:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        API_ORIGIN: ${INTERNAL_API_ORIGIN:-http://api:8000}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      API_ORIGIN: ${INTERNAL_API_ORIGIN:-http://api:8000}
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+
+volumes:
+  corplms_postgres:
+  corplms_valkey:

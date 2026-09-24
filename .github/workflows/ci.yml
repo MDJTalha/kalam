@@ -1,0 +1,78 @@
+name: Corporate LMS CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: corplms
+          POSTGRES_USER: lms
+          POSTGRES_PASSWORD: lms_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lms -d corplms"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m venv .venv
+      - run: .venv/bin/python -m pip install --upgrade pip
+      - run: .venv/bin/pip install -r requirements.txt
+      - name: Migrate database
+        env:
+          DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          APP_ENV: development
+          WEB_ORIGIN: http://localhost:3000
+          ALLOWED_HOSTS: localhost,127.0.0.1
+        run: .venv/bin/alembic upgrade head
+      - name: Seed demo data
+        env:
+          DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          APP_ENV: development
+          WEB_ORIGIN: http://localhost:3000
+          ALLOWED_HOSTS: localhost,127.0.0.1
+        run: .venv/bin/python scripts/seed.py
+      - name: Static checks
+        run: .venv/bin/ruff check app tests
+      - name: Type checks
+        run: .venv/bin/mypy app
+      - name: Tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          APP_ENV: development
+          WEB_ORIGIN: http://localhost:3000
+          ALLOWED_HOSTS: localhost,127.0.0.1
+        run: .venv/bin/python -m pytest -q
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci --include=dev
+        working-directory: .
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
