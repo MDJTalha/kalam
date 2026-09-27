@@ -1,30 +1,22 @@
-import { Layers3 } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Layers3, Target } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { apiJson, requireUser } from "@/lib/server-api";
+type Skill={id:string;skill:string;proficiency:number;evidence_source?:string|null};
+type CatalogSkill={id:string;name:string;description?:string|null;category?:string|null};
+type Gap={role:string;role_id:string;skill:string;skill_id:string;required_proficiency:number;current_proficiency:number;gap:number};
 
-type Skill = { id: string; skill: string; proficiency: number; evidence_source?: string | null };
-type CatalogSkill = { id: string; name: string; description?: string | null; category?: string | null };
-
-export default async function SkillsPage() {
-  await requireUser();
-  const [mine, catalog] = await Promise.all([
-    apiJson<Skill[]>("/api/v1/skills/my"),
-    apiJson<CatalogSkill[]>("/api/v1/skills"),
-  ]);
-  return (
-    <DashboardShell title="Skills & development" eyebrow="Capability management">
-      <div className="stat-grid">
-        <div className="stat-card"><span>My skills</span><strong>{mine?.length ?? 0}</strong><small>Recorded evidence</small></div>
-        <div className="stat-card"><span>Catalog</span><strong>{catalog?.length ?? 0}</strong><small>Tenant skill taxonomy</small></div>
-        <div className="stat-card"><span>Average proficiency</span><strong>{mine?.length ? (mine.reduce((sum,x)=>sum+x.proficiency,0)/mine.length).toFixed(1) : "—"}</strong><small>1 to 5 scale</small></div>
-        <div className="stat-card"><span>Evidence</span><strong>{mine?.filter(x=>x.evidence_source).length ?? 0}</strong><small>Attributed records</small></div>
-      </div>
-      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">My capability profile</span><h2>Skills</h2></div></div>
-        {mine?.length ? <div className="table-wrap"><table className="data-table"><thead><tr><th>Skill</th><th>Proficiency</th><th>Evidence</th></tr></thead><tbody>{mine.map((item)=><tr key={item.id}><td><strong>{item.skill}</strong></td><td><span className="proficiency">{item.proficiency}/5</span></td><td>{item.evidence_source || "Not specified"}</td></tr>)}</tbody></table></div> : <div className="empty-state"><Layers3 size={24}/><p>No skills have been recorded for this learner yet.</p></div>}
-      </div>
-      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Taxonomy</span><h2>Skill catalog</h2></div></div>
-        {catalog?.length ? <div className="compact-list">{catalog.map((item)=><div className="compact-row" key={item.id}><div><strong>{item.name}</strong><small>{item.category || "General capability"} · {item.description || "No description"}</small></div></div>)}</div> : <div className="empty-state"><p>No skills configured.</p></div>}
-      </div>
-    </DashboardShell>
-  );
+export default async function SkillsPage(){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("skills.manage")??false;
+  const [mine,catalog,gaps]=await Promise.all([apiJson<Skill[]>("/api/v1/skills/me"),apiJson<CatalogSkill[]>("/api/v1/skills"),apiJson<Gap[]>("/api/v1/skills/me/gaps")]);
+  const average=mine?.length?(mine.reduce((sum,x)=>sum+x.proficiency,0)/mine.length).toFixed(1):"—";
+  const evidenceCount=mine?.filter(x=>x.evidence_source).length??0;
+  return <DashboardShell title="Skills & development" eyebrow="Capability management">
+    <section className="skills-command-hero" aria-labelledby="skills-command-title"><div><span className="eyebrow">Capability profile</span><h2 id="skills-command-title">Turn learning into measurable capability.</h2><p>Review recorded proficiency and evidence first, then use authorized skill governance to align courses and role expectations.</p>{canManage&&<div className="skills-command-actions"><Link className="button button-primary" href="/dashboard/skills/admin">Open Capability Framework <ArrowRight size={14}/></Link></div>}</div><div className="skills-command-aside"><span><i/> {canManage?"Governance scope":"Learner scope"}</span><strong>{mine?.length??0}</strong><small>skills with recorded proficiency</small></div></section>
+    <section className="stat-grid skills-stat-grid" aria-label="Capability indicators"><div className="stat-card"><span>My skills</span><strong>{mine?.length??0}</strong><small>Recorded proficiency</small></div><div className="stat-card"><span>Catalog</span><strong>{catalog?.length??0}</strong><small>Tenant skill taxonomy</small></div><div className="stat-card"><span>Average proficiency</span><strong>{average}</strong><small>1 to 5 scale</small></div><div className="stat-card"><span>Evidence</span><strong>{evidenceCount}</strong><small>Attributed records</small></div></section>
+    <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">My capability profile</span><h2>Skills</h2></div></div>{mine?.length?<div className="table-wrap"><table className="data-table"><thead><tr><th>Skill</th><th>Proficiency</th><th>Evidence</th></tr></thead><tbody>{mine.map(item=><tr key={item.id}><td><strong>{item.skill}</strong></td><td><span className="proficiency">{item.proficiency}/5</span></td><td>{item.evidence_source||"Not specified"}</td></tr>)}</tbody></table></div>:<div className="empty-state"><Layers3 size={24}/><p>No skills have been recorded for this learner yet.</p></div>}</div>
+    <section className="data-panel" aria-label="My role skill gaps"><div className="section-heading compact"><div><span className="eyebrow">Role expectations</span><h2>My skill gaps</h2></div></div>{gaps?.length?<div className="table-wrap"><table className="data-table"><thead><tr><th>Role</th><th>Skill</th><th>Required</th><th>Recorded</th><th>Gap</th></tr></thead><tbody>{gaps.map(g=><tr key={g.role_id+g.skill_id}><td>{g.role}</td><td><strong>{g.skill}</strong></td><td>{g.required_proficiency}/5</td><td>{g.current_proficiency?`${g.current_proficiency}/5`:"Not recorded"}</td><td>{g.gap?`${g.gap} level${g.gap===1?"":"s"}`:"Met"}</td></tr>)}</tbody></table></div>:<p>No skill requirements are mapped to your assigned roles yet.</p>}<p className="section-meta">Gaps compare recorded proficiency with role requirements; an unrecorded skill is shown as zero.</p></section>
+    {canManage?<section className="skills-guidance" aria-label="Capability governance"><div><Target size={18}/><div><span className="eyebrow">Framework</span><strong>Manage role and course alignment</strong><p>Use Capability Framework to define skills, set role requirements, and maintain course mappings.</p><Link href="/dashboard/skills/admin">Open Capability Framework <ArrowRight size={14}/></Link></div></div></section>:<section className="skills-guidance" aria-label="Skill development guidance"><div><Target size={18}/><div><span className="eyebrow">Next step</span><strong>Use your learning record to build capability.</strong><p>Course completion and development activity can become evidence for your skill profile as your organization records it.</p></div></div><div><Layers3 size={18}/><div><span className="eyebrow">Skill taxonomy</span><strong>{catalog?.length??0} skills available</strong><p>Your organization maintains the taxonomy used to describe capability across learning and development.</p></div></div></section>}
+  </DashboardShell>;
 }

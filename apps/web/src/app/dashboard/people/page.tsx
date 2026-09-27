@@ -1,18 +1,17 @@
-import { UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { PeopleDirectory } from "@/components/people-directory";
 import { apiJson, requireUser } from "@/lib/server-api";
-
-type Person = { id: string; email: string; first_name: string; last_name: string; employee_number?: string | null; job_title?: string | null; is_active: boolean };
-
+type Person = { id: string; email: string; first_name: string; last_name: string; employee_number?: string | null; job_title?: string | null; org_unit_id?: string | null; is_active: boolean };
+type Unit = { id: string; name: string };
 export default async function PeoplePage() {
-  await requireUser();
-  const people = await apiJson<Person[]>("/api/v1/people");
-  return (
-    <DashboardShell title="People & teams" eyebrow="Workforce administration">
-      <div className="data-panel">
-        <div className="section-heading compact"><div><span className="eyebrow">Tenant workforce</span><h2>People</h2></div><span className="section-meta">{people?.length ?? 0} records</span></div>
-        {people?.length ? <div className="table-wrap"><table className="data-table"><thead><tr><th>Person</th><th>Employee #</th><th>Role / title</th><th>Status</th></tr></thead><tbody>{people.map((person)=><tr key={person.id}><td><strong>{person.first_name} {person.last_name}</strong><small>{person.email}</small></td><td>{person.employee_number || "—"}</td><td>{person.job_title || "—"}</td><td><span className={`status-badge ${person.is_active ? "success" : "muted"}`}>{person.is_active ? "Active" : "Inactive"}</span></td></tr>)}</tbody></table></div> : <div className="empty-state"><UsersRound size={24}/><p>No people records are available.</p></div>}
-      </div>
-    </DashboardShell>
-  );
+  const user = await requireUser<{ permissions?: string[] }>();
+  const permissions = user.permissions ?? [];
+  if (!permissions.includes("users.read")) return <DashboardShell title="People" eyebrow="Workforce administration"><section className="data-panel"><h2>Access restricted</h2><p>You need permission to view the people directory.</p></section></DashboardShell>;
+  const [people, units] = await Promise.all([
+    apiJson<Person[]>("/api/v1/people"),
+    apiJson<Unit[]>("/api/v1/organization/units"),
+  ]);
+  return <DashboardShell title="People" eyebrow="Workforce administration">
+    {people && units ? <PeopleDirectory people={people} units={units} canManage={permissions.includes("users.manage")} /> : <section className="data-panel" role="alert"><h2>People directory unavailable</h2><p>Check your access or try again later.</p></section>}
+  </DashboardShell>;
 }

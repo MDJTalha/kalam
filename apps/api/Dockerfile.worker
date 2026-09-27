@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+WORKDIR /app/api
+RUN addgroup --system app && adduser --system --ingroup app app
+
+COPY apps/api/requirements-prod.txt ./requirements-prod.txt
+RUN set -eux; for attempt in 1 2 3; do pip install --no-cache-dir --retries 10 --timeout 60 -r requirements-prod.txt && exit 0; echo "dependency install attempt ${attempt} failed; retrying" >&2; sleep 3; done; exit 1
+
+COPY apps/api/app ./app
+COPY apps/worker /app/worker
+RUN mkdir -p /data/uploads && chown -R app:app /app /data/uploads
+USER app
+
+WORKDIR /app/worker
+CMD ["python", "run.py"]

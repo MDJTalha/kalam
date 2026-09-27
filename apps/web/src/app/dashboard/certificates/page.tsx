@@ -2,15 +2,38 @@ import { Award, ExternalLink } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { apiJson, requireUser } from "@/lib/server-api";
 
-type Certificate = { id: string; course: string; verification_code: string; issued_at: string; expires_at?: string | null; revoked: boolean };
+type CertificateStatus = "active" | "expiring_soon" | "expired" | "revoked";
+type Certificate = { id: string; course: string; verification_code: string; issued_at: string; expires_at?: string | null; revoked: boolean; status: CertificateStatus };
+
+const statusLabel: Record<CertificateStatus, string> = {
+  active: "Valid",
+  expiring_soon: "Expiring soon",
+  expired: "Expired",
+  revoked: "Revoked",
+};
+
+const statusClass: Record<CertificateStatus, string> = {
+  active: "success",
+  expiring_soon: "warning",
+  expired: "danger",
+  revoked: "danger",
+};
 
 export default async function CertificatesPage() {
   await requireUser();
-  const certificates = await apiJson<Certificate[]>("/api/v1/certificates/my");
+  const certificates = (await apiJson<Certificate[]>("/api/v1/certificates/my")) ?? [];
+  const counts = {
+    issued: certificates.length,
+    active: certificates.filter((item) => item.status === "active").length,
+    expiring: certificates.filter((item) => item.status === "expiring_soon").length,
+    revoked: certificates.filter((item) => item.status === "revoked").length,
+  };
   return (
     <DashboardShell title="Credentials" eyebrow="Certificates & verification">
-      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Verified learning evidence</span><h2>Certificates</h2></div><span className="section-meta">{certificates?.length ?? 0} issued</span></div>
-        {certificates?.length ? <div className="certificate-grid">{certificates.map((item)=><article className="certificate-card" key={item.id}><div className="certificate-symbol"><Award size={24}/></div><div><span className={`status-badge ${item.revoked ? "danger" : "success"}`}>{item.revoked ? "Revoked" : "Valid"}</span><h3>{item.course}</h3><p>Issued {new Date(item.issued_at).toLocaleDateString()}{item.expires_at ? ` · Expires ${new Date(item.expires_at).toLocaleDateString()}` : " · No expiry"}</p><small>Verification: {item.verification_code}</small><a className="text-link" target="_blank" rel="noreferrer" href={`/verify/${item.verification_code}`}>Verification endpoint <ExternalLink size={13}/></a></div></article>)}</div> : <div className="empty-state"><Award size={24}/><p>No certificates have been issued to this learner yet.</p></div>}
+      <section className="certificate-command-hero"><div><span className="eyebrow">Verified learning evidence</span><h2>Your credentials, ready to verify</h2><p>Review certificates issued to you, monitor expiry dates and share a trusted public verification page when you need to evidence your learning.</p></div></section>
+      <section className="metric-strip certificate-stat-grid" aria-label="Credential summary"><span><b>{counts.issued}</b> issued</span><span><b>{counts.active}</b> valid</span><span><b>{counts.expiring}</b> expiring soon</span><span><b>{counts.revoked}</b> revoked</span></section>
+      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Credential records</span><h2>Certificates</h2></div><span className="section-meta">{counts.issued} issued</span></div>
+        {certificates.length ? <div className="certificate-grid">{certificates.map((item)=><article className="certificate-card certificate-card-enhanced" key={item.id}><div className="certificate-symbol"><Award size={24}/></div><div className="certificate-card-body"><span className={`status-badge ${statusClass[item.status]}`}>{statusLabel[item.status]}</span><h3>{item.course}</h3><p>Issued {new Date(item.issued_at).toLocaleDateString()}{item.expires_at ? ` · Expires ${new Date(item.expires_at).toLocaleDateString()}` : " · No expiry"}</p><div className="certificate-code"><span>Verification code</span><code>{item.verification_code}</code></div><a className="text-link certificate-verify-action" target="_blank" rel="noreferrer" href={`/verify/${item.verification_code}`}>Verify credential <ExternalLink size={13}/></a></div></article>)}</div> : <div className="empty-state"><Award size={24}/><h3>No certificates issued yet</h3><p>Certificates will appear here after you complete certificate-eligible learning.</p></div>}
       </div>
     </DashboardShell>
   );

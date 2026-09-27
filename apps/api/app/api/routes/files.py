@@ -5,10 +5,11 @@ from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_permission
+from app.api.deps import require_permission
 from app.db.models import FileObject, User
 from app.db.session import get_db
 from app.services.audit import audit
+from app.services.file_scanner import FileScanError, scan_file
 from app.services.storage import get_storage
 
 router = APIRouter()
@@ -28,7 +29,7 @@ ALLOWED_MIME_TYPES = {
 @router.post("", status_code=201)
 async def upload_file(
     upload: UploadFile = File(...),
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission("files.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     if upload.content_type not in ALLOWED_MIME_TYPES:
@@ -42,6 +43,17 @@ async def upload_file(
     except ValueError as exc:
         raise HTTPException(status_code=413, detail=str(exc)) from exc
 
+    path = storage.path_for(object_key)
+    try:
+        clean, scanner = await scan_file(path)
+    except FileScanError as exc:
+        storage.delete(object_key)
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    if not clean:
+        storage.delete(object_key)
+        raise HTTPException(status_code=422, detail="File rejected by malware scanner")
+
     item = FileObject(
         tenant_id=user.tenant_id,
         uploaded_by=user.id,
@@ -49,8 +61,8 @@ async def upload_file(
         original_name=upload.filename[:255],
         mime_type=upload.content_type,
         size_bytes=size_bytes,
-        status="pending_scan",
-        record_metadata={"scanner": "not_configured"},
+        status="available" if scanner != "not_configured" else "pending_scan",
+        record_metadata={"scanner": scanner, "scan_result": "clean" if scanner != "not_configured" else "pending"},
     )
     db.add(item)
     await db.flush()
@@ -76,7 +88,7 @@ async def upload_file(
 
 @router.get("")
 async def list_files(
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission("files.read")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -101,7 +113,7 @@ async def list_files(
 @router.get("/{file_id}/download")
 async def download_file(
     file_id: UUID,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission("files.read")),
     db: AsyncSession = Depends(get_db),
 ):
     item = await db.scalar(

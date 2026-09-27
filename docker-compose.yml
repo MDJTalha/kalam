@@ -16,6 +16,15 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+  clamav:
+    image: clamav/clamav:1.4.3
+    container_name: corplms-clamav
+    restart: unless-stopped
+    ports:
+      - "55000:3310"
+    volumes:
+      - corplms_clamav_db:/var/lib/clamav
+
   valkey:
     image: valkey/valkey:8-alpine
     container_name: corplms-valkey
@@ -28,3 +37,4 @@ services:
 volumes:
   corplms_postgres_canonical:
   corplms_valkey:
+  corplms_clamav_db:

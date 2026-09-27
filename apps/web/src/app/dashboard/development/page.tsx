@@ -1,40 +1,22 @@
-import { Target, CheckCircle2 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { DevelopmentPlanner } from "@/components/development-planner";
 import { apiJson, requireUser } from "@/lib/server-api";
-
-type Goal = { title: string; target_date?: string | null; status: string; notes?: string | null };
-type Plan = { id: string; title: string; status: string; goals: Goal[]; created_at: string; updated_at: string };
-
-export default async function DevelopmentPage() {
+type Goal={title:string;target_date?:string|null;status:string;notes?:string|null};
+type Plan={id:string;title:string;status:string;goals:Goal[]};
+export default async function DevelopmentPage(){
   await requireUser();
-  const plans = await apiJson<Plan[]>("/api/v1/development/my");
-  const goalCount = plans?.reduce((total, plan) => total + plan.goals.length, 0) ?? 0;
-  const completed = plans?.reduce((total, plan) => total + plan.goals.filter((goal) => goal.status === "completed").length, 0) ?? 0;
-
-  return (
-    <DashboardShell title="Development plans" eyebrow="Individual capability growth">
-      <div className="stat-grid">
-        <div className="stat-card"><span>Plans</span><strong>{plans?.length ?? 0}</strong><small>Personal development plans</small></div>
-        <div className="stat-card"><span>Goals</span><strong>{goalCount}</strong><small>Tracked development goals</small></div>
-        <div className="stat-card"><span>Completed</span><strong>{completed}</strong><small>Goals completed</small></div>
-        <div className="stat-card"><span>Progress</span><strong>{goalCount ? Math.round(completed / goalCount * 100) : 0}%</strong><small>Goal completion rate</small></div>
-      </div>
-
-      {plans?.length ? plans.map((plan) => (
-        <section className="data-panel" key={plan.id}>
-          <div className="section-heading compact"><div><span className="eyebrow">{plan.status}</span><h2>{plan.title}</h2></div><Target size={20}/></div>
-          <div className="compact-list">
-            {plan.goals.length ? plan.goals.map((goal, index) => (
-              <div className="compact-row" key={plan.id + "-" + index}>
-                <div><strong>{goal.title}</strong><small>{goal.target_date ? "Target " + new Date(goal.target_date).toLocaleDateString() : "No target date"} · {goal.status}</small></div>
-                <CheckCircle2 size={17}/>
-              </div>
-            )) : <div className="empty-state"><p>No goals are attached to this plan.</p></div>}
-          </div>
-        </section>
-      )) : (
-        <section className="data-panel"><div className="empty-state"><Target size={28}/><h2>No development plans yet</h2><p>Create a plan through the HR/L&D workflow to start tracking capability goals.</p></div></section>
-      )}
-    </DashboardShell>
-  );
+  const plans=await apiJson<Plan[]>("/api/v1/development/my");
+  const goals=plans?.flatMap(plan=>plan.goals)??[];
+  const completed=goals.filter(goal=>goal.status==="completed").length;
+  const active=plans?.filter(plan=>plan.status==="active").length??0;
+  return <DashboardShell title="Development Plans" eyebrow="Individual capability growth">
+    <section className="skills-command-hero"><div><span className="eyebrow">My development</span><h2>Turn capability needs into achievable goals.</h2><p>Create a plan, set a target date for each goal, record progress, and review manager milestones and feedback in one place.</p></div><div className="skills-command-aside"><span>Active plans</span><strong>{active}</strong><small>of {plans?.length??0} personal plans</small></div></section>
+    <section className="stat-grid" aria-label="Development indicators">
+      <div className="stat-card"><span>Plans</span><strong>{plans?.length??0}</strong><small>Personal plans</small></div>
+      <div className="stat-card"><span>Goals</span><strong>{goals.length}</strong><small>Across all plans</small></div>
+      <div className="stat-card"><span>Completed</span><strong>{completed}</strong><small>Goals marked complete</small></div>
+      <div className="stat-card"><span>Goal progress</span><strong>{goals.length?Math.round(completed/goals.length*100):0}%</strong><small>Of recorded goals</small></div>
+    </section>
+    <DevelopmentPlanner initial={plans??[]}/>
+  </DashboardShell>;
 }

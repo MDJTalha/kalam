@@ -1,5 +1,6 @@
 from datetime import timedelta
 from secrets import token_urlsafe
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select, update
@@ -7,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.security import hash_password, new_session_token, session_token_hash, utcnow, verify_password
-from app.db.models import Invitation, PasswordResetToken, SessionRecord, Tenant, User, UserRole
+from app.db.models import Invitation, PasswordResetToken, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.email import send_email
@@ -178,12 +179,80 @@ async def accept_invitation(payload: InvitationAccept, db: AsyncSession = Depend
     await db.commit()
     return {"status": "accepted", "user_id": str(user.id)}
 
+@router.get("/sessions")
+async def list_sessions(request: Request, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    raw_token = request.cookies.get(settings.session_cookie_name)
+    current_hash = session_token_hash(raw_token) if raw_token else None
+    result = await db.execute(
+        select(SessionRecord)
+        .where(SessionRecord.user_id == user.id)
+        .order_by(SessionRecord.expires_at.desc())
+    )
+    now = utcnow()
+    return [{
+        "id": str(item.id),
+        "is_current": item.token_hash == current_hash,
+        "status": "revoked" if item.revoked_at else ("expired" if item.expires_at <= now else "active"),
+        "created_at": None,
+        "expires_at": item.expires_at,
+        "revoked_at": item.revoked_at,
+    } for item in result.scalars().all()]
+
+@router.delete("/sessions/{session_id}")
+async def revoke_session(session_id: UUID, request: Request, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    raw_token = request.cookies.get(settings.session_cookie_name)
+    current_hash = session_token_hash(raw_token) if raw_token else None
+    session = await db.scalar(select(SessionRecord).where(SessionRecord.id == session_id, SessionRecord.user_id == user.id))
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.token_hash == current_hash:
+        raise HTTPException(status_code=400, detail="Use logout to end the current session")
+    if session.revoked_at is None:
+        session.revoked_at = utcnow()
+        await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="auth.session.revoked", entity_type="session", entity_id=str(session.id))
+        await db.commit()
+    return {"status": "revoked"}
+
+@router.post("/sessions/revoke-others")
+async def revoke_other_sessions(request: Request, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    raw_token = request.cookies.get(settings.session_cookie_name)
+    current_hash = session_token_hash(raw_token) if raw_token else None
+    result = await db.execute(select(SessionRecord).where(SessionRecord.user_id == user.id, SessionRecord.revoked_at.is_(None)))
+    sessions = list(result.scalars().all())
+    count = 0
+    for session in sessions:
+        if session.token_hash != current_hash:
+            session.revoked_at = utcnow()
+            count += 1
+    if count:
+        await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="auth.sessions.revoked_others", entity_type="user", entity_id=str(user.id), metadata={"count": count})
+        await db.commit()
+    return {"status": "revoked", "count": count}
+
 @router.get("/me")
-async def me(user: User = Depends(get_current_user)):
+async def me(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    access_rows = (
+        await db.execute(
+            select(Role.id, Role.name, Permission.key)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .outerjoin(RolePermission, RolePermission.role_id == Role.id)
+            .outerjoin(Permission, Permission.id == RolePermission.permission_id)
+            .where(UserRole.user_id == user.id, Role.tenant_id == user.tenant_id)
+            .order_by(Role.name, Permission.key)
+        )
+    ).all()
+    role_map: dict[UUID, dict[str, str]] = {}
+    permission_keys: set[str] = set()
+    for role_id, role_name, permission_key in access_rows:
+        role_map[role_id] = {"id": str(role_id), "name": role_name}
+        if permission_key:
+            permission_keys.add(permission_key)
+    roles = list(role_map.values())
+    permissions = sorted(permission_keys)
     return {"id": str(user.id), "tenant_id": str(user.tenant_id),
             "email": user.email, "first_name": user.first_name,
             "last_name": user.last_name, "employee_number": user.employee_number,
-            "job_title": user.job_title}
+            "job_title": user.job_title, "roles": roles, "permissions": permissions}
 
 @router.post("/logout")
 async def logout(request: Request, response: Response, db: AsyncSession = Depends(get_db)):

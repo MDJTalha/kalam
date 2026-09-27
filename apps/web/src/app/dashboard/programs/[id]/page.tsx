@@ -2,15 +2,23 @@ import Link from "next/link";
 import { ArrowLeft, Layers3, UsersRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { ProgramEditor } from "@/components/program-editor";
 import { apiJson, requireUser } from "@/lib/server-api";
 
-type Course = { id: string; title: string; position: number; is_required: boolean };
-type Program = { id: string; title: string; slug: string; description?: string | null; status: string; courses: Course[] };
+type Course = { course_id: string; title: string; position: number; is_required: boolean };
+type CatalogCourse = { id: string; title: string; status: string };
+type Cohort = { id: string; program_id: string; name: string; status: string };
+type Program = { id: string; title: string; slug: string; description?: string | null; status: string; is_required: boolean; courses: Course[] };
 
 export default async function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireUser();
+  const user = await requireUser<{ permissions?: string[] }>();
+  const canManage = user.permissions?.includes("courses.manage") ?? false;
   const { id } = await params;
-  const program = await apiJson<Program>("/api/v1/programs/" + id);
+  const [program, cohorts, catalog] = await Promise.all([
+    apiJson<Program>("/api/v1/programs/" + id),
+    apiJson<Cohort[]>("/api/v1/programs/cohorts"),
+    canManage ? apiJson<CatalogCourse[]>("/api/v1/courses?manage=true") : Promise.resolve(null),
+  ]);
   if (!program) notFound();
 
   return (
@@ -33,8 +41,8 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
         {program.courses?.length ? (
           <div className="compact-list">
             {program.courses.map((course) => (
-              <div className="compact-row" key={course.id}>
-                <div><strong>{course.position}. {course.title}</strong><small>{course.is_required ? "Required component" : "Elective component"}</small></div>
+              <div className="compact-row" key={course.course_id}>
+                <div><Link href={"/dashboard/catalog/" + course.course_id} className="text-link"><strong>{course.position}. {course.title}</strong></Link><small>{course.is_required ? "Required component" : "Elective component"}</small></div>
               </div>
             ))}
           </div>
@@ -43,8 +51,10 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
 
       <div className="data-panel">
         <div className="section-heading compact"><div><span className="eyebrow">Delivery</span><h2>Cohort management</h2></div><UsersRound size={20}/></div>
-        <p>Use cohorts to group learners, enforce capacity, and launch program course enrollments as one controlled delivery operation.</p>
+        <p>Group learners into cohorts and launch delivery after publishing the program.</p>
+        <div className="compact-list">{cohorts?.filter(item => item.program_id === id).map(item => <div className="compact-row" key={item.id}><Link className="text-link" href={"/dashboard/programs/cohorts/" + item.id}>{item.name}</Link><span className="status-badge">{item.status}</span></div>)}</div>
       </div>
+      {canManage && <ProgramEditor initialProgram={program} catalog={catalog ?? []} />}
     </DashboardShell>
   );
 }

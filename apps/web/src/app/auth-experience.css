@@ -1,0 +1,46 @@
+/* Kognivon public authentication experience */
+.k-auth{--k-navy:#071b37;--k-blue:#0b5caa;--k-gold:#eac779;grid-template-columns:minmax(0,1.05fr) minmax(420px,.95fr);background:#f5f8fc}
+.k-auth .auth-brand{position:relative;isolation:isolate;min-height:100svh;padding:clamp(30px,4.5vw,70px);overflow:hidden;background:radial-gradient(circle at 80% 17%,rgba(43,123,207,.38),transparent 36%),linear-gradient(146deg,#071b37 0%,#0a315d 62%,#104d85 100%);color:#fff}
+.k-auth .auth-brand:before{content:"";position:absolute;z-index:-1;width:58vw;height:58vw;max-width:780px;max-height:780px;right:-34%;bottom:-54%;border:1px solid rgba(255,255,255,.14);border-radius:50%;box-shadow:0 0 0 90px rgba(255,255,255,.025),0 0 0 190px rgba(255,255,255,.018)}
+.k-brand-lockup{display:inline-flex;align-items:center;gap:13px;width:max-content;color:#fff;font-size:22px;font-weight:800;letter-spacing:-.035em;text-decoration:none;line-height:1}
+.k-brand-lockup small{display:block;margin-top:6px;color:#a9c9e8;font-size:10px;font-weight:700;letter-spacing:.17em;text-transform:uppercase}
+.k-brand-mark{width:45px;height:45px;display:grid;place-items:center;border:1px solid rgba(234,199,121,.48);border-radius:14px;background:linear-gradient(150deg,rgba(234,199,121,.24),rgba(234,199,121,.07));color:var(--k-gold)}
+.k-auth .auth-brand-copy{max-width:650px;margin:auto 0}
+.k-overline{display:inline-flex;align-items:center;gap:9px;color:var(--k-gold);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.k-overline-dot{width:7px;height:7px;border-radius:50%;background:var(--k-gold);box-shadow:0 0 0 5px rgba(234,199,121,.15)}
+.k-auth .auth-brand-copy h1{max-width:650px;margin:24px 0 19px;font-size:clamp(45px,5vw,76px);line-height:1.04;letter-spacing:-.055em}
+.k-auth .auth-brand-copy h1 em{font-style:normal;color:var(--k-gold)}
+.k-auth .auth-brand-copy p{max-width:525px;margin:0;color:#c7d9ec;font-size:clamp(15px,1.15vw,18px);line-height:1.75}
+.k-proof{display:flex;flex-wrap:wrap;gap:10px;margin-top:31px}
+.k-proof span{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid rgba(255,255,255,.19);border-radius:999px;background:rgba(255,255,255,.055);color:#e7f1fb;font-size:12px;font-weight:650}
+.k-proof svg{color:var(--k-gold)}
+.k-brand-foot{margin:0;color:#9bbbdc;font-size:12px;letter-spacing:.025em}
+.k-auth .auth-panel{padding:35px clamp(22px,5vw,78px);background:#f6f9fd}
+.k-auth .auth-card{width:min(480px,100%);padding:clamp(28px,3.3vw,43px);border:1px solid #e4eaf2;border-radius:22px;box-shadow:0 24px 80px rgba(10,40,78,.09),0 3px 12px rgba(10,40,78,.03)}
+.k-form-eyebrow{display:inline-flex;align-items:center;gap:7px;color:var(--k-blue);font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+.k-auth .auth-card-heading h2{margin:13px 0 7px;color:var(--k-navy);font-size:clamp(29px,2.5vw,36px);letter-spacing:-.045em}
+.k-auth .auth-card-heading p{margin:0 0 28px;color:#566980;font-size:14px;line-height:1.55}.k-auth .form-stack{gap:0}
+.k-auth .form-stack>label,.k-auth .k-label-row label{color:#173354;font-size:13px;font-weight:750}
+.k-auth .form-stack>input,.k-auth .password-field input{height:50px;margin:8px 0 19px;border:1px solid #bacada;border-radius:11px;background:#fff;color:#122c49;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s}
+.k-auth .form-stack>input:hover,.k-auth .password-field input:hover{border-color:#829eb9}
+.k-auth .form-stack input:focus{border-color:#1769c2;box-shadow:0 0 0 4px rgba(23,105,194,.14)}
+.k-auth .form-stack input::placeholder{color:#718398}
+.k-auth .k-field-hint{margin:-12px 0 19px;color:#5b6e82;font-size:11px;line-height:1.4}
+.k-label-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.k-label-row a,.k-auth .text-link{color:#075da9;font-size:12px;font-weight:750;text-decoration:none}
+.k-label-row a:hover,.k-auth .text-link:hover{text-decoration:underline}
+.k-auth .password-field input{margin-bottom:0;padding-right:54px}
+.k-auth .password-field .icon-button{width:42px;height:42px;color:#496780}
+.k-auth .form-error{margin-top:15px;padding:12px 14px;border:1px solid #f3d0d0;border-radius:10px;color:#8f2634;font-size:12px;line-height:1.5}
+.k-auth .submit-button{min-height:52px;margin-top:22px;border-radius:11px;background:#0a5dab;box-shadow:0 12px 25px rgba(10,93,171,.2);font-size:14px}
+.k-auth .submit-button:hover{background:#084e91}
+.k-auth .submit-button:disabled{opacity:.7;cursor:wait;transform:none}
+.k-support{margin:20px 0 0;color:#556a80;font-size:12px;line-height:1.6;text-align:center}
+.k-auth-footer{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:28px;padding-top:20px;border-top:1px solid #e9eef4;color:#5b7086;font-size:11px;line-height:1.5;text-align:center}
+.k-auth-footer svg{flex:0 0 auto;color:#18715d}
+.k-mobile-brand{display:none}
+.k-auth .auth-card>.text-link{display:inline-block;margin-top:20px}
+.k-auth :focus-visible{outline:3px solid #d49c32;outline-offset:3px}
+@media(max-width:960px){.k-auth{grid-template-columns:1fr}.k-auth .auth-panel{min-height:100svh;padding:36px 18px}.k-auth .auth-brand{display:none}.k-auth .auth-card{margin:auto}.k-mobile-brand{display:block;margin-bottom:30px;color:#0b3765;font-size:23px;font-weight:850;letter-spacing:-.04em}.k-mobile-brand span{display:block;margin-top:3px;color:#59799a;font-size:10px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}}
+@media(max-width:520px){.k-auth .auth-panel{display:block;padding:24px 16px;background:#fff}.k-auth .auth-card{width:100%;padding:0;border:0;border-radius:0;box-shadow:none}.k-auth .auth-card-heading p{margin-bottom:26px}.k-auth .form-stack>input,.k-auth .password-field input{height:52px}.k-auth-footer{margin-top:24px}}
+@media(prefers-reduced-motion:reduce){.k-auth *{scroll-behavior:auto!important;transition:none!important}}

@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import hash_password
 from app.db.models import (
     Assessment,
+    AIGovernancePolicy,
     ComplianceAssignment,
     ComplianceRequirement,
     Course,
@@ -58,14 +59,17 @@ PERMISSIONS = [
     ("skills.manage", "Manage skills"),
     ("development.manage", "Manage development plans"),
     ("reports.read", "View reports"),
+    ("reports.manage", "Create and manage saved reports and schedules"),
     ("audit.read", "View audit logs"),
+    ("files.read", "View and download governed files"),
     ("files.manage", "Manage file scanning and file controls"),
     ("integrations.manage", "Manage external integrations"),
-]
+    ("ai.manage", "Manage governed AI providers, models, prompts and policies"),
+  ]
 
 ROLE_PERMISSIONS = {
     "Tenant Admin": [key for key, _ in PERMISSIONS],
-    "HR/L&D Admin": ["users.read", "users.manage", "courses.read", "courses.manage", "learning.access", "assessments.manage", "certificates.manage", "compliance.manage", "skills.manage", "development.manage", "reports.read", "audit.read"],
+    "HR/L&D Admin": ["users.read", "users.manage", "courses.read", "courses.manage", "learning.access", "assessments.manage", "certificates.manage", "compliance.manage", "skills.manage", "development.manage", "reports.read", "audit.read", "files.read", "files.manage", "ai.manage"],
     "Manager": ["users.read", "courses.read", "learning.access", "reports.read"],
     "Instructor": ["courses.read", "courses.manage", "learning.access", "assessments.manage"],
     "Learner": ["courses.read", "learning.access", "development.manage"],
@@ -146,6 +150,7 @@ async def seed() -> None:
                 session.add(UserRole(user_id=user.id, role_id=roles[role_name].id))
 
         users["learner@demo.corp"].manager_id = users["manager@demo.corp"].id
+        await session.flush()
 
         isolation_tenant = await get_or_create(
             session,
@@ -281,6 +286,21 @@ async def seed() -> None:
             {"description": "Applies ethical reasoning in workplace decisions.", "category": "Professional"},
         )
 
+        await get_or_create(
+            session,
+            AIGovernancePolicy,
+            {"tenant_id": tenant.id},
+            {
+                "enabled": False,
+                "require_grounding": True,
+                "employment_decisioning_allowed": False,
+                "raw_prompt_storage_allowed": False,
+                "raw_response_storage_allowed": False,
+                "max_input_chars": 4000,
+                "max_output_tokens": 1200,
+                "allowed_provider_types": ["ollama"],
+            },
+        )
         await session.commit()
 
         print("DEMO seed complete")

@@ -8,7 +8,9 @@ from sqlalchemy import select
 from app.core.security import utcnow
 from app.db.models import ComplianceAssignment, Notification, User
 from app.db.session import SessionLocal
+from app.services.email import send_email
 from app.services.notifications import create_notification
+from app.services.phase5_compliance import run_compliance_automation
 
 POLL_SECONDS = 60
 DUE_SOON_HOURS = 72
@@ -66,9 +68,38 @@ async def process_compliance_notifications() -> int:
         return created
 
 
+async def process_notification_emails() -> int:
+    async with SessionLocal() as db:
+        result = await db.execute(
+            select(Notification, User)
+            .join(User, User.id == Notification.user_id)
+            .where(Notification.email_sent_at.is_(None))
+            .where(Notification.created_at >= utcnow() - timedelta(hours=24))
+            .where(User.is_active.is_(True))
+            .order_by(Notification.created_at.asc())
+            .limit(100)
+        )
+        sent = 0
+        for notification, user in result.all():
+            try:
+                send_email(
+                    recipient=user.email,
+                    subject=notification.title,
+                    text=notification.body,
+                )
+            except RuntimeError:
+                continue
+            notification.email_sent_at = utcnow()
+            sent += 1
+        await db.commit()
+        return sent
+
+
 async def run() -> None:
     while True:
         try:
+            async with SessionLocal() as db:
+                await run_compliance_automation(db)
             await process_compliance_notifications()
         except Exception:
             await asyncio.sleep(5)

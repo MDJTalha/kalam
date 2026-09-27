@@ -18,8 +18,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     if (password.length < 12) { setError("Use at least 12 characters."); return; }
     setBusy(true);
     try {
-      const origin = process.env.NEXT_PUBLIC_API_ORIGIN || "http://localhost:8000";
-      const response = await fetch(`${origin}/api/v1/auth/reset-password`, {
+      const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

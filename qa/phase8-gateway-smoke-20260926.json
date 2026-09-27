@@ -1,0 +1,13 @@
+﻿{
+    "checked_at_utc":  "2026-09-26T15:01:02.4921754Z",
+    "gateway_url":  "http://127.0.0.1:3100",
+    "gateway_health":  200,
+    "web_status":  200,
+    "security_headers":  "pass",
+    "api_readiness":  "ready",
+    "database":  "ready",
+    "redis":  "ready",
+    "migration_exit":  0,
+    "api_image":  "sha256:8a09494c8cf729f97e2f3fe001eea64b7eeb4a215e0129d17b17d07356f6aa5f",
+    "web_image":  "sha256:c98f71f68bd2ee9f90c302f33ae249a34cf373412f647a15dc611d75cdb57444"
+}

@@ -1,98 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, Circle, LogIn, PlayCircle } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CheckCircle2, Circle, FileText, Link2, LogIn, PlayCircle, Video } from "lucide-react";
 
-type Course = {
-  id: string;
-  title: string;
-  description?: string | null;
-  estimated_minutes?: number | null;
-  modules: Array<{
-    id: string;
-    title: string;
-    lessons: Array<{ id: string; title: string; content_type: string; content: Record<string, unknown> }>;
-  }>;
-  enrollment?: { id: string; status: string } | null;
-};
-
-export function CoursePlayer({ course }: { course: Course }) {
-  const [enrollmentId, setEnrollmentId] = useState(course.enrollment?.id ?? null);
-  const [status, setStatus] = useState(course.enrollment?.status ?? "not_enrolled");
-  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-
-  async function enroll() {
-    setBusy(true);
-    setMessage("");
-    try {
-      const origin = process.env.NEXT_PUBLIC_API_ORIGIN || "http://localhost:8000";
-      const response = await fetch(`${origin}/api/v1/courses/${course.id}/enroll`, {
-        method: "POST",
-        credentials: "include",
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Enrollment failed");
-      setEnrollmentId(data.id);
-      setStatus(data.status);
-      setMessage("Enrollment confirmed. You can now work through the lessons.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Enrollment failed");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function complete(lessonId: string) {
-    if (!enrollmentId) return;
-    setBusy(true);
-    setMessage("");
-    try {
-      const origin = process.env.NEXT_PUBLIC_API_ORIGIN || "http://localhost:8000";
-      const response = await fetch(
-        `${origin}/api/v1/courses/my/enrollments/${enrollmentId}/lessons/${lessonId}/complete`,
-        { method: "POST", credentials: "include" },
-      );
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Unable to save progress");
-      setCompletedLessons((items) => items.includes(lessonId) ? items : [...items, lessonId]);
-      setStatus(data.course_status || data.status || status);
-      setMessage(data.status === "completed" ? "Course completed. Your learning record is now complete." : "Lesson completion saved.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to save progress");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="data-panel">
-      <div className="player-toolbar">
-        <div><span className="eyebrow">Learner player</span><h2>{status === "not_enrolled" ? "Start this course" : "Continue learning"}</h2></div>
-        {status === "not_enrolled" ? (
-          <button className="button button-primary" onClick={enroll} disabled={busy}><LogIn size={15}/>{busy ? "Enrolling…" : "Enroll now"}</button>
-        ) : <span className="status-badge success">{status}</span>}
-      </div>
-      {message && <div className="form-success" role="status">{message}</div>}
-      <div className="curriculum-list">
-        {course.modules.map((module, index) => (
-          <section className="curriculum-module" key={module.id}>
-            <div className="curriculum-heading"><span>{String(index + 1).padStart(2,"0")}</span><div><strong>{module.title}</strong><small>{module.lessons.length} lesson(s)</small></div></div>
-            <div className="compact-list">
-              {module.lessons.map((lesson) => {
-                const done = completedLessons.includes(lesson.id);
-                return (
-                  <div className="compact-row" key={lesson.id}>
-                    <div><strong>{lesson.title}</strong><small>{lesson.content_type}</small></div>
-                    {done ? <CheckCircle2 className="success-icon" size={18}/> : status !== "not_enrolled" ? <button className="icon-text-button" onClick={() => complete(lesson.id)} disabled={busy}><PlayCircle size={16}/> Complete</button> : <Circle size={17}/>}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        ))}
-      </div>
-    </div>
-  );
+type Lesson={id:string;title:string;content_type:string;content:Record<string,unknown>;position:number};
+type Course={id:string;title:string;description?:string|null;estimated_minutes?:number|null;modules:Array<{id:string;title:string;lessons:Lesson[]}>;enrollment?:{id:string;status:string}|null;completed_lesson_ids?:string[];progress_percent?:number};
+export function CoursePlayer({course}:{course:Course}){
+  const [enrollmentId,setEnrollmentId]=useState(course.enrollment?.id??null);const [status,setStatus]=useState(course.enrollment?.status??"not_enrolled");const [completedLessons,setCompletedLessons]=useState<string[]>(course.completed_lesson_ids??[]);const [selectedId,setSelectedId]=useState<string|null>(course.modules[0]?.lessons[0]?.id??null);const [busy,setBusy]=useState(false);const [message,setMessage]=useState("");
+  const lessons=useMemo(()=>course.modules.flatMap(module=>module.lessons.map(lesson=>({...lesson,moduleTitle:module.title}))),[course.modules]);
+  const selected=lessons.find(item=>item.id===selectedId)??lessons[0];
+  const progress=lessons.length?Math.round(completedLessons.length/lessons.length*100):0;
+  const learningActive = ["enrolled", "in_progress", "completed"].includes(status);
+  const enrollmentActionable = status === "not_enrolled" || status === "rejected";
+  const statusLabel: Record<string, string> = {
+    pending_approval: "Pending approval",
+    waitlisted: "Waitlisted",
+    rejected: "Request rejected",
+    enrolled: "Enrolled",
+    in_progress: "In progress",
+    completed: "Completed",
+  };
+  async function enroll(){setBusy(true);setMessage("");try{const response=await fetch(`/api/lms/courses/${course.id}/enroll`,{method:"POST",credentials:"include"});const data=await response.json();if(!response.ok)throw new Error(data.detail||"Enrollment failed");setEnrollmentId(data.id);setStatus(data.status);setMessage(data.status==="pending_approval"?"Enrollment request submitted for approval.":data.status==="waitlisted"?"You have joined the waitlist.":"Enrollment confirmed. Your learning record is now active.")}catch(error){setMessage(error instanceof Error?error.message:"Enrollment failed")}finally{setBusy(false)}}
+  async function complete(lessonId:string){if(!enrollmentId)return;setBusy(true);setMessage("");try{const response=await fetch(`/api/lms/courses/my/enrollments/${enrollmentId}/lessons/${lessonId}/complete`,{method:"POST",credentials:"include"});const data=await response.json();if(!response.ok)throw new Error(data.detail||"Unable to save progress");setCompletedLessons(items=>items.includes(lessonId)?items:[...items,lessonId]);setStatus(data.course_status||data.status||status);setMessage(data.status==="completed"?"Course completed. Your learning record and mapped skill evidence are now updated.":"Lesson completion saved.")}catch(error){setMessage(error instanceof Error?error.message:"Unable to save progress")}finally{setBusy(false)}}
+  function renderContent(lesson:typeof selected){if(!lesson)return null;const body=typeof lesson.content?.body==="string"?lesson.content.body:"";const url=typeof lesson.content?.url==="string"?lesson.content.url:"";if(lesson.content_type==="video")return <div className="lesson-resource"><Video size={22}/><strong>Video learning resource</strong>{url?<a className="text-link" href={url} target="_blank" rel="noreferrer">Open video resource →</a>:<p>{body||"Video resource not configured yet."}</p>}</div>;if(lesson.content_type==="document")return <div className="lesson-resource"><FileText size={22}/><strong>Document resource</strong>{url?<a className="text-link" href={url} target="_blank" rel="noreferrer">Open document →</a>:<p>{body||"Document resource not configured yet."}</p>}</div>;if(lesson.content_type==="link")return <div className="lesson-resource"><Link2 size={22}/><strong>External resource</strong>{url?<a className="text-link" href={url} target="_blank" rel="noreferrer">Open learning resource →</a>:<p>{body||"External link not configured yet."}</p>}</div>;return <div className="lesson-rich-text">{body.split(/\n\n+/).map((paragraph,index)=><p key={index}>{paragraph}</p>)}</div>}
+  return <section className="data-panel learner-player" aria-labelledby="learner-player-title"><div className="player-toolbar"><div><span className="eyebrow">Learner player</span><h2 id="learner-player-title">{enrollmentActionable ? "Start this course" : "Continue learning"}</h2></div>{enrollmentActionable?<button className="button button-primary" onClick={enroll} disabled={busy}><LogIn size={15}/>{busy?(status==="rejected"?"Requesting…":"Enrolling…"):(status==="rejected"?"Request again":"Enroll now")}</button>:<span className={learningActive ? "status-badge success" : "status-badge"}>{statusLabel[status] ?? status}</span>}</div>{message&&<div className="form-success" role="status" aria-live="polite">{message}</div>}<div className="progress-summary" aria-label={`Course progress ${progress}%`}><div><strong>Course progress</strong><span>{progress}%</span></div><div className="progress-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} aria-label="Course completion"><span style={{width:`${progress}%`}}/></div></div><div className="player-layout"><nav className="lesson-index" aria-label="Course lessons">{course.modules.map(module=><section key={module.id}><div className="eyebrow">{module.title}</div><div className="compact-list">{module.lessons.map(lesson=>{const done=completedLessons.includes(lesson.id);return <button className={`lesson-nav-row ${selected?.id===lesson.id?"selected":""}`} key={lesson.id} onClick={()=>setSelectedId(lesson.id)} aria-current={selected?.id===lesson.id ? "step" : undefined} aria-label={`${lesson.title}${done ? ", completed" : ""}`}><span>{done?<CheckCircle2 size={15}/>:<Circle size={15}/>}</span><div><strong>{lesson.title}</strong><small>{lesson.content_type}</small></div></button>})}</div></section>)}</nav><main className="lesson-content" aria-live="polite">{selected?<><div className="lesson-content-header"><span className="tag">{selected.moduleTitle}</span><h3>{selected.title}</h3></div>{renderContent(selected)}<div className="lesson-footer">{completedLessons.includes(selected.id)?<span className="status-badge success"><CheckCircle2 size={13}/> Completed</span>:learningActive?<button className="button button-primary" onClick={()=>void complete(selected.id)} disabled={busy}><PlayCircle size={15}/>{busy?"Saving…":"Mark lesson complete"}</button>:status==="pending_approval"?<span className="status-badge muted">Awaiting L&amp;D approval before learning access.</span>:status==="waitlisted"?<span className="status-badge muted">You are on the course waitlist.</span>:status==="rejected"?<span className="status-badge muted">Your request was rejected. Submit a new request to rejoin the approval flow.</span>:<span className="status-badge muted">Enroll to continue</span>}</div></>:<div className="empty-state"><p>This course has no lessons yet.</p></div>}</main></div></section>;
 }

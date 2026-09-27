@@ -1,8 +1,9 @@
 from uuid import UUID
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_permission
@@ -14,7 +15,13 @@ router = APIRouter()
 
 class OrgUnitCreate(BaseModel):
     name: str = Field(min_length=2, max_length=160)
-    unit_type: str = Field(default="department", min_length=2, max_length=40)
+    unit_type: Literal["business_unit", "department", "location", "team"] = "department"
+    code: str | None = Field(default=None, max_length=80)
+    parent_id: UUID | None = None
+
+class OrgUnitUpdate(BaseModel):
+    name: str = Field(min_length=2, max_length=160)
+    unit_type: Literal["business_unit", "department", "location", "team"]
     code: str | None = Field(default=None, max_length=80)
     parent_id: UUID | None = None
 
@@ -59,7 +66,17 @@ async def create_unit(
         )
         if parent is None:
             raise HTTPException(status_code=404, detail="Parent organizational unit not found")
-    unit = OrgUnit(tenant_id=user.tenant_id, **payload.model_dump())
+    name = payload.name.strip()
+    if len(name) < 2:
+        raise HTTPException(status_code=422, detail="Unit name is too short")
+    duplicate = await db.scalar(select(OrgUnit.id).where(
+        OrgUnit.tenant_id == user.tenant_id,
+        OrgUnit.parent_id == payload.parent_id,
+        func.lower(OrgUnit.name) == name.lower(),
+    ))
+    if duplicate:
+        raise HTTPException(status_code=409, detail="A unit with this name already exists under the selected parent")
+    unit = OrgUnit(tenant_id=user.tenant_id, **{**payload.model_dump(), "name": name})
     db.add(unit)
     await db.flush()
     await audit(
@@ -82,6 +99,22 @@ async def list_roles(
     result = await db.execute(
         select(Role)
         .where(Role.tenant_id == user.tenant_id)
+        .order_by(Role.name)
+    )
+    return list(result.scalars().all())
+
+@router.get("/users/{user_id}/roles", response_model=list[RoleOut])
+async def list_user_roles(
+    user_id: UUID,
+    user: User = Depends(require_permission("users.read")),
+    db: AsyncSession = Depends(get_db),
+):
+    target = await db.scalar(select(User.id).where(User.id == user_id, User.tenant_id == user.tenant_id))
+    if target is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    result = await db.execute(
+        select(Role).join(UserRole, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == user_id, Role.tenant_id == user.tenant_id)
         .order_by(Role.name)
     )
     return list(result.scalars().all())
@@ -121,3 +154,94 @@ async def assign_role(
     )
     await db.commit()
     return {"status": "assigned"}
+
+@router.delete("/users/{user_id}/roles/{role_id}")
+async def remove_role(
+    user_id: UUID,
+    role_id: UUID,
+    user: User = Depends(require_permission("users.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    target = await db.scalar(select(User).where(User.id == user_id, User.tenant_id == user.tenant_id))
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == user.tenant_id))
+    if target is None or role is None:
+        raise HTTPException(status_code=404, detail="User or role not found")
+    if target.id == user.id:
+        raise HTTPException(status_code=422, detail="You cannot remove a role from your own account")
+    assignment = await db.scalar(select(UserRole).where(UserRole.user_id == target.id, UserRole.role_id == role.id))
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Role assignment not found")
+    await db.delete(assignment)
+    await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="user.role.removed",
+                entity_type="user_role", entity_id=str(target.id), metadata={"role_id": str(role.id)})
+    await db.commit()
+    return {"status": "removed"}
+
+@router.patch("/units/{unit_id}", response_model=OrgUnitOut)
+async def update_unit(
+    unit_id: UUID,
+    payload: OrgUnitUpdate,
+    user: User = Depends(require_permission("users.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    unit = await db.scalar(select(OrgUnit).where(OrgUnit.id == unit_id, OrgUnit.tenant_id == user.tenant_id))
+    if unit is None:
+        raise HTTPException(status_code=404, detail="Organization unit not found")
+    name = payload.name.strip()
+    if len(name) < 2:
+        raise HTTPException(status_code=422, detail="Unit name is too short")
+    if payload.parent_id == unit.id:
+        raise HTTPException(status_code=422, detail="A unit cannot be its own parent")
+    cursor = payload.parent_id
+    visited = {unit.id}
+    while cursor:
+        if cursor in visited:
+            raise HTTPException(status_code=422, detail="Organization hierarchy cannot contain a cycle")
+        visited.add(cursor)
+        parent = await db.scalar(select(OrgUnit).where(OrgUnit.id == cursor, OrgUnit.tenant_id == user.tenant_id))
+        if parent is None:
+            raise HTTPException(status_code=404, detail="Parent organizational unit not found")
+        cursor = parent.parent_id
+    duplicate = await db.scalar(select(OrgUnit.id).where(
+        OrgUnit.tenant_id == user.tenant_id,
+        OrgUnit.id != unit.id,
+        OrgUnit.parent_id == payload.parent_id,
+        func.lower(OrgUnit.name) == name.lower(),
+    ))
+    if duplicate:
+        raise HTTPException(status_code=409, detail="A unit with this name already exists under the selected parent")
+    before = {"name": unit.name, "unit_type": unit.unit_type, "code": unit.code, "parent_id": str(unit.parent_id) if unit.parent_id else None}
+    unit.name = name
+    unit.unit_type = payload.unit_type
+    unit.code = payload.code.strip() or None if payload.code else None
+    unit.parent_id = payload.parent_id
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id,
+        action="org_unit.updated", entity_type="org_unit", entity_id=str(unit.id),
+        metadata={"before": before, "after": {"name": unit.name, "unit_type": unit.unit_type, "code": unit.code, "parent_id": str(unit.parent_id) if unit.parent_id else None}},
+    )
+    await db.commit()
+    await db.refresh(unit)
+    return unit
+
+@router.delete("/units/{unit_id}")
+async def delete_unit(
+    unit_id: UUID,
+    user: User = Depends(require_permission("users.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    unit = await db.scalar(select(OrgUnit).where(OrgUnit.id == unit_id, OrgUnit.tenant_id == user.tenant_id))
+    if unit is None:
+        raise HTTPException(status_code=404, detail="Organization unit not found")
+    child = await db.scalar(select(OrgUnit.id).where(OrgUnit.tenant_id == user.tenant_id, OrgUnit.parent_id == unit.id))
+    member = await db.scalar(select(User.id).where(User.tenant_id == user.tenant_id, User.org_unit_id == unit.id))
+    if child or member:
+        raise HTTPException(status_code=409, detail="Move child units and people before deleting this unit")
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id,
+        action="org_unit.deleted", entity_type="org_unit", entity_id=str(unit.id),
+        metadata={"name": unit.name, "unit_type": unit.unit_type},
+    )
+    await db.delete(unit)
+    await db.commit()
+    return {"status": "deleted"}

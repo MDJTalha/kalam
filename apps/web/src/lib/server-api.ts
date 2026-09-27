@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const API_ORIGIN = process.env.API_ORIGIN || "http://localhost:8000";
+const API_ORIGIN = process.env.API_ORIGIN || "http://127.0.0.1:8000";
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
   const cookieStore = await cookies();
@@ -24,7 +24,10 @@ export async function apiJson<T>(path: string, init: RequestInit = {}): Promise<
 }
 
 export async function requireUser<T = Record<string, unknown>>() {
-  const user = await apiJson<T>("/api/v1/auth/me");
-  if (!user) redirect("/login");
-  return user;
+  const response = await apiFetch("/api/v1/auth/me");
+  if (response.status === 401 || response.status === 403) redirect("/login");
+  if (!response.ok) {
+    throw new Error(`Authentication service returned HTTP ${response.status}`);
+  }
+  return response.json() as Promise<T>;
 }

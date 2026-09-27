@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -5,8 +6,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_permission
-from app.db.models import DevelopmentPlan, Role, User, UserRole
+from app.api.deps import get_current_user, require_permission, user_has_permission
+from app.db.models import DevelopmentFeedback, DevelopmentMilestone, DevelopmentPlan, Role, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
 
@@ -154,3 +155,84 @@ async def user_plans(
         }
         for item in result.scalars().all()
     ]
+
+class MilestoneCreate(BaseModel):
+    title: str = Field(min_length=2, max_length=240)
+    description: str | None = None
+    due_at: datetime | None = None
+
+class MilestoneUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=2, max_length=240)
+    description: str | None = None
+    due_at: datetime | None = None
+    status: str | None = Field(default=None, pattern=r"^(planned|in_progress|completed|cancelled)$")
+
+class FeedbackCreate(BaseModel):
+    rating: int | None = Field(default=None, ge=1, le=5)
+    strengths: str | None = None
+    feedback: str = Field(min_length=2, max_length=5000)
+    next_steps: str | None = None
+
+async def _manager_plan(plan_id: UUID, manager: User, db: AsyncSession) -> DevelopmentPlan:
+    item = await db.scalar(select(DevelopmentPlan).where(DevelopmentPlan.id == plan_id, DevelopmentPlan.tenant_id == manager.tenant_id))
+    if item is None:
+        raise HTTPException(status_code=404, detail="Development plan not found")
+    target = await db.scalar(select(User).where(User.id == item.user_id, User.tenant_id == manager.tenant_id))
+    if target is None:
+        raise HTTPException(status_code=404, detail="Plan owner not found")
+    if target.manager_id != manager.id and manager.id != target.id:
+        admin_role = await db.scalar(select(Role.id).join(UserRole, UserRole.role_id == Role.id).where(UserRole.user_id == manager.id, Role.tenant_id == manager.tenant_id, Role.name == "Tenant Admin"))
+        if admin_role is None:
+            raise HTTPException(status_code=403, detail="Manager scope does not include this plan")
+    return item
+
+@router.get("/{plan_id}/progress")
+async def plan_progress(plan_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    plan = await db.scalar(select(DevelopmentPlan).where(DevelopmentPlan.id == plan_id, DevelopmentPlan.tenant_id == user.tenant_id))
+    if plan is None:
+        raise HTTPException(status_code=404, detail="Development plan not found")
+    if plan.user_id != user.id:
+        if not await user_has_permission(user, db, "users.read"):
+            raise HTTPException(status_code=404, detail="Development plan not found")
+        await _manager_plan(plan_id, user, db)
+    milestones = (await db.execute(select(DevelopmentMilestone).where(DevelopmentMilestone.plan_id == plan.id).order_by(DevelopmentMilestone.due_at.asc().nulls_last()))).scalars().all()
+    feedback = (await db.execute(select(DevelopmentFeedback).where(DevelopmentFeedback.plan_id == plan.id).order_by(DevelopmentFeedback.created_at.desc()))).scalars().all()
+    return {"plan": {"id": str(plan.id), "title": plan.title, "status": plan.status}, "milestones": [{"id": str(x.id), "title": x.title, "description": x.description, "due_at": x.due_at, "status": x.status, "completed_at": x.completed_at} for x in milestones], "feedback": [{"id": str(x.id), "reviewer_id": str(x.reviewer_id), "rating": x.rating, "strengths": x.strengths, "feedback": x.feedback, "next_steps": x.next_steps, "created_at": x.created_at} for x in feedback]}
+
+@router.post("/{plan_id}/milestones", status_code=status.HTTP_201_CREATED)
+async def create_milestone(plan_id: UUID, payload: MilestoneCreate, manager: User = Depends(require_permission("users.read")), db: AsyncSession = Depends(get_db)):
+    plan = await _manager_plan(plan_id, manager, db)
+    item = DevelopmentMilestone(tenant_id=manager.tenant_id, plan_id=plan.id, owner_id=plan.user_id, title=payload.title, description=payload.description, due_at=payload.due_at)
+    db.add(item)
+    await db.flush()
+    await audit(db, tenant_id=manager.tenant_id, actor_id=manager.id, action="development.milestone.created", entity_type="development_milestone", entity_id=str(item.id))
+    await db.commit()
+    return {"id": str(item.id), "title": item.title, "status": item.status}
+
+@router.patch("/{plan_id}/milestones/{milestone_id}")
+async def update_milestone(plan_id: UUID, milestone_id: UUID, payload: MilestoneUpdate, manager: User = Depends(require_permission("users.read")), db: AsyncSession = Depends(get_db)):
+    plan = await _manager_plan(plan_id, manager, db)
+    item = await db.scalar(select(DevelopmentMilestone).where(DevelopmentMilestone.id == milestone_id, DevelopmentMilestone.plan_id == plan.id))
+    if item is None:
+        raise HTTPException(status_code=404, detail="Milestone not found")
+    values = payload.model_dump(exclude_unset=True)
+    for key in ("title", "description", "due_at", "status"):
+        if key in values:
+            setattr(item, key, values[key])
+    if values.get("status") == "completed":
+        item.completed_at = datetime.now(timezone.utc)
+    elif "status" in values:
+        item.completed_at = None
+    await audit(db, tenant_id=manager.tenant_id, actor_id=manager.id, action="development.milestone.updated", entity_type="development_milestone", entity_id=str(item.id))
+    await db.commit()
+    return {"id": str(item.id), "title": item.title, "status": item.status, "completed_at": item.completed_at}
+
+@router.post("/{plan_id}/feedback", status_code=status.HTTP_201_CREATED)
+async def add_feedback(plan_id: UUID, payload: FeedbackCreate, manager: User = Depends(require_permission("users.read")), db: AsyncSession = Depends(get_db)):
+    plan = await _manager_plan(plan_id, manager, db)
+    item = DevelopmentFeedback(tenant_id=manager.tenant_id, plan_id=plan.id, reviewer_id=manager.id, rating=payload.rating, strengths=payload.strengths, feedback=payload.feedback, next_steps=payload.next_steps)
+    db.add(item)
+    await db.flush()
+    await audit(db, tenant_id=manager.tenant_id, actor_id=manager.id, action="development.feedback.created", entity_type="development_feedback", entity_id=str(item.id))
+    await db.commit()
+    return {"id": str(item.id), "rating": item.rating, "created_at": item.created_at}

@@ -1,0 +1,19 @@
+{
+  "checks": 2,
+  "results": [
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/catalog",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 40
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/catalog",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 40
+    }
+  ]
+}

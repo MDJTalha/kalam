@@ -1,14 +1,21 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+﻿import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
+import "./auth-experience.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const geistSans = localFont({ src: "./fonts/Geist-Latin.woff2", variable: "--font-geist-sans", weight: "100 900", display: "swap" });
+const geistMono = localFont({ src: "./fonts/GeistMono-Latin.woff2", variable: "--font-geist-mono", weight: "100 900", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Corporate LMS", template: "%s · Corporate LMS" },
+  title: { default: "Kognivon | Learning Intelligence", template: "%s · Kognivon" },
   description: "Enterprise learning, compliance, skills and workforce capability platform.",
-  applicationName: "Corporate LMS",
+  applicationName: "Kognivon",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

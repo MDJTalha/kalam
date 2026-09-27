@@ -3,10 +3,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_permission
+from app.api.deps import get_current_user, require_permission, user_has_permission
 from app.db.models import AttendanceRecord, Course, LiveSession, User
 from app.db.session import get_db
 from app.services.audit import audit
@@ -66,3 +66,70 @@ async def mark_attendance(
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="attendance.marked", entity_type="attendance_record", entity_id=str(row.id), metadata={"status": payload.status})
     await db.commit()
     return {"status": row.status}
+
+@router.get("/{session_id}/analytics")
+async def session_analytics(
+    session_id: UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    session = await db.scalar(
+        select(LiveSession).where(
+            LiveSession.id == session_id,
+            LiveSession.tenant_id == user.tenant_id,
+        )
+    )
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    is_admin = await user_has_permission(user, db, "courses.manage")
+    if not is_admin and session.instructor_id != user.id:
+        raise HTTPException(status_code=403, detail="Facilitator scope does not include this session")
+
+    counts = await db.execute(
+        select(AttendanceRecord.status, func.count(AttendanceRecord.id))
+        .where(AttendanceRecord.live_session_id == session.id)
+        .group_by(AttendanceRecord.status)
+    )
+    status_counts = {status: count for status, count in counts.all()}
+    total_marked = sum(status_counts.values())
+    present_like = status_counts.get("present", 0) + status_counts.get("late", 0)
+    attendance_rate = round((present_like / total_marked) * 100, 2) if total_marked else 0.0
+
+    roster = await db.execute(
+        select(User.id, User.first_name, User.last_name, User.email, AttendanceRecord.status)
+        .join(AttendanceRecord, AttendanceRecord.user_id == User.id)
+        .where(
+            User.tenant_id == user.tenant_id,
+            AttendanceRecord.live_session_id == session.id,
+        )
+        .order_by(User.last_name, User.first_name)
+    )
+    return {
+        "session": {
+            "id": str(session.id),
+            "course_id": str(session.course_id),
+            "title": session.title,
+            "instructor_id": str(session.instructor_id) if session.instructor_id else None,
+            "starts_at": session.starts_at,
+            "ends_at": session.ends_at,
+            "status": session.status,
+        },
+        "attendance": {
+            "total_marked": total_marked,
+            "present": status_counts.get("present", 0),
+            "late": status_counts.get("late", 0),
+            "absent": status_counts.get("absent", 0),
+            "excused": status_counts.get("excused", 0),
+            "attendance_rate": attendance_rate,
+        },
+        "roster": [
+            {
+                "user_id": str(row.id),
+                "learner": " ".join(part for part in (row.first_name, row.last_name) if part),
+                "email": row.email,
+                "status": row.status,
+            }
+            for row in roster.all()
+        ],
+    }

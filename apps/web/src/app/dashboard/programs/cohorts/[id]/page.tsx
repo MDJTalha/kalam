@@ -2,9 +2,11 @@ import Link from "next/link";
 import { ArrowLeft, UsersRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { CohortEditor } from "@/components/cohort-editor";
 import { apiJson, requireUser } from "@/lib/server-api";
 
 type Member = { user_id: string; name: string; email: string; status: string };
+type Person = { id: string; first_name: string; last_name: string; email: string; is_active: boolean };
 type Cohort = {
   id: string;
   program_id: string;
@@ -22,9 +24,14 @@ export default async function CohortDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser<{ permissions?: string[] }>();
+  const canManage = user.permissions?.includes("courses.manage") ?? false;
+  const canManageMembers = user.permissions?.includes("users.manage") ?? false;
   const { id } = await params;
-  const cohort = await apiJson<Cohort>("/api/v1/programs/cohorts/" + id);
+  const [cohort, people] = await Promise.all([
+    apiJson<Cohort>("/api/v1/programs/cohorts/" + id),
+    canManage && canManageMembers ? apiJson<Person[]>("/api/v1/people") : Promise.resolve(null),
+  ]);
   if (!cohort) notFound();
 
   return (
@@ -65,6 +72,7 @@ export default async function CohortDetailPage({
           </div>
         ) : <div className="empty-state"><UsersRound size={24}/><p>No learners are enrolled in this cohort yet.</p></div>}
       </section>
+      {canManage && <CohortEditor initialCohort={cohort} people={people ?? []} canManageMembers={canManageMembers} />}
     </DashboardShell>
   );
 }

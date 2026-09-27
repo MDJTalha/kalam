@@ -1,0 +1,22 @@
+"use client";
+import { FormEvent, useState } from "react";
+import { ClipboardCheck, Plus } from "lucide-react";
+import { Notice, SectionCard, StatusBadge } from "./ui";
+
+type Person={id:string;first_name:string;last_name:string;email:string};
+type Course={id:string;title:string};
+type Requirement={id:string;name:string;description?:string|null;due_days?:number|null;recurrence_days?:number|null;active:boolean};
+
+export function ComplianceConsole({requirements,people,courses}:{requirements:Requirement[];people:Person[];courses:Course[]}){
+  const [items,setItems]=useState(requirements);const [name,setName]=useState("");const [description,setDescription]=useState("");const [dueDays,setDueDays]=useState("30");
+  const [requirementId,setRequirementId]=useState(requirements[0]?.id||"");const [userId,setUserId]=useState(people[0]?.id||"");const [courseId,setCourseId]=useState(courses[0]?.id||"");
+  const [message,setMessage]=useState<string|null>(null);const [busy,setBusy]=useState(false);
+  async function createRequirement(e:FormEvent){e.preventDefault();setBusy(true);setMessage(null);try{const r=await fetch("/api/lms/compliance",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,description,due_days:Number(dueDays),active:true})});const d=await r.json();if(!r.ok)throw new Error(d.detail||"Unable to create requirement");const next={id:d.id,name:d.name,description,due_days:Number(dueDays),active:true};setItems([next,...items]);setRequirementId(d.id);setName("");setDescription("");setMessage("Compliance requirement created.");}catch(err){setMessage(err instanceof Error?err.message:"Unable to create requirement")}finally{setBusy(false)}}
+  async function assign(e:FormEvent){e.preventDefault();setBusy(true);setMessage(null);try{const r=await fetch("/api/lms/compliance/"+requirementId+"/assign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user_id:userId,course_id:courseId||null})});const d=await r.json();if(!r.ok)throw new Error(d.detail||"Unable to assign requirement");setMessage("Requirement assigned to the selected learner.");}catch(err){setMessage(err instanceof Error?err.message:"Unable to assign requirement")}finally{setBusy(false)}}
+  return <div className="console-grid">
+    <SectionCard eyebrow="Compliance policy" title="Create requirement"><form className="studio-form" onSubmit={createRequirement}><div className="form-grid"><label>Name<input value={name} onChange={e=>setName(e.target.value)} required/></label><label>Due days<input type="number" min={1} value={dueDays} onChange={e=>setDueDays(e.target.value)} required/></label><label className="full-span">Description<textarea value={description} onChange={e=>setDescription(e.target.value)} rows={4}/></label></div><button className="button button-primary" disabled={busy}><Plus size={15}/> Create requirement</button></form></SectionCard>
+    <SectionCard eyebrow="Applicability" title="Assign mandatory learning"><form className="studio-form" onSubmit={assign}><div className="form-grid"><label>Requirement<select value={requirementId} onChange={e=>setRequirementId(e.target.value)} required>{items.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>Learner<select value={userId} onChange={e=>setUserId(e.target.value)} required>{people.map(item=><option key={item.id} value={item.id}>{item.first_name} {item.last_name}</option>)}</select></label><label className="full-span">Linked course<select value={courseId} onChange={e=>setCourseId(e.target.value)}>{courses.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select></label></div><button className="button button-secondary" disabled={busy}><ClipboardCheck size={15}/> Assign requirement</button></form></SectionCard>
+    {message&&<Notice kind="success">{message}</Notice>}
+    <SectionCard eyebrow="Policy library" title="Configured requirements" meta={items.length+" rules"}><div className="compact-list">{items.map(item=><div className="compact-row" key={item.id}><div><strong>{item.name}</strong><small>{item.description||"Organizational requirement"} · due {item.due_days||"—"} days</small></div><StatusBadge status={item.active?"active":"disabled"}/></div>)}</div></SectionCard>
+  </div>;
+}

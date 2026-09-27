@@ -26,6 +26,34 @@ services:
       timeout: 3s
       retries: 20
 
+  clamav:
+    image: clamav/clamav:1.4.3
+    restart: unless-stopped
+    volumes:
+      - corplms_clamav_db:/var/lib/clamav
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'PING\\n' | nc 127.0.0.1 3310 | grep -q PONG"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  migrate:
+    build:
+      context: ../../apps/api
+    restart: "no"
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-lms}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-corplms}
+      REDIS_URL: redis://valkey:6379/0
+      WEB_ORIGIN: ${WEB_ORIGIN:?WEB_ORIGIN is required}
+      API_ORIGIN: ${API_ORIGIN:?API_ORIGIN is required}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?ALLOWED_HOSTS is required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   api:
     build:
       context: ../../apps/api
@@ -34,14 +62,27 @@ services:
       APP_ENV: production
       APP_NAME: Corporate LMS API
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-lms}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-corplms}
+      DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-10}
+      DATABASE_MAX_OVERFLOW: ${DATABASE_MAX_OVERFLOW:-10}
       REDIS_URL: redis://valkey:6379/0
       WEB_ORIGIN: ${WEB_ORIGIN:?WEB_ORIGIN is required}
       API_ORIGIN: ${API_ORIGIN:?API_ORIGIN is required}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?ALLOWED_HOSTS is required}
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-corp_lms_session}
       SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-28800}
-      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      COOKIE_SECURE: "true"
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-2}
+      API_DOCS_ENABLED: "false"
       RESET_TOKEN_MINUTES: ${RESET_TOKEN_MINUTES:-30}
+      MAX_FAILED_LOGIN_ATTEMPTS: ${MAX_FAILED_LOGIN_ATTEMPTS:-5}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-15}
+      STORAGE_BACKEND: local
+      STORAGE_ROOT: /data/uploads
+      FILE_SCAN_PROVIDER: clamd
+      FILE_SCAN_HOST: clamav
+      FILE_SCAN_PORT: 3310
+      FILE_SCAN_TIMEOUT_SECONDS: ${FILE_SCAN_TIMEOUT_SECONDS:-30}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
@@ -49,52 +90,95 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
       DEV_EMAIL_SINK: "false"
+      INTEGRATION_ALLOW_PRIVATE_URLS: "false"
+      WEBHOOK_ENCRYPTION_KEYS: ${WEBHOOK_ENCRYPTION_KEYS:-}
+      WEBHOOK_ACTIVE_KEY_ID: ${WEBHOOK_ACTIVE_KEY_ID:-primary}
+    volumes:
+      - corplms_uploads:/data/uploads
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       valkey:
+        condition: service_healthy
+      clamav:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=3)"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 12
 
   worker:
     build:
-      context: ../../apps/api
+      context: ../..
+      dockerfile: apps/api/Dockerfile.worker
     restart: unless-stopped
-    command: ["python", "-m", "app.worker"]
+    command: ["python", "/app/worker/run.py"]
     environment:
       APP_ENV: production
       APP_NAME: Corporate LMS Worker
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-lms}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-corplms}
+      DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-10}
+      DATABASE_MAX_OVERFLOW: ${DATABASE_MAX_OVERFLOW:-10}
       REDIS_URL: redis://valkey:6379/0
       WEB_ORIGIN: ${WEB_ORIGIN:?WEB_ORIGIN is required}
       API_ORIGIN: ${API_ORIGIN:?API_ORIGIN is required}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?ALLOWED_HOSTS is required}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      STORAGE_BACKEND: local
+      STORAGE_ROOT: /data/uploads
+      FILE_SCAN_PROVIDER: clamd
+      FILE_SCAN_HOST: clamav
+      FILE_SCAN_PORT: 3310
       DEV_EMAIL_SINK: "false"
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      WEBHOOK_ENCRYPTION_KEYS: ${WEBHOOK_ENCRYPTION_KEYS:-}
+      WEBHOOK_ACTIVE_KEY_ID: ${WEBHOOK_ACTIVE_KEY_ID:-primary}
+    volumes:
+      - corplms_uploads:/data/uploads
     depends_on:
       api:
         condition: service_healthy
 
   web:
     build:
-      context: ../../apps/web
+      context: ../..
+      dockerfile: apps/web/Dockerfile
       args:
-        NEXT_PUBLIC_API_ORIGIN: ${NEXT_PUBLIC_API_ORIGIN:?NEXT_PUBLIC_API_ORIGIN is required}
+        API_ORIGIN: ${INTERNAL_API_ORIGIN:-http://api:8000}
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      API_ORIGIN: http://api:8000
+      API_ORIGIN: ${INTERNAL_API_ORIGIN:-http://api:8000}
       NEXT_PUBLIC_API_ORIGIN: ${NEXT_PUBLIC_API_ORIGIN:?NEXT_PUBLIC_API_ORIGIN is required}
     depends_on:
       api:
         condition: service_healthy
-    ports:
-      - "${WEB_PORT:-3100}:3000"
+    expose:
+      - "3000"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  gateway:
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    volumes:
+      - ../reverse-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-3100}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/proxy-health"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -102,3 +186,5 @@ services:
 volumes:
   corplms_postgres:
   corplms_valkey:
+  corplms_uploads:
+  corplms_clamav_db:

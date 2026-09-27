@@ -1,27 +1,39 @@
 from __future__ import annotations
 
 import os
+from uuid import uuid4
+
 import httpx
 
 BASE = os.getenv("CORPLMS_API", "http://127.0.0.1:8000/api/v1")
 PASSWORD = os.getenv("SEED_ADMIN_PASSWORD", "DemoOnly!1234")
 TENANT = os.getenv("SEED_TENANT_SLUG", "demo-corporation")
 
+
 def login(client: httpx.Client, email: str) -> None:
-    response = client.post(f"{BASE}/auth/login", json={"tenant_slug": TENANT, "email": email, "password": PASSWORD})
+    response = client.post(
+        f"{BASE}/auth/login",
+        json={"tenant_slug": TENANT, "email": email, "password": PASSWORD},
+    )
     response.raise_for_status()
+
 
 def must(condition: bool, message: str) -> None:
     if not condition:
         raise AssertionError(message)
+
+
+smoke_key = uuid4().hex[:12]
 
 with httpx.Client() as public:
     health = public.get(f"{BASE}/health")
     health.raise_for_status()
     must(health.json()["status"] == "ok", "health failed")
 
+
 with httpx.Client() as admin:
     login(admin, "admin@demo.corp")
+
     me = admin.get(f"{BASE}/auth/me")
     me.raise_for_status()
     must(me.json()["email"] == "admin@demo.corp", "admin identity failed")
@@ -30,23 +42,17 @@ with httpx.Client() as admin:
     people.raise_for_status()
     must(len(people.json()) >= 4, "expected demo people")
 
-    existing_courses = admin.get(f"{BASE}/courses")
-    existing_courses.raise_for_status()
-    existing = next((item for item in existing_courses.json() if item["slug"] == "smoke-test-course"), None)
-    if existing:
-        course_id = existing["id"]
-    else:
-        course = admin.post(
-            f"{BASE}/courses",
-            json={
-                "title": "Smoke Test Course",
-                "slug": "smoke-test-course",
-                "description": "Automated integration-test course.",
-                "estimated_minutes": 10,
-            },
-        )
-        course.raise_for_status()
-        course_id = course.json()["id"]
+    course = admin.post(
+        f"{BASE}/courses",
+        json={
+            "title": f"Smoke Test Course {smoke_key}",
+            "slug": f"smoke-test-course-{smoke_key}",
+            "description": "Automated integration-test course.",
+            "estimated_minutes": 10,
+        },
+    )
+    course.raise_for_status()
+    course_id = course.json()["id"]
 
     module = admin.post(
         f"{BASE}/courses/{course_id}/modules",
@@ -71,8 +77,46 @@ with httpx.Client() as admin:
     published.raise_for_status()
     must(published.json()["status"] == "published", "publish failed")
 
+    roles = admin.get(f"{BASE}/admin/roles")
+    roles.raise_for_status()
+    learner_role = next(item for item in roles.json() if item["name"] == "Learner")
+
+    skill = admin.post(
+        f"{BASE}/skills",
+        json={
+            "name": f"Smoke Capability {smoke_key}",
+            "description": "Automated capability-intelligence test skill.",
+            "category": "Testing",
+        },
+    )
+    skill.raise_for_status()
+    skill_id = skill.json()["id"]
+
+    role_mapping = admin.post(
+        f"{BASE}/skills/role-mapping",
+        json={"role_id": learner_role["id"], "skill_id": skill_id, "required_proficiency": 3},
+    )
+    role_mapping.raise_for_status()
+
+    course_mapping = admin.post(
+        f"{BASE}/skills/course-mapping",
+        json={"course_id": course_id, "skill_id": skill_id, "target_proficiency": 3},
+    )
+    course_mapping.raise_for_status()
+
+    intelligence = admin.get(f"{BASE}/intelligence/capability")
+    intelligence.raise_for_status()
+    intelligence_payload = intelligence.json()
+    must(intelligence_payload["skill_gaps"] >= 1, "expected a persisted learner skill gap")
+    must(
+        any(item["course_id"] == course_id for item in intelligence_payload["recommended_actions"]),
+        "expected a mapped learning recommendation",
+    )
+
+
 with httpx.Client() as learner:
     login(learner, "learner@demo.corp")
+
     courses = learner.get(f"{BASE}/courses")
     courses.raise_for_status()
     must(course_id in {item["id"] for item in courses.json()}, "published course not visible")
@@ -87,12 +131,20 @@ with httpx.Client() as learner:
     completed.raise_for_status()
     must(completed.json()["status"] == "completed", "lesson/course completion failed")
 
+    learner_skills = learner.get(f"{BASE}/skills/me")
+    learner_skills.raise_for_status()
+    derived = next(item for item in learner_skills.json() if item["id"] == skill_id or item["skill"] == f"Smoke Capability {smoke_key}")
+    must(derived["proficiency"] >= 3, "course completion did not derive target skill proficiency")
+    must(derived["evidence_source"].startswith("course_completion:"), "course completion evidence was not recorded")
+
+
 with httpx.Client() as admin:
     login(admin, "admin@demo.corp")
+
     assessment = admin.post(
         f"{BASE}/assessments",
         json={
-            "title": "Smoke Assessment",
+            "title": f"Smoke Assessment {smoke_key}",
             "course_id": course_id,
             "passing_score": 70,
             "max_attempts": 2,
@@ -115,8 +167,10 @@ with httpx.Client() as admin:
     question.raise_for_status()
     question_id = question.json()["id"]
 
+
 with httpx.Client() as learner:
     login(learner, "learner@demo.corp")
+
     detail = learner.get(f"{BASE}/assessments/{assessment_id}")
     detail.raise_for_status()
     visible = detail.json()["questions"][0]
@@ -133,12 +187,18 @@ with httpx.Client() as learner:
 
     certificates = learner.get(f"{BASE}/certificates/my")
     certificates.raise_for_status()
-    certificate = next(item for item in certificates.json() if item["id"] == result["certificate_id"])
+    certificate = next(
+        item for item in certificates.json() if item["id"] == result["certificate_id"]
+    )
+
 
 with httpx.Client() as public:
-    verification = public.get(f"{BASE}/certificates/verify/{certificate['verification_code']}")
+    verification = public.get(
+        f"{BASE}/certificates/verify/{certificate['verification_code']}"
+    )
     verification.raise_for_status()
     must(verification.json()["valid"] is True, "certificate verification failed")
+
 
 print("SMOKE TEST PASSED")
 print(f"course_id={course_id}")

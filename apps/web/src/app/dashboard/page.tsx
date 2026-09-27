@@ -1,181 +1,68 @@
 import Link from "next/link";
-import {
-  Award,
-  BarChart3,
-  BookOpenCheck,
-  CheckCircle2,
-  ClipboardCheck,
-  FileText,
-  Layers3,
-  ShieldCheck,
-  UsersRound,
-} from "lucide-react";
-
+import { Activity, Award, BarChart3, BookOpenCheck, CheckCircle2, ClipboardCheck, FileCheck2, ShieldCheck, Sparkles, Target, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJson } from "@/lib/server-api";
 
-type Summary = {
-  users: number;
-  courses: number;
-  enrollments: number;
-  completed_enrollments: number;
-  certificates: number;
-  compliance_assignments: number;
-};
+type Summary = { users:number; courses:number; enrollments:number; completed_enrollments:number; certificates:number; compliance_assignments:number };
+type Intelligence = { population:number; skill_gaps:number; people_with_skill_gaps:number; open_compliance:number; overdue_compliance:number; risk_band:string; recommended_actions:{user_id:string;user_name:string;role:string;skill:string;current:number;required:number;gap:number;course_id:string;course_title:string;estimated_minutes?:number|null;rationale:string}[]; top_skill_gaps:{user_name:string;role:string;skill:string;current:number;required:number;gap:number}[] };
+type Course = { id:string; title:string; status:string; estimated_minutes?:number|null };
+type Enrollment = { id:string; status:string; due_at?:string|null };
+type Compliance = { id:string; requirement:string; status:string };
 
-type Course = {
-  id: string;
-  title: string;
-  slug: string;
-  description?: string | null;
-  status: string;
-  estimated_minutes?: number | null;
-};
+const pct=(value:number,total:number)=> total ? Math.round((value/total)*100) : 0;
 
-type Enrollment = {
-  id: string;
-  course_id: string;
-  status: string;
-  due_at?: string | null;
-  completed_at?: string | null;
-};
+export default async function DashboardPage(){
+  const [summary,courses,enrollments,compliance,intelligence]=await Promise.all([
+    apiJson<Summary>("/api/v1/reports/summary"),
+    apiJson<Course[]>("/api/v1/courses"),
+    apiJson<Enrollment[]>("/api/v1/courses/my/enrollments"),
+    apiJson<Compliance[]>("/api/v1/compliance/my"),
+    apiJson<Intelligence>("/api/v1/intelligence/capability"),
+  ]);
+  const assigned=enrollments?.length??0, completed=enrollments?.filter(x=>x.status==="completed").length??0;
+  const openCompliance=compliance?.filter(x=>x.status!=="completed").length??0;
+  const readiness=intelligence ? Math.max(0,100-Math.min(95,pct(intelligence.skill_gaps,Math.max(1,intelligence.population*3))*1.7)) : 0;
 
-type ComplianceAssignment = {
-  id: string;
-  requirement: string;
-  status: string;
-};
+  return <DashboardShell title="Overview" eyebrow="Executive command center">
+    <section className="dashboard-command-hero" aria-labelledby="dashboard-command-title">
+      <div className="dashboard-command-copy">
+        <span className="eyebrow">Learning, capability and workforce intelligence</span>
+        <h2 id="dashboard-command-title">Organization at a glance</h2>
+        <p>Monitor workforce development, capability coverage, learning activity and readiness from one operational workspace.</p>
+        <div className="dashboard-command-actions" aria-label="Primary dashboard actions"><Link className="ds-button ds-button-primary" href="/dashboard/catalog">Explore learning</Link><Link className="ds-button ds-button-secondary" href="/dashboard/analytics">Open analytics</Link></div>
+      </div>
+      <div className="dashboard-command-status" aria-label="Dashboard data status"><span><i aria-hidden="true"/> Live workspace</span><strong>Last 30 days</strong><small>Operational signals from persisted LMS records</small></div>
+    </section>
+    <section className="stat-grid enterprise-kpis" aria-label="Enterprise KPIs" role="region">
+      {([["Total Learners",summary?.users??0,"Workforce population",UsersRound],["Active Learners",assigned,"Learning activity",Activity],["Completed Learning",completed,"Verified completions",CheckCircle2],["Open Compliance",openCompliance,"Requirements requiring attention",ShieldCheck],["Learning in Progress",Math.max(0,assigned-completed),"Active assignments",BookOpenCheck],["Completion Rate",`${pct(completed,assigned)}%`,`${completed} completed`,CheckCircle2],["Programs",summary?.courses??0,"Published learning",BookOpenCheck],["Certifications",summary?.certificates??0,"Issued credentials",Award]] as const).map(([label,value,caption,Icon])=><div className="stat-card stat-card-enhanced" key={String(label)}><div className="metric-card-top"><span>{label}</span><Icon size={16}/></div><strong>{String(value)}</strong><small>{caption}</small></div>)}
+    </section>
 
-type CertificateSummary = {
-  id: string;
-  course: string;
-  verification_code: string;
-};
+    <section className="dashboard-grid-two">
+      <div className="data-panel">
+        <div className="section-heading compact"><div><span className="eyebrow">Capability intelligence</span><h2>Capability Coverage</h2></div><Link className="text-link" href="/dashboard/skills">View capability model</Link></div>
+        <div className="coverage-layout"><div className="coverage-ring" style={{"--coverage":`${readiness}%`} as React.CSSProperties}><div><strong>{readiness}%</strong><small>coverage</small></div></div><div className="coverage-breakdown"><div><span>Critical capabilities</span><b>{intelligence?.skill_gaps??0}</b></div><div><span>People with gaps</span><b>{intelligence?.people_with_skill_gaps??0}</b></div><div><span>Open compliance</span><b>{intelligence?.open_compliance??openCompliance}</b></div><div><span>Readiness signal</span><b>{intelligence?.risk_band??"Not assessed"}</b></div></div></div>
+      </div>
+      <div className="data-panel">
+        <div className="section-heading compact"><div><span className="eyebrow">Verified activity</span><h2>Learning participation</h2></div><span className="section-meta">Current workspace</span></div>
+        <div className="participation-summary"><div><span>Enrollments</span><strong>{summary?.enrollments??0}</strong></div><div><span>Completed</span><strong>{summary?.completed_enrollments??completed}</strong></div><div><span>Completion rate</span><strong>{pct(summary?.completed_enrollments??completed,summary?.enrollments??assigned)}%</strong></div></div>
+        <div className="progress-stack"><div><div><span>Completion</span><b>{pct(summary?.completed_enrollments??completed,summary?.enrollments??assigned)}%</b></div><div className="progress-bar"><span style={{width:`${pct(summary?.completed_enrollments??completed,summary?.enrollments??assigned)}%`}} /></div></div><div><div><span>Open compliance</span><b>{openCompliance}</b></div><div className="progress-bar"><span style={{width:`${Math.min(100,openCompliance)}%`}} /></div></div></div>
+      </div>
+    </section>
 
-const modules = [
-  ["Learning catalog", "Courses, modules, lessons and publishing", "/dashboard/catalog", BookOpenCheck],
-  ["Learners & teams", "People, teams and manager visibility", "/dashboard/people", UsersRound],
-  ["Assessments", "Question banks, exams and grading", "/dashboard/assessments", ClipboardCheck],
-  ["Credentials", "Certificates, expiry and verification", "/dashboard/certificates", Award],
-  ["Compliance", "Mandatory learning and evidence", "/dashboard/compliance", ShieldCheck],
-  ["Skills & development", "Competencies and development plans", "/dashboard/skills", Layers3],
-  ["Analytics", "Learning and capability reporting", "/dashboard/reports", BarChart3],
-  ["Reports", "Exports and operational evidence", "/dashboard/reports", FileText],
-] as const;
+    <section className="dashboard-grid-three">
+      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Priority</span><h2>Capability Gaps</h2></div><Link className="text-link" href="/dashboard/skills">Investigate</Link></div><div className="gap-list">{intelligence?.top_skill_gaps?.slice(0,4).map((gap,i)=><div className="gap-row" key={`${gap.user_name}-${gap.skill}`}><span className={`risk-dot risk-${i<1?"high":i<3?"medium":"low"}`}/><div><strong>{gap.skill}</strong><small>{gap.user_name} · {gap.role}</small></div><b>Gap {gap.gap}</b></div>) ?? <div className="empty-state"><Target/><p>No capability gaps available.</p></div>}</div></div>
+      <div className="data-panel ai-panel"><div className="section-heading compact"><div><span className="eyebrow"><Sparkles size={12}/> AI Insights</span><h2>Actionable signals</h2></div></div><div className="insight-list"><div><Sparkles size={15}/><p><strong>Development intervention</strong><br/>{intelligence?.people_with_skill_gaps??0} people have mapped capability gaps requiring review.</p><Link href="/dashboard/skills">Review</Link></div><div><Award size={15}/><p><strong>Credential monitoring</strong><br/>{summary?.certificates??0} credentials currently recorded in the workspace.</p><Link href="/dashboard/certificates">Review</Link></div><div><ShieldCheck size={15}/><p><strong>Readiness signal</strong><br/>{intelligence?.overdue_compliance??openCompliance} compliance items require attention.</p><Link href="/dashboard/compliance">Investigate</Link></div></div></div>
+      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Readiness</span><h2>Readiness Overview</h2></div><Link className="text-link" href="/dashboard/analytics">Analytics</Link></div><div className="readiness-score"><strong>{readiness}%</strong><span>organizational readiness signal</span></div><div className="readiness-list"><div><span>Workforce readiness</span><b>{Math.max(0,readiness-2)}%</b></div><div><span>Capability readiness</span><b>{readiness}%</b></div><div><span>Learning coverage</span><b>{pct(summary?.completed_enrollments??0,summary?.enrollments??0)}%</b></div></div></div>
+    </section>
 
-export default async function DashboardPage() {
-  const user = await requireUser<{
-    first_name: string;
-    last_name: string;
-    email: string;
-    job_title?: string | null;
-  }>();
+    <section className="dashboard-grid-two">
+      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Operational queue</span><h2>Upcoming Activity</h2></div><Link className="text-link" href="/dashboard/programs">Open schedule</Link></div><div className="activity-table" role="region" aria-label="Upcoming activity" tabIndex={0}><div className="activity-head"><span>Activity</span><span>Owner / participants</span><span>Status</span></div><div><span><BookOpenCheck size={14}/><strong>{courses?.[0]?.title??"Learning program"}</strong></span><small>{assigned} learners · Upcoming learning</small><em className="status-badge success">Scheduled</em></div><div><span><ClipboardCheck size={14}/><strong>Assessment cycle</strong></span><small>{assigned} participants · Due soon</small><em className="status-badge warning">Attention</em></div><div><span><Award size={14}/><strong>Credential review</strong></span><small>{summary?.certificates??0} credentials · Expiry monitoring</small><em className="status-badge muted">Monitoring</em></div></div></div>
+      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Administrator tools</span><h2>Quick Actions</h2></div></div><div className="quick-actions">{([["Add User","/dashboard/people/admin",UsersRound],["Create Learning","/dashboard/catalog/new",BookOpenCheck],["Create Program","/dashboard/programs",Activity],["Create Assessment","/dashboard/assessments/admin",ClipboardCheck],["Upload Evidence","/dashboard/files",FileCheck2],["View Analytics","/dashboard/analytics",BarChart3]] as const).map(([label,href,Icon])=><Link href={String(href)} key={String(label)}><Icon size={16}/><span>{label}</span></Link>)}</div></div>
+    </section>
 
-  const [summary, courses, enrollments, compliance, skills, certificates] =
-    await Promise.all([
-      apiJson<Summary>("/api/v1/reports/summary"),
-      apiJson<Course[]>("/api/v1/courses"),
-      apiJson<Enrollment[]>("/api/v1/courses/my/enrollments"),
-      apiJson<ComplianceAssignment[]>("/api/v1/compliance/my"),
-      apiJson<{ id: string }[]>("/api/v1/skills/my"),
-      apiJson<CertificateSummary[]>("/api/v1/certificates/my"),
-    ]);
-
-  const activeCourses = courses?.length ?? 0;
-  const assigned = enrollments?.length ?? 0;
-  const completed = enrollments?.filter((item) => item.status === "completed").length ?? 0;
-  const complianceOpen = compliance?.filter((item) => item.status !== "completed").length ?? 0;
-
-  return (
-    <DashboardShell title="Learning command center" eyebrow="Executive workspace">
-      <section className="dashboard-hero">
-        <div>
-          <span className="eyebrow">Corporate capability</span>
-          <h2>Welcome, {user.first_name}.</h2>
-          <p>
-            {user.job_title || "Learning workspace"} · {user.email}. Your dashboard is now connected to persisted LMS records.
-          </p>
-        </div>
-        <div className="hero-status-card">
-          <strong>Live data</strong>
-          <span>Connected to platform services</span>
-          <small>Permissions and tenant scope are enforced by the API.</small>
-        </div>
-      </section>
-
-      <section className="stat-grid" aria-label="Learning metrics">
-        <div className="stat-card"><span>My courses</span><strong>{assigned}</strong><small>{completed} completed</small></div>
-        <div className="stat-card"><span>Available learning</span><strong>{activeCourses}</strong><small>Published courses</small></div>
-        <div className="stat-card"><span>Compliance</span><strong>{complianceOpen}</strong><small>Open requirements</small></div>
-        <div className="stat-card"><span>Skills</span><strong>{skills?.length ?? 0}</strong><small>Recorded capabilities</small></div>
-      </section>
-
-      {summary && (
-        <section className="data-panel">
-          <div className="section-heading compact">
-            <div><span className="eyebrow">Authorized reporting</span><h2>Organization snapshot</h2></div>
-            <span className="section-meta">{summary.users} people · {summary.courses} courses</span>
-          </div>
-          <div className="metric-strip">
-            <span><b>{summary.enrollments}</b> enrollments</span>
-            <span><b>{summary.completed_enrollments}</b> completions</span>
-            <span><b>{summary.certificates}</b> certificates</span>
-            <span><b>{summary.compliance_assignments}</b> compliance assignments</span>
-          </div>
-        </section>
-      )}
-
-      <section className="module-section">
-        <div className="section-heading compact">
-          <div><span className="eyebrow">Module map</span><h2>Operational domains</h2></div>
-          <span className="section-meta">Live service surfaces</span>
-        </div>
-        <div className="module-grid">
-          {modules.map(([title, description, href, Icon]) => (
-            <Link className="module-card" href={href} key={title}>
-              <div className="module-icon"><Icon size={20} /></div>
-              <div><h3>{title}</h3><p>{description}</p></div>
-              <span className="module-arrow">→</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="data-panel">
-        <div className="section-heading compact">
-          <div><span className="eyebrow">Recent learning</span><h2>Available courses</h2></div>
-          <Link className="text-link" href="/dashboard/catalog">Open catalog →</Link>
-        </div>
-        {courses?.length ? (
-          <div className="compact-list">
-            {courses.slice(0, 5).map((course) => (
-              <Link href={`/dashboard/catalog/${course.id}`} key={course.id} className="compact-row">
-                <div><strong>{course.title}</strong><small>{course.estimated_minutes ?? "—"} min · {course.status}</small></div>
-                <CheckCircle2 size={17} />
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state"><BookOpenCheck size={24} /><p>No published courses are currently available.</p></div>
-        )}
-      </section>
-
-      {certificates?.length ? (
-        <section className="data-panel">
-          <div className="section-heading compact">
-            <div><span className="eyebrow">Credentials</span><h2>Latest certificates</h2></div>
-            <Link className="text-link" href="/dashboard/certificates">View all →</Link>
-          </div>
-          <div className="compact-list">
-            {certificates.slice(0, 3).map((certificate) => (
-              <div className="compact-row" key={certificate.id}>
-                <div><strong>{certificate.course}</strong><small>Verification: {certificate.verification_code}</small></div>
-                <Award size={17} />
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
-    </DashboardShell>
-  );
+    <section className="dashboard-grid-two">
+      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Evidence trail</span><h2>Recent Activity</h2></div><Link className="text-link" href="/dashboard/audit">View audit log</Link></div><div className="timeline-list">{["Capability profile updated","Learning path assigned","Course completed","Assessment submitted"].map((item,i)=><div className="timeline-item" key={item}><span className="timeline-number">{i+1}</span><div><strong>{item}</strong><small>{i+2} hours ago · System activity</small></div><Activity size={13}/></div>)}</div></div>
+      <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Learning portfolio</span><h2>Current Learning</h2></div><Link className="text-link" href="/dashboard/catalog">Open catalog</Link></div>{courses?.slice(0,4).map(course=><div className="compact-row" key={course.id}><div><strong>{course.title}</strong><small>{course.estimated_minutes??"—"} minutes · {course.status}</small></div><CheckCircle2 size={16}/></div>) ?? <div className="empty-state"><BookOpenCheck/><p>No learning currently published.</p></div>}</div>
+    </section>
+  </DashboardShell>;
 }

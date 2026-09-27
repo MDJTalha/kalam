@@ -20,12 +20,15 @@ ENV API_ORIGIN=$API_ORIGIN
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run typecheck
 RUN npm run lint
-RUN npm run build
+RUN npm run build -- --webpack
 
 FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# Bind to all container interfaces so the local healthcheck and gateway can
+# reach the standalone server instead of Docker's generated container hostname.
+ENV HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/.next/standalone ./

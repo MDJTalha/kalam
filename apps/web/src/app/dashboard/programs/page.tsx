@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { UsersRound, Layers3, ArrowRight } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { ProgramCreateForm } from "@/components/program-create-form";
 import { apiJson, requireUser } from "@/lib/server-api";
 
 type Program = {
@@ -24,7 +25,8 @@ type Cohort = {
 };
 
 export default async function ProgramsPage() {
-  await requireUser();
+  const user = await requireUser<{ permissions?: string[] }>();
+  const canManage = user.permissions?.includes("courses.manage") ?? false;
   const [programs, cohorts] = await Promise.all([
     apiJson<Program[]>("/api/v1/programs"),
     apiJson<Cohort[]>("/api/v1/programs/cohorts"),
@@ -39,6 +41,7 @@ export default async function ProgramsPage() {
         <div className="stat-card"><span>Required programs</span><strong>{programs?.filter((item) => item.is_required).length ?? 0}</strong><small>Mandatory pathways</small></div>
       </div>
 
+      {(!programs || !cohorts) && <section className="data-panel" role="alert"><h2>Delivery data unavailable</h2><p>Some program information could not be loaded. Try again.</p></section>}
       <section className="data-panel">
         <div className="section-heading compact">
           <div><span className="eyebrow">Structured learning</span><h2>Programs</h2></div>
@@ -58,9 +61,10 @@ export default async function ProgramsPage() {
               </Link>
             ))}
           </div>
-        ) : <div className="empty-state"><Layers3 size={24}/><p>No learning programs are configured yet.</p></div>}
+        ) : <div className="empty-state"><Layers3 size={24}/><p>{canManage ? "Create a draft program and add its courses." : "Published programs will appear here."}</p></div>}
       </section>
 
+      {canManage && <ProgramCreateForm />}
       <section className="data-panel">
         <div className="section-heading compact">
           <div><span className="eyebrow">Learner groups</span><h2>Cohorts</h2></div>

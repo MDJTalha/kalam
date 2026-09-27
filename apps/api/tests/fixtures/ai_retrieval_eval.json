@@ -1,0 +1,22 @@
+{
+  "documents": [
+    {"id":"leadership","title":"Leadership coaching","text":"Managers develop people through mentoring, coaching and constructive feedback conversations."},
+    {"id":"compliance","title":"Mandatory compliance","text":"Required policy training must be completed annually and renewed before the due date."},
+    {"id":"communication","title":"Feedback conversations","text":"Effective communication uses clear feedback, active listening and respectful conversation."},
+    {"id":"skills","title":"Skill development","text":"Development plans identify proficiency gaps and mapped learning options for capability growth."},
+    {"id":"certificates","title":"Certificate renewal","text":"Certificates can expire and may require renewal before the credential validity date."},
+    {"id":"assessment","title":"Assessment scoring","text":"Assessment attempts are scored against the configured passing score and attempt limits."},
+    {"id":"enrollment","title":"Course enrollment","text":"Enrollment can depend on prerequisites, capacity, assignment rules and learner eligibility."},
+    {"id":"analytics","title":"Manager analytics","text":"Team learning reports show manager populations, enrollments, completions and overdue learning."}
+  ],
+  "cases": [
+    {"query":"How should a manager coach someone?","expected":["leadership"]},
+    {"query":"What mandatory policy training must I renew?","expected":["compliance"]},
+    {"query":"How should I give feedback in a conversation?","expected":["communication","leadership"]},
+    {"query":"Explain my skill development gap.","expected":["skills"]},
+    {"query":"When does my certificate need renewal?","expected":["certificates"]},
+    {"query":"What passing score applies to an assessment attempt?","expected":["assessment"]},
+    {"query":"What prerequisites affect course enrollment?","expected":["enrollment"]},
+    {"query":"Show manager team completion reporting.","expected":["analytics"]}
+  ]
+}

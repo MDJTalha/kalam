@@ -28,7 +28,13 @@ async def list_skills(user: User = Depends(get_current_user), db: AsyncSession =
 
 @router.post("", status_code=201)
 async def create_skill(payload: SkillCreate, user: User = Depends(require_permission("skills.manage")), db: AsyncSession = Depends(get_db)):
-    item = Skill(tenant_id=user.tenant_id, **payload.model_dump())
+    name = payload.name.strip()
+    if len(name) < 2:
+        raise HTTPException(status_code=422, detail="Skill name must have at least two characters")
+    existing = await db.scalar(select(Skill.id).where(Skill.tenant_id == user.tenant_id, Skill.name.ilike(name)))
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="A skill with this name already exists")
+    item = Skill(tenant_id=user.tenant_id, name=name, category=payload.category.strip() if payload.category else None, description=payload.description.strip() if payload.description else None)
     db.add(item)
     await db.flush()
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="skill.created", entity_type="skill", entity_id=str(item.id))
@@ -134,6 +140,54 @@ async def map_role_skill(
     await db.commit()
     return {"status": "mapped", "role_id": str(role.id), "skill_id": str(skill.id), "required_proficiency": item.required_proficiency}
 
+@router.get("/role/{role_id}/gaps")
+async def get_role_skill_gaps(
+    role_id: UUID,
+    target_user_id: UUID | None = None,
+    user: User = Depends(require_permission("users.read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return role-required competencies and learner gaps on a 1-5 proficiency scale."""
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == user.tenant_id))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Role not found")
+    target = user if target_user_id is None else await db.scalar(
+        select(User).where(User.id == target_user_id, User.tenant_id == user.tenant_id, User.is_active.is_(True))
+    )
+    if target is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    required = await db.execute(
+        select(RoleSkillRequirement, Skill)
+        .join(Skill, Skill.id == RoleSkillRequirement.skill_id)
+        .where(RoleSkillRequirement.role_id == role.id, Skill.tenant_id == user.tenant_id)
+        .order_by(Skill.name)
+    )
+    actual_rows = await db.execute(
+        select(UserSkill, Skill)
+        .join(Skill, Skill.id == UserSkill.skill_id)
+        .where(UserSkill.user_id == target.id, Skill.tenant_id == user.tenant_id)
+    )
+    actual = {skill.id: item.proficiency for item, skill in actual_rows.all()}
+    gaps = []
+    for requirement, skill in required.all():
+        current = actual.get(skill.id, 0)
+        gaps.append({
+            "skill_id": str(skill.id),
+            "skill": skill.name,
+            "required_proficiency": requirement.required_proficiency,
+            "current_proficiency": current,
+            "gap": max(0, requirement.required_proficiency - current),
+            "met": current >= requirement.required_proficiency,
+        })
+    return {
+        "role_id": str(role.id),
+        "role": role.name,
+        "user_id": str(target.id),
+        "skills": gaps,
+        "gap_count": sum(1 for item in gaps if item["gap"] > 0),
+    }
+
+
 @router.get("/role/{role_id}")
 async def get_role_skills(
     role_id: UUID,
@@ -153,3 +207,65 @@ async def get_role_skills(
         {"skill_id": str(item.skill_id), "skill": skill.name, "required_proficiency": item.required_proficiency}
         for item, skill in result.all()
     ]
+
+
+@router.get("/governance")
+async def skill_governance(user: User = Depends(require_permission("skills.manage")), db: AsyncSession = Depends(get_db)):
+    role_rows = await db.execute(select(RoleSkillRequirement, Role, Skill).join(Role, Role.id == RoleSkillRequirement.role_id).join(Skill, Skill.id == RoleSkillRequirement.skill_id).where(Role.tenant_id == user.tenant_id, Skill.tenant_id == user.tenant_id).order_by(Role.name, Skill.name))
+    course_rows = await db.execute(select(CourseSkill, Course, Skill).join(Course, Course.id == CourseSkill.course_id).join(Skill, Skill.id == CourseSkill.skill_id).where(Course.tenant_id == user.tenant_id, Skill.tenant_id == user.tenant_id).order_by(Course.title, Skill.name))
+    return {
+        "role_requirements": [{"role_id": str(role.id), "role": role.name, "skill_id": str(skill.id), "skill": skill.name, "required_proficiency": mapping.required_proficiency} for mapping, role, skill in role_rows.all()],
+        "course_mappings": [{"course_id": str(course.id), "course": course.title, "skill_id": str(skill.id), "skill": skill.name, "target_proficiency": mapping.target_proficiency} for mapping, course, skill in course_rows.all()],
+    }
+
+@router.delete("/role-mapping/{role_id}/{skill_id}", status_code=204)
+async def delete_role_mapping(role_id: UUID, skill_id: UUID, user: User = Depends(require_permission("skills.manage")), db: AsyncSession = Depends(get_db)):
+    item = await db.scalar(select(RoleSkillRequirement).join(Role, Role.id == RoleSkillRequirement.role_id).join(Skill, Skill.id == RoleSkillRequirement.skill_id).where(RoleSkillRequirement.role_id == role_id, RoleSkillRequirement.skill_id == skill_id, Role.tenant_id == user.tenant_id, Skill.tenant_id == user.tenant_id))
+    if item is None:
+        raise HTTPException(status_code=404, detail="Role requirement not found")
+    await db.delete(item)
+    await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="skill.role_mapping.deleted", entity_type="role_skill_requirement", entity_id=str(role_id), metadata={"skill_id": str(skill_id)})
+    await db.commit()
+
+@router.delete("/course-mapping/{course_id}/{skill_id}", status_code=204)
+async def delete_course_mapping(course_id: UUID, skill_id: UUID, user: User = Depends(require_permission("skills.manage")), db: AsyncSession = Depends(get_db)):
+    item = await db.scalar(select(CourseSkill).join(Course, Course.id == CourseSkill.course_id).join(Skill, Skill.id == CourseSkill.skill_id).where(CourseSkill.course_id == course_id, CourseSkill.skill_id == skill_id, Course.tenant_id == user.tenant_id, Skill.tenant_id == user.tenant_id))
+    if item is None:
+        raise HTTPException(status_code=404, detail="Course mapping not found")
+    await db.delete(item)
+    await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="skill.course_mapping.deleted", entity_type="course_skill", entity_id=str(course_id), metadata={"skill_id": str(skill_id)})
+    await db.commit()
+
+@router.get("/me/gaps")
+async def my_role_gaps(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    from app.db.models import UserRole
+    requirements = await db.execute(select(Role, Skill, RoleSkillRequirement.required_proficiency).join(UserRole, UserRole.role_id == Role.id).join(RoleSkillRequirement, RoleSkillRequirement.role_id == Role.id).join(Skill, Skill.id == RoleSkillRequirement.skill_id).where(UserRole.user_id == user.id, Role.tenant_id == user.tenant_id, Skill.tenant_id == user.tenant_id).order_by(Role.name, Skill.name))
+    actual_rows = await db.execute(select(UserSkill.skill_id, UserSkill.proficiency).join(Skill, Skill.id == UserSkill.skill_id).where(UserSkill.user_id == user.id, Skill.tenant_id == user.tenant_id))
+    actual: dict[UUID, int] = {
+        skill_id: proficiency for skill_id, proficiency in actual_rows.all()
+    }
+    return [{"role": role.name, "role_id": str(role.id), "skill": skill.name, "skill_id": str(skill.id), "required_proficiency": required, "current_proficiency": actual.get(skill.id, 0), "gap": max(0, required - actual.get(skill.id, 0))} for role, skill, required in requirements.all()]
+
+class SkillUpdate(BaseModel):
+    name: str = Field(min_length=2, max_length=180)
+    description: str | None = None
+    category: str | None = Field(default=None, max_length=120)
+
+@router.patch("/{skill_id}")
+async def update_skill(skill_id: UUID, payload: SkillUpdate, user: User = Depends(require_permission("skills.manage")), db: AsyncSession = Depends(get_db)):
+    item = await db.scalar(select(Skill).where(Skill.id == skill_id, Skill.tenant_id == user.tenant_id))
+    if item is None:
+        raise HTTPException(status_code=404, detail="Skill not found")
+    name = payload.name.strip()
+    if len(name) < 2:
+        raise HTTPException(status_code=422, detail="Skill name must have at least two characters")
+    duplicate = await db.scalar(select(Skill.id).where(Skill.tenant_id == user.tenant_id, Skill.id != skill_id, Skill.name.ilike(name)))
+    if duplicate is not None:
+        raise HTTPException(status_code=409, detail="A skill with this name already exists")
+    before = {"name": item.name, "category": item.category, "description": item.description}
+    item.name = name
+    item.category = payload.category.strip() if payload.category else None
+    item.description = payload.description.strip() if payload.description else None
+    await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="skill.updated", entity_type="skill", entity_id=str(item.id), metadata={"before": before, "after": {"name": item.name, "category": item.category, "description": item.description}})
+    await db.commit()
+    return {"id": str(item.id), "name": item.name, "category": item.category, "description": item.description}

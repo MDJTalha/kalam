@@ -1,0 +1,90 @@
+{
+  "checks": 12,
+  "violations": 0,
+  "results": [
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/catalog",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 40
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/catalog",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 40
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 35
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/compliance",
+      "violations": [],
+      "incomplete": 1,
+      "passes": 34
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/compliance/admin",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 42
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/people",
+      "violations": [],
+      "incomplete": 1,
+      "passes": 43
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/settings",
+      "violations": [],
+      "incomplete": 1,
+      "passes": 34
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 35
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/compliance",
+      "violations": [],
+      "incomplete": 1,
+      "passes": 34
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/compliance/admin",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 42
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/people",
+      "violations": [],
+      "incomplete": 1,
+      "passes": 43
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/settings",
+      "violations": [],
+      "incomplete": 1,
+      "passes": 34
+    }
+  ]
+}

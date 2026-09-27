@@ -1,0 +1,32 @@
+﻿[
+    {
+        "scenario":  "api_failure_1",
+        "severity":  "observing",
+        "exit_code":  0,
+        "api_failures":  1
+    },
+    {
+        "scenario":  "api_failure_2",
+        "severity":  "warning",
+        "exit_code":  1,
+        "api_failures":  2
+    },
+    {
+        "scenario":  "sustained_api_failure",
+        "severity":  "critical",
+        "exit_code":  2,
+        "api_failures":  3
+    },
+    {
+        "scenario":  "gateway_unavailable",
+        "severity":  "critical",
+        "exit_code":  2,
+        "api_failures":  0
+    },
+    {
+        "scenario":  "recovery",
+        "severity":  "healthy",
+        "exit_code":  0,
+        "api_failures":  0
+    }
+]

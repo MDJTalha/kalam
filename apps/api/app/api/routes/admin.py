@@ -8,12 +8,13 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_permission
+from app.api.deps import require_permission
 from app.core.security import session_token_hash, utcnow
-from app.db.models import AuditLog, Invitation, OrgUnit, Role, Tenant, User
+from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.email import send_email
+from app.services.learning_reminders import run_course_due_reminders
 
 router = APIRouter()
 
@@ -90,6 +91,86 @@ async def roles(user: User = Depends(require_permission("tenant.manage")), db: A
     )
     return [{"id": str(row.id), "name": row.name, "description": row.description} for row in result.all()]
 
+class RolePermissionsUpdate(BaseModel):
+    permission_keys: list[str] = Field(default_factory=list, max_length=100)
+
+
+@router.get("/permissions")
+async def list_permissions(
+    user: User = Depends(require_permission("tenant.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Permission).order_by(Permission.key))
+    return [{"id": str(item.id), "key": item.key, "description": item.description} for item in result.scalars().all()]
+
+
+@router.get("/roles/{role_id}/permissions")
+async def role_permissions(
+    role_id: UUID,
+    user: User = Depends(require_permission("tenant.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == user.tenant_id))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Role not found")
+    result = await db.execute(
+        select(Permission.key)
+        .join(RolePermission, RolePermission.permission_id == Permission.id)
+        .where(RolePermission.role_id == role.id)
+        .order_by(Permission.key)
+    )
+    return {"role_id": str(role.id), "permission_keys": list(result.scalars().all())}
+
+
+@router.put("/roles/{role_id}/permissions")
+async def update_role_permissions(
+    role_id: UUID,
+    payload: RolePermissionsUpdate,
+    user: User = Depends(require_permission("tenant.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == user.tenant_id))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Role not found")
+
+    requested = sorted(set(payload.permission_keys))
+    permission_result = await db.execute(select(Permission).where(Permission.key.in_(requested)))
+    permissions = list(permission_result.scalars().all())
+    found = {item.key for item in permissions}
+    unknown = sorted(set(requested) - found)
+    if unknown:
+        raise HTTPException(status_code=422, detail={"unknown_permissions": unknown})
+
+    if role.name == "Tenant Admin" and "tenant.manage" not in requested:
+        raise HTTPException(status_code=422, detail="Tenant Admin must retain tenant.manage")
+
+    existing_result = await db.execute(
+        select(RolePermission).where(RolePermission.role_id == role.id)
+    )
+    existing = list(existing_result.scalars().all())
+    existing_by_permission = {item.permission_id: item for item in existing}
+    permission_ids = {item.id for item in permissions}
+
+    for assignment in existing:
+        if assignment.permission_id not in permission_ids:
+            await db.delete(assignment)
+    for permission in permissions:
+        if permission.id not in existing_by_permission:
+            db.add(RolePermission(role_id=role.id, permission_id=permission.id))
+
+    await audit(
+        db,
+        tenant_id=user.tenant_id,
+        actor_id=user.id,
+        action="role.permissions.updated",
+        entity_type="role",
+        entity_id=str(role.id),
+        metadata={"permission_keys": requested},
+    )
+    await db.commit()
+    return {"role_id": str(role.id), "permission_keys": requested}
+
+
 @router.post("/invitations", status_code=201)
 async def create_invitation(
     payload: InvitationCreate,
@@ -135,7 +216,7 @@ async def create_invitation(
 
 @router.get("/org-units")
 async def list_org_units(
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission("users.read")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -234,6 +315,15 @@ async def update_user(
         target.failed_login_count = 0
         target.locked_until = None
 
+    if "is_active" in payload.model_fields_set and payload.is_active is False:
+        if target.id == admin.id:
+            raise HTTPException(status_code=422, detail="You cannot deactivate your own account")
+        active_sessions = await db.execute(
+            select(SessionRecord).where(SessionRecord.user_id == target.id, SessionRecord.revoked_at.is_(None))
+        )
+        for session in active_sessions.scalars().all():
+            session.revoked_at = utcnow()
+
     await audit(
         db,
         tenant_id=admin.tenant_id,
@@ -251,6 +341,24 @@ async def update_user(
         "org_unit_id": str(target.org_unit_id) if target.org_unit_id else None,
         "is_active": target.is_active,
     }
+
+
+@router.post("/learning/reminders/run")
+async def run_learning_reminders(
+    user: User = Depends(require_permission("courses.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await run_course_due_reminders(db, tenant_id=user.tenant_id)
+    await audit(
+        db,
+        tenant_id=user.tenant_id,
+        actor_id=user.id,
+        action="learning.reminders.run",
+        entity_type="learning_reminder_job",
+        metadata=result,
+    )
+    await db.commit()
+    return result
 
 
 @router.get("/audit")

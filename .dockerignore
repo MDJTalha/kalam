@@ -12,3 +12,12 @@
 .github
 docs
 coverage
+backups
+data
+database/postgres-data
+database/.pgpass
+qa
+.edge-smoke-profile
+.tmp-chrome
+.npm-cache*
+*.log

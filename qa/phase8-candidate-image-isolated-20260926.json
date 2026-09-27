@@ -1,0 +1,16 @@
+﻿{
+    "checked_at_utc":  "2026-09-26T15:28:03.6274234Z",
+    "candidate_api_image":  "sha256:ce983374c8fe1ef0665abef6fe7f91dd1839af4fbdcbff7854b3e6e0762ef49e",
+    "candidate_web_image":  "sha256:2b3862e9a342f14aac4ad0f05aebabbbf47ef149b5ed70357f19d36fdef569b4",
+    "api_isolated_no_network":  true,
+    "api_liveness":  200,
+    "api_readiness_expected_disconnected":  503,
+    "api_docs_disabled":  404,
+    "web_routes":  {
+                       "/":  200,
+                       "/login":  200,
+                       "/dashboard":  200
+                   },
+    "web_markup_assets":  "pass",
+    "integrated_stack_certified":  false
+}
