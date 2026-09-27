@@ -42,6 +42,13 @@ jobs:
           WEB_ORIGIN: http://localhost:3000
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: .venv/bin/alembic upgrade head
+      - name: Verify migration head
+        env:
+          DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          APP_ENV: development
+          WEB_ORIGIN: http://localhost:3000
+          ALLOWED_HOSTS: localhost,127.0.0.1
+        run: .venv/bin/python scripts/check_migration_head.py
       - name: Seed demo data
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
@@ -96,7 +103,7 @@ jobs:
           ALLOWED_HOSTS: lms.example.com,api
         run: |
           docker compose -f infra/docker/docker-compose.app.yml config --quiet
-          docker compose -f infra/docker/docker-compose.app.yml config --format json | python -c 'import json,sys; port=json.load(sys.stdin)["services"]["gateway"]["ports"][0]; assert port["host_ip"] == "127.0.0.1" and port["published"] == "3100", f"Unsafe default gateway binding: {port}"'
+          docker compose -f infra/docker/docker-compose.app.yml config --format json | python -c 'import json,sys; cfg=json.load(sys.stdin); port=cfg["services"]["gateway"]["ports"][0]; assert port["host_ip"] == "127.0.0.1" and port["published"] == "3100", f"Unsafe default gateway binding: {port}"; assert cfg["services"]["api"]["image"] == cfg["services"]["migrate"]["image"], "Migration service must use the exact API image"'
       - name: Validate Nginx policy
         run: docker run --rm --add-host web:127.0.0.1 -v "$PWD/infra/reverse-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro" nginx:1.29-alpine nginx -t
       - name: Build production images

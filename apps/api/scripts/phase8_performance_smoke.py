@@ -5,14 +5,17 @@ import time
 
 import httpx
 
-BASE = os.getenv("PERF_BASE_URL", "http://127.0.0.1:8000")
+BASE = os.getenv("PERF_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+API_PREFIX = os.getenv("PERF_API_PREFIX", "/api/v1").rstrip("/")
+LOGIN_PATH = os.getenv("PERF_LOGIN_PATH", f"{API_PREFIX}/auth/login")
 TENANT = "demo-corporation"
 ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
+COOKIE = "corp_lms_session"
 
 PROFILES = [
-    {"path": "/api/v1/health", "total": 100, "concurrency": 10, "p95_limit_ms": 750},
-    {"path": "/api/v1/health/ready", "total": 30, "concurrency": 5, "p95_limit_ms": 1000},
-    {"path": "/api/v1/auth/me", "total": 100, "concurrency": 10, "p95_limit_ms": 1500},
+    {"path": f"{API_PREFIX}/health", "total": 100, "concurrency": 10, "p95_limit_ms": 750},
+    {"path": f"{API_PREFIX}/health/ready", "total": 30, "concurrency": 5, "p95_limit_ms": 1000},
+    {"path": f"{API_PREFIX}/auth/me", "total": 100, "concurrency": 10, "p95_limit_ms": 1500},
 ]
 
 
@@ -62,10 +65,16 @@ async def main() -> None:
     timeout = httpx.Timeout(15)
     async with httpx.AsyncClient(base_url=BASE, timeout=timeout) as client:
         login = await client.post(
-            "/api/v1/auth/login",
+            LOGIN_PATH,
             json={"tenant_slug": TENANT, **ADMIN},
         )
         login.raise_for_status()
+        session = client.cookies.get(COOKIE)
+        if not session:
+            raise RuntimeError("Login did not issue a session cookie")
+        # Local HTTP release-candidate runs may receive a production Secure cookie.
+        # Supply the captured token explicitly so the smoke still exercises authenticated server behavior.
+        client.headers["Cookie"] = f"{COOKIE}={session}"
         results = [await exercise(client, **profile) for profile in PROFILES]
 
     print(json.dumps(results, indent=2))

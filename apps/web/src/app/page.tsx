@@ -5,8 +5,8 @@ import styles from "./landing.module.css";
 import { DemoInquiryForm } from "./demo-inquiry-form";
 
 export const metadata: Metadata = {
-  title: "Kognivon | Enterprise workforce capability SaaS",
-  description: "Kognivon connects enterprise learning, skills, compliance and evidence in a role-aware SaaS platform for workforce capability.",
+  title: "Kognivon | Enterprise Workforce Capability Platform",
+  description: "Kognivon is an Enterprise Workforce Capability Platform connecting learning, skills, compliance, development and workforce readiness in one role-aware SaaS workspace.",
 };
 
 const capabilities = [
@@ -61,14 +61,14 @@ export default function Home() {
           <div className={styles.container}>
             <div className={styles.heroGrid}>
               <div className={styles.heroCopy}>
-                <div className={styles.eyebrow}><span className={styles.eyebrowLine} /> ENTERPRISE LEARNING & WORKFORCE CAPABILITY</div>
-                <h1 id="hero-title">Know where your workforce stands. <span>Build what comes next.</span></h1>
-                <p className={styles.heroLead}>Kognivon is a SaaS platform for the teams responsible for workforce growth and readiness. Connect learning, skills and compliance records so every role can see the work, the evidence and the next decision.</p>
+                <div className={styles.eyebrow}><span className={styles.eyebrowLine} /> ENTERPRISE WORKFORCE CAPABILITY PLATFORM</div>
+                <h1 id="hero-title">Build workforce capability. <span>Prove readiness. Move the enterprise forward.</span></h1>
+                <p className={styles.heroLead}>Kognivon is an Enterprise Workforce Capability Platform that connects learning, skills, compliance, assessments and development in one role-aware SaaS workspace. Give every stakeholder a clear line of sight from role expectations to evidence and the next decision.</p>
                 <div className={styles.heroActions}>
                   <a className={styles.primaryButton} href={inquiriesEnabled ? "#demo" : "#platform"}>{inquiriesEnabled ? "Request a demo" : "Explore the platform"} <ArrowRight size={18} aria-hidden="true" /></a>
                   <a className={styles.secondaryButton} href="#workflow">See how it works <ArrowDownRight size={17} aria-hidden="true" /></a>
                 </div>
-                <div className={styles.heroFootnote}><ShieldCheck size={18} aria-hidden="true" /> Role-aware views. Connected records. Clearer decisions.</div>
+                <div className={styles.heroFootnote}><ShieldCheck size={18} aria-hidden="true" /> Role-aware workspaces. Governed workflows. Connected evidence.</div>
               </div>
               <div className={styles.heroVisual} aria-label="Illustrative Kognivon workspace preview">
                 <div className={styles.previewTop}><div className={styles.previewIdentity}><span className={styles.previewLogo}>K</span><span>Kognivon <small>WORKSPACE PREVIEW</small></span></div><span className={styles.previewSample}>ILLUSTRATIVE VIEW</span></div>
@@ -91,7 +91,14 @@ export default function Home() {
           </div>
         </section>
 
-        <section className={styles.introBand} aria-label="Product proposition"><div className={styles.container}><span>THE IDEA</span><p>Bring learning delivery, capability planning and compliance evidence into one picture of <strong>what your people need</strong> and <strong>what comes next.</strong></p></div></section>
+        <section className={styles.introBand} aria-label="Product proposition"><div className={styles.container}><span>THE CATEGORY</span><p>Kognivon goes beyond a stand-alone LMS. It brings learning delivery, capability planning, assessments and compliance evidence into one enterprise operating picture of <strong>what your workforce needs</strong>, <strong>how readiness is changing</strong> and <strong>what comes next.</strong></p></div></section>
+
+        <section className={styles.enterpriseSignals} aria-label="Enterprise SaaS principles"><div className={styles.container}><div className={styles.signalGrid}>
+          <div><ShieldCheck size={21} aria-hidden="true" /><span><strong>Governed by design</strong><small>Permissions, evidence and accountability stay close to the work.</small></span></div>
+          <div><UsersRound size={21} aria-hidden="true" /><span><strong>Built around roles</strong><small>Learners, managers, L&D and compliance teams see what matters to them.</small></span></div>
+          <div><Globe2 size={21} aria-hidden="true" /><span><strong>Ready for distributed organizations</strong><small>Organize capability work across teams, business units and locations.</small></span></div>
+          <div><FileCheck2 size={21} aria-hidden="true" /><span><strong>Evidence connected</strong><small>Keep learning, assessment, credentials and readiness context together.</small></span></div>
+        </div></div></section>
 
         <section id="platform" className={styles.section} aria-labelledby="platform-title">
           <div className={styles.container}>
@@ -111,7 +118,7 @@ export default function Home() {
         </div></section>
 
         <section id="enterprise" className={styles.enterprise} aria-labelledby="enterprise-title"><div className={styles.container}><div className={styles.enterpriseGrid}>
-          <div><span className={styles.kicker}>BUILT FOR COMPLEX ORGANIZATIONS</span><h2 id="enterprise-title">Make capability visible across the enterprise.</h2><p>Give learning teams, managers, compliance owners and leaders relevant views of the same work. Kognivon connects requirements, delivery and evidence so decisions can be traced back to the underlying records.</p><a href="#platform" className={styles.textLink}>Explore the capabilities <ArrowRight size={17} aria-hidden="true" /></a></div>
+          <div><span className={styles.kicker}>ENTERPRISE CONTROL WITHOUT ENTERPRISE FRICTION</span><h2 id="enterprise-title">Make capability visible, governable and easier to move forward.</h2><p>Give learning teams, managers, compliance owners and leaders relevant views of the same work. Kognivon connects requirements, delivery and evidence so decisions can be traced back to the underlying records without forcing every team into the same workflow.</p><a href="#platform" className={styles.textLink}>Explore the capability system <ArrowRight size={17} aria-hidden="true" /></a></div>
           <div className={styles.enterpriseList}>
             <div><LockKeyhole size={23} aria-hidden="true" /><span><strong>Role-aware workspaces</strong><small>Keep actions and information relevant to the person using them.</small></span></div>
             <div><FileCheck2 size={23} aria-hidden="true" /><span><strong>Evidence in context</strong><small>Connect learning activity to assessments, credentials and compliance records.</small></span></div>
@@ -134,7 +141,7 @@ export default function Home() {
 
         <section className={styles.closing} aria-labelledby="closing-title"><div className={styles.container}><div className={styles.closingInner}><div><span className={styles.kicker}>THE NEXT STEP</span><h2 id="closing-title">See the whole picture.<br />Move people forward.</h2><p>{inquiriesEnabled ? "Request a conversation about your needs, or enter your workspace when you have access." : "Review the connected workflow, then enter your workspace when you have access."}</p></div><div className={styles.closingActions}><a className={styles.lightButton} href={inquiriesEnabled ? "#demo" : "#questions"}>{inquiriesEnabled ? "Request a conversation" : "Review evaluation questions"} <ArrowRight size={18} aria-hidden="true" /></a><Link href="/login">Already have access? Sign in <ChevronRight size={16} aria-hidden="true" /></Link></div></div></div></section>
       </main>
-      <footer className={styles.footer}><div className={styles.container}><div className={styles.footerTop}><Link className={styles.brand} href="/" aria-label="Kognivon home"><span className={styles.brandMark} aria-hidden="true"><span>K</span></span><span>Kognivon<span className={styles.brandPeriod}>.</span></span></Link><p>Learning, capability and evidence in one connected workspace.</p><div><a href="#platform">Platform</a><a href="#workflow">Workflow</a><a href="#roles">For teams</a><a href="#questions">Questions</a>{inquiriesEnabled && <a href="#demo">Request a demo</a>}<Link href="/login">Sign in</Link></div></div><div className={styles.footerBottom}><span>© {new Date().getFullYear()} Kognivon</span><span>Workforce capability, with clarity.</span></div></div></footer>
+      <footer className={styles.footer}><div className={styles.container}><div className={styles.footerTop}><Link className={styles.brand} href="/" aria-label="Kognivon home"><span className={styles.brandMark} aria-hidden="true"><span>K</span></span><span>Kognivon<span className={styles.brandPeriod}>.</span></span></Link><p>Enterprise workforce capability, delivered through one connected SaaS workspace.</p><div><a href="#platform">Platform</a><a href="#workflow">Workflow</a><a href="#roles">For teams</a><a href="#questions">Questions</a>{inquiriesEnabled && <a href="#demo">Request a demo</a>}<Link href="/login">Sign in</Link></div></div><div className={styles.footerBottom}><span>© {new Date().getFullYear()} Kognivon</span><span>Workforce capability, with clarity.</span></div></div></footer>
     </div>
   );
 }

@@ -7,8 +7,8 @@ const geistSans = localFont({ src: "./fonts/Geist-Latin.woff2", variable: "--fon
 const geistMono = localFont({ src: "./fonts/GeistMono-Latin.woff2", variable: "--font-geist-mono", weight: "100 900", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Kognivon | Learning Intelligence", template: "%s · Kognivon" },
-  description: "Enterprise learning, compliance, skills and workforce capability platform.",
+  title: { default: "Kognivon | Enterprise Workforce Capability Platform", template: "%s · Kognivon" },
+  description: "Enterprise Workforce Capability Platform connecting learning, skills, compliance, development and workforce readiness in one SaaS workspace.",
   applicationName: "Kognivon",
 };
 

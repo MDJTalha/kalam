@@ -38,7 +38,7 @@ $env:ALLOWED_HOSTS = "localhost,127.0.0.1"
 
 Push-Location apps/api
 try {
-.\.venv\Scripts\python.exe -m alembic current --check-heads
+.\.venv\Scripts\python.exe scripts\check_migration_head.py
 Assert-Exit "alembic current at all heads"
 .\.venv\Scripts\python.exe -m ruff check app tests
 Assert-Exit "api ruff"

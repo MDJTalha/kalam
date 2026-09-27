@@ -9,6 +9,8 @@ TENANT="demo-corporation"
 ADMIN={"email":"admin@demo.corp","password":"DemoOnly!1234"}
 COOKIE="corp_lms_session"
 DEBUG_PORT=os.getenv("BROWSER_DEBUG_PORT", "9222")
+WEB_BASE_URL=os.getenv("CERT_WEB_BASE_URL", "http://127.0.0.1:3000").rstrip("/")
+AUTH_URL=os.getenv("CERT_AUTH_URL", "http://127.0.0.1:8000/api/v1/auth/login")
 ALIASES = {
     "/dashboard/instructor": {"/dashboard/instructor", "/dashboard/sessions"},
     "/dashboard/instructors": {"/dashboard/instructors", "/dashboard/sessions"},
@@ -41,8 +43,8 @@ async def call(ws, ident, method, params=None):
         if item.get("id")==ident:
             return ident,item
 async def main():
-    async with httpx.AsyncClient(base_url="http://127.0.0.1:8000") as c:
-        r=await c.post("/api/v1/auth/login",json={"tenant_slug":TENANT,**ADMIN})
+    async with httpx.AsyncClient(timeout=30.0) as c:
+        r=await c.post(AUTH_URL,json={"tenant_slug":TENANT,**ADMIN})
         r.raise_for_status()
         cookie=c.cookies.get(COOKIE)
     targets=json.load(urllib.request.urlopen(f"http://127.0.0.1:{DEBUG_PORT}/json"))
@@ -50,13 +52,13 @@ async def main():
     async with websockets.connect(page["webSocketDebuggerUrl"],max_size=20_000_000) as ws:
         ident,_=await call(ws,0,"Network.enable")
         ident,_=await call(ws,ident,"Runtime.enable")
-        ident,_=await call(ws,ident,"Network.setCookie",{"name":COOKIE,"value":cookie,"domain":"127.0.0.1","path":"/"})
+        ident,_=await call(ws,ident,"Network.setCookie",{"name":COOKIE,"value":cookie,"url":WEB_BASE_URL})
         failures=[]
         results=[]
         for width,height,label in [(1440,1000,"desktop"),(390,844,"mobile")]:
             ident,_=await call(ws,ident,"Emulation.setDeviceMetricsOverride",{"width":width,"height":height,"deviceScaleFactor":1,"mobile":width<600})
             for route in ROUTES:
-                ident,_=await call(ws,ident,"Page.navigate",{"url":"http://127.0.0.1:3000"+route})
+                ident,_=await call(ws,ident,"Page.navigate",{"url":WEB_BASE_URL+route})
                 await asyncio.sleep(0.9)
                 expr="""(() => {
                   const fields=[...document.querySelectorAll('input,select,textarea')];

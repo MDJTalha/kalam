@@ -39,7 +39,12 @@ $migrationExit = docker inspect $MigrateContainer --format "{{.State.ExitCode}}"
 if ($LASTEXITCODE -ne 0 -or $migrationExit.Trim() -ne "0") {
   throw "Migration service did not exit successfully."
 }
+$migrationImage = docker inspect $MigrateContainer --format "{{.Image}}"
+if ($LASTEXITCODE -ne 0) { throw "Could not inspect migration image." }
 $apiImage = docker inspect $ApiContainer --format "{{.Image}}"
+if ($migrationImage.Trim() -ne $apiImage.Trim()) {
+  throw "Migration image differs from the API release image."
+}
 $webContainer = $ApiContainer -replace "-api-", "-web-"
 $webImage = docker inspect $webContainer --format "{{.Image}}"
 if ($LASTEXITCODE -ne 0) { throw "Could not inspect web image." }
