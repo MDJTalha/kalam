@@ -8,12 +8,78 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
-from app.db.models import ComplianceAssignment, Course, CourseCategory, CourseContentVersion, CourseModule, CourseSkill, Enrollment, Lesson, LessonProgress, OrgUnit, User, UserSkill
+from app.db.models import ComplianceAssignment, Course, CourseCategory, CourseContentVersion, CourseModule, CourseSkill, Enrollment, FileObject, Lesson, LessonProgress, OrgUnit, User, UserSkill
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.notifications import create_notification
 
 router = APIRouter()
+
+
+LESSON_BLOCK_TYPES = {"heading", "paragraph", "bullets", "numbered", "callout", "image", "video", "file", "link", "divider"}
+LESSON_CALL_OUT_VARIANTS = {"info", "success", "warning", "important"}
+
+
+def validate_http_url(value: object) -> bool:
+    if not isinstance(value, str) or len(value) > 2000:
+        return False
+    parsed = urlparse(value.strip())
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+async def validate_lesson_content(
+    db: AsyncSession,
+    *,
+    tenant_id: UUID,
+    content_type: str,
+    content: dict,
+) -> None:
+    if not isinstance(content, dict):
+        raise HTTPException(status_code=422, detail="Lesson content must be an object")
+    if content_type != "rich_text":
+        if not validate_http_url(content.get("url")):
+            raise HTTPException(status_code=422, detail="Lesson resource must use a valid http(s) URL")
+        return
+    blocks = content.get("blocks")
+    if not isinstance(blocks, list) or not blocks or len(blocks) > 80:
+        legacy_body = content.get("body")
+        if isinstance(legacy_body, str) and legacy_body.strip():
+            return
+        raise HTTPException(status_code=422, detail="Structured lessons require 1 to 80 content blocks")
+    file_ids: list[UUID] = []
+    for index, block in enumerate(blocks, start=1):
+        if not isinstance(block, dict) or block.get("type") not in LESSON_BLOCK_TYPES:
+            raise HTTPException(status_code=422, detail=f"Invalid lesson block at position {index}")
+        block_type = block["type"]
+        text = block.get("text")
+        if block_type in {"heading", "paragraph", "bullets", "numbered", "callout", "link"} and (
+            not isinstance(text, str) or not text.strip()
+        ):
+            raise HTTPException(status_code=422, detail=f"Lesson block {index} requires text")
+        if block_type == "heading" and block.get("level") not in {2, 3, 4, None}:
+            raise HTTPException(status_code=422, detail=f"Heading block {index} has an invalid level")
+        if block_type == "callout" and block.get("variant") not in LESSON_CALL_OUT_VARIANTS | {None}:
+            raise HTTPException(status_code=422, detail=f"Callout block {index} has an invalid style")
+        if block_type in {"image", "file"}:
+            file_id = block.get("file_id")
+            if file_id:
+                try:
+                    file_ids.append(UUID(str(file_id)))
+                except ValueError as exc:
+                    raise HTTPException(status_code=422, detail=f"Lesson block {index} contains an invalid file reference") from exc
+            elif not validate_http_url(block.get("url")):
+                raise HTTPException(status_code=422, detail=f"Lesson block {index} requires a file reference or valid URL")
+        if block_type in {"video", "link"} and not validate_http_url(block.get("url")):
+            raise HTTPException(status_code=422, detail=f"Lesson block {index} requires a valid URL")
+    if file_ids:
+        result = await db.execute(select(FileObject.id).where(
+            FileObject.tenant_id == tenant_id,
+            FileObject.id.in_(list(dict.fromkeys(file_ids))),
+            FileObject.status == "available",
+        ))
+        available = set(result.scalars().all())
+        if available != set(file_ids):
+            raise HTTPException(status_code=422, detail="One or more referenced learning files are unavailable")
 
 
 def normalize_tags(tags: list[str]) -> list[str]:
@@ -98,6 +164,9 @@ class ModuleUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=2, max_length=240)
     description: str | None = None
     position: int | None = Field(default=None, ge=1)
+
+class PositionUpdate(BaseModel):
+    position: int = Field(ge=1, le=1000)
 
 class CourseOut(BaseModel):
     id: UUID
@@ -316,6 +385,7 @@ async def course_detail(
         .order_by(CourseModule.position.asc())
     )
     modules = list(modules_result.scalars().all())
+    can_view_content = can_manage or (enrollment is not None and enrollment.status in {"enrolled", "in_progress", "completed"})
     payload = []
     for module in modules:
         lessons_result = await db.execute(
@@ -334,7 +404,7 @@ async def course_detail(
                         "id": str(lesson.id),
                         "title": lesson.title,
                         "content_type": lesson.content_type,
-                        "content": lesson.content,
+                        "content": lesson.content if can_view_content else {},
                         "position": lesson.position,
                     }
                     for lesson in lessons_result.scalars().all()
@@ -539,6 +609,12 @@ async def create_lesson(
     )
     if module is None:
         raise HTTPException(status_code=404, detail="Module not found")
+    await validate_lesson_content(
+        db,
+        tenant_id=user.tenant_id,
+        content_type=payload.content_type,
+        content=payload.content,
+    )
     lesson_values = payload.model_dump(exclude={"change_note"})
     lesson = Lesson(module_id=module.id, **lesson_values)
     db.add(lesson)
@@ -554,6 +630,60 @@ async def create_lesson(
     await db.commit()
     return {"id": str(lesson.id), "title": lesson.title, "position": lesson.position, "content_type": lesson.content_type}
 
+
+
+@router.patch("/{course_id}/modules/{module_id}/position", response_model=dict)
+async def move_module(
+    course_id: UUID,
+    module_id: UUID,
+    payload: PositionUpdate,
+    user: User = Depends(require_permission("courses.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    course = await db.scalar(select(Course).where(Course.id == course_id, Course.tenant_id == user.tenant_id))
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course not found")
+    result = await db.execute(select(CourseModule).where(CourseModule.course_id == course_id).order_by(CourseModule.position.asc()))
+    modules = list(result.scalars().all())
+    moving = next((item for item in modules if item.id == module_id), None)
+    if moving is None:
+        raise HTTPException(status_code=404, detail="Module not found")
+    if payload.position > len(modules):
+        raise HTTPException(status_code=422, detail="Target position exceeds module count")
+    ordered = [item for item in modules if item.id != module_id]
+    ordered.insert(payload.position - 1, moving)
+    for position, item in enumerate(ordered, start=1):
+        item.position = position
+    await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="course.module.reordered", entity_type="course_module", entity_id=str(module_id), metadata={"course_id": str(course_id), "position": payload.position})
+    await db.commit()
+    return {"status": "reordered", "module_id": str(module_id), "position": payload.position}
+
+@router.patch("/{course_id}/modules/{module_id}/lessons/{lesson_id}/position", response_model=dict)
+async def move_lesson(
+    course_id: UUID,
+    module_id: UUID,
+    lesson_id: UUID,
+    payload: PositionUpdate,
+    user: User = Depends(require_permission("courses.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    module = await db.scalar(select(CourseModule).join(Course).where(CourseModule.id == module_id, Course.id == course_id, Course.tenant_id == user.tenant_id))
+    if module is None:
+        raise HTTPException(status_code=404, detail="Module not found")
+    result = await db.execute(select(Lesson).where(Lesson.module_id == module_id).order_by(Lesson.position.asc()))
+    lessons = list(result.scalars().all())
+    moving = next((item for item in lessons if item.id == lesson_id), None)
+    if moving is None:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    if payload.position > len(lessons):
+        raise HTTPException(status_code=422, detail="Target position exceeds lesson count")
+    ordered = [item for item in lessons if item.id != lesson_id]
+    ordered.insert(payload.position - 1, moving)
+    for position, item in enumerate(ordered, start=1):
+        item.position = position
+    await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="lesson.reordered", entity_type="lesson", entity_id=str(lesson_id), metadata={"course_id": str(course_id), "module_id": str(module_id), "position": payload.position})
+    await db.commit()
+    return {"status": "reordered", "lesson_id": str(lesson_id), "position": payload.position}
 
 @router.patch("/{course_id}/modules/{module_id}", response_model=dict)
 async def update_module(
@@ -604,6 +734,13 @@ async def update_lesson(
     values = payload.model_dump(exclude_unset=True)
     change_note = values.pop("change_note", None)
     content_changed = any(field in values for field in ("title", "content_type", "content"))
+    if content_changed:
+        await validate_lesson_content(
+            db,
+            tenant_id=user.tenant_id,
+            content_type=values.get("content_type", lesson.content_type),
+            content=values.get("content", lesson.content),
+        )
     for field, value in values.items():
         setattr(lesson, field, value)
     if content_changed:
@@ -613,6 +750,73 @@ async def update_lesson(
     await db.refresh(lesson)
     return {"id": str(lesson.id), "title": lesson.title, "content_type": lesson.content_type, "content": lesson.content, "position": lesson.position}
 
+
+
+@router.delete("/{course_id}/modules/{module_id}", response_model=dict)
+async def delete_module(
+    course_id: UUID,
+    module_id: UUID,
+    user: User = Depends(require_permission("courses.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    module = await db.scalar(
+        select(CourseModule).join(Course).where(
+            CourseModule.id == module_id,
+            Course.id == course_id,
+            Course.tenant_id == user.tenant_id,
+        )
+    )
+    if module is None:
+        raise HTTPException(status_code=404, detail="Module not found")
+    lessons_result = await db.execute(select(Lesson).where(Lesson.module_id == module.id))
+    lessons = list(lessons_result.scalars().all())
+    for lesson in lessons:
+        await db.delete(lesson)
+    await db.delete(module)
+    remaining_result = await db.execute(
+        select(CourseModule).where(CourseModule.course_id == course_id).order_by(CourseModule.position.asc())
+    )
+    for position, remaining in enumerate(remaining_result.scalars().all(), start=1):
+        remaining.position = position
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id,
+        action="course.module.deleted", entity_type="course_module", entity_id=str(module_id),
+        metadata={"lesson_count": len(lessons)},
+    )
+    await db.commit()
+    return {"id": str(module_id), "deleted": True, "lesson_count": len(lessons)}
+
+@router.delete("/{course_id}/modules/{module_id}/lessons/{lesson_id}", response_model=dict)
+async def delete_lesson(
+    course_id: UUID,
+    module_id: UUID,
+    lesson_id: UUID,
+    user: User = Depends(require_permission("courses.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    lesson = await db.scalar(
+        select(Lesson).join(CourseModule, CourseModule.id == Lesson.module_id).join(Course).where(
+            Lesson.id == lesson_id,
+            CourseModule.id == module_id,
+            Course.id == course_id,
+            Course.tenant_id == user.tenant_id,
+        )
+    )
+    if lesson is None:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    await db.delete(lesson)
+    remaining_result = await db.execute(
+        select(Lesson).where(Lesson.module_id == module_id).order_by(Lesson.position.asc())
+    )
+    for position, remaining in enumerate(remaining_result.scalars().all(), start=1):
+        remaining.position = position
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id,
+        action="lesson.deleted", entity_type="lesson", entity_id=str(lesson_id),
+        metadata={"module_id": str(module_id)},
+    )
+    await db.commit()
+    return {"id": str(lesson_id), "deleted": True}
 
 @router.get("/{course_id}/modules/{module_id}/lessons/{lesson_id}/versions", response_model=list[ContentVersionOut])
 async def list_lesson_versions(
@@ -693,15 +897,15 @@ async def publish_course(
         CourseModule.course_id == course.id,
     ))
     for lesson in result.scalars().all():
-        content = lesson.content or {}
-        if lesson.content_type == "rich_text":
-            valid = isinstance(content.get("body"), str) and bool(content["body"].strip())
-        else:
-            url = content.get("url")
-            parsed = urlparse(url) if isinstance(url, str) else None
-            valid = bool(parsed and parsed.scheme in ("http", "https") and parsed.netloc)
-        if not valid:
-            raise HTTPException(status_code=422, detail=f"Complete the content for lesson '{lesson.title}' before publishing")
+        try:
+            await validate_lesson_content(
+                db,
+                tenant_id=user.tenant_id,
+                content_type=lesson.content_type,
+                content=lesson.content or {},
+            )
+        except HTTPException as exc:
+            raise HTTPException(status_code=422, detail=f"Complete the content for lesson '{lesson.title}': {exc.detail}") from exc
     course.status = "published"
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="course.published", entity_type="course", entity_id=str(course.id))
     await db.commit()

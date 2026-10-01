@@ -158,7 +158,11 @@ def test_ai_query_returns_citations_for_authorized_evidence(monkeypatch):
             )
         ]
 
+    async def fake_authorized_sources(user, db, question, course_id, top_k=8, max_context_chars=18000):
+        return await fake_capability_sources(user, db, top_k=top_k)
+
     monkeypatch.setattr(ai_route, "_generate", fake_generate)
+    monkeypatch.setattr(ai_route, "retrieve_authorized_sources", fake_authorized_sources)
     monkeypatch.setattr(ai_route, "retrieve_capability_sources", fake_capability_sources)
     with TestClient(app, base_url="http://localhost") as client:
         admin = {"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": "DemoOnly!1234"}

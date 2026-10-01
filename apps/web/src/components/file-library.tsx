@@ -22,7 +22,7 @@ export function FileLibrary({initial}:{initial:FileItem[]}){
       {message&&<Notice kind={message.startsWith("File")?"success":"error"}>{message}</Notice>}
     </SectionCard>
     <SectionCard eyebrow="Tenant library" title="Content files" meta={items.length+" records"}>
-      <div className="table-wrap"><table className="data-table"><thead><tr><th>File</th><th>Type</th><th>Size</th><th>Status</th><th>Created</th></tr></thead><tbody>{items.map(item=><tr key={item.id}><td><strong>{item.name}</strong><small>{item.id}</small></td><td>{item.mime_type}</td><td>{Math.round(item.size_bytes/1024)} KB</td><td><StatusBadge status={item.status}/></td><td>{new Date(item.created_at).toLocaleString()}</td></tr>)}</tbody></table></div>
+      <div className="table-wrap"><table className="data-table"><thead><tr><th scope="col">File</th><th scope="col">Type</th><th scope="col">Size</th><th scope="col">Status</th><th scope="col">Created</th></tr></thead><tbody>{items.map(item=><tr key={item.id}><td><strong>{item.name}</strong><small>{item.id}</small></td><td>{item.mime_type}</td><td>{Math.round(item.size_bytes/1024)} KB</td><td><StatusBadge status={item.status}/></td><td>{new Date(item.created_at).toLocaleString()}</td></tr>)}</tbody></table></div>
       {!items.length&&<div className="empty-state"><FileArchive size={25}/><p>No content files uploaded yet.</p></div>}
     </SectionCard>
   </>;

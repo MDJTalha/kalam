@@ -18,6 +18,7 @@ Status: Phase 0 baseline
 | ADR-011 | Standards boundary for LTI/xAPI/SCORM/cmi5 | Accepted |
 | ADR-012 | OIDC-first SSO with adapter boundary | Accepted |
 | ADR-013 | Containerized production topology behind reverse proxy | Accepted |
+| ADR-014 | Kalam brand architecture and identity system | Accepted |
 
 ## Rules
 ADRs capture durable architectural choices, alternatives considered and consequences.

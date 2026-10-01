@@ -12,9 +12,9 @@ A phase may remain IN PROGRESS when deployment-dependent evidence is still open.
 The LMS has completed substantial enterprise functionality across identity, learning, assessments, L&D, compliance/skills, analytics/integrations and governed-AI foundation work. Later-phase deployment prerequisites remain independent of the Phase 2 local gate.
 
 ## Phase 0 — Foundation
-Status: **CLOSED — local evidence gate passed**
+Status: **CLOSED — current-tree local foundation gate passed on 2026-09-28; hosted CI evidence remains external**
 
-Evidence includes environment baseline, PostgreSQL/Alembic foundation, API/web structure and local quality gates.
+Current evidence includes the Phase 0 document/repository baseline, expanded requirements traceability, canonical environment validation, PostgreSQL/Valkey/ClamAV readiness, Alembic at head, Ruff, mypy, **112 passing API tests**, web TypeScript/ESLint, and a successful **75-route** production build through `npm run validate:phase0`. No Git remote is configured, so hosted CI for the exact candidate remains an external evidence dependency rather than an unresolved local engineering gap.
 
 ## Phase 1 — Identity, tenancy and core platform
 Status: **CLOSED — local evidence gate passed**

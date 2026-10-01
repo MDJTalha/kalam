@@ -23,7 +23,13 @@ def test_inquiry_requires_explicit_consent_and_valid_work_email():
         InquiryCreate(**base, consent=False)
     with pytest.raises(ValidationError):
         InquiryCreate(**{**base, "work_email": "invalid"}, consent=True)
-    assert InquiryCreate(**base, consent=True).organization == "Acme"
+    payload = InquiryCreate(**base, consent=True, country_code="pk", country_name="Pakistan",
+                            primary_objective="Skills & capability management")
+    assert payload.organization == "Acme"
+    assert payload.country_code == "PK"
+    assert payload.primary_objective == "Skills & capability management"
+    with pytest.raises(ValidationError):
+        InquiryCreate(**{**base, "work_email": "ada@gmail.com"}, consent=True)
 
 
 @pytest.mark.asyncio

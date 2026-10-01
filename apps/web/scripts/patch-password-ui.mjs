@@ -1,0 +1,12 @@
+import fs from "node:fs";
+const p="src/components/reset-password-form.tsx";
+let s=fs.readFileSync(p,"utf8");
+s=s.replace('<label>New password<input type="password" minLength={12} required value={password}', '<label>New password<input type="password" minLength={12} required value={password}');
+s=s.replace('<label>Confirm password<input', '<small className="field-hint">12+ characters with uppercase, lowercase, number, and special character.</small>\n      <label>Confirm password<input');
+fs.writeFileSync(p,s);
+const q="src/components/settings-center.tsx";
+let t=fs.readFileSync(q,"utf8");
+t=t.replace('<label><span>New password</span><input type="password"', '<label><span>New password</span><input type="password"');
+t=t.replace('<label><span>Confirm new password</span><input type="password"', '<label><span>Confirm new password</span><input type="password"');
+fs.writeFileSync(q,t);
+console.log("PASSWORD_UI_UPDATED");

@@ -29,7 +29,7 @@ class IntegrationUpsert(BaseModel):
 
 @router.get("")
 async def list_integrations(
-    user: User = Depends(require_permission("tenant.read")),
+    user: User = Depends(require_permission("integrations.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(

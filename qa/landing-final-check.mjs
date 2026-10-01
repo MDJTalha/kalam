@@ -23,7 +23,7 @@ await send("Page.enable");
 await send("Runtime.enable");
 const axe = await fs.readFile("C:/Projects/CorpLMS/node_modules/axe-core/axe.min.js", "utf8");
 await send("Page.addScriptToEvaluateOnNewDocument", { source: axe });
-for (const width of [1440]) {
+for (const width of [320, 390, 768, 1440]) {
   await send("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: width < 900 });
   await send("Page.navigate", { url: "http://127.0.0.1:3000/" });
   await new Promise(resolve => setTimeout(resolve, 1500));

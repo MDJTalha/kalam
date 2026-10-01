@@ -16,7 +16,9 @@ COPY apps/web/public apps/web/public
 COPY apps/web/src apps/web/src
 WORKDIR /app/apps/web
 ARG API_ORIGIN=http://localhost:8000
+ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ENV API_ORIGIN=$API_ORIGIN
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run typecheck
 RUN npm run lint

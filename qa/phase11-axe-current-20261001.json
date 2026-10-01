@@ -1,0 +1,3041 @@
+{
+  "checks": 12,
+  "results": [
+    {
+      "viewport": "desktop",
+      "route": "/dashboard",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 57,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(1) > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #70849a, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(1) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 7.1pt (9.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(2) > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #70849a, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 7.1pt (9.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(4) > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #70849a, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(4) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 7.1pt (9.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "span:nth-child(1) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #7b8d9e, background color: #f8fbfe, font size: 6.4pt (8.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "span:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #7b8d9e, background color: #f8fbfe, font size: 6.4pt (8.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(2) > div:nth-child(2) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.83 (foreground color: #71849a, background color: #ffffff, font size: 6.4pt (8.5px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(2) > div:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 6.4pt (8.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(3) > div:nth-child(2) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.83 (foreground color: #71849a, background color: #ffffff, font size: 6.4pt (8.5px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(3) > div:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 6.4pt (8.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-summary > span:nth-child(1)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.19 (foreground color: #8192a2, background color: #ffffff, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-summary > span:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.19 (foreground color: #8192a2, background color: #ffffff, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-summary > span:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.19 (foreground color: #8192a2, background color: #ffffff, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-ranges > button[type=\"button\"]:nth-child(1)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #7b8d9e, background color: #f8fbfe, font size: 6.0pt (8px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-ranges > button[type=\"button\"]:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #7b8d9e, background color: #f8fbfe, font size: 6.0pt (8px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-labels > button[type=\"button\"]:nth-child(1)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-labels > button[type=\"button\"]:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-labels > button[type=\"button\"]:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(4)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(5)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(6)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(7)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(8)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(9)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(10)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(11)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(12)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.9pt (6.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "link-name",
+          "impact": "serious",
+          "description": "Ensure links have discernible text",
+          "node_count": 3,
+          "nodes": [
+            {
+              "target": [
+                ".executive-attention-risk > a[href$=\"compliance\"]"
+              ],
+              "summary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(2) > a[href$=\"skills\"]"
+              ],
+              "summary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(3) > a[href$=\"analytics\"]"
+              ],
+              "summary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "nested-interactive",
+          "impact": "serious",
+          "description": "Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".dashboard-chart-plot"
+              ],
+              "summary": "Fix any of the following:\n  Element has focusable descendants"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".dashboard-chart-ranges"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        },
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 2,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            },
+            {
+              "target": [
+                ".profile-chip"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"account-menu-panel\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 64,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(2) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(3) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Teams\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Organization\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(4) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Catalog\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Paths\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Programs & Cohorts\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Live Sessions\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Course Studio\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"L&D Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(5) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Skills & Capabilities\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Framework\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Development Plans\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Gaps\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Risk\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(6) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessment Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Credentials\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Certificate Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(7) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance & Readiness\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Evidence Repository\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 36
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/compliance",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 2,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            },
+            {
+              "target": [
+                ".profile-chip"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"account-menu-panel\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 48,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(2) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Overview\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(3) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Teams\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Organization\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(4) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Catalog\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Paths\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Programs & Cohorts\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Live Sessions\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Course Studio\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"L&D Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(5) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Skills & Capabilities\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Framework\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Development Plans\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Gaps\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Risk\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(6) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessment Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Credentials\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Certificate Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(7) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Evidence Repository\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 35
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/compliance/admin",
+      "violations": [
+        {
+          "id": "aria-required-children",
+          "impact": "critical",
+          "description": "Ensure elements with an ARIA role that require child roles contain them",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".lookup-multi-options"
+              ],
+              "summary": "Fix any of the following:\n  Required ARIA children role not present: group, option"
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 3,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".form-field:nth-child(5) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3 (foreground color: #8b96a3, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".form-field:nth-child(7) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3 (foreground color: #8b96a3, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                "div[aria-label=\"Filter assignments\"]"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        },
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 2,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            },
+            {
+              "target": [
+                ".profile-chip"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"account-menu-panel\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 48,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(2) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Overview\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(3) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Teams\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Organization\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(4) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Catalog\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Paths\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Programs & Cohorts\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Live Sessions\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Course Studio\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"L&D Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(5) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Skills & Capabilities\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Framework\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Development Plans\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Gaps\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Risk\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(6) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessment Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Credentials\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Certificate Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(7) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance & Readiness\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Evidence Repository\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 45
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/catalog",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".learner-catalog-stat"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        },
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 2,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            },
+            {
+              "target": [
+                ".profile-chip"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"account-menu-panel\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 51,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(2) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Overview\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(3) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Teams\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Organization\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(4) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Paths\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Programs & Cohorts\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Live Sessions\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Course Studio\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"L&D Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(5) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Skills & Capabilities\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Framework\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Development Plans\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Gaps\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Risk\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(6) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessment Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Credentials\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Certificate Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(7) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance & Readiness\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Evidence Repository\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 38
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/people",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 3,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".people-filter-state"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.27 (foreground color: #80909f, background color: #ffffff, font size: 5.6pt (7.5px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".people-filter-result > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.18 (foreground color: #8392a1, background color: #ffffff, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 2,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            },
+            {
+              "target": [
+                ".profile-chip"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"account-menu-panel\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 51,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(2) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Overview\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(3) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Teams\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Organization\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(4) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Catalog\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Paths\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Programs & Cohorts\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Live Sessions\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Course Studio\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"L&D Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(5) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Skills & Capabilities\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Framework\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Development Plans\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Gaps\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Risk\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(6) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessment Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Credentials\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Certificate Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(7) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance & Readiness\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Evidence Repository\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 44
+    },
+    {
+      "viewport": "desktop",
+      "route": "/dashboard/settings",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 36,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-detail-grid > div:nth-child(1) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(1) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-detail-grid > div:nth-child(2) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-detail-grid > div:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(3) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(3) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(4) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-detail-grid > div:nth-child(4) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(5) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(5) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(6) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(6) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "label:nth-child(1) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.36 (foreground color: #7d8ea0, background color: #ffffff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "label:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.36 (foreground color: #7d8ea0, background color: #ffffff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".selected > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.56 (foreground color: #73869a, background color: #f5faff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "fieldset > label:nth-child(3) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #73869a, background color: #ffffff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#preferences > .settings-switch > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(1) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".locked > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.52 (foreground color: #73869a, background color: #f6f8fb, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(3) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".notification-preference-grid > .settings-switch:nth-child(4) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(5) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(6) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(7) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(8) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(9) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#notifications > .settings-action-row > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.05 (foreground color: #6b7f93, background color: #fbfdff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(1) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(2) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 2,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            },
+            {
+              "target": [
+                ".profile-chip"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"account-menu-panel\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 49,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(2) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Overview\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(3) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Teams\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Organization\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"People Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(4) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Catalog\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Learning Paths\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Programs & Cohorts\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Live Sessions\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Course Studio\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"L&D Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(5) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Skills & Capabilities\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Framework\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Development Plans\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Gaps\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Risk\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(6) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Assessment Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Capability Assessments\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Credentials\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Certificate Administration\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".nav-group:nth-child(7) > .nav-group-toggle[type=\"button\"] > .nav-label"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance & Readiness\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "a[aria-label=\"Compliance Operations\"] > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 40
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 57,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(1) > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #70849a, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(1) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 7.1pt (9.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(2) > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #70849a, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 7.1pt (9.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(4) > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #70849a, background color: #ffffff, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-kpi:nth-child(4) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 7.1pt (9.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "span:nth-child(1) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #7b8d9e, background color: #f8fbfe, font size: 6.4pt (8.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "span:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #7b8d9e, background color: #f8fbfe, font size: 6.4pt (8.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(2) > div:nth-child(2) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.83 (foreground color: #71849a, background color: #ffffff, font size: 6.4pt (8.5px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(2) > div:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 6.4pt (8.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(3) > div:nth-child(2) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.83 (foreground color: #71849a, background color: #ffffff, font size: 6.4pt (8.5px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(3) > div:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.41 (foreground color: #7b8d9e, background color: #ffffff, font size: 6.4pt (8.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-summary > span:nth-child(1)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.19 (foreground color: #8192a2, background color: #ffffff, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-summary > span:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.19 (foreground color: #8192a2, background color: #ffffff, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-summary > span:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.19 (foreground color: #8192a2, background color: #ffffff, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-ranges > button[type=\"button\"]:nth-child(1)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #7b8d9e, background color: #f8fbfe, font size: 6.0pt (8px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-ranges > button[type=\"button\"]:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #7b8d9e, background color: #f8fbfe, font size: 6.0pt (8px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-labels > button[type=\"button\"]:nth-child(1)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-labels > button[type=\"button\"]:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".dashboard-chart-labels > button[type=\"button\"]:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(4)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(5)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(6)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(7)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(8)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(9)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(10)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(11)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[type=\"button\"]:nth-child(12)"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.51 (foreground color: #97a5b3, background color: #ffffff, font size: 4.5pt (6px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "link-name",
+          "impact": "serious",
+          "description": "Ensure links have discernible text",
+          "node_count": 3,
+          "nodes": [
+            {
+              "target": [
+                ".executive-attention-risk > a[href$=\"compliance\"]"
+              ],
+              "summary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(2) > a[href$=\"skills\"]"
+              ],
+              "summary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            },
+            {
+              "target": [
+                ".executive-attention-card:nth-child(3) > a[href$=\"analytics\"]"
+              ],
+              "summary": "Fix all of the following:\n  Element is in tab order and does not have accessible text\n\nFix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute"
+            }
+          ]
+        },
+        {
+          "id": "nested-interactive",
+          "impact": "serious",
+          "description": "Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".dashboard-chart-plot"
+              ],
+              "summary": "Fix any of the following:\n  Element has focusable descendants"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".dashboard-chart-ranges"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        },
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 18,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".sidebar-mobile-toggle > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#dashboard-command-title"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".dashboard-command-copy > p"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-head > div > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#executive-snapshot-title"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-kpi-risk > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-kpi-risk > strong"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-kpi-risk > small"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-attention-risk > div:nth-child(2) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-attention-risk > div:nth-child(2) > strong"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-attention-risk > div:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-leadership-footer > div:nth-child(1) > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-leadership-footer > div:nth-child(1) > h2"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-leadership-footer > div:nth-child(1) > p"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-leadership-actions > a[href$=\"analytics\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-leadership-actions > a[href$=\"skills\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".executive-leadership-actions > a[href$=\"compliance\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 35
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/compliance",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 2,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".sidebar-mobile-toggle > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 34
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/compliance/admin",
+      "violations": [
+        {
+          "id": "aria-required-children",
+          "impact": "critical",
+          "description": "Ensure elements with an ARIA role that require child roles contain them",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".lookup-multi-options"
+              ],
+              "summary": "Fix any of the following:\n  Required ARIA children role not present: group, option"
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 3,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".form-field:nth-child(5) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3 (foreground color: #8b96a3, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".form-field:nth-child(7) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3 (foreground color: #8b96a3, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                "div[aria-label=\"Filter assignments\"]"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        },
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 57,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".sidebar-mobile-toggle > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".section-heading.compact > div:nth-child(2) > .action-stack > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(1) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(2) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(3) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(4) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(5) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(6) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(7) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(8) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(9) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(10) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(11) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(12) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                ".compact-row:nth-child(13) > .button-row > .action-stack:nth-child(2) > button[type=\"button\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+            },
+            {
+              "target": [
+                "th:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "th:nth-child(4)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(1) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(2) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(3) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(4) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(5) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(6) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(7) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(8) > td:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(8) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(9) > td:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(9) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(10) > td:nth-child(2)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            }
+          ]
+        }
+      ],
+      "passes": 45
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/catalog",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "description": "Ensure ARIA attributes are not prohibited for an element's role",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".learner-catalog-stat"
+              ],
+              "summary": "Fix all of the following:\n  aria-label attribute is not well supported on a div with no valid role attribute."
+            }
+          ]
+        },
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 5,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".sidebar-mobile-toggle > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".learner-catalog-heading > div:nth-child(1) > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#learner-catalog-title"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "div:nth-child(1) > p"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 37
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/people",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 3,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".people-filter-state"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.27 (foreground color: #80909f, background color: #ffffff, font size: 5.6pt (7.5px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".people-filter-result > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.18 (foreground color: #8392a1, background color: #ffffff, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 16,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".sidebar-mobile-toggle > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".people-filter-heading > div > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".people-filter-heading > div > strong"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".people-filter-heading > div > small"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "th:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "th:nth-child(4)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "th:nth-child(5)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(1) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(1) > td:nth-child(4)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(2) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(2) > td:nth-child(4)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(3) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(3) > td:nth-child(4)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(4) > td:nth-child(3)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(4) > td:nth-child(4)"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            }
+          ]
+        }
+      ],
+      "passes": 44
+    },
+    {
+      "viewport": "mobile",
+      "route": "/dashboard/settings",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 36,
+          "nodes": [
+            {
+              "target": [
+                ".page-title-row > .eyebrow"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #0878c9, background color: #f4f8fc, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-detail-grid > div:nth-child(1) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(1) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-detail-grid > div:nth-child(2) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-detail-grid > div:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(3) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(3) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(4) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-detail-grid > div:nth-child(4) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(5) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(5) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(6) > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.04 (foreground color: #6c7f92, background color: #fbfdff, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(6) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.2 (foreground color: #8190a0, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "label:nth-child(1) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.36 (foreground color: #7d8ea0, background color: #ffffff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "label:nth-child(2) > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.36 (foreground color: #7d8ea0, background color: #ffffff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".selected > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.56 (foreground color: #73869a, background color: #f5faff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "fieldset > label:nth-child(3) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.74 (foreground color: #73869a, background color: #ffffff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#preferences > .settings-switch > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(1) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".locked > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.52 (foreground color: #73869a, background color: #f6f8fb, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(3) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".notification-preference-grid > .settings-switch:nth-child(4) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(5) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(6) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(7) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(8) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".settings-switch:nth-child(9) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#notifications > .settings-action-row > div > span"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.05 (foreground color: #6b7f93, background color: #fbfdff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(1) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(2) > span > small"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #73869a, background color: #fbfdff, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": "critical",
+          "description": "Ensure all ARIA attributes have valid values",
+          "node_count": 1,
+          "nodes": [
+            {
+              "target": [
+                ".header-icon-button"
+              ],
+              "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"notification-popover\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "node_count": 3,
+          "nodes": [
+            {
+              "target": [
+                ".kalam-logo-wordmark"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".sidebar-mobile-toggle > span"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".settings-avatar"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 40
+    }
+  ]
+}

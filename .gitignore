@@ -18,6 +18,7 @@ __pycache__/
 .npm-cache-lock2/
 .npm-cache-recovery/
 .edge-smoke-profile/
+.phase8rc-browser/
 .tmp-chrome/
 .cdp-profile/
 .cdp-ui-profile/
@@ -25,7 +26,20 @@ __pycache__/
 apps/web/.next-*/
 qa/chrome-*/
 qa/edge-*/
+.tmp-chrome-qa/
 backups/
+# Local/non-Kalam design collateral
+Kognivon-brand-package/
+Kognivon_Enterprise_Capability_Guide_Client_Edition_9.9.docx
+Kognivon_Enterprise_Capability_Guide_Client_Edition_9.9.pdf
+Kognivon_Executive_One_Pager_Client_Edition_9.9.docx
+kalam-font-review.png
+kalam-review*.png
+guided-evaluation-*.png
+# Temporary/debug artifacts
+*.bak-*
+apps/api/1.6
+apps/api/tmp_schema_check.py
 /frontend-dashboard-live.png
 /landing*.png
 /CorpLMS_Global_Top_Three_Strategy_2026_2028.docx

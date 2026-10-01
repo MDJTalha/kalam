@@ -15,11 +15,18 @@ def test_phase6_metric_contracts_reconcile():
         effectiveness = client.get("/api/v1/reports/learning-effectiveness")
         performance = client.get("/api/v1/reports/course-performance", params={"page": 1, "page_size": 25, "sort_by": "enrollments", "sort_dir": "desc"})
         risk = client.get("/api/v1/reports/compliance-risk")
+        people_export = client.get("/api/v1/reports/export/people")
+        enrollment_export = client.get("/api/v1/reports/export/enrollments")
 
         assert summary.status_code == 200
         assert effectiveness.status_code == 200
         assert performance.status_code == 200
         assert risk.status_code == 200
+        assert people_export.status_code == 200
+        assert enrollment_export.status_code == 200
+        assert "text/csv" in people_export.headers["content-type"]
+        assert "User ID,Email" in people_export.text
+        assert "Enrollment ID,Learner Email" in enrollment_export.text
 
         summary_data = summary.json()
         effectiveness_data = effectiveness.json()

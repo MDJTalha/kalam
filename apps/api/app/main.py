@@ -22,6 +22,12 @@ from app.api.routes.assessments import router as assessments_router
 from app.api.routes.certificates import router as certificates_router
 from app.api.routes.compliance import router as compliance_router
 from app.api.routes.skills import router as skills_router
+from app.api.routes.capabilities import router as capabilities_router
+from app.api.routes.capability_domain import router as capability_domain_router
+from app.api.routes.evidence import router as evidence_router
+from app.api.routes.capability_assessments import router as capability_assessments_router
+from app.api.routes.capability_gap import router as capability_gap_router
+from app.api.routes.capability_risk import router as capability_risk_router
 from app.api.routes.reports import router as reports_router
 from app.api.routes.report_library import router as report_library_router
 from app.api.routes.people import router as people_router
@@ -31,6 +37,8 @@ from app.api.routes.programs import router as programs_router
 from app.api.routes.sessions import router as sessions_router
 from app.api.routes.notifications import router as notifications_router
 from app.api.routes.development import router as development_router
+from app.api.routes.development_intelligence import router as development_intelligence_router
+from app.api.routes.development_execution import router as development_execution_router
 from app.api.routes.search import router as search_router
 from app.api.routes.files import router as files_router
 from app.api.routes.integrations import router as integrations_router
@@ -39,6 +47,9 @@ from app.api.routes.interop import router as interop_router
 from app.api.routes.intelligence import router as intelligence_router
 from app.api.routes.ai import router as ai_router
 from app.api.routes.marketing import router as marketing_router
+from app.api.routes.saas_commercial import router as saas_commercial_router
+from app.api.routes.saas_finance import finance_overview, paged_invoices, paged_payments
+from app.api.routes.support import router as support_router
 
 logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO), format="%(message)s")
 structlog.configure(
@@ -137,6 +148,12 @@ app.include_router(assessments_router, prefix="/api/v1/assessments", tags=["asse
 app.include_router(certificates_router, prefix="/api/v1/certificates", tags=["certificates"])
 app.include_router(compliance_router, prefix="/api/v1/compliance", tags=["compliance"])
 app.include_router(skills_router, prefix="/api/v1/skills", tags=["skills"])
+app.include_router(capabilities_router, prefix="/api/v1/capabilities", tags=["capabilities"])
+app.include_router(capability_domain_router, prefix="/api/v1/capability-domain", tags=["capability-domain"])
+app.include_router(evidence_router, prefix="/api/v1/evidence", tags=["capability-evidence"])
+app.include_router(capability_assessments_router, prefix="/api/v1/capability-assessments", tags=["capability-assessments"])
+app.include_router(capability_gap_router, prefix="/api/v1/capability-gaps", tags=["capability-gaps"])
+app.include_router(capability_risk_router, prefix="/api/v1/capability-risks", tags=["capability-risks"])
 app.include_router(reports_router, prefix="/api/v1/reports", tags=["reports"])
 app.include_router(report_library_router, prefix="/api/v1/reports", tags=["report-library"])
 app.include_router(people_router, prefix="/api/v1/people", tags=["people"])
@@ -145,7 +162,10 @@ app.include_router(organization_router, prefix="/api/v1/organization", tags=["or
 app.include_router(programs_router, prefix="/api/v1/programs", tags=["programs"])
 app.include_router(sessions_router, prefix="/api/v1/sessions", tags=["live-learning"])
 app.include_router(notifications_router, prefix="/api/v1/notifications", tags=["notifications"])
+app.include_router(support_router, prefix="/api/v1/support", tags=["support"])
 app.include_router(development_router, prefix="/api/v1/development", tags=["development"])
+app.include_router(development_intelligence_router, prefix="/api/v1/development", tags=["development-intelligence"])
+app.include_router(development_execution_router, prefix="/api/v1/development/interventions", tags=["development-execution"])
 app.include_router(search_router, prefix="/api/v1/search", tags=["search"])
 app.include_router(files_router, prefix="/api/v1/files", tags=["files"])
 app.include_router(integrations_router, prefix="/api/v1/integrations", tags=["integrations"])
@@ -154,3 +174,7 @@ app.include_router(interop_router, prefix="/api/v1/interop", tags=["interoperabi
 app.include_router(intelligence_router, prefix="/api/v1/intelligence", tags=["intelligence"])
 app.include_router(ai_router, prefix="/api/v1/ai", tags=["governed-ai"])
 app.include_router(marketing_router, prefix="/api/v1/marketing", tags=["marketing"])
+app.include_router(saas_commercial_router, prefix="/api/v1/saas", tags=["saas-commercial"])
+app.add_api_route("/api/v1/saas/crm/finance/overview", finance_overview, methods=["GET"], tags=["saas-finance"])
+app.add_api_route("/api/v1/saas/crm/page/invoices", paged_invoices, methods=["GET"], tags=["saas-finance"])
+app.add_api_route("/api/v1/saas/crm/page/payments", paged_payments, methods=["GET"], tags=["saas-finance"])

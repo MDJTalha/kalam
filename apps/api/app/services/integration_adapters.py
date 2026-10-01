@@ -33,10 +33,24 @@ def _validate_config(provider: str, config: dict) -> None:
         raise IntegrationCheckError("Unsupported integration provider")
     for key in config:
         normalized = key.lower().replace("-", "_")
+        if normalized.endswith("_env"):
+            continue
         if normalized in SENSITIVE_KEYS or any(item in normalized for item in SENSITIVE_KEYS):
             raise IntegrationCheckError(
                 f"Sensitive integration value '{key}' must use an environment reference"
             )
+    if provider == "oidc" and config.get("login_enabled") is True:
+        if not (config.get("issuer") or config.get("discovery_url")):
+            raise IntegrationCheckError("OIDC login requires issuer or discovery_url")
+        if not str(config.get("client_id") or "").strip():
+            raise IntegrationCheckError("OIDC login requires client_id")
+        if not str(config.get("client_secret_env") or "").strip():
+            raise IntegrationCheckError("OIDC login requires client_secret_env")
+    if provider == "saml" and config.get("login_enabled") is True:
+        if not str(config.get("metadata_url") or "").strip():
+            raise IntegrationCheckError("SAML login requires metadata_url")
+        if not str(config.get("entity_id") or "").strip():
+            raise IntegrationCheckError("SAML login requires entity_id")
 
 
 def _url_allowed(url: str) -> None:
@@ -115,24 +129,35 @@ def _basic_headers(config: dict) -> dict[str, str]:
     return headers
 
 
-async def _oidc_check(config: dict, required: set[str], timeout: float) -> str:
+async def get_oidc_discovery(config: dict, timeout: float = 10.0) -> dict:
     discovery_url = str(config.get("discovery_url") or "").strip()
     issuer = str(config.get("issuer") or "").strip()
     if not discovery_url:
         if not issuer:
-            raise IntegrationCheckError("OIDC/LTI issuer or discovery_url is required")
+            raise IntegrationCheckError("OIDC issuer or discovery_url is required")
         discovery_url = urljoin(issuer.rstrip("/") + "/", ".well-known/openid-configuration")
-    response = await _get(discovery_url, _basic_headers(config), timeout)
+    response = await _get(discovery_url, {"Accept": "application/json"}, timeout)
     if response.status_code >= 400:
         raise IntegrationCheckError(f"Discovery endpoint returned HTTP {response.status_code}")
     try:
         data = response.json()
     except ValueError as exc:
         raise IntegrationCheckError("Discovery endpoint did not return JSON") from exc
+    required = {"issuer", "authorization_endpoint", "token_endpoint", "jwks_uri"}
     missing = sorted(required - set(data))
     if missing:
         raise IntegrationCheckError("Discovery document is missing: " + ", ".join(missing))
-    return f"OIDC discovery verified: {data.get('issuer', issuer or discovery_url)}"
+    if issuer and str(data.get("issuer") or "").rstrip("/") != issuer.rstrip("/"):
+        raise IntegrationCheckError("OIDC discovery issuer does not match configured issuer")
+    return data
+
+
+async def _oidc_check(config: dict, required: set[str], timeout: float) -> str:
+    data = await get_oidc_discovery(config, timeout)
+    missing = sorted(required - set(data))
+    if missing:
+        raise IntegrationCheckError("Discovery document is missing: " + ", ".join(missing))
+    return f"OIDC discovery verified: {data.get('issuer')}"
 async def _http_check(config: dict, timeout: float) -> str:
     url = str(config.get("health_url") or "").strip()
     if not url:
@@ -206,4 +231,5 @@ __all__ = [
     "SUPPORTED",
     "run_integration_check",
     "validate_integration_config",
+    "get_oidc_discovery",
 ]

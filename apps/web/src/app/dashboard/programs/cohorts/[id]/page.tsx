@@ -58,7 +58,7 @@ export default async function CohortDetailPage({
         {cohort.members.length ? (
           <div className="table-wrap">
             <table className="data-table">
-              <thead><tr><th>Learner</th><th>Email</th><th>Status</th></tr></thead>
+              <thead><tr><th scope="col">Learner</th><th scope="col">Email</th><th scope="col">Status</th></tr></thead>
               <tbody>
                 {cohort.members.map((member) => (
                   <tr key={member.user_id}>

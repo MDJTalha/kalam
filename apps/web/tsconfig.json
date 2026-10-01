@@ -33,11 +33,11 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
     "**/*.mts",
     ".next-assessments/types/**/*.ts",
-    ".next-assessments/dev/types/**/*.ts",
     ".next-phase8-preflight/types/**/*.ts",
+    ".next-phase8-final/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
     ".next-phase8-preflight/dev/types/**/*.ts"
   ],
   "exclude": [

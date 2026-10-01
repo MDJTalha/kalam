@@ -1,0 +1,47 @@
+{
+  "clean": {
+    "status": 201,
+    "text": "{\"id\":\"69953c2b-d497-405a-96e7-abb52d86bbe8\",\"name\":\"phase8rc-clean.txt\",\"mime_type\":\"text/plain\",\"size_bytes\":49,\"status\":\"available\"}"
+  },
+  "infected": {
+    "status": 422,
+    "text": "{\"detail\":\"File rejected by malware scanner\"}"
+  },
+  "list_status": 200,
+  "files": [
+    {
+      "id": "69953c2b-d497-405a-96e7-abb52d86bbe8",
+      "name": "phase8rc-clean.txt",
+      "mime_type": "text/plain",
+      "size_bytes": 49,
+      "status": "available",
+      "created_at": "2026-09-27T11:21:56.447480+00:00"
+    },
+    {
+      "id": "bc21c52f-87b5-46c1-b8c3-39b45bad5a21",
+      "name": "phase8rc-clean.txt",
+      "mime_type": "text/plain",
+      "size_bytes": 49,
+      "status": "available",
+      "created_at": "2026-09-27T11:21:05.888747+00:00"
+    },
+    {
+      "id": "42f075b2-7b61-4b90-adab-501724ec2706",
+      "name": "phase8rc-eicar.txt",
+      "mime_type": "text/plain",
+      "size_bytes": 67,
+      "status": "available",
+      "created_at": "2026-09-27T11:19:41.651322+00:00"
+    },
+    {
+      "id": "ea3c32f8-a9bf-4ac5-b23a-a009474101d1",
+      "name": "phase8rc-clean.txt",
+      "mime_type": "text/plain",
+      "size_bytes": 49,
+      "status": "available",
+      "created_at": "2026-09-27T11:19:38.341328+00:00"
+    }
+  ],
+  "clean_upload_pass": true,
+  "malware_rejection_pass": true
+}

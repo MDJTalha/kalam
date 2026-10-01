@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -38,9 +38,15 @@ class Settings(BaseSettings):
     dev_email_sink: bool = Field(default=True, alias="DEV_EMAIL_SINK")
     marketing_inbox_enabled: bool = Field(default=False, alias="MARKETING_INBOX_ENABLED")
     marketing_review_tenant_slug: str | None = Field(default=None, alias="MARKETING_REVIEW_TENANT_SLUG")
+    saas_ops_tenant_slug: str | None = Field(default=None, alias="SAAS_OPS_TENANT_SLUG")
+    saas_demo_crm_enabled: bool = Field(default=False, alias="SAAS_DEMO_CRM_ENABLED")
+    saas_demo_tenant_slug: str = Field(default="demo-corporation", alias="SAAS_DEMO_TENANT_SLUG")
+    saas_demo_admin_email: str = Field(default="admin@demo.corp", alias="SAAS_DEMO_ADMIN_EMAIL")
     reset_token_minutes: int = Field(default=30, alias="RESET_TOKEN_MINUTES")
     max_failed_login_attempts: int = Field(default=5, alias="MAX_FAILED_LOGIN_ATTEMPTS")
     login_lockout_minutes: int = Field(default=15, alias="LOGIN_LOCKOUT_MINUTES")
+    sso_state_key: str | None = Field(default=None, alias="SSO_STATE_KEY")
+    sso_transaction_ttl_seconds: int = Field(default=600, alias="SSO_TRANSACTION_TTL_SECONDS")
     storage_backend: str = Field(default="local", alias="STORAGE_BACKEND")
     storage_root: str = Field(default="./data/uploads", alias="STORAGE_ROOT")
     max_upload_mb: int = Field(default=25, alias="MAX_UPLOAD_MB")
@@ -57,6 +63,22 @@ class Settings(BaseSettings):
     file_scan_host: str = Field(default="127.0.0.1", alias="FILE_SCAN_HOST")
     file_scan_port: int = Field(default=3310, alias="FILE_SCAN_PORT")
     file_scan_timeout_seconds: int = Field(default=30, alias="FILE_SCAN_TIMEOUT_SECONDS")
+
+    @model_validator(mode="after")
+    def validate_production_safety(self) -> "Settings":
+        if self.app_env.lower() in {"production", "prod"}:
+            unsafe = []
+            if not self.cookie_secure:
+                unsafe.append("COOKIE_SECURE=true")
+            if self.api_docs_enabled:
+                unsafe.append("API_DOCS_ENABLED=false")
+            if self.dev_email_sink:
+                unsafe.append("DEV_EMAIL_SINK=false")
+            if self.integration_allow_private_urls:
+                unsafe.append("INTEGRATION_ALLOW_PRIVATE_URLS=false")
+            if unsafe:
+                raise ValueError("Production safety requirements not met: " + ", ".join(unsafe))
+        return self
 
 @lru_cache
 def get_settings() -> Settings:

@@ -9,14 +9,26 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_permission
+from app.core.config import settings
 from app.core.security import session_token_hash, utcnow
-from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User
+from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.email import send_email
 from app.services.learning_reminders import run_course_due_reminders
 
 router = APIRouter()
+
+async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
+    role = await db.scalar(
+        select(Role.id)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .join(Tenant, Tenant.id == Role.tenant_id)
+        .where(UserRole.user_id == user.id)
+        .where(Tenant.slug == settings.saas_ops_tenant_slug)
+        .where(Role.name.ilike("platform developer"))
+    )
+    return role is not None
 
 class InvitationCreate(BaseModel):
     email: EmailStr
@@ -84,15 +96,52 @@ async def update_tenant_settings(
 
 @router.get("/roles")
 async def roles(user: User = Depends(require_permission("tenant.manage")), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(Role.id, Role.name, Role.description)
-        .where(Role.tenant_id == user.tenant_id)
-        .order_by(Role.name)
-    )
-    return [{"id": str(row.id), "name": row.name, "description": row.description} for row in result.all()]
+    is_developer = await _is_platform_developer(user, db)
+    stmt = select(Role.id, Role.name, Role.description, Role.role_kind).where(Role.tenant_id == user.tenant_id)
+    if not is_developer:
+        stmt = stmt.where(Role.role_kind.in_(["predefined", "custom"]))
+    result = await db.execute(stmt.order_by(Role.name))
+    return [{"id": str(row.id), "name": row.name, "description": row.description, "role_kind": row.role_kind} for row in result.all()]
 
 class RolePermissionsUpdate(BaseModel):
     permission_keys: list[str] = Field(default_factory=list, max_length=100)
+
+class RoleCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+    permission_keys: list[str] = Field(default_factory=list, max_length=100)
+
+
+@router.post("/roles", status_code=201)
+async def create_role(
+    payload: RoleCreate,
+    user: User = Depends(require_permission("tenant.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    if not await _is_platform_developer(user, db):
+        raise HTTPException(status_code=403, detail="Only Kalam Platform Developers can create tenant roles")
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="Role name is required")
+    duplicate = await db.scalar(select(Role.id).where(Role.tenant_id == user.tenant_id, Role.name.ilike(name)))
+    if duplicate:
+        raise HTTPException(status_code=409, detail="A role with this name already exists")
+    requested = sorted(set(payload.permission_keys))
+    if any(key.startswith("saas.crm.") for key in requested):
+        raise HTTPException(status_code=403, detail="Kalam CRM permissions cannot be assigned to tenant roles")
+    permission_rows = list((await db.execute(select(Permission).where(Permission.key.in_(requested)))).scalars().all()) if requested else []
+    found = {item.key for item in permission_rows}
+    unknown = sorted(set(requested) - found)
+    if unknown:
+        raise HTTPException(status_code=422, detail={"unknown_permissions": unknown})
+    role = Role(tenant_id=user.tenant_id, name=name, description=payload.description, role_kind="custom")
+    db.add(role)
+    await db.flush()
+    for permission in permission_rows:
+        db.add(RolePermission(role_id=role.id, permission_id=permission.id))
+    await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="role.created", entity_type="role", entity_id=str(role.id), metadata={"role_kind":"custom","permission_keys":requested})
+    await db.commit()
+    return {"id": str(role.id), "name": role.name, "description": role.description, "role_kind": role.role_kind}
 
 
 @router.get("/permissions")
@@ -100,7 +149,9 @@ async def list_permissions(
     user: User = Depends(require_permission("tenant.manage")),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(Permission).order_by(Permission.key))
+    stmt = select(Permission).order_by(Permission.key)
+    stmt = stmt.where(~Permission.key.like("saas.crm.%"))
+    result = await db.execute(stmt)
     return [{"id": str(item.id), "key": item.key, "description": item.description} for item in result.scalars().all()]
 
 
@@ -132,8 +183,12 @@ async def update_role_permissions(
     role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == user.tenant_id))
     if role is None:
         raise HTTPException(status_code=404, detail="Role not found")
-
+    is_developer = await _is_platform_developer(user, db)
+    if not is_developer:
+        raise HTTPException(status_code=403, detail="Role permission changes are governed by Kalam Platform Developers")
     requested = sorted(set(payload.permission_keys))
+    if any(key.startswith("saas.crm.") for key in requested):
+        raise HTTPException(status_code=403, detail="Kalam CRM permissions are platform-only")
     permission_result = await db.execute(select(Permission).where(Permission.key.in_(requested)))
     permissions = list(permission_result.scalars().all())
     found = {item.key for item in permissions}
@@ -141,8 +196,8 @@ async def update_role_permissions(
     if unknown:
         raise HTTPException(status_code=422, detail={"unknown_permissions": unknown})
 
-    if role.name == "Tenant Admin" and "tenant.manage" not in requested:
-        raise HTTPException(status_code=422, detail="Tenant Admin must retain tenant.manage")
+    if role.name == "Tenant Administrator" and "tenant.manage" not in requested:
+        raise HTTPException(status_code=422, detail="Tenant Administrator must retain tenant.manage")
 
     existing_result = await db.execute(
         select(RolePermission).where(RolePermission.role_id == role.id)

@@ -3,10 +3,10 @@ import { SessionManagement } from "@/components/session-management";
 import { requireUser } from "@/lib/server-api";
 
 export default async function SessionsPage() {
-  await requireUser();
+  const user = await requireUser<{preferences?:{timezone?:string}}>();
   return (
-    <DashboardShell title="Session security" eyebrow="Account security" breadcrumbs={[{ label: "Settings", href: "/dashboard/settings" }, { label: "Session security" }]}>
-      <SessionManagement />
+    <DashboardShell title="Active sessions" eyebrow="Account security" breadcrumbs={[{ label: "Settings", href: "/dashboard/settings" }, { label: "Active sessions" }]}>
+      <SessionManagement timezone={user.preferences?.timezone || "UTC"} />
     </DashboardShell>
   );
 }

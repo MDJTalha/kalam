@@ -33,7 +33,7 @@ export default async function LdOperationsPage({ searchParams }: { searchParams:
         <div className="form-actions"><button type="submit" className="button button-secondary">Apply filters</button></div>
       </form>
 
-      {queue ? queue.items.length ? <div className="table-wrap"><table className="data-table"><thead><tr><th>Learner</th><th>Course</th><th>Request</th><th>Status</th><th>Decision</th></tr></thead><tbody>
+      {queue ? queue.items.length ? <div className="table-wrap"><table className="data-table"><thead><tr><th scope="col">Learner</th><th scope="col">Course</th><th scope="col">Request</th><th scope="col">Status</th><th scope="col">Decision</th></tr></thead><tbody>
         {queue.items.map(item => <tr key={item.id}>
           <td><strong>{item.learner_name}</strong><small>{item.learner_email}</small></td>
           <td><Link className="text-link" href={`/dashboard/course-studio/${item.course_id}`}>{item.course_title}</Link></td>

@@ -80,7 +80,7 @@ export function CertificateAdmin({initialCertificates,initialTemplate}:{initialC
         <article className="certificate-preview" style={{borderColor:template.accent_color}}>
           {template.logo_url&&<img className="certificate-preview-logo" src={template.logo_url} alt={`${template.issuer_name} logo`} referrerPolicy="no-referrer" />}
           <div className="certificate-preview-issuer" style={{color:template.primary_color}}>{template.issuer_name}</div>
-          <div className="certificate-preview-title" style={{color:template.accent_color}}>{template.title}</div>
+          <div className="certificate-preview-title">{template.title}</div>
           <div className="certificate-preview-subtitle">{template.subtitle}</div>
           <div className="certificate-preview-name">Sample learner</div>
           <div className="certificate-preview-copy">has successfully completed</div>

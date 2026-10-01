@@ -1,38 +1,72 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Bell, Check, X } from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { Bell, CheckCheck, ChevronRight, Filter, Search, ShieldAlert } from "lucide-react";
 
-type NotificationItem = { id: string; type: string; title: string; body: string; read_at?: string | null; created_at: string };
+export type NotificationItem={
+  id:string;type:string;category:string;priority:string;action_href?:string|null;title:string;body:string;email_sent_at?:string|null;read_at?:string|null;created_at:string;
+};
 
-export function NotificationCenter() {
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<NotificationItem[]>([]);
+const labels:Record<string,string>={learning:"Learning",compliance:"Compliance",assessment:"Assessments",credentials:"Credentials",support:"Support",security:"Security",approvals:"Approvals",system:"System"};
 
-  useEffect(() => {
-    let active = true;
-    void fetch("/api/lms/notifications", { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : [])
-      .then((data: unknown) => {
-        if (active && Array.isArray(data)) setItems(data as NotificationItem[]);
-      })
-      .catch(() => undefined);
-    return () => { active = false; };
-  }, []);
+export function NotificationCenter({initialItems,timezone="UTC"}:{initialItems:NotificationItem[];timezone?:string}){
+  const [items,setItems]=useState(initialItems);
+  const [query,setQuery]=useState("");
+  const [category,setCategory]=useState("all");
+  const [readState,setReadState]=useState("all");
+  const [busy,setBusy]=useState(false);
 
-  const unread = items.filter((item) => !item.read_at).length;
-  async function markRead(id: string) {
-    await fetch(`/api/lms/notifications/${id}/read`, { method: "POST" });
-    setItems((current) => current.map((item) => item.id === id ? { ...item, read_at: new Date().toISOString() } : item));
+  const categories=useMemo(()=>Array.from(new Set(items.map(item=>item.category))).sort(),[items]);
+  const filtered=useMemo(()=>items.filter(item=>{
+    const text=(item.title+" "+item.body+" "+item.type+" "+item.category).toLowerCase();
+    const queryMatch=!query.trim()||text.includes(query.trim().toLowerCase());
+    const categoryMatch=category==="all"||item.category===category;
+    const readMatch=readState==="all"||(readState==="unread"&&!item.read_at)||(readState==="read"&&Boolean(item.read_at));
+    return queryMatch&&categoryMatch&&readMatch;
+  }),[items,query,category,readState]);
+
+  const unread=items.filter(item=>!item.read_at).length;
+  const important=items.filter(item=>["high","critical"].includes(item.priority)&&!item.read_at).length;
+
+  async function markRead(id:string){
+    const response=await fetch("/api/lms/notifications/"+id+"/read",{method:"POST"});
+    if(response.ok)setItems(current=>current.map(item=>item.id===id?{...item,read_at:new Date().toISOString()}:item));
+  }
+  async function markAll(){
+    setBusy(true);
+    try{
+      const response=await fetch("/api/lms/notifications/read-all",{method:"POST"});
+      if(response.ok){const now=new Date().toISOString();setItems(current=>current.map(item=>({...item,read_at:item.read_at||now})))}
+    }finally{setBusy(false)}
   }
 
-  return <div className="notification-wrap">
-    <button className="header-icon-button" onClick={() => setOpen((v) => !v)} aria-label="Notifications"><Bell size={18}/>{unread > 0 && <span className="notification-count">{unread > 9 ? "9+" : unread}</span>}</button>
-    {open && <div className="notification-popover">
-      <div className="notification-head"><div><strong>Notifications</strong><small>{unread ? `${unread} unread` : "All caught up"}</small></div><button className="icon-button" onClick={() => setOpen(false)} aria-label="Close notifications"><X size={16}/></button></div>
-      <div className="notification-list">
-        {items.length ? items.slice(0, 12).map((item) => <div className={`notification-item ${item.read_at ? "read" : "unread"}`} key={item.id}><div><strong>{item.title}</strong><p>{item.body}</p><small>{new Date(item.created_at).toLocaleString()}</small></div>{!item.read_at && <button className="notification-read" onClick={() => markRead(item.id)} aria-label="Mark as read"><Check size={15}/></button>}</div>) : <div className="notification-empty">No notifications yet.</div>}
-      </div>
-    </div>}
+  return <div className="notification-center">
+    <section className="notification-overview">
+      <article><Bell size={18}/><span>Unread</span><strong>{unread}</strong><small>Notifications requiring review</small></article>
+      <article><ShieldAlert size={18}/><span>High priority</span><strong>{important}</strong><small>Unread high/critical notifications</small></article>
+      <article><CheckCheck size={18}/><span>Total</span><strong>{items.length}</strong><small>Recent notifications loaded</small></article>
+      <div className="notification-overview-action"><button className="button notification-bulk-action" type="button" onClick={()=>void markAll()} disabled={busy||unread===0}><CheckCheck size={14}/>{busy?"Updating…":"Mark all as read"}</button><Link className="notification-preferences-link" href="/dashboard/settings#notifications">Notification preferences <ChevronRight size={13}/></Link></div>
+    </section>
+
+    <section className="notification-toolbar">
+      <label><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search notifications"/></label>
+      <label><Filter size={14}/><select value={category} onChange={e=>setCategory(e.target.value)}><option value="all">All categories</option>{categories.map(item=><option key={item} value={item}>{labels[item]||item}</option>)}</select></label>
+      <label><Filter size={14}/><select value={readState} onChange={e=>setReadState(e.target.value)}><option value="all">All states</option><option value="unread">Unread</option><option value="read">Read</option></select></label>
+    </section>
+
+    <section className="notification-list">
+      {filtered.length===0?<div className="empty-state"><Bell size={24}/><h2>No notifications match these filters</h2><p>Adjust search or filters to review other notifications.</p></div>:filtered.map(item=><article className={"notification-card "+(!item.read_at?"unread ":"")+"priority-"+item.priority} key={item.id}>
+        <div className="notification-card-main">
+          <div className="notification-card-top"><span className="notification-category">{labels[item.category]||item.category}</span><span className={"notification-priority "+item.priority}>{item.priority}</span>{!item.read_at&&<span className="notification-new">New</span>}</div>
+          <h2>{item.title}</h2><p>{item.body}</p>
+          <small>{new Date(item.created_at).toLocaleString(undefined,{timeZone:timezone})}{item.email_sent_at?" · Email sent":""}</small>
+        </div>
+        <div className="notification-card-actions">
+          {item.action_href&&<Link className="button button-secondary" href={item.action_href}>Open <ChevronRight size={14}/></Link>}
+          {!item.read_at&&<button className="button button-secondary" type="button" onClick={()=>void markRead(item.id)}>Mark read</button>}
+        </div>
+      </article>)}
+    </section>
   </div>;
 }

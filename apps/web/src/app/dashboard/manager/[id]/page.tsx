@@ -17,10 +17,10 @@ export default async function ManagerPerson({params}:{params:Promise<{id:string}
   const [people,plans,courses]=await Promise.all([apiJson<Person[]>("/api/v1/people/team"),apiJson<Plan[]>("/api/v1/development/users/"+id),apiJson<Course[]>("/api/v1/courses")]);
   const person=people?.find(x=>x.id===id);
   if(!person)notFound();
-  if(plans === null || courses === null) return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager learner view"><section className="data-panel" role="alert"><h2>Learner data unavailable</h2><p>Check your access or try again later.</p></section></DashboardShell>;
+  if(plans === null || courses === null) return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager development view"><section className="data-panel" role="alert"><h2>Team member data unavailable</h2><p>Check your access or try again later.</p></section></DashboardShell>;
   const goalCount=(plans??[]).reduce((sum,plan)=>sum+plan.goals.length,0);
   const activePlans=(plans??[]).filter(plan=>plan.status!=="completed").length;
-  return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager learner view" breadcrumbs={[{label:"Team",href:"/dashboard/team"},{label:person.first_name+" "+person.last_name}]}>
+  return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager development view" breadcrumbs={[{label:"Team",href:"/dashboard/team"},{label:person.first_name+" "+person.last_name}]}>
     <section className="manager-profile-hero" aria-labelledby="manager-profile-title">
       <div className="manager-profile-identity">
         <div className="manager-profile-avatar"><UserRound size={22}/></div>

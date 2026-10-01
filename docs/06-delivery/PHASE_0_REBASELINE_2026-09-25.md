@@ -60,3 +60,11 @@ The foundation API suite could stall/fail when reusing one session-scoped TestCl
 PHASE 0 TECHNICAL GATE: PASS.
 
 Repository hygiene remains an explicit change-control item before a formal Git-clean Phase 0 closure: current status contains 1,144 tracked deletions (primarily `.npm-cache-clean`) and 135 untracked paths. These changes were not reset or discarded. The environment baseline was also corrected to the actual Next.js local default port 3000 after live verification.
+
+## 2026-09-28 reconciliation
+
+The 2026-09-25 working-tree counts above are historical and are no longer current. The large tracked deletion set under `.npm-cache-clean` is no longer present in the current status scan. Generated browser profile `.phase8rc-browser/` has also been added to `.gitignore`.
+
+Phase 0 now has a single repeatable local validator: `npm run validate:phase0`. The current-tree run passed required artifact checks, environment contract, Docker dependency readiness, Alembic head, Ruff, mypy, 112 API tests, web TypeScript, ESLint and a 75-route production build.
+
+Current formal local evidence is authoritative in `PHASE_0_EXIT_EVIDENCE.md`. Hosted CI remains external because this checkout has no configured Git remote.

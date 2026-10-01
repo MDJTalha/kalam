@@ -49,7 +49,9 @@ Settings references in workspace navigation: 2
 - line 55: ["/dashboard/settings", "Platform Settings", Settings2],
 - line 99: <Link className={`nav-item ${isActive("/dashboard/settings") ? "active" : ""}`} href="/dashboard/settings" aria-label="Settings" title="Settings">
 
-## QA status
+## QA status at the time of this scan
 PHASE 0 BASELINE: OPEN — defects identified; remediation required before phase exit.
+
+This is a historical 2026-09-25 snapshot, superseded for the local foundation gate by `docs/06-delivery/PHASE_0_REBASELINE_2026-09-25.md`. It is not a current route inventory or a formal hosted-CI closure record. Current Phase 0 verification is tracked in `docs/06-delivery/PHASE_0_EXIT_EVIDENCE.md`.
 
 Acceptance rule: route compilation is not functional acceptance; each route must render its intended screen and each interactive workflow must be verified through API and persistence.

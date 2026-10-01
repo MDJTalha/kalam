@@ -27,7 +27,10 @@ class AttendanceUpdate(BaseModel):
 
 @router.get("")
 async def list_sessions(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(LiveSession).where(LiveSession.tenant_id == user.tenant_id).order_by(LiveSession.starts_at))
+    stmt = select(LiveSession).where(LiveSession.tenant_id == user.tenant_id)
+    if not await user_has_permission(user, db, "courses.manage"):
+        stmt = stmt.where(LiveSession.instructor_id == user.id)
+    result = await db.execute(stmt.order_by(LiveSession.starts_at))
     return list(result.scalars().all())
 
 @router.post("", status_code=201)
@@ -50,13 +53,16 @@ async def create_session(
 async def mark_attendance(
     session_id: UUID,
     payload: AttendanceUpdate,
-    user: User = Depends(require_permission("courses.manage")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     session = await db.scalar(select(LiveSession).where(LiveSession.id == session_id, LiveSession.tenant_id == user.tenant_id))
     learner = await db.scalar(select(User).where(User.id == payload.user_id, User.tenant_id == user.tenant_id))
     if session is None or learner is None:
         raise HTTPException(status_code=404, detail="Session or learner not found")
+    can_manage_all = await user_has_permission(user, db, "courses.manage")
+    if not can_manage_all and session.instructor_id != user.id:
+        raise HTTPException(status_code=403, detail="Facilitator scope does not include this session")
     row = await db.scalar(select(AttendanceRecord).where(AttendanceRecord.live_session_id == session.id, AttendanceRecord.user_id == learner.id))
     if row is None:
         row = AttendanceRecord(live_session_id=session.id, user_id=learner.id, status=payload.status)

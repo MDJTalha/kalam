@@ -1,0 +1,23 @@
+DO $$
+DECLARE ops_id uuid; core_id uuid; growth_id uuid;
+BEGIN
+  SELECT id INTO ops_id FROM tenants WHERE slug='kalam';
+  IF ops_id IS NULL THEN RAISE EXCEPTION 'kalam tenant not found'; END IF;
+
+  INSERT INTO saas_plans (id,ops_tenant_id,code,name,tagline,description,status,public_visible,billing_model,currency,monthly_price_minor,annual_price_minor,trial_days,minimum_seats,maximum_seats,features,limits,sort_order,created_at,updated_at)
+  VALUES (gen_random_uuid(),ops_id,'core','Core','A complete capability foundation for smaller workforces.','Launch governed learning, skills, assessments, compliance and development in one platform.','active',true,'per_user','USD',600,5760,30,25,249,'["Learning and course management","Skills and capability profiles","Assessments and certificates","Compliance and readiness tracking","Development plans","Standard analytics and reporting","Role-based workspaces","Email support"]'::jsonb,'{}'::jsonb,10,now(),now())
+  ON CONFLICT (ops_tenant_id,code) DO UPDATE SET name=EXCLUDED.name,tagline=EXCLUDED.tagline,description=EXCLUDED.description,status='active',public_visible=true,billing_model='per_user',currency='USD',monthly_price_minor=600,annual_price_minor=5760,trial_days=30,minimum_seats=25,maximum_seats=249,features=EXCLUDED.features,sort_order=10,updated_at=now();
+
+  INSERT INTO saas_plans (id,ops_tenant_id,code,name,tagline,description,status,public_visible,billing_model,currency,monthly_price_minor,annual_price_minor,trial_days,minimum_seats,maximum_seats,features,limits,sort_order,created_at,updated_at)
+  VALUES (gen_random_uuid(),ops_id,'scale','Scale','Advanced workforce capability for growing organizations.','Coordinate capability across teams, locations and business units with stronger automation, integrations and governance.','active',true,'per_user','USD',500,4800,30,250,1999,'["Everything in Core","Advanced capability frameworks","Automation and assignment rules","Advanced analytics and executive reporting","Integrations and API access","SSO and identity integration","Multi-unit governance","Priority support and onboarding"]'::jsonb,'{}'::jsonb,20,now(),now())
+  ON CONFLICT (ops_tenant_id,code) DO UPDATE SET name=EXCLUDED.name,tagline=EXCLUDED.tagline,description=EXCLUDED.description,status='active',public_visible=true,billing_model='per_user',currency='USD',monthly_price_minor=500,annual_price_minor=4800,trial_days=30,minimum_seats=250,maximum_seats=1999,features=EXCLUDED.features,sort_order=20,updated_at=now();
+
+  INSERT INTO saas_plans (id,ops_tenant_id,code,name,tagline,description,status,public_visible,billing_model,currency,monthly_price_minor,annual_price_minor,trial_days,minimum_seats,maximum_seats,features,limits,sort_order,created_at,updated_at)
+  VALUES (gen_random_uuid(),ops_id,'enterprise','Enterprise','Enterprise-wide capability orchestration without a fixed ceiling.','Designed for complex organizations that need scale, security, integrations, implementation governance and commercial flexibility.','active',true,'custom','USD',NULL,NULL,30,2000,NULL,'["Everything in Scale","Enterprise architecture and deployment planning","Complex SSO and integration patterns","Data migration and implementation services","Advanced governance and audit controls","Dedicated success governance","Priority service commitments","Custom commercial and support model"]'::jsonb,'{}'::jsonb,30,now(),now())
+  ON CONFLICT (ops_tenant_id,code) DO UPDATE SET name=EXCLUDED.name,tagline=EXCLUDED.tagline,description=EXCLUDED.description,status='active',public_visible=true,billing_model='custom',currency='USD',monthly_price_minor=NULL,annual_price_minor=NULL,trial_days=30,minimum_seats=2000,maximum_seats=NULL,features=EXCLUDED.features,sort_order=30,updated_at=now();
+
+  SELECT id INTO growth_id FROM saas_plans WHERE ops_tenant_id=ops_id AND code='scale';
+  INSERT INTO saas_offers (id,ops_tenant_id,plan_id,code,title,description,discount_type,discount_value,public_visible,status,starts_at,ends_at,created_at,updated_at)
+  VALUES (gen_random_uuid(),ops_id,growth_id,'LAUNCH15','Launch Partner Annual Offer','Qualifying new Scale customers receive 15% off the first annual subscription when contracted by December 31, 2026. Implementation services and taxes are excluded.','percent',15,true,'active',now(),'2027-01-01 00:00:00+00',now(),now())
+  ON CONFLICT (ops_tenant_id,code) DO UPDATE SET plan_id=EXCLUDED.plan_id,title=EXCLUDED.title,description=EXCLUDED.description,discount_type='percent',discount_value=15,public_visible=true,status='active',starts_at=now(),ends_at='2027-01-01 00:00:00+00',updated_at=now();
+END $$;

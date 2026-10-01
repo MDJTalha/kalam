@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.core.config import settings
 from app.main import app
-from app.services.integration_adapters import IntegrationCheckError, run_integration_check
+from app.services.integration_adapters import IntegrationCheckError, run_integration_check, validate_integration_config
 
 TENANT = "demo-corporation"
 ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
@@ -18,8 +18,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.endswith("/.well-known/openid-configuration"):
             body = json.dumps({
-                "issuer": "http://127.0.0.1/issuer",
+                "issuer": f"http://127.0.0.1:{self.server.server_port}",
                 "authorization_endpoint": "http://127.0.0.1/auth",
+                "token_endpoint": "http://127.0.0.1/token",
                 "jwks_uri": "http://127.0.0.1/jwks",
             }).encode()
             content_type = "application/json"
@@ -28,8 +29,9 @@ class Handler(BaseHTTPRequestHandler):
             content_type = "text/plain"
         elif self.path == "/.well-known/openid-configuration":
             body = json.dumps({
-                "issuer": "http://127.0.0.1/issuer",
+                "issuer": f"http://127.0.0.1:{self.server.server_port}",
                 "authorization_endpoint": "http://127.0.0.1/auth",
+                "token_endpoint": "http://127.0.0.1/token",
                 "jwks_uri": "http://127.0.0.1/jwks",
             }).encode()
             content_type = "application/json"
@@ -92,6 +94,24 @@ def test_provider_handshakes_are_protocol_checked(provider, config_builder, loca
 def test_integration_config_rejects_secrets_in_tenant_metadata():
     with pytest.raises(IntegrationCheckError, match="environment reference"):
         asyncio.run(run_integration_check("hris", {"health_url": "http://127.0.0.1:1", "password": "plain-text"}))
+
+
+def test_oidc_login_config_accepts_environment_secret_reference():
+    validate_integration_config("oidc", {
+        "issuer": "https://idp.example.com",
+        "client_id": "kognivon",
+        "client_secret_env": "KOGNIVON_OIDC_CLIENT_SECRET",
+        "login_enabled": True,
+    })
+
+
+def test_oidc_login_config_requires_environment_secret_reference():
+    with pytest.raises(IntegrationCheckError, match="client_secret_env"):
+        validate_integration_config("oidc", {
+            "issuer": "https://idp.example.com",
+            "client_id": "kognivon",
+            "login_enabled": True,
+        })
 
 
 def test_integration_route_persists_connection_check_evidence(local_server):

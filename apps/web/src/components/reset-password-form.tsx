@@ -24,8 +24,11 @@ export function ResetPasswordForm({ token }: { token: string }) {
         credentials: "include",
         body: JSON.stringify({ token, new_password: password }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Reset request failed.");
+      const data = await response.json().catch(() => ({})) as { detail?: unknown };
+      if (!response.ok) {
+        const detail = typeof data.detail === "string" ? data.detail : "Reset request failed.";
+        throw new Error(detail);
+      }
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Reset request failed.");

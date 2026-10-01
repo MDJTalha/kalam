@@ -1,0 +1,783 @@
+"""Phase 6 governed development intervention intelligence."""
+
+from datetime import datetime, timedelta, timezone
+from uuid import UUID
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.api.deps import get_current_user, user_has_permission
+from app.db.models import (
+    CapabilityCompetency,
+    CapabilityEvidence,
+    CapabilityGap,
+    CapabilityRisk,
+    CapabilitySkill,
+    Course,
+    CourseSkill,
+    DevelopmentPlan,
+    DevelopmentIntervention,
+    DevelopmentRecommendation,
+    Enrollment,
+    LearningPath,
+    LearningPathItem,
+    LiveSession,
+    Program,
+    ProgramCourse,
+    Role,
+    RoleRequirement,
+    User,
+)
+from app.db.session import get_db
+from app.services.audit import audit
+
+router = APIRouter()
+VERSION = "phase6.v2"
+
+
+def _priority(gap, risk):
+    critical = (gap.criticality or "").lower()
+    score = float(risk.risk_score) if risk else 0
+    if critical == "critical" or score >= 75 or float(gap.gap_value or 0) >= 3:
+        return "critical"
+    if critical == "high" or score >= 50 or float(gap.gap_value or 0) >= 2:
+        return "high"
+    return "medium"
+
+
+def _preference(user, kind):
+    prefs = user.preferences if isinstance(user.preferences, dict) else {}
+    dev = (
+        prefs.get("development", {})
+        if isinstance(prefs.get("development", {}), dict)
+        else {}
+    )
+    weights = (
+        dev.get("intervention_weights", {})
+        if isinstance(dev.get("intervention_weights", {}), dict)
+        else {}
+    )
+    try:
+        return max(-15, min(15, float(weights.get(kind, 0))))
+    except (TypeError, ValueError):
+        return 0
+
+
+async def _scope(user, db, target_id):
+    if target_id is None or target_id == user.id:
+        return user.id
+    if not await user_has_permission(user, db, "users.read"):
+        raise HTTPException(403, "You cannot view another user's recommendations")
+    target = await db.scalar(
+        select(User).where(
+            User.id == target_id,
+            User.tenant_id == user.tenant_id,
+            User.is_active.is_(True),
+        )
+    )
+    if target is None:
+        raise HTTPException(404, "User not found")
+    if target.manager_id != user.id and not await user_has_permission(
+        user, db, "development.recommendations.manage"
+    ):
+        raise HTTPException(403, "Manager scope does not include this user")
+    return target.id
+
+
+async def _generate(user, db, target_id):
+    uid = await _scope(user, db, target_id)
+    gaps = (
+        (
+            await db.execute(
+                select(CapabilityGap)
+                .where(
+                    CapabilityGap.tenant_id == user.tenant_id,
+                    CapabilityGap.user_id == uid,
+                    CapabilityGap.severity.notin_(["met", "not_required"]),
+                )
+                .order_by(CapabilityGap.gap_value.desc().nullslast())
+            )
+        )
+        .scalars()
+        .all()
+    )
+    enrollments = (
+        await db.execute(
+            select(Enrollment.course_id, Enrollment.status).where(
+                Enrollment.tenant_id == user.tenant_id, Enrollment.user_id == uid
+            )
+        )
+    ).all()
+    history = {cid: st for cid, st in enrollments}
+    plans = (
+        (
+            await db.execute(
+                select(DevelopmentPlan).where(
+                    DevelopmentPlan.tenant_id == user.tenant_id,
+                    DevelopmentPlan.user_id == uid,
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    prior_goals = [
+        str(goal.get("title", "")).lower()
+        for plan in plans
+        for goal in (plan.goals or [])
+        if isinstance(goal, dict)
+    ]
+    out = []
+    for gap in gaps:
+        requirement = await db.scalar(
+            select(RoleRequirement).where(
+                RoleRequirement.id == gap.role_requirement_id,
+                RoleRequirement.tenant_id == user.tenant_id,
+            )
+        )
+        role = (
+            await db.scalar(
+                select(Role).where(
+                    Role.id == requirement.role_id, Role.tenant_id == user.tenant_id
+                )
+            )
+            if requirement
+            else None
+        )
+        risk = (
+            await db.scalar(
+                select(CapabilityRisk).where(
+                    CapabilityRisk.capability_id == gap.target_id,
+                    CapabilityRisk.tenant_id == user.tenant_id,
+                )
+            )
+            if gap.target_type == "capability"
+            else None
+        )
+        priority = _priority(gap, risk)
+        urgency = {"critical": 100, "high": 80, "medium": 60, "low": 40}[priority]
+        evidence_rows = (
+            await db.execute(
+                select(CapabilityEvidence.observed_at, CapabilityEvidence.confidence)
+                .where(
+                    CapabilityEvidence.tenant_id == user.tenant_id,
+                    CapabilityEvidence.user_id == uid,
+                    CapabilityEvidence.target_type == gap.target_type,
+                    CapabilityEvidence.target_id == gap.target_id,
+                )
+                .order_by(CapabilityEvidence.observed_at.desc())
+                .limit(20)
+            )
+        ).all()
+        latest = evidence_rows[0][0] if evidence_rows else None
+        evidence_age = (
+            max(0, (datetime.now(timezone.utc) - latest).days) if latest else 9999
+        )
+        freshness = max(0, 100 - min(100, evidence_age / 180 * 100))
+        assessment_history = min(100, len(evidence_rows) * 20)
+        if gap.target_type == "capability":
+            skill_rows = (
+                await db.execute(
+                    select(CapabilitySkill.skill_id, CapabilitySkill.weight).where(
+                        CapabilitySkill.capability_id == gap.target_id
+                    )
+                )
+            ).all()
+        elif gap.target_type == "competency":
+            capability_ids = (
+                (
+                    await db.execute(
+                        select(CapabilityCompetency.capability_id).where(
+                            CapabilityCompetency.competency_id == gap.target_id
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            skill_rows = (
+                await db.execute(
+                    select(CapabilitySkill.skill_id, CapabilitySkill.weight).where(
+                        CapabilitySkill.capability_id.in_(
+                            capability_ids or [UUID(int=0)]
+                        )
+                    )
+                )
+            ).all()
+        else:
+            skill_rows = [(gap.target_id, 100)]
+        skill_ids = {sid for sid, _ in skill_rows}
+        course_rows = (
+            await db.execute(
+                select(Course, CourseSkill.skill_id, CourseSkill.target_proficiency)
+                .join(CourseSkill, CourseSkill.course_id == Course.id)
+                .where(
+                    Course.tenant_id == user.tenant_id,
+                    Course.status == "published",
+                    CourseSkill.skill_id.in_(list(skill_ids) or [UUID(int=0)]),
+                )
+            )
+        ).all()
+        course_scores = {}
+        for course, skill_id, target in course_rows:
+            fit = min(100, float(target) / max(1, float(gap.required_level)) * 100)
+            course_scores[course.id] = max(course_scores.get(course.id, 0), fit)
+        for course, _, _ in course_rows:
+            course_id = course.id
+            fit = course_scores.get(course_id, 0)
+            prior_penalty = (
+                30
+                if history.get(course_id) in {"completed", "enrolled", "in_progress"}
+                else 0
+            )
+            score = max(
+                0,
+                min(
+                    100,
+                    0.42 * fit
+                    + 0.25 * urgency
+                    + 0.13 * float(gap.evidence_confidence)
+                    + 0.10 * freshness
+                    + 0.10 * assessment_history
+                    - prior_penalty
+                    + _preference(user, "learning"),
+                ),
+            )
+            out.append(
+                (
+                    uid,
+                    gap,
+                    role,
+                    "learning",
+                    "course",
+                    str(course_id),
+                    course.title,
+                    float(score),
+                    priority,
+                    max(
+                        14,
+                        min(
+                            180, 30 + int((5 - float(gap.demonstrated_level or 0)) * 30)
+                        ),
+                    ),
+                    {
+                        "course_id": str(course_id),
+                        "fit": round(fit, 1),
+                        "prior_status": history.get(course_id),
+                        "role": role.name if role else None,
+                        "evidence_age_days": evidence_age,
+                        "assessment_history_count": len(evidence_rows),
+                    },
+                )
+            )
+        path_rows = (
+            await db.execute(
+                select(LearningPath, LearningPathItem.course_id)
+                .join(LearningPathItem, LearningPathItem.path_id == LearningPath.id)
+                .where(
+                    LearningPath.tenant_id == user.tenant_id,
+                    LearningPath.status == "published",
+                    LearningPathItem.course_id.in_(
+                        list(course_scores) or [UUID(int=0)]
+                    ),
+                )
+            )
+        ).all()
+        path_courses = {}
+        for path, cid in path_rows:
+            path_courses.setdefault(path.id, [path, []])[1].append(cid)
+        for path, cids in path_courses.values():
+            fit = sum(course_scores.get(cid, 0) for cid in cids) / max(1, len(cids))
+            score = max(
+                0,
+                min(
+                    100,
+                    0.45 * fit
+                    + 0.30 * urgency
+                    + 0.15 * freshness
+                    + 0.10 * assessment_history
+                    + _preference(user, "learning"),
+                ),
+            )
+            out.append(
+                (
+                    uid,
+                    gap,
+                    role,
+                    "learning",
+                    "learning_path",
+                    str(path.id),
+                    path.title,
+                    float(score),
+                    priority,
+                    max(
+                        21,
+                        min(
+                            180, 45 + int((5 - float(gap.demonstrated_level or 0)) * 25)
+                        ),
+                    ),
+                    {
+                        "learning_path_id": str(path.id),
+                        "course_count": len(cids),
+                        "fit": round(fit, 1),
+                        "role": role.name if role else None,
+                    },
+                )
+            )
+        program_rows = (
+            await db.execute(
+                select(Program, ProgramCourse.course_id)
+                .join(ProgramCourse, ProgramCourse.program_id == Program.id)
+                .where(
+                    Program.tenant_id == user.tenant_id,
+                    Program.status == "published",
+                    ProgramCourse.course_id.in_(list(course_scores) or [UUID(int=0)]),
+                )
+            )
+        ).all()
+        program_courses = {}
+        for program, cid in program_rows:
+            program_courses.setdefault(program.id, [program, []])[1].append(cid)
+        for program, cids in program_courses.values():
+            fit = sum(course_scores.get(cid, 0) for cid in cids) / max(1, len(cids))
+            score = max(
+                0,
+                min(
+                    100,
+                    0.45 * fit
+                    + 0.30 * urgency
+                    + 0.15 * freshness
+                    + 0.10 * assessment_history
+                    + _preference(user, "learning"),
+                ),
+            )
+            out.append(
+                (
+                    uid,
+                    gap,
+                    role,
+                    "learning",
+                    "program",
+                    str(program.id),
+                    program.title,
+                    float(score),
+                    priority,
+                    max(
+                        30,
+                        min(
+                            180, 60 + int((5 - float(gap.demonstrated_level or 0)) * 25)
+                        ),
+                    ),
+                    {
+                        "program_id": str(program.id),
+                        "course_count": len(cids),
+                        "fit": round(fit, 1),
+                        "role": role.name if role else None,
+                    },
+                )
+            )
+        session_rows = (
+            await db.execute(
+                select(LiveSession, LiveSession.course_id)
+                .where(
+                    LiveSession.tenant_id == user.tenant_id,
+                    LiveSession.status == "scheduled",
+                    LiveSession.starts_at >= datetime.now(timezone.utc),
+                    LiveSession.course_id.in_(list(course_scores) or [UUID(int=0)]),
+                )
+                .limit(20)
+            )
+        ).all()
+        for session, cid in session_rows:
+            fit = course_scores.get(cid, 0)
+            score = max(
+                0,
+                min(
+                    100,
+                    0.45 * fit
+                    + 0.35 * urgency
+                    + 0.10 * freshness
+                    + 0.10 * assessment_history
+                    + _preference(user, "learning"),
+                ),
+            )
+            out.append(
+                (
+                    uid,
+                    gap,
+                    role,
+                    "learning",
+                    "session",
+                    str(session.id),
+                    session.title,
+                    float(score),
+                    priority,
+                    max(
+                        7,
+                        min(
+                            120,
+                            (session.starts_at - datetime.now(timezone.utc)).days + 7,
+                        ),
+                    ),
+                    {
+                        "session_id": str(session.id),
+                        "course_id": str(cid),
+                        "fit": round(fit, 1),
+                        "starts_at": session.starts_at.isoformat(),
+                    },
+                )
+            )
+        base = (
+            0.45 * urgency
+            + 0.20 * (100 - float(gap.evidence_confidence))
+            + 0.15 * min(100, float(gap.gap_value or 0) / 4 * 100)
+            + 0.10 * freshness
+            + 0.10 * assessment_history
+        )
+        templates = [
+            (
+                "coaching",
+                "Targeted manager coaching",
+                "Use focused practice, observation and feedback against the capability gap.",
+            ),
+            (
+                "mentoring",
+                "Capability-focused mentoring",
+                "Use guided experience and perspective from a knowledgeable mentor.",
+            ),
+            (
+                "experiential",
+                "Stretch assignment / field practice",
+                "Build demonstrated capability through a scoped real-work assignment.",
+            ),
+            (
+                "evidence_building",
+                "Evidence-building assessment",
+                "Create observable evidence and reassess the demonstrated capability level.",
+            ),
+        ]
+        for kind, title, rationale in templates:
+            prior = sum(
+                1
+                for g in prior_goals
+                if kind.replace("_", " ") in g or title.lower() in g
+            )
+            score = max(
+                0, min(100, base + _preference(user, kind) - min(20, prior * 10))
+            )
+            out.append(
+                (
+                    uid,
+                    gap,
+                    role,
+                    kind,
+                    "template",
+                    "template:" + kind,
+                    title,
+                    float(score),
+                    priority,
+                    max(
+                        30,
+                        min(
+                            180, 45 + int((5 - float(gap.demonstrated_level or 0)) * 25)
+                        ),
+                    ),
+                    {
+                        "gap_id": str(gap.id),
+                        "evidence_confidence": gap.evidence_confidence,
+                        "risk_score": float(risk.risk_score) if risk else None,
+                        "role": role.name if role else None,
+                        "evidence_age_days": evidence_age,
+                        "assessment_history_count": len(evidence_rows),
+                        "prior_intervention_count": prior,
+                        "rationale_basis": rationale,
+                    },
+                )
+            )
+    out.sort(key=lambda x: x[7], reverse=True)
+    return uid, out
+
+
+@router.get("/recommendations")
+async def recommendations(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    user_id: UUID | None = Query(None),
+    intervention_type: str | None = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+):
+    uid, generated = await _generate(user, db, user_id)
+    rows = (
+        (
+            await db.execute(
+                select(DevelopmentRecommendation)
+                .where(
+                    DevelopmentRecommendation.tenant_id == user.tenant_id,
+                    DevelopmentRecommendation.user_id == uid,
+                    DevelopmentRecommendation.status.in_(["recommended", "accepted"]),
+                )
+                .order_by(DevelopmentRecommendation.score.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
+    existing = {
+        (x.capability_gap_id, x.intervention_type, x.source_type, x.source_id): x
+        for x in rows
+    }
+    generated_keys = set()
+    for (
+        uid,
+        gap,
+        role,
+        kind,
+        source_type,
+        source_id,
+        title,
+        score,
+        priority,
+        days,
+        meta,
+    ) in generated:
+        key = (gap.id, kind, source_type, source_id)
+        generated_keys.add(key)
+        item = existing.get(key)
+        if item is None:
+            reason = title + " is recommended to address the observed capability gap."
+            item = DevelopmentRecommendation(
+                tenant_id=user.tenant_id,
+                user_id=uid,
+                capability_gap_id=gap.id,
+                intervention_type=kind,
+                source_type=source_type,
+                source_id=source_id,
+                title=title,
+                rationale=f"{reason} Gap severity is {gap.severity}; required level {gap.required_level}, demonstrated level {gap.demonstrated_level if gap.demonstrated_level is not None else 'not demonstrated'}. Role context: {role.name if role else 'not specified'}.",
+                score=score,
+                priority=priority,
+                timeframe_days=days,
+                recommendation_version=VERSION,
+                metadata_json=meta,
+            )
+            db.add(item)
+        else:
+            item.score = score
+            item.priority = priority
+            item.timeframe_days = days
+            item.metadata_json = meta
+            item.rationale = f"{title} remains aligned to the observed capability gap. Role context: {role.name if role else 'not specified'}."
+    # Reconcile persisted recommendations against the current governed gap state.
+    for item in rows:
+        key = (
+            item.capability_gap_id,
+            item.intervention_type,
+            item.source_type,
+            item.source_id,
+        )
+        if item.status == "recommended" and key not in generated_keys:
+            item.status = "superseded"
+
+    await db.commit()
+    rows = (
+        (
+            await db.execute(
+                select(DevelopmentRecommendation)
+                .where(
+                    DevelopmentRecommendation.tenant_id == user.tenant_id,
+                    DevelopmentRecommendation.user_id == uid,
+                    DevelopmentRecommendation.status.in_(["recommended", "accepted"]),
+                    *([DevelopmentRecommendation.intervention_type == intervention_type] if intervention_type else []),
+                )
+                .order_by(DevelopmentRecommendation.score.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
+    return [
+        {
+            "id": str(x.id),
+            "capability_gap_id": str(x.capability_gap_id),
+            "intervention_type": x.intervention_type,
+            "source_type": x.source_type,
+            "source_id": x.source_id,
+            "title": x.title,
+            "rationale": x.rationale,
+            "score": float(x.score),
+            "priority": x.priority,
+            "timeframe_days": x.timeframe_days,
+            "status": x.status,
+            "metadata": x.metadata_json,
+            "recommendation_version": x.recommendation_version,
+        }
+        for x in rows[:limit]
+    ]
+
+
+@router.post("/recommendations/{recommendation_id}/accept")
+async def accept_recommendation(
+    recommendation_id: UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    item = await db.scalar(
+        select(DevelopmentRecommendation).where(
+            DevelopmentRecommendation.id == recommendation_id,
+            DevelopmentRecommendation.tenant_id == user.tenant_id,
+        )
+    )
+    if item is None:
+        raise HTTPException(404, "Development recommendation not found")
+    if item.user_id != user.id and not await user_has_permission(
+        user, db, "development.recommendations.manage"
+    ):
+        raise HTTPException(403, "You cannot accept this recommendation")
+    if item.status == "accepted":
+        return {"status": "accepted", "recommendation_id": str(item.id)}
+    item.status = "accepted"
+    if item.source_type in {"course", "learning_path", "program", "session"}:
+        course_ids = []
+        if item.source_type == "course":
+            course_ids = [UUID(item.source_id)]
+        elif item.source_type == "learning_path":
+            course_ids = (
+                (
+                    await db.execute(
+                        select(LearningPathItem.course_id).where(
+                            LearningPathItem.path_id == UUID(item.source_id),
+                            LearningPathItem.tenant_id == user.tenant_id,
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+        elif item.source_type == "program":
+            course_ids = (
+                (
+                    await db.execute(
+                        select(ProgramCourse.course_id).where(
+                            ProgramCourse.program_id == UUID(item.source_id),
+                            ProgramCourse.tenant_id == user.tenant_id,
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+        else:
+            session = await db.scalar(
+                select(LiveSession).where(
+                    LiveSession.id == UUID(item.source_id),
+                    LiveSession.tenant_id == user.tenant_id,
+                )
+            )
+            if session:
+                course_ids = [session.course_id]
+        courses = (
+            (
+                await db.execute(
+                    select(Course).where(
+                        Course.tenant_id == user.tenant_id,
+                        Course.status == "published",
+                        Course.id.in_(course_ids or [UUID(int(0))]),
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if not courses:
+            raise HTTPException(
+                409, "The recommended learning resource is no longer available"
+            )
+        for course in courses:
+            active = await db.scalar(
+                select(Enrollment).where(
+                    Enrollment.tenant_id == user.tenant_id,
+                    Enrollment.user_id == item.user_id,
+                    Enrollment.course_id == course.id,
+                    Enrollment.status.notin_(["completed", "rejected"]),
+                )
+            )
+            if not active:
+                db.add(
+                    Enrollment(
+                        tenant_id=user.tenant_id,
+                        course_id=course.id,
+                        user_id=item.user_id,
+                        status="enrolled",
+                        source="development_recommendation",
+                        due_at=datetime.now(timezone.utc)
+                        + timedelta(days=item.timeframe_days),
+                    )
+                )
+    else:
+        plan = await db.scalar(
+            select(DevelopmentPlan)
+            .where(
+                DevelopmentPlan.tenant_id == user.tenant_id,
+                DevelopmentPlan.user_id == item.user_id,
+                DevelopmentPlan.status == "active",
+            )
+            .order_by(DevelopmentPlan.created_at.desc())
+        )
+        goal = {
+            "title": f"{item.title} — {item.intervention_type}",
+            "target_date": (
+                datetime.now(timezone.utc) + timedelta(days=item.timeframe_days)
+            )
+            .date()
+            .isoformat(),
+            "status": "planned",
+            "notes": item.rationale,
+        }
+        if plan is None:
+            plan = DevelopmentPlan(
+                tenant_id=user.tenant_id,
+                user_id=item.user_id,
+                title=f"Capability development — {item.title}",
+                status="active",
+                goals=[goal],
+            )
+            db.add(plan)
+        else:
+            plan.goals = [*(plan.goals or []), goal]
+        await db.flush()
+        existing_intervention = await db.scalar(
+            select(DevelopmentIntervention).where(
+                DevelopmentIntervention.tenant_id == user.tenant_id,
+                DevelopmentIntervention.recommendation_id == item.id,
+            )
+        )
+        if existing_intervention is None:
+            db.add(
+                DevelopmentIntervention(
+                    tenant_id=user.tenant_id,
+                    user_id=item.user_id,
+                    plan_id=plan.id,
+                    recommendation_id=item.id,
+                    intervention_type=item.intervention_type,
+                    title=item.title,
+                    objective=item.rationale,
+                    status="planned",
+                    due_at=datetime.now(timezone.utc) + timedelta(days=item.timeframe_days),
+                    metadata_json={"recommendation_version": item.recommendation_version},
+                )
+            )
+    await audit(
+        db,
+        tenant_id=user.tenant_id,
+        actor_id=user.id,
+        action="development.recommendation.accepted",
+        entity_type="development_recommendation",
+        entity_id=str(item.id),
+        metadata={"type": item.intervention_type, "source": item.source_id},
+    )
+    await db.commit()
+    return {
+        "status": "accepted",
+        "recommendation_id": str(item.id),
+        "intervention_type": item.intervention_type,
+        "source_type": item.source_type,
+    }

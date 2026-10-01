@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { ClipboardCheck, Plus } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ResourceForm } from "@/components/resource-form";

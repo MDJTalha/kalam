@@ -1,6 +1,7 @@
 param(
   [switch]$SkipTests,
-  [switch]$SkipBuild
+  [switch]$SkipBuild,
+  [switch]$RequireCleanTree
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,6 +20,12 @@ function Assert-Exit([string]$Name) {
 
 try {
 Set-Location $root
+if ($RequireCleanTree) {
+  $changes = @(git status --porcelain --untracked-files=all)
+  Assert-Exit "git status"
+  if ($changes.Count -gt 0) { throw "Release candidate working tree is not clean; commit and review its contents before certification." }
+  Write-Output "[PASS] clean release-candidate tree"
+}
 docker compose -f docker-compose.yml config --quiet
 Assert-Exit "development compose validation"
 

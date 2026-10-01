@@ -10,7 +10,7 @@
 7. On-call owner and rollback decision owner are named.
 
 ## Preflight
-Run `infra/scripts/phase8-preflight.ps1` from the repository root. Do not deploy if any gate fails.
+Run `infra/scripts/phase8-preflight.ps1 -RequireCleanTree` from the repository root against the exact release commit. Do not deploy if any gate fails. The separate `infra/scripts/phase8-local-regression.py` checks a disposable local database and requires ClamAV on `127.0.0.1:55000`; it does not replace hosted CI or target certification.
 
 ## Deployment sequence
 1. Pull/build API, web and dedicated worker images for the exact release commit; verify the worker image packages the course-reminder, compliance, email, webhook and report-scheduler jobs.

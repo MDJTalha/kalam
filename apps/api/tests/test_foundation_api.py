@@ -71,6 +71,52 @@ def test_login_is_tenant_scoped(client: TestClient) -> None:
     assert wrong.status_code == 401
 
 
+def test_auth_discovery_does_not_enumerate_unknown_tenant(client: TestClient) -> None:
+    unknown = client.get("/api/v1/auth/discovery/not-a-real-tenant")
+    assert unknown.status_code == 200
+    payload = unknown.json()
+    assert payload["recognized"] is False
+    assert payload["tenant_name"] is None
+    assert payload["sso_providers"] == []
+
+
+def test_auth_discovery_recognizes_demo_tenant(client: TestClient) -> None:
+    response = client.get(f"/api/v1/auth/discovery/{TENANT}")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["recognized"] is True
+    assert payload["tenant_slug"] == TENANT
+    assert payload["password_available"] is True
+
+
+def test_global_search_respects_people_permission(client: TestClient) -> None:
+    login(client, LEARNER)
+    assert client.get("/api/v1/search", params={"q": "   "}).status_code == 422
+    private_result = client.get("/api/v1/search", params={"q": ADMIN["email"]})
+    assert private_result.status_code == 200
+    assert private_result.json()["people"] == []
+    login(client, ADMIN)
+    admin_result = client.get("/api/v1/search", params={"q": ADMIN["email"]})
+    assert admin_result.status_code == 200
+    assert any(person["email"] == ADMIN["email"] for person in admin_result.json()["people"])
+
+
+def test_people_directory_page_is_bounded_and_permissioned(client: TestClient) -> None:
+    login(client, LEARNER)
+    assert client.get("/api/v1/people/page").status_code == 403
+    login(client, ADMIN)
+    first = client.get("/api/v1/people/page", params={"page": 1, "page_size": 1})
+    second = client.get("/api/v1/people/page", params={"page": 2, "page_size": 1})
+    assert first.status_code == second.status_code == 200
+    assert len(first.json()["items"]) == len(second.json()["items"]) == 1
+    assert first.json()["items"][0]["id"] != second.json()["items"][0]["id"]
+    assert first.json()["total"] == second.json()["total"] >= 2
+    match = client.get("/api/v1/people/page", params={"q": ADMIN["email"]})
+    assert match.status_code == 200
+    assert any(person["email"] == ADMIN["email"] for person in match.json()["items"])
+    assert client.get("/api/v1/people/page", params={"page_size": 101}).status_code == 422
+
+
 def test_authenticated_profile_is_available(client: TestClient) -> None:
     login(client, LEARNER)
     response = client.get("/api/v1/auth/me")
@@ -468,7 +514,7 @@ def test_phase1_role_permission_matrix_is_tenant_scoped_and_protected(client: Te
 
     roles = client.get("/api/v1/admin/roles")
     assert roles.status_code == 200
-    admin_role = next(item for item in roles.json() if item["name"] == "Tenant Admin")
+    admin_role = next(item for item in roles.json() if item["name"] == "Tenant Administrator")
 
     current = client.get(f"/api/v1/admin/roles/{admin_role['id']}/permissions")
     assert current.status_code == 200
@@ -478,13 +524,13 @@ def test_phase1_role_permission_matrix_is_tenant_scoped_and_protected(client: Te
         f"/api/v1/admin/roles/{admin_role['id']}/permissions",
         json={"permission_keys": ["does.not.exist"]},
     )
-    assert invalid.status_code == 422
+    assert invalid.status_code == 403
 
     unsafe = client.put(
         f"/api/v1/admin/roles/{admin_role['id']}/permissions",
         json={"permission_keys": ["users.read"]},
     )
-    assert unsafe.status_code == 422
+    assert unsafe.status_code == 403
 
 
 def test_phase1_self_service_resource_ids_remain_tenant_and_user_scoped(client: TestClient) -> None:
@@ -1149,6 +1195,9 @@ def test_phase2_approval_and_audience_enrollment(client: TestClient) -> None:
     assert lesson.status_code == 200
     assert client.post(f"/api/v1/courses/{course_id}/publish").status_code == 200
     login(client, LEARNER)
+    preview = client.get(f"/api/v1/courses/{course_id}")
+    assert preview.status_code == 200
+    assert preview.json()["modules"][0]["lessons"][0]["content"] == {}
     outside = client.post(f"/api/v1/courses/{course_id}/enroll")
     assert outside.status_code == 403
     login(client, ADMIN)
@@ -1158,6 +1207,7 @@ def test_phase2_approval_and_audience_enrollment(client: TestClient) -> None:
     requested = client.post(f"/api/v1/courses/{course_id}/enroll")
     assert requested.status_code == 200
     assert requested.json()["status"] == "pending_approval"
+    assert client.get(f"/api/v1/courses/{course_id}").json()["modules"][0]["lessons"][0]["content"] == {}
     enrollment_id = requested.json()["id"]
     login(client, ADMIN)
     queue = client.get(f"/api/v1/courses/{course_id}/enrollments/queue")
@@ -1170,6 +1220,7 @@ def test_phase2_approval_and_audience_enrollment(client: TestClient) -> None:
     detail = client.get(f"/api/v1/courses/{course_id}")
     assert detail.status_code == 200
     lesson_id = detail.json()["modules"][0]["lessons"][0]["id"]
+    assert detail.json()["modules"][0]["lessons"][0]["content"]["body"] == "Approval"
     completed = client.post(
         f"/api/v1/courses/my/enrollments/{enrollment_id}/lessons/{lesson_id}/complete"
     )
@@ -1752,3 +1803,126 @@ def test_assessment_timed_attempt_resume_and_revision_lock(client: TestClient) -
     assert copied.status_code == 201
     editor = client.get(f"/api/v1/assessments/{copied.json()['id']}/editor")
     assert editor.status_code == 200 and editor.json()["locked"] is False
+
+
+def test_phase9_course_studio_structure_lifecycle(client: TestClient) -> None:
+    login(client, ADMIN)
+    token = uuid4().hex[:8]
+    course = client.post(
+        "/api/v1/courses",
+        json={"title": f"Phase 9 Studio {token}", "slug": f"phase-9-studio-{token}"},
+    )
+    assert course.status_code == 201
+    course_id = course.json()["id"]
+
+    first = client.post(
+        f"/api/v1/courses/{course_id}/modules",
+        json={"title": "First module", "position": 1},
+    )
+    second = client.post(
+        f"/api/v1/courses/{course_id}/modules",
+        json={"title": "Second module", "position": 2},
+    )
+    assert first.status_code == 200 and second.status_code == 200
+    first_id = first.json()["id"]
+    second_id = second.json()["id"]
+
+    first_lesson = client.post(
+        f"/api/v1/courses/{course_id}/modules/{first_id}/lessons",
+        json={"title": "First lesson", "position": 1, "content_type": "rich_text", "content": {"body": "one"}},
+    )
+    second_lesson = client.post(
+        f"/api/v1/courses/{course_id}/modules/{first_id}/lessons",
+        json={"title": "Second lesson", "position": 2, "content_type": "rich_text", "content": {"body": "two"}},
+    )
+    assert first_lesson.status_code == 200 and second_lesson.status_code == 200
+
+    detail = client.get(f"/api/v1/courses/{course_id}").json()
+    assert [item["position"] for item in detail["modules"]] == [1, 2]
+    assert [item["position"] for item in detail["modules"][0]["lessons"]] == [1, 2]
+
+    deleted_lesson = client.delete(
+        f"/api/v1/courses/{course_id}/modules/{first_id}/lessons/{second_lesson.json()['id']}"
+    )
+    assert deleted_lesson.status_code == 200
+    after_lesson_delete = client.get(f"/api/v1/courses/{course_id}").json()
+    assert len(after_lesson_delete["modules"][0]["lessons"]) == 1
+    assert after_lesson_delete["modules"][0]["lessons"][0]["position"] == 1
+
+    deleted_module = client.delete(f"/api/v1/courses/{course_id}/modules/{first_id}")
+    assert deleted_module.status_code == 200
+    final_detail = client.get(f"/api/v1/courses/{course_id}").json()
+    assert len(final_detail["modules"]) == 1
+    assert final_detail["modules"][0]["id"] == second_id
+    assert final_detail["modules"][0]["position"] == 1
+
+
+def test_phase9_learning_path_reorder_preserves_prerequisites(client: TestClient) -> None:
+    login(client, ADMIN)
+    token = uuid4().hex[:8]
+    courses = []
+    for index in (1, 2, 3):
+        course = client.post(
+            "/api/v1/courses",
+            json={"title": f"Phase 9 Path {index} {token}", "slug": f"phase-9-path-{index}-{token}"},
+        )
+        assert course.status_code == 201
+        courses.append(course.json()["id"])
+
+    path = client.post(
+        "/api/v1/programs/paths",
+        json={"title": f"Phase 9 Path {token}", "slug": f"phase-9-learning-path-{token}"},
+    )
+    assert path.status_code == 201
+    path_id = path.json()["id"]
+
+    for position, course_id in enumerate(courses, start=1):
+        response = client.post(
+            f"/api/v1/programs/paths/{path_id}/courses",
+            json={"course_id": course_id, "position": position, "prerequisite_item_id": courses[position - 2] if position > 1 else None},
+        )
+        assert response.status_code == 201
+
+    moved = client.patch(
+        f"/api/v1/programs/paths/{path_id}/courses/{courses[2]}/position",
+        json={"position": 2},
+    )
+    assert moved.status_code == 422
+
+    safe_move = client.patch(
+        f"/api/v1/programs/paths/{path_id}/courses/{courses[1]}/position",
+        json={"position": 3},
+    )
+    assert safe_move.status_code == 422
+
+
+def test_phase9_course_reorder_is_atomic_and_normalized(client: TestClient) -> None:
+    login(client, ADMIN)
+    token = uuid4().hex[:8]
+    course = client.post(
+        "/api/v1/courses",
+        json={"title": f"Phase 9 Reorder {token}", "slug": f"phase-9-reorder-{token}"},
+    )
+    assert course.status_code == 201
+    course_id = course.json()["id"]
+    modules = [
+        client.post(f"/api/v1/courses/{course_id}/modules", json={"title": f"Module {index}", "position": index}).json()
+        for index in (1, 2, 3)
+    ]
+    move = client.patch(
+        f"/api/v1/courses/{course_id}/modules/{modules[2]['id']}/position",
+        json={"position": 1},
+    )
+    assert move.status_code == 200
+    detail = client.get(f"/api/v1/courses/{course_id}").json()
+    assert [item["id"] for item in detail["modules"]] == [modules[2]["id"], modules[0]["id"], modules[1]["id"]]
+    assert [item["position"] for item in detail["modules"]] == [1, 2, 3]
+    invalid = client.patch(
+        f"/api/v1/courses/{course_id}/modules/{modules[0]['id']}/position",
+        json={"position": 99},
+    )
+    assert invalid.status_code == 422
+    unchanged = client.get(f"/api/v1/courses/{course_id}").json()
+    assert [item["position"] for item in unchanged["modules"]] == [1, 2, 3]
+
+

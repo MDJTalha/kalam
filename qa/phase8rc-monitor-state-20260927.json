@@ -1,0 +1,9 @@
+﻿{
+    "schema_version":  2,
+    "checked_at_utc":  "2026-09-27T11:16:05.1845319Z",
+    "gateway_failures":  0,
+    "api_failures":  0,
+    "api_first_failed_utc":  null,
+    "worker_failures":  0,
+    "worker_first_failed_utc":  null
+}

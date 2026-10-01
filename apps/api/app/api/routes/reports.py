@@ -318,6 +318,72 @@ async def export_course_performance(
     return csv_response("corporate-lms-course-performance.csv", ["Course", "Status", "Enrollments", "Completions", "Completion Rate %"], rows)
 
 
+@router.get("/export/people")
+async def export_people(
+    user: User = Depends(require_permission("reports.read")),
+    db: AsyncSession = Depends(get_db),
+) -> StreamingResponse:
+    result = await db.execute(
+        select(User)
+        .where(User.tenant_id == user.tenant_id)
+        .order_by(User.last_name.asc(), User.first_name.asc(), User.email.asc())
+    )
+    rows = [
+        [
+            str(item.id),
+            item.email,
+            item.first_name,
+            item.last_name,
+            item.employee_number or "",
+            item.job_title or "",
+            "active" if item.is_active else "inactive",
+            item.last_login_at.isoformat() if item.last_login_at else "",
+        ]
+        for item in result.scalars().all()
+    ]
+    return csv_response(
+        "kognivon-people.csv",
+        ["User ID", "Email", "First Name", "Last Name", "Employee Number", "Job Title", "Status", "Last Sign-in"],
+        rows,
+    )
+
+
+@router.get("/export/enrollments")
+async def export_enrollments(
+    user: User = Depends(require_permission("reports.read")),
+    db: AsyncSession = Depends(get_db),
+) -> StreamingResponse:
+    result = await db.execute(
+        select(Enrollment, Course, User)
+        .join(Course, Course.id == Enrollment.course_id)
+        .join(User, User.id == Enrollment.user_id)
+        .where(
+            Enrollment.tenant_id == user.tenant_id,
+            Course.tenant_id == user.tenant_id,
+            User.tenant_id == user.tenant_id,
+        )
+        .order_by(Enrollment.created_at.desc(), User.email.asc())
+    )
+    rows = [
+        [
+            str(item.id),
+            learner.email,
+            f"{learner.first_name} {learner.last_name}".strip(),
+            course.title,
+            item.status,
+            item.created_at.isoformat() if item.created_at else "",
+            item.due_at.isoformat() if item.due_at else "",
+            item.completed_at.isoformat() if item.completed_at else "",
+        ]
+        for item, course, learner in result.all()
+    ]
+    return csv_response(
+        "kognivon-enrollments.csv",
+        ["Enrollment ID", "Learner Email", "Learner", "Course", "Status", "Enrolled At", "Due At", "Completed At"],
+        rows,
+    )
+
+
 @router.get("/export/compliance")
 async def export_compliance(
     user: User = Depends(require_permission("reports.read")),
@@ -622,62 +688,3 @@ async def compliance_risk(
     overdue = int(overdue or 0)
     risk_band = "low" if overdue == 0 else ("high" if overdue >= max(3, total // 5) else "medium")
     return {"total": total, "open": open_count, "overdue": overdue, "risk_band": risk_band}
-
-
-@router.get("/export/people")
-async def export_people(
-    user: User = Depends(require_permission("reports.read")),
-    db: AsyncSession = Depends(get_db),
-) -> StreamingResponse:
-    result = await db.execute(
-        select(User)
-        .where(User.tenant_id == user.tenant_id)
-        .order_by(User.last_name, User.first_name)
-    )
-    rows = [
-        [
-            item.employee_number or "",
-            item.first_name,
-            item.last_name,
-            item.email,
-            item.job_title or "",
-            "Active" if item.is_active else "Inactive",
-        ]
-        for item in result.scalars().all()
-    ]
-    return csv_response(
-        "corporate-lms-people.csv",
-        ["Employee Number", "First Name", "Last Name", "Email", "Job Title", "Status"],
-        rows,
-    )
-
-
-@router.get("/export/enrollments")
-async def export_enrollments(
-    user: User = Depends(require_permission("reports.read")),
-    db: AsyncSession = Depends(get_db),
-) -> StreamingResponse:
-    result = await db.execute(
-        select(Enrollment, User, Course)
-        .join(User, User.id == Enrollment.user_id)
-        .join(Course, Course.id == Enrollment.course_id)
-        .where(Enrollment.tenant_id == user.tenant_id)
-        .order_by(Enrollment.created_at.desc())
-    )
-    rows = [
-        [
-            f"{person.first_name} {person.last_name}",
-            person.email,
-            course.title,
-            enrollment.status,
-            enrollment.source,
-            enrollment.created_at.isoformat(),
-            enrollment.completed_at.isoformat() if enrollment.completed_at else "",
-        ]
-        for enrollment, person, course in result.all()
-    ]
-    return csv_response(
-        "corporate-lms-enrollments.csv",
-        ["Learner", "Email", "Course", "Status", "Source", "Enrolled At", "Completed At"],
-        rows,
-    )

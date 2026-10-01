@@ -1,6 +1,6 @@
 import csv
 from io import StringIO
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from fastapi.responses import FileResponse
@@ -14,6 +14,7 @@ from app.api.routes.files import ALLOWED_MIME_TYPES
 from app.services.file_scanner import FileScanError, scan_file
 from app.services.storage import get_storage
 from app.services.audit import audit
+from app.services.compliance_operations import run_compliance_operations_for_tenant
 
 router = APIRouter()
 
@@ -146,6 +147,60 @@ async def ensure_compliance_enrollment(db: AsyncSession, *, tenant_id: UUID, lea
     await audit(db, tenant_id=tenant_id, actor_id=actor_id,
                 action="compliance.learning.enrolled", entity_type="course", entity_id=str(course.id),
                 metadata={"learner_id": str(learner_id), "status": next_status})
+
+
+
+@router.post("/operations/run")
+async def run_compliance_operations(
+    user: User = Depends(require_permission("compliance.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    return await run_compliance_operations_for_tenant(db, user.tenant_id, user.id)
+
+
+@router.get("/operations/summary")
+async def compliance_operations_summary(
+    user: User = Depends(require_permission("compliance.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    now = datetime.now(timezone.utc)
+    open_assignments = list(
+        (
+            await db.scalars(
+                select(ComplianceAssignment).where(
+                    ComplianceAssignment.tenant_id == user.tenant_id,
+                    ComplianceAssignment.status.in_(OPEN_ASSIGNMENT_STATUSES),
+                )
+            )
+        ).all()
+    )
+    expiring_exceptions = (
+        await db.scalar(
+            select(func.count(ComplianceException.id)).where(
+                ComplianceException.tenant_id == user.tenant_id,
+                ComplianceException.status == "approved",
+                ComplianceException.expires_at.is_not(None),
+                ComplianceException.expires_at <= now + timedelta(days=7),
+            )
+        )
+        or 0
+    )
+    return {
+        "generated_at": now,
+        "open_assignments": len(open_assignments),
+        "overdue": sum(
+            1
+            for item in open_assignments
+            if item.due_at and item.due_at < now
+        ),
+        "evidence_review": sum(
+            1 for item in open_assignments if item.status == "evidence_submitted"
+        ),
+        "exception_review": sum(
+            1 for item in open_assignments if item.status == "exception_requested"
+        ),
+        "expiring_exceptions_7d": expiring_exceptions,
+    }
 
 
 @router.get("")

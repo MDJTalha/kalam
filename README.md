@@ -1,15 +1,15 @@
-# Corporate LMS
+# Kalam
 
-Enterprise Corporate Learning Management System project.
+Enterprise Workforce Capability Platform. The repository keeps the historical `CorpLMS` technical identifier for continuity.
 
 ## Project root
 C:\Projects\CorpLMS
 
 ## Baseline status
-Planning and architecture baseline v0.1.
+Phase 0 current-tree local foundation gate passed on 2026-09-28. Hosted CI evidence requires a configured Git remote.
 
 ## Primary objective
-Build a production-grade, multi-tenant corporate LMS covering learning administration, learners, instructors, HR/L&D workflows, content, assessments, certifications, skills, compliance, analytics, integrations, and controlled AI capabilities.
+Build a production-grade, multi-tenant enterprise workforce capability platform covering learning administration, learners, instructors, HR/L&D workflows, content, assessments, certifications, skills, compliance, readiness, analytics, integrations, commercial SaaS operations and governed AI capabilities.
 
 ## Working principles
 - No static/demo-only implementation.
@@ -22,3 +22,11 @@ Build a production-grade, multi-tenant corporate LMS covering learning administr
 - Security, accessibility, observability and recovery are release requirements.
 
 See docs/ for the governing project plan and architecture.
+
+## Foundation validation
+
+Run the complete repeatable Phase 0 local gate from the repository root:
+
+`npm run validate:phase0`
+
+The command validates required baseline artifacts, environment consistency, Docker dependency readiness, migration head, API Ruff/mypy/pytest, web TypeScript/ESLint/build and reports repository/remote state.

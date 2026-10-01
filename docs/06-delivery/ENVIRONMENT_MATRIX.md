@@ -1,7 +1,7 @@
 # Corporate LMS — Environment Matrix
 
-Version: 0.2
-Status: Phase 0 technical gate passed — 2026-09-25
+Version: 0.3
+Status: Phase 0 current-tree local foundation gate passed — 2026-09-28
 
 | Environment | Web | API | Database | Redis/Jobs | Storage | Secrets |
 |---|---|---|---|---|---|---|

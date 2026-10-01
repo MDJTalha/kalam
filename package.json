@@ -14,7 +14,8 @@
     "dev:web": "npm --workspace apps/web run dev",
     "build:web": "npm --workspace apps/web run build",
     "lint:web": "npm --workspace apps/web run lint",
-    "typecheck:web": "npm --workspace apps/web run typecheck"
+    "typecheck:web": "npm --workspace apps/web run typecheck",
+    "validate:phase0": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/phase0-validate.ps1"
   },
   "engines": {
     "node": ">=20.9.0"

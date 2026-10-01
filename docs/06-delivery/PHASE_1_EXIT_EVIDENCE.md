@@ -1,104 +1,46 @@
-# Phase 1 Exit Evidence — Identity, Tenancy & Core Platform
+﻿# Kalam — Phase 1 Exit Evidence
 
-Date: 2026-09-25
-Implementation root: C:\Projects\CorpLMS
-Status: **CLOSED — local engineering evidence gate passed**
+Version: 1.0
+Date: 2026-09-30
+Status: CLOSED — LOCAL ENGINEERING / PRODUCT GATE
 
-## Scope
+## Objective
+Establish the canonical capability domain: Strategic Objective → Organizational Capability → Competency → Skill/Behavior → Role Requirement
 
-Phase 1 covers tenant-scoped identity, authentication and session security, RBAC and permission enforcement, tenant isolation, organization/role administration, lifecycle controls, auditability, protected frontend navigation and browser/runtime authentication behavior.
+## Implemented
+- Tenant-governed five-level proficiency language: Foundational, Developing, Proficient, Advanced, Expert.
+- Strategic Objectives with owner, business unit, priority, category, status and effective dates.
+- Strategic Objective → Capability mapping with required level and weight.
+- Competency framework with type, definition and mandatory five-level definitions/behavioral indicators.
+- Capability → Competency mapping with governed weight.
+- Unified Role Requirements for capability, competency and skill targets.
+- Required level, criticality, weight and effective periods.
+- Tenant isolation and permission enforcement for all Phase 1 routes.
+- Audit events for Phase 1 mutations.
+- Duplicate/overlap protection for role requirements.
+- Capability → Competency read endpoint for administration/review.
+- Existing competency-level editor initialization corrected so persisted levels are loaded rather than appearing empty.
 
-## Final exit checklist
+## QA / Acceptance — 2026-09-30
+- Dedicated Phase 1 capability-domain suite: **7 passed, 0 failed**.
+- Phase 2/3/4 regression after the Phase 1 permission correction: **8 passed, 0 failed**.
+- Earlier Phase 0/Foundation regression: **57 passed, 0 failed**.
+- Backend compilation for the affected capability-domain modules: PASS.
+- Phase 1 migration correction: PASS; database upgraded through mergepoint `h5i6j7k8l9m0`.
+- Capability permissions are now explicitly aligned to Tenant Owner, Tenant Administrator, L&D Administrator and HR / People Administrator; Manager has read access.
+- Tenant isolation, permission boundaries, level validation, effective dating, duplicate/overlap protection and audit-backed mutations are covered by the dedicated suite.
+- Frontend Phase 1 capability-domain implementation remains covered by the existing production build/type/lint gates.
+- Alembic now reports a single merged head: `h5i6j7k8l9m0`.
 
-- [x] Tenant-scoped authentication and logout.
-- [x] Password reset and account lockout/unlock.
-- [x] Session security controls.
-- [x] Tenant-scoped organization and role operations.
-- [x] Route-level permission catalog reconciled with API guards.
-- [x] Privileged endpoint negative-access matrix.
-- [x] Cross-tenant resource-ID / IDOR-BOLA regression coverage.
-- [x] User lifecycle regression evidence.
-- [x] Frontend protected-route/session retention verification.
-- [x] Browser navigation verification for Analytics.
-- [x] Password visibility toggle browser verification.
-- [x] Frontend TypeScript, ESLint and production build.
-- [x] Backend Ruff and mypy.
-- [x] Full API regression.
-- [x] Runtime web/API authentication smoke evidence.
+## Current-tree defects closed during QA
+- Fixed undefined l variable in apps/api/app/api/routes/capabilities.py.
+- Hardened role requirement effective-period validation.
+- Added capability→competency relationship read path.
+- Removed five web lint warnings.
+- Resolved standalone Next.js build lock caused by concurrent application/build processes.
 
-## Final validation evidence
+## Closure decision
+Phase 1 is closed for the current local engineering/product gate. The canonical capability domain is implemented, tenant-scoped, permission-governed, auditable and validated through the current API/web release gates.
 
-### Backend quality gates
-
-- Full API regression: **76 passed, 1 warning, 0 failures**.
-- Focused authentication/integration regression was also executed successfully; the lockout test was reproduced independently and passed.
-- Ruff on apps/api/app and apps/api/tests: **PASS — All checks passed**.
-- mypy on apps/api/app: **PASS — All checks passed**.
-- Known non-blocking warning: Starlette/httpx TestClient deprecation warning.
-
-The earlier broad ruff check report of legacy findings is not used as the Phase 1 production-code gate; those findings are concentrated in historical Phase 6 probe/evidence scripts and are not part of the current Phase 1 application/test lint scope.
-
-### Authentication and authorization
-
-- Tenant-scoped login returns an authenticated session cookie.
-- Authenticated /api/v1/auth/me returns the expected user/tenant context.
-- Learner access to privileged administrative operations is denied with HTTP 403.
-- Cross-tenant resource identifiers resolve to protective 403/404 outcomes.
-- Role-permission changes are tenant-scoped, validate permission keys and are audited.
-- Tenant Admin retains the mandatory tenant.manage permission.
-- Account lockout/unlock behavior is covered by regression testing.
-- Session listing, current-session protection, individual non-current revocation and revoke-other-sessions are covered.
-
-### Browser/runtime evidence
-
-A live Chromium/CDP validation was executed against the running LMS.
-
-Verified:
-
-- /dashboard loaded without redirecting to /login when an authenticated session was present.
-- /dashboard/reports loaded without redirecting to /login.
-- The Dashboard Analytics navigation link resolved to /dashboard/analytics.
-- Clicking Analytics retained the authenticated session and resulted in http://127.0.0.1:3000/dashboard/analytics with login=false.
-- Password field initially rendered as type=password.
-- Password visibility control was present with accessible label Show password.
-- Clicking the control changed the field to type=text and the accessible label to Hide password.
-- Reports browser QA passed at 1440px and 390px with no horizontal overflow, no workspace errors and zero unlabeled form fields.
-- Integrations browser QA passed at 390px with no horizontal overflow, no workspace errors and zero unlabeled form fields.
-
-### Frontend quality gates
-
-- TypeScript: **PASS**.
-- ESLint: **PASS**.
-- Production build: **PASS**.
-- Current Next.js application build contains **48 application routes**.
-
-### Runtime service evidence
-
-- Web development server: http://127.0.0.1:3000.
-- API: http://127.0.0.1:8000.
-- API health/readiness checks previously passed.
-- Frontend-to-backend authentication through the LMS same-origin API proxy was previously verified with HTTP 200 and session-cookie authentication.
-
-## Phase 1 implementation corrections completed
-
-- Centralized API test import bootstrap in apps/api/tests/conftest.py.
-- Removed test-module path-bootstrap lint violations.
-- Corrected integration adapter naming/import contract.
-- Corrected OIDC/LTI discovery test configuration.
-- Corrected malformed integration adapter/test syntax discovered during Phase 1 validation.
-- Preserved tenant-scoped authorization and audit behavior.
-- Verified lockout/unlock behavior against the current implementation.
-
-## Deferred / non-blocking
-
-Session device fingerprint/IP metadata remains deferred because the current session schema does not persist those attributes. This is not required for the local Phase 1 exit gate.
-
-External production credentials, SMTP infrastructure and third-party integration certification remain deployment prerequisites and are not simulated as complete.
-
-## Phase 1 decision
-
-**PHASE 1 CLOSED — LOCAL ENGINEERING GATE PASS.**
-
-The closure is based on implementation, database-backed regression coverage, authorization/tenant-isolation tests, static quality gates and live browser/runtime evidence.
-
-This does not mean the overall LMS is production-release complete. Phases 2–8 retain their own exit gates, and the project remains **IN PROGRESS — not production-release closed** until the Phase 8 release gate is fully evidenced and critical defects are zero.
+## External release evidence
+Hosted CI remains a separate deployment/governance gate because this checkout currently has no configured Git remote. This does not reopen the local Phase 1 product/engineering gate; promotion to a formally hosted release still requires repository/commit/workflow evidence.

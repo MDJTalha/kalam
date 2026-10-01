@@ -274,7 +274,7 @@ export function Phase6ReportWorkbench({
         ) : courseRows.length ? (
           <div className="table-wrap" aria-live="polite">
             <table className="data-table">
-              <thead><tr><th>Course</th><th>Status</th><th>Enrollments</th><th>Completions</th><th>Rate</th></tr></thead>
+              <thead><tr><th scope="col">Course</th><th scope="col">Status</th><th scope="col">Enrollments</th><th scope="col">Completions</th><th scope="col">Rate</th></tr></thead>
               <tbody>
                 {courseRows.map((item) => (
                   <tr key={item.course_id}>
@@ -327,7 +327,7 @@ export function Phase6ReportWorkbench({
         <section className="data-panel">
           <div className="section-heading compact"><div><span className="eyebrow">Assessment intelligence</span><h2>Assessment performance</h2></div><ClipboardCheck size={20} /></div>
           {assessments.length ? (
-            <div className="table-wrap"><table className="data-table"><thead><tr><th>Assessment</th><th>Attempts</th><th>Avg score</th><th>Pass rate</th></tr></thead><tbody>
+            <div className="table-wrap"><table className="data-table"><thead><tr><th scope="col">Assessment</th><th scope="col">Attempts</th><th scope="col">Avg score</th><th scope="col">Pass rate</th></tr></thead><tbody>
               {assessments.slice(0, 12).map((item) => <tr key={item.assessment_id}><td><strong>{item.assessment}</strong></td><td>{item.submitted_attempts}/{item.attempts}</td><td>{item.average_score}%</td><td><strong>{item.pass_rate}%</strong></td></tr>)}
             </tbody></table></div>
           ) : <div className="empty-state"><ClipboardCheck size={24} /><h3>No assessment evidence</h3><p>Assessment results will populate as attempts are submitted.</p></div>}
@@ -347,7 +347,7 @@ export function Phase6ReportWorkbench({
       <section className="data-panel">
         <div className="section-heading compact"><div><span className="eyebrow">Manager & team intelligence</span><h2>Team learning performance</h2></div><span className="section-meta">{managers.length} managers</span></div>
         {managers.length ? (
-          <div className="table-wrap"><table className="data-table"><thead><tr><th>Manager</th><th>Team members</th><th>Enrollments</th><th>Completions</th><th>Rate</th></tr></thead><tbody>
+          <div className="table-wrap"><table className="data-table"><thead><tr><th scope="col">Manager</th><th scope="col">Team members</th><th scope="col">Enrollments</th><th scope="col">Completions</th><th scope="col">Rate</th></tr></thead><tbody>
             {managers.map((item) => <tr key={item.manager_id}><td><strong>{item.manager}</strong></td><td>{item.team_members}</td><td>{item.enrollments}</td><td>{item.completions}</td><td><strong>{item.completion_rate}%</strong></td></tr>)}
           </tbody></table></div>
         ) : <div className="empty-state"><UsersRound size={24} /><h3>No manager-linked learning data</h3><p>Team reporting will populate when learners have reporting relationships and learning records.</p></div>}

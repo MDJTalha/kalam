@@ -120,9 +120,9 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
       <section className="data-panel">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">Phase 7 · Governed AI</span>
-            <h2>Learning intelligence with authorization boundaries</h2>
-            <p>AI responses are grounded only in published learning content the signed-in learner is authorized to access.</p>
+            <span className="eyebrow">Kalam AI · Governed intelligence</span>
+            <h2>Workforce intelligence, governed by design</h2>
+            <p>Kalam AI answers from authorized learning content, respects tenant access boundaries, and keeps AI activity auditable.</p>
           </div>
           <BrainCircuit size={28} aria-hidden="true" />
         </div>
@@ -132,13 +132,16 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
           <div className="metric-card"><span>Grounding</span><strong>Authorized content only</strong></div>
           <div className="metric-card"><span>Audit</span><strong>{status.governance.audit_logging ? "Enabled" : "Disabled"}</strong></div>
         </div>
-        {!status.configured ? <StateMessage tone="warning" title="Governed AI is not configured">An administrator must enable a ready governed provider, model, and tenant AI policy before generation is available.</StateMessage> : null}
+        <div className="ai-trust-strip" aria-label="Kalam AI governance safeguards">
+          <span><ShieldCheck size={14} aria-hidden="true"/> Authorized content only</span><span>Tenant access rules apply</span><span>Evidence grounded</span><span>Activity audited</span>
+        </div>
+        {!status.configured ? <StateMessage tone="warning" title="Kalam AI is not configured">An administrator must enable a ready governed provider, model, and tenant AI policy before generation is available.</StateMessage> : null}
       </section>
 
       {canManage ? (
         <section className="data-panel">
           <div className="section-heading compact">
-            <div><span className="eyebrow">AI governance operations</span><h2>Review and telemetry</h2></div>
+            <div><span className="eyebrow">Kalam AI governance</span><h2>Governance &amp; oversight</h2></div>
             <ShieldCheck size={22} aria-hidden="true" />
           </div>
           {telemetry ? <div className="metric-grid">
@@ -170,10 +173,10 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
 
       <section className="data-panel">
         <div className="section-heading compact">
-          <div><span className="eyebrow">Authorized Q&A</span><h2>Ask about your learning content</h2></div>
+          <div><span className="eyebrow">Kalam AI workspace</span><h2>Understand your capability with governed AI</h2></div>
           <ShieldCheck size={22} aria-hidden="true" />
         </div>
-        {error ? <StateMessage tone="danger" title="Governed AI request failed">{error}</StateMessage> : null}
+        {error ? <StateMessage tone="danger" title="Kalam AI request failed">{error}</StateMessage> : null}
         <form onSubmit={ask} className="stack-md">
           <label htmlFor="ai-mode">Request type</label>
           <select id="ai-mode" value={mode} onChange={(event) => setMode(event.target.value as "qa" | "summary" | "recommendation" | "skill_gap")}>
@@ -186,15 +189,15 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
           <textarea id="ai-question" value={question} onChange={(event) => setQuestion(event.target.value)} rows={5} maxLength={4000} placeholder={mode === "qa" ? "Ask a question grounded in your enrolled courses..." : mode === "summary" ? "Describe what you want summarized from your authorized course content..." : mode === "recommendation" ? "Ask for learning options based on your persisted skill gaps..." : "Ask for an explanation of your persisted role-to-skill gaps..."} />
           <label htmlFor="ai-course">Course ID (optional)</label>
           <input id="ai-course" value={courseId} onChange={(event) => setCourseId(event.target.value)} placeholder="Limit retrieval to one enrolled course" />
-          <button className="button button-primary" type="submit" disabled={loading || question.trim().length < 3}><Send size={16} />{loading ? "Generating..." : "Ask governed AI"}</button>
+          <button className="button button-primary" type="submit" disabled={loading || question.trim().length < 3}><Send size={16} />{loading ? "Kalam is thinking..." : "Ask Kalam"}</button>
         </form>
       </section>
 
       {answer ? (
         <section className="data-panel">
-          <div className="section-heading compact"><div><span className="eyebrow">Grounded response</span><h2>Answer</h2></div></div>
+          <div className="section-heading compact"><div><span className="eyebrow">Kalam response</span><h2>Answer</h2></div></div>
           <p className="ai-response">{answer}</p>
-          <div className="section-heading compact"><div><span className="eyebrow">Evidence</span><h3>Authorized sources</h3></div></div>
+          <div className="section-heading compact"><div><span className="eyebrow">Evidence used</span><h3>Authorized sources</h3></div></div>
           {sources.map((source) => (
             <div className="compact-row" key={`${source.lesson_id}-${source.citation_id}-${source.chunk_index}`}>
               <strong>[{source.citation_id}] {source.lesson_title}</strong>

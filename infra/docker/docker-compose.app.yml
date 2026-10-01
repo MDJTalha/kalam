@@ -51,6 +51,10 @@ services:
       WEB_ORIGIN: ${WEB_ORIGIN:?WEB_ORIGIN is required}
       API_ORIGIN: ${API_ORIGIN:?API_ORIGIN is required}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:?ALLOWED_HOSTS is required}
+      COOKIE_SECURE: "true"
+      API_DOCS_ENABLED: "false"
+      DEV_EMAIL_SINK: "false"
+      INTEGRATION_ALLOW_PRIVATE_URLS: "false"
     depends_on:
       postgres:
         condition: service_healthy
@@ -111,6 +115,7 @@ services:
       retries: 12
 
   worker:
+    image: ${WORKER_IMAGE:-docker-worker:latest}
     build:
       context: ../..
       dockerfile: apps/api/Dockerfile.worker
@@ -127,6 +132,9 @@ services:
       API_ORIGIN: ${API_ORIGIN:?API_ORIGIN is required}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:?ALLOWED_HOSTS is required}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      COOKIE_SECURE: "true"
+      API_DOCS_ENABLED: "false"
+      INTEGRATION_ALLOW_PRIVATE_URLS: "false"
       STORAGE_BACKEND: local
       STORAGE_ROOT: /data/uploads
       FILE_SCAN_PROVIDER: clamd
@@ -148,15 +156,18 @@ services:
         condition: service_healthy
 
   web:
+    image: ${WEB_IMAGE:-docker-web:latest}
     build:
       context: ../..
       dockerfile: apps/web/Dockerfile
       args:
         API_ORIGIN: ${INTERNAL_API_ORIGIN:-http://api:8000}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL is required}
     restart: unless-stopped
     environment:
       NODE_ENV: production
       API_ORIGIN: ${INTERNAL_API_ORIGIN:-http://api:8000}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL is required}
       NEXT_PUBLIC_API_ORIGIN: ${NEXT_PUBLIC_API_ORIGIN:?NEXT_PUBLIC_API_ORIGIN is required}
     depends_on:
       api:

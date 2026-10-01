@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 type Item = { course_id: string; title: string; position: number; prerequisite_item_id?: string | null };
 type Path = { id: string; title: string; description?: string | null; status: string; items: Item[] };
@@ -50,6 +51,21 @@ export function LearningPathEditor({ initialPath, courses }: { initialPath: Path
       setCourseId(""); setPrerequisiteId(""); setMessage("Course added to path.");
     });
   }
+  function move(item: Item, direction: -1 | 1) {
+    const ordered = [...items].sort((a, b) => a.position - b.position);
+    const index = ordered.findIndex(entry => entry.course_id === item.course_id);
+    const target = ordered[index + direction];
+    if (!target) return;
+    void run(async () => {
+      const result = await request("/api/lms/programs/paths/" + initialPath.id + "/courses/" + item.course_id + "/position", "PATCH", { position: target.position });
+      setItems(current => current.map(entry => {
+        if (entry.course_id === item.course_id) return { ...entry, position: result.position };
+        if (entry.course_id === target.course_id) return { ...entry, position: item.position };
+        return entry;
+      }).sort((a, b) => a.position - b.position));
+      setMessage("Sequence updated.");
+    });
+  }
   function remove(item: Item) {
     if (!window.confirm(`Remove “${item.title}” from this learning path?`)) return;
     void run(async () => {
@@ -85,8 +101,7 @@ export function LearningPathEditor({ initialPath, courses }: { initialPath: Path
       <button className="button button-primary" type="submit" disabled={busy || !courseId}>Add course</button>
     </form>
     {!!items.length && <div className="compact-list">{items.map(item => <div className="compact-row" key={item.course_id}>
-      <div><strong>{item.position}. {item.title}</strong><small>{item.prerequisite_item_id ? "Requires " + (items.find(entry => entry.course_id === item.prerequisite_item_id)?.title ?? "earlier course") : "No prerequisite"}</small></div>
-      <button className="button button-secondary" type="button" disabled={busy} onClick={() => remove(item)}>Remove</button>
+      <div><strong>{item.position}. {item.title}</strong><small>{item.prerequisite_item_id ? "Requires " + (items.find(entry => entry.course_id === item.prerequisite_item_id)?.title ?? "earlier course") : "No prerequisite"}</small></div><div className="button-row"><button className="icon-button" type="button" aria-label="Move course up" disabled={busy || item.position === 1} onClick={() => move(item, -1)}><ChevronUp size={15}/></button><button className="icon-button" type="button" aria-label="Move course down" disabled={busy || item.position === items.length} onClick={() => move(item, 1)}><ChevronDown size={15}/></button><button className="button button-secondary" type="button" disabled={busy} onClick={() => remove(item)}>Remove</button></div>
     </div>)}</div>}
   </section>;
 }

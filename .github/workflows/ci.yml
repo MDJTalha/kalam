@@ -22,6 +22,16 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
+      clamav:
+        image: clamav/clamav:1.4.3
+        ports:
+          - 3310:3310
+        options: >-
+          --health-cmd "printf 'PING\\n' | nc -w 3 127.0.0.1 3310 | grep -q PONG"
+          --health-interval 15s
+          --health-timeout 5s
+          --health-retries 30
+          --health-start-period 60s
     defaults:
       run:
         working-directory: apps/api
@@ -56,16 +66,28 @@ jobs:
           WEB_ORIGIN: http://localhost:3000
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: .venv/bin/python scripts/seed.py
+      - name: Bootstrap SaaS operations roles
+        env:
+          DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          SAAS_OPS_TENANT_SLUG: kognivon-operations
+        run: .venv/bin/python scripts/bootstrap_saas_ops.py
       - name: Static checks
         run: .venv/bin/ruff check app tests
       - name: Type checks
         run: .venv/bin/mypy app
+      - name: Verify ClamAV transport
+        run: >-
+          .venv/bin/python -c "import socket; s=socket.create_connection(('127.0.0.1', 3310), timeout=5); s.sendall(b'PING\n'); result=s.recv(100); s.close(); assert result.strip()==b'PONG', result"
       - name: Tests
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
           APP_ENV: development
           WEB_ORIGIN: http://localhost:3000
           ALLOWED_HOSTS: localhost,127.0.0.1
+          FILE_SCAN_PROVIDER: clamd
+          FILE_SCAN_HOST: 127.0.0.1
+          FILE_SCAN_PORT: 3310
+          SAAS_OPS_TENANT_SLUG: kognivon-operations
         run: .venv/bin/python -m pytest -q
 
   web:
@@ -97,6 +119,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: ci-release-validation-only
           WEB_ORIGIN: https://lms.example.com
+          NEXT_PUBLIC_SITE_URL: https://lms.example.com
           API_ORIGIN: https://lms.example.com/api
           NEXT_PUBLIC_API_ORIGIN: https://lms.example.com/api
           INTERNAL_API_ORIGIN: http://api:8000
@@ -110,6 +133,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: ci-release-validation-only
           WEB_ORIGIN: https://lms.example.com
+          NEXT_PUBLIC_SITE_URL: https://lms.example.com
           API_ORIGIN: https://lms.example.com/api
           NEXT_PUBLIC_API_ORIGIN: https://lms.example.com/api
           INTERNAL_API_ORIGIN: http://api:8000

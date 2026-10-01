@@ -1,17 +1,35 @@
 import { DashboardShell } from "@/components/dashboard-shell";
-import { PeopleDirectory } from "@/components/people-directory";
+import { redirect } from "next/navigation";
+import { PeopleDirectory, type PeoplePageResult } from "@/components/people-directory";
 import { apiJson, requireUser } from "@/lib/server-api";
-type Person = { id: string; email: string; first_name: string; last_name: string; employee_number?: string | null; job_title?: string | null; org_unit_id?: string | null; is_active: boolean };
+
 type Unit = { id: string; name: string };
-export default async function PeoplePage() {
+type Params = { q?: string; status?: string; unit?: string; page?: string };
+export default async function PeoplePage({ searchParams }: { searchParams: Promise<Params> }) {
   const user = await requireUser<{ permissions?: string[] }>();
   const permissions = user.permissions ?? [];
   if (!permissions.includes("users.read")) return <DashboardShell title="People" eyebrow="Workforce administration"><section className="data-panel"><h2>Access restricted</h2><p>You need permission to view the people directory.</p></section></DashboardShell>;
-  const [people, units] = await Promise.all([
-    apiJson<Person[]>("/api/v1/people"),
+  const params = await searchParams;
+  const q = (params.q ?? "").trim().slice(0, 160);
+  const status = ["all", "active", "inactive"].includes(params.status ?? "") ? params.status! : "all";
+  const unit = params.unit === "unassigned" || /^[0-9a-fA-F-]{36}$/.test(params.unit ?? "") ? params.unit! : "all";
+  const requested = Number(params.page);
+  const page = Number.isSafeInteger(requested) && requested > 0 ? Math.min(requested, 100000) : 1;
+  const query = new URLSearchParams({ page: String(page), page_size: "20", status, q });
+  if (unit === "unassigned") query.set("unassigned", "true");
+  else if (unit !== "all") query.set("unit_id", unit);
+  const [result, units] = await Promise.all([
+    apiJson<PeoplePageResult>("/api/v1/people/page?" + query.toString()),
     apiJson<Unit[]>("/api/v1/organization/units"),
   ]);
-  return <DashboardShell title="People" eyebrow="Workforce administration">
-    {people && units ? <PeopleDirectory people={people} units={units} canManage={permissions.includes("users.manage")} /> : <section className="data-panel" role="alert"><h2>People directory unavailable</h2><p>Check your access or try again later.</p></section>}
+  if (result && result.total > 0 && page > Math.ceil(result.total / result.page_size)) {
+    const destination = new URLSearchParams({ page: String(Math.ceil(result.total / result.page_size)) });
+    if (q) destination.set("q", q);
+    if (status !== "all") destination.set("status", status);
+    if (unit !== "all") destination.set("unit", unit);
+    redirect("/dashboard/people?" + destination.toString());
+  }
+  return <DashboardShell title="People" eyebrow="Workforce administration" breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "People" }]}>
+    {result && units ? <PeopleDirectory result={result} units={units} filters={{ q, status, unit }} canManage={permissions.includes("users.manage")} /> : <section className="data-panel" role="alert"><h2>People directory unavailable</h2><p>Check your access or try again later.</p></section>}
   </DashboardShell>;
 }

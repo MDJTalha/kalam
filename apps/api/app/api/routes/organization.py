@@ -7,11 +7,23 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_permission
-from app.db.models import OrgUnit, Role, User, UserRole
+from app.core.config import settings
+from app.db.models import OrgUnit, Role, Tenant, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
 
 router = APIRouter()
+
+async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
+    role = await db.scalar(
+        select(Role.id)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .join(Tenant, Tenant.id == Role.tenant_id)
+        .where(UserRole.user_id == user.id)
+        .where(Tenant.slug == settings.saas_ops_tenant_slug)
+        .where(Role.name.ilike("platform developer"))
+    )
+    return role is not None
 
 class OrgUnitCreate(BaseModel):
     name: str = Field(min_length=2, max_length=160)
@@ -37,6 +49,7 @@ class RoleOut(BaseModel):
     id: UUID
     name: str
     description: str | None
+    role_kind: str
     model_config = {"from_attributes": True}
 
 @router.get("/units", response_model=list[OrgUnitOut])
@@ -96,11 +109,10 @@ async def list_roles(
     user: User = Depends(require_permission("users.read")),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
-        select(Role)
-        .where(Role.tenant_id == user.tenant_id)
-        .order_by(Role.name)
-    )
+    stmt = select(Role).where(Role.tenant_id == user.tenant_id)
+    if not await _is_platform_developer(user, db):
+        stmt = stmt.where(Role.role_kind.in_(["predefined", "custom"]))
+    result = await db.execute(stmt.order_by(Role.name))
     return list(result.scalars().all())
 
 @router.get("/users/{user_id}/roles", response_model=list[RoleOut])
@@ -134,6 +146,8 @@ async def assign_role(
     )
     if target is None or role is None:
         raise HTTPException(status_code=404, detail="User or role not found")
+    if role.role_kind not in ("predefined", "custom") and not await _is_platform_developer(user, db):
+        raise HTTPException(status_code=403, detail="This role is managed by Kalam and cannot be assigned by tenant administrators")
     existing = await db.scalar(
         select(UserRole).where(
             UserRole.user_id == target.id,

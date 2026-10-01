@@ -6,7 +6,7 @@ import { apiFetch, requireUser } from "@/lib/server-api";
 type Certificate={id:string;learner:string;course:string;verification_code:string;issued_at:string;expires_at:string|null;revoked:boolean;status:"active"|"expiring_soon"|"expired"|"revoked"};
 type Template={title:string;subtitle:string;issuer_name:string;primary_color:string;accent_color:string;logo_url:string|null;footer_text:string;version?:number};
 
-const defaultTemplate: Template = { title:"Certificate of Completion", subtitle:"This certifies that", issuer_name:"Kognivon", primary_color:"#0e4c3d", accent_color:"#df9d13", logo_url:null, footer_text:"Verify this credential using the verification code.", version:1 };
+const defaultTemplate: Template = { title:"Certificate of Completion", subtitle:"This certifies that", issuer_name:"Kalam", primary_color:"#0e4c3d", accent_color:"#df9d13", logo_url:null, footer_text:"Verify this credential using the verification code.", version:1 };
 
 export default async function CertificateAdminPage(){
   const user=await requireUser<{permissions?:string[]}>();

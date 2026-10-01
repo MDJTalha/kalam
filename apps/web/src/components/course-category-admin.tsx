@@ -120,7 +120,7 @@ export function CourseCategoryAdmin() {
     </div>
     <div className="form-actions"><button type="button" className="button button-primary" onClick={() => void createCategory()} disabled={busy || !newName.trim()}><Plus size={15}/> Add category</button></div>
     <div className="table-wrap category-admin-table">
-      <table><thead><tr><th>Category</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+      <table><thead><tr><th scope="col">Category</th><th scope="col">Description</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead><tbody>
         {categories.map((category) => <tr key={category.id}>
           <td><strong>{category.name}</strong></td>
           <td>{category.description || "—"}</td>

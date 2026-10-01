@@ -20,7 +20,7 @@ export function RoleAssignment({ people, roles, accessPermissions, initialSelect
     const controller = new AbortController();
     fetch(`/api/lms/organization/users/${userId}/roles`, { signal: controller.signal })
       .then(async response => {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Could not load assigned roles.");
         setAssigned(data);
       })
@@ -54,7 +54,7 @@ export function RoleAssignment({ people, roles, accessPermissions, initialSelect
     </div>
     <div className="form-actions">{canManage ? <button className="button button-primary" onClick={() => void changeRole("POST", roleId)} disabled={busy || loading || !userId || !roleId || assigned.some(role => role.id === roleId)}>Assign role</button> : <span className="form-help">Role changes require users.manage permission.</span>}</div>
     <strong>Current roles</strong>
-    {loading ? <p role="status">Loading roles…</p> : assigned.length ? <div className="compact-list">{assigned.map(role => <div className="compact-row" key={role.id}><span>{role.name}</span>{canManage && <button type="button" className="button button-secondary" disabled={busy} onClick={() => void changeRole("DELETE", role.id)}>Remove</button>}</div>)}</div> : <p>No roles assigned.</p>}
+    {loading ? <p role="status">Loading roles…</p> : error ? <p>Role assignments could not be loaded.</p> : assigned.length ? <div className="compact-list">{assigned.map(role => <div className="compact-row" key={role.id}><span>{role.name}</span>{canManage && <button type="button" className="button button-secondary" disabled={busy} onClick={() => void changeRole("DELETE", role.id)}>Remove</button>}</div>)}</div> : <p>No roles assigned.</p>}
     {error && <div className="form-error" role="alert">{error}</div>}
     {message && <div className="form-success" role="status">{message}</div>}
   </div>;

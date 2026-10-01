@@ -35,17 +35,17 @@ export default async function ProgramsPage() {
   return (
     <DashboardShell title="Programs & cohorts" eyebrow="Corporate learning delivery">
       <div className="stat-grid">
-        <div className="stat-card"><span>Programs</span><strong>{programs?.length ?? 0}</strong><small>Structured learning programs</small></div>
-        <div className="stat-card"><span>Cohorts</span><strong>{cohorts?.length ?? 0}</strong><small>Managed learner groups</small></div>
-        <div className="stat-card"><span>Active cohorts</span><strong>{cohorts?.filter((item) => item.status === "active").length ?? 0}</strong><small>Currently running</small></div>
-        <div className="stat-card"><span>Required programs</span><strong>{programs?.filter((item) => item.is_required).length ?? 0}</strong><small>Mandatory pathways</small></div>
+        <div className="stat-card"><span>Programs</span><strong>{programs ? programs.length : "—"}</strong><small>{programs ? "Structured learning programs" : "Data unavailable"}</small></div>
+        <div className="stat-card"><span>Cohorts</span><strong>{cohorts?.length ?? "—"}</strong><small>Managed learner groups</small></div>
+        <div className="stat-card"><span>Active cohorts</span><strong>{cohorts?.filter((item) => item.status === "active").length ?? "—"}</strong><small>Currently running</small></div>
+        <div className="stat-card"><span>Required programs</span><strong>{programs?.filter((item) => item.is_required).length ?? "—"}</strong><small>Mandatory pathways</small></div>
       </div>
 
       {(!programs || !cohorts) && <section className="data-panel" role="alert"><h2>Delivery data unavailable</h2><p>Some program information could not be loaded. Try again.</p></section>}
       <section className="data-panel">
         <div className="section-heading compact">
           <div><span className="eyebrow">Structured learning</span><h2>Programs</h2></div>
-          <span className="section-meta">{programs?.length ?? 0} configured</span>
+          <span className="section-meta">{programs ? `${programs.length} configured` : "Unavailable"}</span>
         </div>
         {programs?.length ? (
           <div className="catalog-grid">
@@ -72,7 +72,7 @@ export default async function ProgramsPage() {
         {cohorts?.length ? (
           <div className="table-wrap">
             <table className="data-table">
-              <thead><tr><th>Cohort</th><th>Program</th><th>Status</th><th>Schedule</th><th>Capacity</th></tr></thead>
+              <thead><tr><th scope="col">Cohort</th><th scope="col">Program</th><th scope="col">Status</th><th scope="col">Schedule</th><th scope="col">Capacity</th></tr></thead>
               <tbody>
                 {cohorts.map((cohort) => (
                   <tr key={cohort.id}>

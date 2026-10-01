@@ -1,7 +1,8 @@
 "use client";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail, ShieldCheck } from "lucide-react";
+import { KalamBrand } from "@/components/kalam-brand";
 
 export default function ForgotPasswordPage() {
   const [tenantSlug, setTenantSlug] = useState("");
@@ -28,20 +29,17 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="auth-shell k-auth">
-      <section className="auth-brand" aria-label="About Kognivon">
-        <Link className="k-brand-lockup" href="/" aria-label="Kognivon home">
-          <span className="k-brand-mark" aria-hidden="true"><Sparkles size={23} /></span>
-          <span>Kognivon<small>Learning intelligence</small></span>
-        </Link>
+      <section className="auth-brand" aria-label="About Kalam">
+        <KalamBrand dark descriptor="Enterprise Workforce Capability Platform" className="k-brand-lockup" />
         <div className="auth-brand-copy">
           <span className="k-overline"><span className="k-overline-dot" /> Account recovery</span>
-          <h1>Back to learning, <em>securely.</em></h1>
+          <h1>Back to your workspace, <em>securely.</em></h1>
           <p>Request a password reset using your organization ID and work email. We&apos;ll send instructions if an account matches.</p>
         </div>
-        <p className="k-brand-foot">Learning with purpose. Progress with proof.</p>
+        <p className="k-brand-foot">Workforce capability, with clarity.</p>
       </section>
       <section className="auth-panel" aria-labelledby="recovery-title">
-        <div className="auth-card">          <div className="k-mobile-brand">Kognivon <span>Learning intelligence</span></div>
+        <div className="auth-card">          <KalamBrand descriptor="Enterprise Workforce Capability Platform" className="k-mobile-brand" />
           <div className="auth-card-heading">
             <span className="k-form-eyebrow"><Mail size={14} aria-hidden="true" /> Account recovery</span>
             <h2 id="recovery-title">Reset your password</h2>

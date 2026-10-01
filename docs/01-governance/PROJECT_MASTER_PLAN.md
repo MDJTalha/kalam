@@ -1,16 +1,18 @@
-# Corporate LMS — Project Master Plan
+# Kalam — Project Master Plan
 
-Version: 0.1
-Status: Baseline for implementation
+Version: 0.2
+Status: Baseline for implementation; product naming reconciled 2026-09-28
 Date: 2026-09-24
+Product: Kalam — Enterprise Workforce Capability Platform
+Repository identifier: CorpLMS (retained for technical continuity)
 Project Director: Muhammad Talha
 Implementation root: C:\Projects\CorpLMS
 
 ## 1. Executive mandate
 
-Build a serious enterprise Corporate Learning Management System, not a course catalogue or front-end prototype.
+Build Kalam as a serious enterprise workforce capability and learning platform, not a course catalogue or front-end prototype.
 
-The platform must support organizations that need to plan, deliver, administer, measure and govern employee learning at scale.
+The platform must support organizations that need to plan, deliver, administer, measure and govern employee learning, skills, readiness and workforce capability at scale.
 
 The product will be designed as a SaaS-capable, multi-tenant platform with optional single-tenant deployment.
 

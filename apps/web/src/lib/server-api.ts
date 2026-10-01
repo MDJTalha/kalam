@@ -17,10 +17,36 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   });
 }
 
-export async function apiJson<T>(path: string, init: RequestInit = {}): Promise<T | null> {
+export type ApiJsonResult<T> = {
+  ok: boolean;
+  status: number;
+  data: T | null;
+  error: string | null;
+};
+
+export async function apiJsonResult<T>(path: string, init: RequestInit = {}): Promise<ApiJsonResult<T>> {
   const response = await apiFetch(path, init);
-  if (!response.ok) return null;
-  return response.json() as Promise<T>;
+  const body = await response.text();
+  let parsed: unknown = null;
+  if (body) {
+    try {
+      parsed = JSON.parse(body) as unknown;
+    } catch {
+      parsed = null;
+    }
+  }
+  if (!response.ok) {
+    const detail = parsed && typeof parsed === "object" && parsed !== null && "detail" in parsed
+      ? String((parsed as { detail?: unknown }).detail ?? "")
+      : body.trim();
+    return { ok: false, status: response.status, data: null, error: detail || response.statusText || "Request failed" };
+  }
+  return { ok: true, status: response.status, data: parsed as T, error: null };
+}
+
+export async function apiJson<T>(path: string, init: RequestInit = {}): Promise<T | null> {
+  const result = await apiJsonResult<T>(path, init);
+  return result.ok ? result.data : null;
 }
 
 export async function requireUser<T = Record<string, unknown>>() {

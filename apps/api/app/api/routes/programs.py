@@ -686,6 +686,51 @@ async def add_learning_path_item(
     await db.commit()
     return {"status": "added", "path_id": str(path.id), "course_id": str(course.id)}
 
+
+class PathPositionUpdate(BaseModel):
+    position: int = Field(ge=1, le=1000)
+
+@router.patch("/paths/{path_id}/courses/{course_id}/position")
+async def move_learning_path_item(
+    path_id: UUID,
+    course_id: UUID,
+    payload: PathPositionUpdate,
+    user: User = Depends(require_permission("courses.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    path = await db.scalar(select(LearningPath).where(
+        LearningPath.id == path_id,
+        LearningPath.tenant_id == user.tenant_id,
+    ))
+    if path is None:
+        raise HTTPException(status_code=404, detail="Learning path not found")
+    result = await db.execute(select(LearningPathItem).where(
+        LearningPathItem.path_id == path.id,
+    ).order_by(LearningPathItem.position.asc()))
+    items = list(result.scalars().all())
+    moving = next((item for item in items if item.course_id == course_id), None)
+    if moving is None:
+        raise HTTPException(status_code=404, detail="Path course not found")
+    target_index = payload.position - 1
+    if target_index >= len(items):
+        raise HTTPException(status_code=422, detail="Target position exceeds path length")
+    ordered = [item for item in items if item.course_id != course_id]
+    ordered.insert(target_index, moving)
+    for position, item in enumerate(ordered, start=1):
+        item.position = position
+    for item in ordered:
+        if item.prerequisite_item_id:
+            prerequisite = next((candidate for candidate in ordered if candidate.course_id == item.prerequisite_item_id), None)
+            if prerequisite is None or prerequisite.position >= item.position:
+                raise HTTPException(status_code=422, detail="Reordering would place a prerequisite after its dependent course")
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id,
+        action="learning_path.course.reordered", entity_type="learning_path_item",
+        entity_id=str(path.id), metadata={"course_id": str(course_id), "position": payload.position},
+    )
+    await db.commit()
+    return {"status": "reordered", "course_id": str(course_id), "position": payload.position}
+
 @router.delete("/paths/{path_id}/courses/{course_id}")
 async def remove_learning_path_item(
     path_id: UUID,

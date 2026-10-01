@@ -16,11 +16,15 @@ sys.path.insert(0, str(API_ROOT))
 
 from sqlalchemy import select, text
 from app.core.security import utcnow
-from app.db.models import Notification, User, WebhookEndpoint
+from app.core.config import settings
+from app.db.models import Notification, Tenant, User, WebhookEndpoint
 from app.db.session import SessionLocal
 from app.services.email import send_email
 from app.services.learning_reminders import run_course_due_reminders
+from app.services.notifications import classify_notification
 from app.services.phase5_compliance import run_compliance_automation
+from app.services.saas_renewals import reconcile_renewal_tasks
+from app.services.audit import audit
 from app.services.webhook_delivery import deliver_webhook, retry_delay
 from app.services.webhook_secrets import decrypt_webhook_secret
 from report_scheduler import process_scheduled_reports
@@ -153,6 +157,12 @@ async def process_notification_emails() -> int:
         )
         sent = 0
         for notification, user in result.all():
+            category, _priority, _href = classify_notification(notification.notification_type)
+            preferences = (user.preferences or {}).get("notification_preferences", {})
+            email_enabled = bool(preferences.get("email_enabled", False))
+            category_enabled = bool(preferences.get(category, True))
+            if category != "security" and (not email_enabled or not category_enabled):
+                continue
             try:
                 send_email(recipient=user.email, subject=notification.title, text=notification.body)
             except RuntimeError:
@@ -164,6 +174,26 @@ async def process_notification_emails() -> int:
         return sent
 
 
+async def process_saas_renewals() -> int:
+    slug = settings.saas_ops_tenant_slug or settings.marketing_review_tenant_slug
+    if not slug:
+        return 0
+    async with SessionLocal() as db:
+        ops = await db.scalar(select(Tenant).where(Tenant.slug == slug, Tenant.status == "active"))
+        if ops is None:
+            return 0
+        result = await reconcile_renewal_tasks(db, ops.id)
+        changed = result["created"] + result["updated"]
+        if changed:
+            await audit(
+                db, tenant_id=ops.id, actor_id=None,
+                action="crm.renewal_tasks.generated_by_worker",
+                entity_type="crm_task", entity_id="bulk", metadata=result,
+            )
+        await db.commit()
+        return changed
+
+
 async def run_once() -> dict[str, int]:
     async with SessionLocal() as db:
         reminders = await run_course_due_reminders(db)
@@ -172,6 +202,7 @@ async def run_once() -> dict[str, int]:
     reminders["notification_emails_sent"] = await process_notification_emails()
     reminders["notification_webhooks_delivered"] = await process_notification_webhooks()
     reminders["scheduled_reports_processed"] = await process_scheduled_reports()
+    reminders["crm_renewal_tasks_reconciled"] = await process_saas_renewals()
     return reminders
 
 

@@ -1,6 +1,6 @@
 import { Award, ExternalLink } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type CertificateStatus = "active" | "expiring_soon" | "expired" | "revoked";
 type Certificate = { id: string; course: string; verification_code: string; issued_at: string; expires_at?: string | null; revoked: boolean; status: CertificateStatus };
@@ -21,7 +21,13 @@ const statusClass: Record<CertificateStatus, string> = {
 
 export default async function CertificatesPage() {
   await requireUser();
-  const certificates = (await apiJson<Certificate[]>("/api/v1/certificates/my")) ?? [];
+  const result = await apiJsonResult<Certificate[]>("/api/v1/certificates/my");
+  if (!result.ok) {
+    const restricted = result.status === 403;
+    const serviceFailure = result.status >= 500;
+    return <DashboardShell title="Credentials" eyebrow="Certificates & verification"><section className="data-panel" role="alert"><h2>{restricted ? "Credential access restricted" : serviceFailure ? "Credential service unavailable" : "Credentials could not be loaded"}</h2><p>{restricted ? "Your role does not have access to these credential records." : serviceFailure ? "The credential service did not respond successfully. No empty credential list is being shown." : result.error || "Certificate records could not be loaded. Try again."}</p></section></DashboardShell>;
+  }
+  const certificates = result.data ?? [];
   const counts = {
     issued: certificates.length,
     active: certificates.filter((item) => item.status === "active").length,

@@ -1,147 +1,177 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowDownRight, ArrowRight, Award, BarChart3, BookOpenCheck, CheckCircle2, ChevronRight, ClipboardCheck, FileCheck2, Globe2, Layers3, LockKeyhole, ShieldCheck, Sparkles, Target, UsersRound } from "lucide-react";
+import { ArrowRight, Award, BarChart3, BookOpenCheck, ChevronRight, ClipboardCheck, FileCheck2, Globe2, LockKeyhole, ShieldCheck, Target, UsersRound } from "lucide-react";
 import styles from "./landing.module.css";
 import { DemoInquiryForm } from "./demo-inquiry-form";
+import { CapabilityCommandCenter } from "@/components/capability-command-center";
+import { PublicHeader } from "@/components/public-header";
+import { PublicFooter } from "@/components/public-footer";
+import { PublicButton } from "@/components/public-button";
 
 export const metadata: Metadata = {
-  title: "Kognivon | Enterprise Workforce Capability Platform",
-  description: "Kognivon is an Enterprise Workforce Capability Platform connecting learning, skills, compliance, development and workforce readiness in one role-aware SaaS workspace.",
+  title: "Kalam | Enterprise Workforce Capability Platform",
+  description: "Kalam turns workforce capability into business readiness by connecting roles, skills, learning, assessment, evidence, compliance and action.",
+  alternates: { canonical: "/" },
 };
 
 const capabilities = [
-  { icon: BookOpenCheck, title: "Learning operations", description: "Create, assign and manage learning with the delivery work visible.", details: ["Courses, learning paths and programs", "Assignments, progress and session delivery"] },
-  { icon: Layers3, title: "Skills and capability", description: "Connect role expectations to development priorities.", details: ["Skill and role mappings", "Gaps, plans and development actions"] },
-  { icon: ShieldCheck, title: "Compliance readiness", description: "See requirements and the records behind their status.", details: ["Assignments, due dates and exceptions", "Evidence and escalation context"] },
-  { icon: ClipboardCheck, title: "Assessments", description: "Check understanding as part of the learning journey.", details: ["Question banks and attempts", "Pass rules and recorded results"] },
-  { icon: Award, title: "Credentials", description: "Keep issued credentials connected to learning history.", details: ["Certificates and expiry tracking", "Verification and revocation records"] },
-  { icon: BarChart3, title: "Decision support", description: "Turn participation and capability signals into next actions.", details: ["Manager and executive views", "Reports, filters and export workflows"] },
+  { icon: BookOpenCheck, title: "Learning operations", description: "Create, assign and manage structured development with delivery work visible.", details: ["Courses, learning paths and programs", "Assignments, progress and delivery"] },
+  { icon: Target, title: "Skills & capability", description: "Connect role expectations to capability gaps and development priorities.", details: ["Role and skill mappings", "Gaps, plans and development actions"] },
+  { icon: ShieldCheck, title: "Compliance readiness", description: "Connect requirements, due dates, exceptions and supporting evidence.", details: ["Requirements and due dates", "Evidence and exception context"] },
+  { icon: ClipboardCheck, title: "Assessments", description: "Check understanding and keep results connected to the learning journey.", details: ["Question banks and attempts", "Pass rules and recorded results"] },
+  { icon: Award, title: "Credentials", description: "Keep issued credentials connected to learning history and expiry status.", details: ["Certificates and expiry", "Verification and revocation"] },
+  { icon: BarChart3, title: "Workforce intelligence", description: "Turn learning and capability signals into clearer management attention.", details: ["Manager and executive views", "Reports, filters and action queues"] },
+] as const;
+
+const journey = [
+  ["01","Role expectation","Define what the role needs to know, demonstrate or maintain."],
+  ["02","Capability gap","Compare expectations with current learning, skills and evidence."],
+  ["03","Development action","Connect gaps to learning, practice and development plans."],
+  ["04","Assessment & evidence","Record results, credentials and compliance evidence in context."],
+  ["05","Readiness signal","Surface what is complete, at risk or waiting for review."],
+  ["06","Manager action","Give accountable people the context to decide what happens next."],
+] as const;
+
+const outcomes = [
+  ["Reduce fragmentation","Bring learning, skills, assessments, credentials and compliance context into a more connected operating picture."],
+  ["Focus development investment","Direct attention toward role-relevant gaps instead of treating all learning demand the same."],
+  ["Improve evidence visibility","Give managers, L&D and compliance teams a clearer path from requirements to supporting records."],
+  ["Move from reporting to action","Turn workforce signals into accountable follow-through on people, roles and capability priorities."],
 ] as const;
 
 const audiences = [
-  { label: "PEOPLE LEADERS", title: "Understand the capability picture.", description: "Bring development, skills and compliance signals into leadership decisions without losing the underlying context." },
-  { label: "L&D TEAMS", title: "Keep delivery moving.", description: "Work across authoring, assignments, programs and operational queues from the same platform." },
-  { label: "MANAGERS", title: "Know who needs support.", description: "See team learning and skill needs, then connect people to relevant development actions." },
-  { label: "COMPLIANCE TEAMS", title: "Follow the evidence.", description: "Review requirements, status and exceptions with a clearer path back to recorded activity." },
+  ["EXECUTIVE LEADERS","Know if the workforce is ready.","See the capability picture behind strategic priorities and identify where leadership attention is required."],
+  ["CHRO / HR","Turn workforce data into capability decisions.","Connect roles, skills, development and readiness so workforce planning has a clearer capability foundation."],
+  ["COO / OPERATIONS","Know who is ready for the work.","See role requirements, capability gaps and readiness signals across teams, sites and operating units."],
+  ["L&D TEAMS","Make learning close capability gaps.","Connect programs, learning activity and development plans to the skills and role requirements that matter."],
+  ["MANAGERS","Know who needs support.","See team needs, evidence and development activity, then move the right actions forward."],
+  ["COMPLIANCE TEAMS","Keep requirements and evidence visible.","Track requirements, status, credentials and exceptions with a clearer route to accountable action."],
 ] as const;
 
-const steps = [
-  { number: "01", title: "Define the expectation", description: "Bring roles, skills and learning requirements into a shared operating picture." },
-  { number: "02", title: "Move learning forward", description: "Assign the right experience and keep learners, managers and L&D aligned." },
-  { number: "03", title: "Check and record", description: "Connect assessments, credentials and compliance records to the activity." },
-  { number: "04", title: "Act on the evidence", description: "See what is complete, what needs attention and where to develop next." },
+const enterprisePaths = [
+  { icon: ShieldCheck, title: "Security & Trust", description: "Review governance, access, evidence principles and verified trust information.", href: "/trust", action: "Review trust posture" },
+  { icon: Globe2, title: "Integrations", description: "Scope identity, people data, APIs, webhooks and reporting around real enterprise data flows.", href: "/integrations", action: "Review integration approach" },
+  { icon: LockKeyhole, title: "Implementation", description: "Plan discovery, configuration, validation, rollout and operational ownership as part of the product decision.", href: "/implementation", action: "Review implementation" },
+] as const;
+
+const questions = [
+  ["How should we evaluate Kalam?","Use a representative workforce scenario and follow it from role expectations through learning, assessment, evidence, and management action. Review security, integration, governance, and deployment scope alongside the workflow."],
+  ["How should we interpret readiness signals?","Use readiness signals to identify records, capability areas, and workforce conditions that require human review. Kalam provides evidence to support accountable decisions—it does not independently certify competence or regulatory compliance."],
+  ["Can Kalam fit our existing enterprise systems?","Integration is scoped around your identity, people-data, reporting, and service architecture. During technical review, we confirm supported connectors, integration requirements, deployment approach, and applicable implementation commitments."],
 ] as const;
 
 export default function Home() {
   const inquiriesEnabled = process.env.MARKETING_INBOX_ENABLED === "true" && !!process.env.MARKETING_REVIEW_TENANT_SLUG;
-  return (
-    <div className={styles.page}>
-      <a className={styles.skip} href="#main">Skip to content</a>
-      <header className={styles.header}>
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const structuredData = {
+    "@context":"https://schema.org",
+    "@graph":[
+      {"@type":"Organization","@id":siteUrl+"/#organization",name:"Kalam",url:siteUrl,logo:siteUrl+"/kalam-logo.svg",description:"Enterprise Workforce Capability Platform connecting workforce expectations, development, evidence and action."},
+      {"@type":"SoftwareApplication","@id":siteUrl+"/#software",name:"Kalam",applicationCategory:"BusinessApplication",operatingSystem:"Web",url:siteUrl,description:"Enterprise Workforce Capability Platform for learning, skills, compliance, development, evidence and workforce readiness.",publisher:{"@id":siteUrl+"/#organization"}},
+    ],
+  };
+
+  return <div className={styles.page}>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(structuredData)}}/>
+    <a className={styles.skip} href="#main">Skip to content</a>
+    <PublicHeader landing/>
+
+    <main id="main">
+      <section className={styles.hero} aria-labelledby="hero-title">
         <div className={styles.container}>
-          <nav className={styles.nav} aria-label="Main navigation">
-            <Link className={styles.brand} href="/" aria-label="Kognivon home">
-              <span className={styles.brandMark} aria-hidden="true"><span>K</span></span>
-              <span>Kognivon<span className={styles.brandPeriod}>.</span></span>
-            </Link>
-            <div className={styles.navLinks}>
-              <a href="#platform">Platform</a><a href="#workflow">How it works</a><a href="#roles">For teams</a><a href="#enterprise">Enterprise</a>
+          <div className={styles.heroGrid}>
+            <div className={styles.heroCopy}>
+              <div className={styles.eyebrow}><span/> ENTERPRISE WORKFORCE CAPABILITY PLATFORM</div>
+              <h1 id="hero-title"><span>Build Capability.</span><em>Prove Readiness.</em></h1>
+              <p>Kalam connects roles, skills, learning, assessment, evidence and workforce readiness in one enterprise capability platform—so organizations can see capability gaps, strengthen readiness and turn workforce capability into business action.</p>
+              <div className={styles.heroActions}>
+                <PublicButton href="#how-it-works">See how Kalam works <ArrowRight size={17}/></PublicButton>
+                <PublicButton href="/guided-evaluation" variant="secondary">Run a guided evaluation <ChevronRight size={16}/></PublicButton>
+              </div>
+              <div className={styles.heroNote}><ShieldCheck size={18}/> More than an LMS: connect learning to capability, evidence and workforce readiness.</div>
             </div>
-            <div className={styles.navActions}>
-              <Link className={styles.signin} href="/login">Sign in</Link>
-              <a className={styles.navCta} href={inquiriesEnabled ? "#demo" : "#workflow"}>{inquiriesEnabled ? "Request a demo" : "See the workflow"} <ArrowRight size={16} aria-hidden="true" /></a>
-            </div>
-          </nav>
-          <nav className={styles.mobileNav} aria-label="Explore the landing page"><a href="#platform">Platform</a>{inquiriesEnabled && <a href="#demo">Request a demo</a>}<a href="#workflow">Workflow</a><a href="#roles">For teams</a><a href="#enterprise">Enterprise</a><a href="#questions">Questions</a></nav>
+            <CapabilityCommandCenter/>
+          </div>
+          <div className={styles.heroRail}><strong>THE KALAM CAPABILITY LOOP</strong><span>Expect <ChevronRight size={14}/> Build <ChevronRight size={14}/> Assess <ChevronRight size={14}/> Prove <ChevronRight size={14}/> Know <ChevronRight size={14}/> Act</span></div>
         </div>
-      </header>
+      </section>
 
-      <main id="main">
-        <section className={styles.hero} aria-labelledby="hero-title">
-          <div className={styles.container}>
-            <div className={styles.heroGrid}>
-              <div className={styles.heroCopy}>
-                <div className={styles.eyebrow}><span className={styles.eyebrowLine} /> ENTERPRISE WORKFORCE CAPABILITY PLATFORM</div>
-                <h1 id="hero-title">Build workforce capability. <span>Prove readiness. Move the enterprise forward.</span></h1>
-                <p className={styles.heroLead}>Kognivon is an Enterprise Workforce Capability Platform that connects learning, skills, compliance, assessments and development in one role-aware SaaS workspace. Give every stakeholder a clear line of sight from role expectations to evidence and the next decision.</p>
-                <div className={styles.heroActions}>
-                  <a className={styles.primaryButton} href={inquiriesEnabled ? "#demo" : "#platform"}>{inquiriesEnabled ? "Request a demo" : "Explore the platform"} <ArrowRight size={18} aria-hidden="true" /></a>
-                  <a className={styles.secondaryButton} href="#workflow">See how it works <ArrowDownRight size={17} aria-hidden="true" /></a>
-                </div>
-                <div className={styles.heroFootnote}><ShieldCheck size={18} aria-hidden="true" /> Role-aware workspaces. Governed workflows. Connected evidence.</div>
-              </div>
-              <div className={styles.heroVisual} aria-label="Illustrative Kognivon workspace preview">
-                <div className={styles.previewTop}><div className={styles.previewIdentity}><span className={styles.previewLogo}>K</span><span>Kognivon <small>WORKSPACE PREVIEW</small></span></div><span className={styles.previewSample}>ILLUSTRATIVE VIEW</span></div>
-                <div className={styles.previewBody}>
-                  <div className={styles.previewHeading}><div><span className={styles.previewOverline}>WORKFORCE INTELLIGENCE</span><strong>Capability overview</strong><span>A connected view of learning and readiness</span></div><span className={styles.previewAvatar} aria-hidden="true">KT</span></div>
-                  <div className={styles.previewMetrics}>
-                    <div><span><UsersRound size={15} aria-hidden="true" /> People</span><strong>Role context</strong><small>Understand who needs what</small></div>
-                    <div><span><Target size={15} aria-hidden="true" /> Skills</span><strong>Capability gaps</strong><small>Prioritize development</small></div>
-                    <div><span><ShieldCheck size={15} aria-hidden="true" /> Compliance</span><strong>Evidence status</strong><small>See what requires action</small></div>
-                  </div>
-                  <div className={styles.previewLower}>
-                    <div className={styles.previewPanel}><div className={styles.previewPanelHead}><strong>From requirement to readiness</strong><span>CONNECTED WORKFLOW</span></div><div className={styles.previewTrack}><span><CheckCircle2 size={15} /> Define</span><i /><span><BookOpenCheck size={15} /> Learn</span><i /><span><ClipboardCheck size={15} /> Assess</span><i /><span><FileCheck2 size={15} /> Evidence</span></div><div className={styles.previewBars}><span style={{ width: "86%" }} /><span style={{ width: "66%" }} /><span style={{ width: "76%" }} /></div></div>
-                    <div className={styles.previewAside}><span className={styles.previewAsideIcon}><Sparkles size={20} /></span><strong>Clearer next actions</strong><small>Bring signals and work into the same view.</small></div>
-                  </div>
-                </div>
-                <div className={styles.previewGlow} aria-hidden="true" />
-              </div>
-            </div>
-            <div className={styles.heroBottom}><span>ONE CONNECTED SYSTEM</span><span>Learning <ChevronRight size={15} /> Skills <ChevronRight size={15} /> Compliance <ChevronRight size={15} /> Evidence</span></div>
+      <section className={styles.signalBand} aria-label="The workforce capability problem">
+        <div className={styles.container}><div className={styles.problemIntro}><span>THE WORKFORCE CAPABILITY PROBLEM</span><h2>Your workforce data is everywhere. Your capability decisions shouldn’t be.</h2><p>Your LMS tracks learning. Your HR system holds people data. Spreadsheets track skills. Compliance records sit elsewhere. Kalam connects the capability picture between them.</p></div></div>
+        <div className={styles.container}><div className={styles.signalGrid}>
+          <article><ShieldCheck size={20}/><span><strong>One connected capability picture</strong><small>Bring roles, skills, learning, assessment, evidence and readiness into context.</small></span></article>
+          <article><UsersRound size={20}/><span><strong>Beyond learning completion</strong><small>Connect development activity to capability gaps and role requirements.</small></span></article>
+          <article><Globe2 size={20}/><span><strong>Built for enterprise decisions</strong><small>Give leaders and managers clearer signals about gaps, readiness and action.</small></span></article>
+          <article><FileCheck2 size={20}/><span><strong>Actionable by design</strong><small>Move from fragmented reporting to accountable workforce action.</small></span></article>
+        </div></div>
+      </section>
+
+      <section id="platform" className={styles.section} aria-labelledby="platform-title">
+        <div className={styles.container}>
+          <div className={styles.sectionHead}><div><span>THE PLATFORM</span><h2 id="platform-title">More than an LMS.<br/><em>Built for workforce capability.</em></h2></div><p>Connect role requirements, skills, learning, assessment, evidence, compliance and readiness in one operating picture—so capability becomes visible and actionable.</p></div>
+          <div className={styles.capabilityGrid}>{capabilities.map(({icon:Icon,title,description,details},index)=><details className={styles.capabilityCard} key={title}><summary><span className={styles.cardTop}><span className={styles.cardIcon}><Icon size={21}/></span><span className={styles.cardNumber}>0{index+1}</span></span><strong>{title}</strong><p>{description}</p><span className={styles.cardAction}>Explore capability <ChevronRight size={15}/></span></summary><div className={styles.cardDetail}><b>In the workspace</b><ul>{details.map(item=><li key={item}>{item}</li>)}</ul></div></details>)}</div>
+        </div>
+      </section>
+
+      <section id="difference" className={`${styles.section} ${styles.differenceSection}`} aria-labelledby="difference-title">
+        <div className={styles.container}>
+          <div className={styles.sectionHead}><div><span>WHY KALAM</span><h2 id="difference-title">Training completion is not<br/><em>workforce capability.</em></h2></div><p>Most organizations already have systems for learning and people data. Kalam connects the capability layer between them, so development can be understood in the context of roles, skills, evidence and readiness.</p></div>
+          <div className={styles.differenceGrid}>
+            <article><span>TRADITIONAL LMS</span><h3>What people completed</h3><p>Courses, assignments, attendance and completion remain the center of the record.</p></article>
+            <article><span>KALAM</span><h3>What the workforce can demonstrate</h3><p>Connect role expectations, skills, learning, assessment and evidence to a clearer readiness picture.</p></article>
+            <article><span>HR SYSTEM</span><h3>Who the people are</h3><p>Workforce identity and organizational context stay connected without turning Kalam into an HRIS.</p></article>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.introBand} aria-label="Product proposition"><div className={styles.container}><span>THE CATEGORY</span><p>Kognivon goes beyond a stand-alone LMS. It brings learning delivery, capability planning, assessments and compliance evidence into one enterprise operating picture of <strong>what your workforce needs</strong>, <strong>how readiness is changing</strong> and <strong>what comes next.</strong></p></div></section>
+      <section id="how-it-works" className={`${styles.section} ${styles.sectionTint}`} aria-labelledby="journey-title">
+        <div className={styles.container}>
+          <div className={styles.sectionHead}><div><span>HOW KALAM WORKS</span><h2 id="journey-title">A connected path from<br/><em>expectation to action.</em></h2></div><p>Capability becomes manageable when role expectations, development, evidence and management action remain part of one traceable journey.</p></div>
+          <div className={styles.journeyGrid}>{journey.map(([number,title,description])=><article key={number}><span>{number}</span><h3>{title}</h3><p>{description}</p></article>)}</div>
+        </div>
+      </section>
 
-        <section className={styles.enterpriseSignals} aria-label="Enterprise SaaS principles"><div className={styles.container}><div className={styles.signalGrid}>
-          <div><ShieldCheck size={21} aria-hidden="true" /><span><strong>Governed by design</strong><small>Permissions, evidence and accountability stay close to the work.</small></span></div>
-          <div><UsersRound size={21} aria-hidden="true" /><span><strong>Built around roles</strong><small>Learners, managers, L&D and compliance teams see what matters to them.</small></span></div>
-          <div><Globe2 size={21} aria-hidden="true" /><span><strong>Ready for distributed organizations</strong><small>Organize capability work across teams, business units and locations.</small></span></div>
-          <div><FileCheck2 size={21} aria-hidden="true" /><span><strong>Evidence connected</strong><small>Keep learning, assessment, credentials and readiness context together.</small></span></div>
-        </div></div></section>
+      <section id="outcomes" className={`${styles.section} ${styles.outcomesSection}`} aria-labelledby="outcomes-title">
+        <div className={styles.container}>
+          <div className={styles.sectionHead}><div><span>BUSINESS OUTCOMES</span><h2 id="outcomes-title">Designed for workforce outcomes.<br/><em>Built to turn evidence into action.</em></h2></div><p>Start with the operating outcome your organization needs, then connect the learning, capability and evidence workflow behind it.</p></div>
+          <div className={styles.outcomeGrid}>{outcomes.map(([title,description],index)=><article key={title}><span>0{index+1}</span><h3>{title}</h3><p>{description}</p></article>)}</div>
+        </div>
+      </section>
 
-        <section id="platform" className={styles.section} aria-labelledby="platform-title">
-          <div className={styles.container}>
-            <div className={styles.sectionHead}><div><span className={styles.kicker}>THE PLATFORM</span><h2 id="platform-title">One platform for capability,<br /><em>from plan to proof.</em></h2></div><p>Connect the tools and records behind development, verification and action. Each team gets a relevant view of the same capability journey.</p></div>
-            <div className={styles.capabilityGrid}>{capabilities.map(({ icon: Icon, title, description, details }, index) => <details className={styles.capabilityCard} key={title}><summary><span className={styles.cardTop}><span className={styles.cardIcon}><Icon size={22} strokeWidth={1.8} aria-hidden="true" /></span><span className={styles.cardNumber}>0{index + 1}</span></span><span className={styles.cardTitle}>{title}</span><span className={styles.cardDescription}>{description}</span><span className={styles.cardAction}>Explore capability <ChevronRight size={16} aria-hidden="true" /></span></summary><div className={styles.cardDetail}><strong>In the workspace</strong><ul>{details.map(detail => <li key={detail}>{detail}</li>)}</ul></div></details>)}</div>
-          </div>
-        </section>
+      <section id="roles" className={`${styles.section} ${styles.rolesSection}`} aria-labelledby="roles-title">
+        <div className={styles.container}>
+          <div className={styles.sectionHead}><div><span>ONE SYSTEM, MANY DECISIONS</span><h2 id="roles-title">One shared view of capability.<br/><em>Clear actions for every team.</em></h2></div><p>The same workforce record should answer different questions for the people responsible for development, readiness and risk.</p></div>
+          <div className={styles.roleGrid}>{audiences.map(([label,title,description])=><article key={label}><span>{label}</span><h3>{title}</h3><p>{description}</p></article>)}</div>
+        </div>
+      </section>
 
-        <section id="workflow" className={styles.workflow} aria-labelledby="workflow-title"><div className={styles.container}>
-          <div className={styles.sectionHead}><div><span className={styles.kicker}>HOW IT WORKS</span><h2 id="workflow-title">A line of sight from<br /><em>expectation to evidence.</em></h2></div><p>Capability is easier to manage when the steps between a requirement and its proof are visible.</p></div>
-          <div className={styles.steps}>{steps.map(step => <div className={styles.step} key={step.number}><span>{step.number}</span><div><h3>{step.title}</h3><p>{step.description}</p></div></div>)}</div>
-        </div></section>
+      <section id="enterprise-readiness" className={`${styles.section} ${styles.enterpriseSection}`} aria-labelledby="enterprise-title">
+        <div className={styles.container}>
+          <div className={styles.sectionHead}><div><span>ENTERPRISE READINESS</span><h2 id="enterprise-title">Evaluate the product,<br/><em>the controls and the rollout.</em></h2></div><p>Enterprise adoption depends on more than feature fit. Review how Kalam aligns with your security, integration and implementation requirements before deployment.</p></div>
+          <div className={styles.enterpriseGrid}>{enterprisePaths.map(({icon:Icon,title,description,href,action})=><article key={title}><Icon size={23}/><h3>{title}</h3><p>{description}</p><Link href={href}>{action} <ArrowRight size={15}/></Link></article>)}</div>
+        </div>
+      </section>
 
-        <section id="roles" className={styles.roles} aria-labelledby="roles-title"><div className={styles.container}>
-          <div className={styles.sectionHead}><div><span className={styles.kicker}>ONE SYSTEM, MANY DECISIONS</span><h2 id="roles-title">Clarity for every team<br /><em>moving people forward.</em></h2></div><p>The same learning record should answer different questions for the people responsible for workforce capability.</p></div>
-          <div className={styles.rolesGrid}>{audiences.map(audience => <article className={styles.roleCard} key={audience.label}><span>{audience.label}</span><h3>{audience.title}</h3><p>{audience.description}</p></article>)}</div>
-        </div></section>
-
-        <section id="enterprise" className={styles.enterprise} aria-labelledby="enterprise-title"><div className={styles.container}><div className={styles.enterpriseGrid}>
-          <div><span className={styles.kicker}>ENTERPRISE CONTROL WITHOUT ENTERPRISE FRICTION</span><h2 id="enterprise-title">Make capability visible, governable and easier to move forward.</h2><p>Give learning teams, managers, compliance owners and leaders relevant views of the same work. Kognivon connects requirements, delivery and evidence so decisions can be traced back to the underlying records without forcing every team into the same workflow.</p><a href="#platform" className={styles.textLink}>Explore the capability system <ArrowRight size={17} aria-hidden="true" /></a></div>
-          <div className={styles.enterpriseList}>
-            <div><LockKeyhole size={23} aria-hidden="true" /><span><strong>Role-aware workspaces</strong><small>Keep actions and information relevant to the person using them.</small></span></div>
-            <div><FileCheck2 size={23} aria-hidden="true" /><span><strong>Evidence in context</strong><small>Connect learning activity to assessments, credentials and compliance records.</small></span></div>
-            <div><Globe2 size={23} aria-hidden="true" /><span><strong>Organizational context across teams</strong><small>Organize people, roles and learning work across business units and locations.</small></span></div>
-          </div>
-        </div></div></section>
-
-        <section id="questions" className={styles.questions} aria-labelledby="questions-title"><div className={styles.container}><div className={styles.questionsGrid}>
-          <div><span className={styles.kicker}>EVALUATING KOGNIVON</span><h2 id="questions-title">The right questions<br />deserve clear answers.</h2><p>Use these questions to examine the product against your workflows. Security, integration and deployment requirements should be scoped with your team before a rollout is agreed.</p></div>
+      <section id="questions" className={styles.section} aria-labelledby="questions-title">
+        <div className={styles.container}><div className={styles.questionLayout}>
+          <div className={styles.questionIntro}><span className={styles.kicker}>ENTERPRISE QUESTIONS, ANSWERED</span><h2 id="questions-title">Clear answers.<br/><em>Confident decisions.</em></h2><p>Before you evaluate Kalam, understand how it fits your operating model, technology environment, governance requirements, and path to enterprise adoption.</p><div className={styles.questionMeta}><span><strong>01</strong><small>Business fit</small></span><span><strong>02</strong><small>Technology fit</small></span><span><strong>03</strong><small>Adoption path</small></span></div></div>
           <div className={styles.questionList}>
-            <details><summary>What can we review in a walkthrough?<ChevronRight size={19} aria-hidden="true" /></summary><p>Follow a real workflow from role and learning requirements through assignments, assessments, credentials, compliance records and reporting. The preview above is illustrative; a walkthrough should use the current product.</p></details>
-            <details><summary>How should we interpret a readiness signal?<ChevronRight size={19} aria-hidden="true" /></summary><p>Use it to find records that need review. A signal is context for a human decision, not an independent certification of competence or regulatory compliance.</p></details>
-            <details><summary>Can different teams work from relevant views?<ChevronRight size={19} aria-hidden="true" /></summary><p>Kognivon includes role-aware learner, manager and administrative workspaces. Specific permissions and organizational scope should be verified as part of an enterprise evaluation.</p></details>
-            <details><summary>How would Kognivon fit our existing systems?<ChevronRight size={19} aria-hidden="true" /></summary><p>Review required identity, HR, content and reporting data flows with your team. The platform has integration and reporting workspaces; each connector and service commitment needs a scoped technical review.</p></details>
-            <details><summary>What would an enterprise rollout involve?<ChevronRight size={19} aria-hidden="true" /></summary><p>Start with your organizational structure, user roles, learning records, required integrations and security review. The configuration, migration and service scope should be confirmed together before a deployment commitment.</p></details>
+            {questions.map(([question,answer],index)=><details key={question} open={index===0}>
+              <summary><span className={styles.questionSummary}><b>0{index+1}</b><span>{question}</span></span><ChevronRight size={18}/></summary>
+              <div className={styles.questionAnswer}><span className={styles.answerMark}><ShieldCheck size={16}/></span><p>{answer}</p></div>
+            </details>)}
+            <Link className={styles.questionCta} href="/guided-evaluation"><span><b>Ready to evaluate Kalam?</b><small>Use a representative workforce scenario and see the platform in context.</small></span><ArrowRight size={18}/></Link>
           </div>
-        </div></div></section>
+        </div></div>
+      </section>
 
-        {inquiriesEnabled && <section id="demo" className={styles.demoSection} aria-labelledby="demo-title"><div className={styles.container}><div className={styles.demoGrid}><div><span className={styles.kicker}>LET&apos;S TALK</span><h2 id="demo-title">Explore Kognivon with your team.</h2><p>Tell us what your organization needs to understand about learning, skills and readiness. We&apos;ll use your details to respond to your request.</p></div><DemoInquiryForm /></div></div></section>}
+      {inquiriesEnabled && <section id="demo" className={`${styles.section} ${styles.demoSection}`} aria-labelledby="demo-title"><div className={styles.container}><div className={styles.demoGrid}><div className={styles.demoIntro}><div className={styles.demoIntroTop}><span className={styles.kicker}>LET&apos;S TALK</span><span className={styles.demoBadge}>01 / CONVERSATION</span></div><h2 id="demo-title">Start with your<br/><em>operating reality.</em></h2><p>Tell us what your organization is trying to improve across capability, learning, compliance, or workforce readiness. We&apos;ll start with the context that matters to your team.</p><div className={styles.demoSignals}><div><span><Target size={16}/></span><section><b>Start with the priority</b><small>Tell us the outcome or capability challenge behind the conversation.</small></section></div><div><span><UsersRound size={16}/></span><section><b>Bring the right context</b><small>We&apos;ll use your information to prepare a more relevant discussion.</small></section></div><div><span><ArrowRight size={16}/></span><section><b>Move toward action</b><small>Explore the right next step for your organization—not a generic demo.</small></section></div></div><div className={styles.demoLoop}><span>YOUR PRIORITY</span><i></i><span>RIGHT CONTEXT</span><i></i><span>NEXT ACTION</span></div></div><DemoInquiryForm/></div></div></section>}
 
-        <section className={styles.closing} aria-labelledby="closing-title"><div className={styles.container}><div className={styles.closingInner}><div><span className={styles.kicker}>THE NEXT STEP</span><h2 id="closing-title">See the whole picture.<br />Move people forward.</h2><p>{inquiriesEnabled ? "Request a conversation about your needs, or enter your workspace when you have access." : "Review the connected workflow, then enter your workspace when you have access."}</p></div><div className={styles.closingActions}><a className={styles.lightButton} href={inquiriesEnabled ? "#demo" : "#questions"}>{inquiriesEnabled ? "Request a conversation" : "Review evaluation questions"} <ArrowRight size={18} aria-hidden="true" /></a><Link href="/login">Already have access? Sign in <ChevronRight size={16} aria-hidden="true" /></Link></div></div></div></section>
-      </main>
-      <footer className={styles.footer}><div className={styles.container}><div className={styles.footerTop}><Link className={styles.brand} href="/" aria-label="Kognivon home"><span className={styles.brandMark} aria-hidden="true"><span>K</span></span><span>Kognivon<span className={styles.brandPeriod}>.</span></span></Link><p>Enterprise workforce capability, delivered through one connected SaaS workspace.</p><div><a href="#platform">Platform</a><a href="#workflow">Workflow</a><a href="#roles">For teams</a><a href="#questions">Questions</a>{inquiriesEnabled && <a href="#demo">Request a demo</a>}<Link href="/login">Sign in</Link></div></div><div className={styles.footerBottom}><span>© {new Date().getFullYear()} Kognivon</span><span>Workforce capability, with clarity.</span></div></div></footer>
-    </div>
-  );
+      {!inquiriesEnabled && <section className={styles.closing} aria-labelledby="closing-title"><div className={styles.container}><div className={styles.closingInner}><div><span>THE NEXT STEP</span><h2 id="closing-title">Turn capability priorities<br/>into business action.</h2><p>See how Kalam connects the workforce picture, then explore the path that fits your organization.</p></div><div><PublicButton href="/contact-sales" variant="secondary">Contact sales <ArrowRight size={17}/></PublicButton><Link href="/login">Already have access? Sign in <ChevronRight size={15}/></Link></div></div></div></section>}
+    </main>
+
+    <PublicFooter landing/>
+  </div>;
 }
+
+

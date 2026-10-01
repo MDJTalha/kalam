@@ -15,6 +15,14 @@ As of: 2026-09-24
 | certificates.manage | certificate revocation |
 | compliance.manage | compliance requirement/assignment administration; exceptions; evidence verification; administrative completion |
 | skills.manage | skill creation; skill evidence; course-skill mapping; role-skill mapping |
+| capabilities.read | capability framework/category read; capability detail and level read |
+| capabilities.manage | capability/category creation/update; governed capability levels and relationships |
+| strategic_objectives.read | strategic objective read |
+| strategic_objectives.manage | strategic objective creation and capability mapping |
+| competencies.read | competency framework, levels and capability relationships read |
+| competencies.manage | competency creation and governed five-level definitions/mappings |
+| role_requirements.read | governed role requirement read |
+| role_requirements.manage | governed capability/competency/skill role requirements |
 | reports.read | executive summary; CSV report exports; xAPI statement read |
 | audit.read | audit log access |
 | files.read | governed file listing and download |

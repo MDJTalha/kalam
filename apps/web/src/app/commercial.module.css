@@ -1,0 +1,768 @@
+.page{--navy:var(--color-brand-deep);--navy2:#0d3158;--blue:var(--color-brand-primary);--blue2:var(--color-brand-hover);--gold:#d5a84a;--ink:var(--color-text-primary);--muted:var(--color-text-secondary);--line:var(--color-border);--soft:var(--color-surface-muted);min-height:100vh;background:var(--color-surface);color:var(--ink)}
+.container{width:min(var(--public-content-width),calc(100% - 56px));margin:auto}
+.skip{position:fixed;left:16px;top:10px;z-index:1000;transform:translateY(-140%);padding:10px 14px;background:#fff;border:2px solid var(--blue);border-radius:10px;font-size:12px;font-weight:800}.skip:focus{transform:none}
+.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 17px;border-radius:11px;font-size:12px;font-weight:800}.primary{background:var(--blue);color:#fff;box-shadow:0 12px 25px rgba(8,120,201,.16)}.primary:hover{background:var(--blue2);transform:translateY(-1px)}.secondary{border:1px solid var(--line);background:#fff;color:#24425f}
+.hero{padding:94px 0 72px;background:radial-gradient(circle at 82% 12%,rgba(42,129,221,.14),transparent 27%),linear-gradient(180deg,#fbfdff,#f5f8fc);border-bottom:1px solid #e5edf5}
+.heroGrid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:72px;align-items:center}
+.kicker{display:inline-flex;align-items:center;gap:8px;color:#175b9e;font-size:10px;font-weight:850;letter-spacing:.17em;text-transform:uppercase}
+.hero h1,.sectionHead h2{margin:18px 0 20px;font-size:clamp(46px,5vw,70px);line-height:1.03;letter-spacing:-.065em}.sectionHead h2{font-size:clamp(36px,4vw,52px);line-height:1.1}
+.hero p,.sectionHead p{max-width:650px;margin:0;color:var(--muted);font-size:16px;line-height:1.75}
+.heroActions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.heroPanel{padding:28px;border-radius:24px;background:linear-gradient(145deg,#091d35,#0e3864);color:#fff;box-shadow:0 32px 70px rgba(7,24,45,.2)}
+.heroPanel>span{font-size:10px;font-weight:850;letter-spacing:.14em;color:#9fc7ef}.heroPanel h2{margin:14px 0 12px;font-size:30px;letter-spacing:-.045em}.heroPanel p{color:#c3d8ec;font-size:13px;line-height:1.7}
+.signalRow{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:22px}.signalRow div{padding:15px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.055)}.signalRow strong,.signalRow span{display:block}.signalRow strong{font-size:15px}.signalRow span{margin-top:4px;color:#b9d0e7;font-size:10px}
+.section{padding:var(--public-section-y) 0}.sectionAlt{padding:var(--public-section-y) 0;background:var(--soft)}
+.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:60px;margin-bottom:38px}.sectionHead>div{max-width:720px}.sectionHead>p{max-width:400px;font-size:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{position:relative;padding:26px;border:1px solid var(--line);border-radius:18px;background:#fff;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}.card:hover{transform:translateY(-4px);border-color:#bfd5ea;box-shadow:0 20px 40px rgba(10,32,60,.09)}.card h3{margin:18px 0 9px;font-size:19px;letter-spacing:-.035em}.card p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}.card small{display:block;margin-top:18px;color:#647b91;font-size:11px;line-height:1.5}
+.planCard{display:flex;flex-direction:column;min-height:470px}.planBadge{width:max-content;padding:6px 9px;border-radius:999px;background:#eaf4ff;color:#135cae;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.planName{margin:22px 0 5px;font-size:24px;font-weight:800}.planTag{min-height:42px;color:var(--muted);font-size:13px;line-height:1.55}.price{margin:25px 0 5px;font-size:38px;font-weight:850;letter-spacing:-.05em}.price small{display:inline;margin:0;color:#76899b;font-size:12px;font-weight:700}.features{display:grid;gap:9px;margin:22px 0 26px;padding:0;list-style:none}.features li{display:flex;gap:8px;color:#4f6478;font-size:12px;line-height:1.5}.features svg{flex:0 0 auto;color:var(--kalam-blue);margin-top:1px}.planCard .primary,.planCard .secondary{margin-top:auto;width:100%}
+.notice{display:flex;gap:11px;padding:16px 18px;border:1px solid #d7e5f3;border-radius:13px;background:#f7fbff;color:#52687e;font-size:12px;line-height:1.6}.notice svg{flex:0 0 auto;color:var(--blue)}
+.clientCard{min-height:210px}.clientLogo{display:grid;place-items:center;width:52px;height:52px;border-radius:13px;background:#edf5fd;color:#145fae;font-weight:900;font-size:18px}.clientCard blockquote{margin:18px 0 0;color:#475d72;font-size:13px;line-height:1.65}
+.empty{padding:35px;border:1px dashed #cbd8e5;border-radius:18px;background:#fbfdff;text-align:center;color:#60758a}.empty strong{display:block;color:#173553;font-size:17px}.empty p{max-width:620px;margin:8px auto 0;font-size:12px;line-height:1.65}
+.formCard{padding:30px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 20px 55px rgba(10,40,78,.07)}.formGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.formCard label{display:grid;gap:7px;color:#1d3b59;font-size:12px;font-weight:760}.formCard input,.formCard select,.formCard textarea{width:100%;border:1px solid #bdcddd;border-radius:10px;background:#fff;padding:12px;color:#16334f;font:inherit}.formCard textarea{min-height:105px;resize:vertical}.formCard input:focus,.formCard select:focus,.formCard textarea:focus{outline:3px solid rgba(8,120,201,.14);border-color:var(--kalam-blue)}.formCard button{margin-top:18px;border:0}.consent{display:flex!important;grid-template-columns:auto 1fr;align-items:flex-start;gap:9px!important;margin-top:16px;color:#61758a!important;font-weight:500!important}.consent input{width:18px;height:18px;padding:0}.status{min-height:20px;margin:12px 0 0;color:#275a8b;font-size:11px}
+@media(max-width:900px){.links{display:none}.heroGrid{grid-template-columns:1fr;gap:35px}.sectionHead{flex-direction:column;align-items:flex-start;gap:12px}.grid3,.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.footerGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.container{width:min(100% - 32px,480px)}.nav{height:68px}.actions .primary{display:none}.hero{padding:66px 0 58px}.hero h1{font-size:42px}.heroActions{flex-direction:column}.heroActions a{width:100%}.signalRow,.grid3,.grid4,.formGrid,.footerGrid{grid-template-columns:1fr}.section,.sectionAlt{padding:72px 0}.sectionHead h2{font-size:36px}.footerBottom{flex-direction:column;align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){.page,.page *{transition:none!important;scroll-behavior:auto!important}}
+
+/* Kalam brand and mobile layout QA closure */
+.brand{flex-shrink:0}
+@media(max-width:600px){
+  .page{overflow-x:hidden}
+  .container{width:calc(100vw - 32px)!important;max-width:none!important}
+  .nav{width:100%;min-width:0}
+  .brand{max-width:calc(100vw - 110px)}
+  .brand :global(.kalam-logo-asset){width:min(158px,46vw)}
+  .heroGrid{grid-template-columns:minmax(0,1fr)!important;width:100%;min-width:0}
+  .heroGrid>*{min-width:0;max-width:100%}
+  .hero h1{max-width:100%;font-size:clamp(38px,10.5vw,48px);line-height:1.02;white-space:normal;overflow-wrap:anywhere}
+  .hero p{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+  .heroPanel{width:100%;max-width:100%;min-width:0;overflow:hidden;padding:22px}
+  .heroPanel *{min-width:0;max-width:100%;overflow-wrap:anywhere}
+  .signalRow{grid-template-columns:1fr}
+}
+
+/* Enterprise commercial inquiry — international-grade form system */
+.enterpriseForm{position:relative;align-self:start;padding:30px;border:1px solid #d8e4ef;border-radius:24px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 28px 70px rgba(8,34,66,.10);overflow:hidden}
+.enterpriseForm:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--kalam-blue-hover),var(--kalam-blue) 58%,var(--kalam-tech))}
+.formHeader{padding-bottom:22px;border-bottom:1px solid #e5edf5}
+.formEyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--kalam-blue);font-size:10px;font-weight:850;letter-spacing:.15em;text-transform:uppercase}
+.formHeader h2,.formSuccess h2{margin:10px 0 8px;color:#102943;font-size:28px;line-height:1.12;letter-spacing:-.04em}
+.formHeader p,.formSuccess p{margin:0;color:#60758a;font-size:12px;line-height:1.65}
+.formHeader p b,.formSection label>span b{color:var(--kalam-blue)}
+.formSection{min-width:0;margin:0;padding:24px 0 0;border:0}
+.formSection+ .formSection{margin-top:4px;padding-top:26px;border-top:1px solid #e8eef5}
+.formSection legend{width:100%;margin:0 0 16px;padding:0;color:#102f4d;font-size:12px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+.enterpriseForm .formGrid{gap:16px}
+.enterpriseForm label{display:grid;grid-template-rows:17px auto;color:#173957;font-size:12px;font-weight:760}
+.enterpriseForm label>span{display:flex;align-items:center;gap:5px;min-width:0;line-height:17px}
+.enterpriseForm label em{margin-left:0;color:#8393a4;font-size:10px;font-style:normal;font-weight:650}
+.enterpriseForm input,.enterpriseForm select,.enterpriseForm textarea{width:100%;min-height:48px;border:1px solid #c7d6e5;border-radius:11px;background:#fff;padding:12px 13px;color:#17334f;font-size:13px;line-height:1.4;box-shadow:0 1px 0 rgba(9,39,72,.02);transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.enterpriseForm input::placeholder,.enterpriseForm textarea::placeholder{color:#8191a2;opacity:1}
+.enterpriseForm select{appearance:auto;color:#294a69}
+.enterpriseForm textarea{min-height:130px;resize:vertical}
+.enterpriseForm input:hover,.enterpriseForm select:hover,.enterpriseForm textarea:hover{border-color:#a9bfd4}
+.enterpriseForm input:focus,.enterpriseForm select:focus,.enterpriseForm textarea:focus{outline:none;border-color:var(--kalam-blue);box-shadow:0 0 0 4px rgba(8,120,201,.11)}
+.enterpriseForm input:invalid:not(:placeholder-shown){border-color:#b85c5c}
+.detailsField{margin-top:17px}
+.detailsField small{display:flex;justify-content:space-between;gap:18px;color:#778a9d;font-size:10px;font-weight:550;line-height:1.45}
+.formTrustBar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;padding:13px;border:1px solid #dce8f4;border-radius:14px;background:#f5f9fd}
+.formTrustBar>div{display:flex;align-items:flex-start;gap:9px;min-width:0}
+.formTrustBar svg{flex:0 0 auto;margin-top:2px;color:var(--kalam-blue)}
+.formTrustBar span{display:grid;gap:2px;min-width:0}
+.formTrustBar strong{color:#183a5b;font-size:10px}
+.formTrustBar small{color:#6d8195;font-size:9px;line-height:1.45}
+.enterpriseConsent{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;align-items:flex-start!important;gap:10px!important;margin-top:18px;color:#5d7287!important;font-size:11px!important;font-weight:500!important;line-height:1.55}
+.enterpriseConsent input{width:18px!important;min-height:18px!important;height:18px!important;margin-top:1px;padding:0!important;accent-color:var(--kalam-blue)}
+.enterpriseConsent span{display:block!important}
+.enterpriseConsent a{color:#145fae;font-weight:750;text-decoration:underline;text-underline-offset:2px}
+.formActions{display:flex;align-items:center;gap:16px;margin-top:20px}
+.enterpriseSubmit{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:0 20px;border:0;border-radius:11px;background:linear-gradient(135deg,var(--kalam-blue),var(--kalam-blue-hover));color:#fff;font-size:12px;font-weight:850;box-shadow:0 14px 28px rgba(8,120,201,.18);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,background .16s ease}
+.enterpriseSubmit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 18px 32px rgba(8,120,201,.24)}
+.enterpriseSubmit:disabled{cursor:wait;opacity:.72}
+.formResponseNote{max-width:250px;color:#778b9f;font-size:9px;line-height:1.5}
+.enterpriseForm .status{min-height:18px;margin:10px 0 0;color:#9b3f3f;font-size:10px}
+.formSuccess{align-self:start;padding:34px;border:1px solid #d7e6f3;border-radius:24px;background:linear-gradient(180deg,#fff,#f8fbfe);box-shadow:0 28px 70px rgba(8,34,66,.10)}
+.successIcon{display:grid;place-items:center;width:46px;height:46px;margin-bottom:18px;border-radius:14px;background:#eaf5ef;color:#177448}
+.responsePromise{display:flex;gap:10px;margin:22px 0;padding:15px;border:1px solid #dce8f4;border-radius:13px;background:#f6faff;color:var(--kalam-blue)}
+.responsePromise>span{display:grid;gap:3px}.responsePromise strong{color:#173b5d;font-size:11px}.responsePromise small{color:#6d8195;font-size:10px;line-height:1.5}
+.formSuccess .secondary{margin-top:2px}
+
+@media(max-width:900px){
+  .enterpriseForm{padding:26px}
+}
+@media(max-width:600px){
+  .enterpriseForm{padding:22px 18px;border-radius:18px}
+  .formHeader h2,.formSuccess h2{font-size:24px}
+  .formSection{padding-top:21px}
+  .formTrustBar{grid-template-columns:1fr}
+  .formActions{align-items:stretch;flex-direction:column}
+  .enterpriseSubmit{width:100%}
+  .formResponseNote{max-width:none;text-align:center}
+  .detailsField small{align-items:flex-start;flex-direction:column;gap:4px}
+}
+
+/* International country + dialing controls */
+.countrySelect,.phoneCountrySelect{font-size:13px;font-weight:600}
+.countryOption,.phoneOption{display:flex;align-items:center;gap:9px;min-width:0}
+.countryFlag{display:block;width:22px;height:15px;background-position:center;background-repeat:no-repeat;background-size:cover;border-radius:2px;box-shadow:0 0 0 1px rgba(18,55,88,.08);flex:0 0 auto}
+.countryName{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.countryDial{margin-left:auto;color:#7890a5;font-size:10px;font-weight:700;letter-spacing:.01em;flex:0 0 auto}
+.countryOption>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phoneControl{display:grid;grid-template-columns:minmax(128px,.8fr) minmax(0,1.4fr);gap:8px}
+.phoneControl>input{min-width:0}
+.enterpriseForm :global(.k-country__control),.enterpriseForm :global(.k-phone-country__control){min-height:48px;border:1px solid #c7d6e5;border-radius:11px;background:#fff;box-shadow:0 1px 0 rgba(9,39,72,.02);transition:border-color .16s ease,box-shadow .16s ease}
+.enterpriseForm :global(.k-country__control:hover),.enterpriseForm :global(.k-phone-country__control:hover){border-color:#a9bfd4}
+.enterpriseForm :global(.k-country__control--is-focused),.enterpriseForm :global(.k-phone-country__control--is-focused){border-color:var(--kalam-blue);box-shadow:0 0 0 4px rgba(8,120,201,.11)}
+.enterpriseForm :global(.k-country__value-container),.enterpriseForm :global(.k-phone-country__value-container){padding:2px 12px}
+.enterpriseForm :global(.k-country__input-container),.enterpriseForm :global(.k-phone-country__input-container){margin:0;padding:0}
+.enterpriseForm :global(.k-country__placeholder),.enterpriseForm :global(.k-phone-country__placeholder){color:#8191a2;font-weight:550}
+.enterpriseForm :global(.k-country__single-value),.enterpriseForm :global(.k-phone-country__single-value){color:#294a69}
+.enterpriseForm :global(.k-country__indicator-separator),.enterpriseForm :global(.k-phone-country__indicator-separator){display:none}
+.enterpriseForm :global(.k-country__dropdown-indicator),.enterpriseForm :global(.k-phone-country__dropdown-indicator){padding:8px;color:#6f859a}
+.enterpriseForm :global(.k-country__menu),.enterpriseForm :global(.k-phone-country__menu){z-index:20;margin-top:6px;border:1px solid #d6e2ed;border-radius:12px;background:#fff;box-shadow:0 18px 40px rgba(9,36,68,.14);overflow:hidden}
+.enterpriseForm :global(.k-country__menu-list),.enterpriseForm :global(.k-phone-country__menu-list){max-height:260px;padding:6px}
+.enterpriseForm :global(.k-country__option),.enterpriseForm :global(.k-phone-country__option){border-radius:8px;padding:9px 10px;color:#294a69;cursor:pointer}
+.enterpriseForm :global(.k-country__option--is-focused),.enterpriseForm :global(.k-phone-country__option--is-focused){background:#eef6ff}
+.enterpriseForm :global(.k-country__option--is-selected),.enterpriseForm :global(.k-phone-country__option--is-selected){background:var(--kalam-blue);color:#fff}
+@media(max-width:600px){
+  .phoneControl{grid-template-columns:minmax(118px,.85fr) minmax(0,1.15fr)}
+}
+
+/* Unified premium public navigation */
+.header{
+  background:rgba(255,255,255,.96);
+  backdrop-filter:saturate(145%) blur(20px);
+  -webkit-backdrop-filter:saturate(145%) blur(20px);
+  box-shadow:0 10px 30px rgba(17,45,78,.05);
+}
+.nav{height:78px;gap:20px}
+.links{
+  align-items:center;
+  gap:2px;
+  margin-left:auto;
+  padding:4px;
+  border:1px solid rgba(217,227,237,.72);
+  border-radius:12px;
+  background:rgba(248,251,254,.76);
+}
+.links a{
+  display:inline-flex;
+  align-items:center;
+  min-height:38px;
+  padding:0 10px;
+  border-radius:8px;
+  color:#405b76;
+  transition:color .16s ease,background .16s ease,box-shadow .16s ease;
+}
+.links a:hover{background:#fff;color:#0f5fac;box-shadow:0 3px 10px rgba(18,53,89,.07)}
+.actions{gap:8px}
+.actions .secondary,.actions .primary,.signin{min-height:42px;border-radius:9px}
+.actions .secondary{padding:0 13px;border-color:#b9cee3;color:#174d82}
+.actions .secondary:hover{background:#f6faff;border-color:#83add5}
+.signin{display:inline-flex;align-items:center;padding:0 10px}
+.actions .primary{padding:0 15px;background:linear-gradient(135deg,var(--kalam-blue),#0f5ba8);box-shadow:0 8px 18px rgba(8,120,201,.18)}
+.nav a:focus-visible{outline:3px solid rgba(8,120,201,.25);outline-offset:2px}
+@media(max-width:1120px){
+  .links{display:none}
+  .nav{height:72px}
+}
+@media(max-width:760px){
+  .actions .secondary{display:none}
+  .nav{gap:10px}
+}
+
+/* intl-tel-input — enterprise phone field */
+.intlPhone{width:100%}
+.intlPhone :global(.iti){width:100%}
+.intlPhone :global(.iti input){width:100%;min-height:48px;border:1px solid #c7d6e5;border-radius:11px;background:#fff;padding-top:12px;padding-bottom:12px;color:#17334f;font-size:13px;box-shadow:0 1px 0 rgba(9,39,72,.02)}
+.intlPhone :global(.iti input:hover){border-color:#a9bfd4}
+.intlPhone :global(.iti input:focus){outline:none;border-color:var(--kalam-blue);box-shadow:0 0 0 4px rgba(8,120,201,.11)}
+.intlPhone :global(.iti__selected-country-primary){border-radius:10px 0 0 10px}
+.intlPhone :global(.iti__country-container){z-index:5}
+.intlPhone :global(.iti__dropdown-content){border:1px solid #d7e3ef;border-radius:12px;box-shadow:0 18px 40px rgba(9,36,68,.14);overflow:hidden}
+.intlPhone :global(.iti__search-input){border:0!important;border-bottom:1px solid #e2ebf3!important;border-radius:0!important;box-shadow:none!important}
+.successActions{display:flex;flex-wrap:wrap;gap:9px;margin-top:4px}.successActions .secondary{min-height:42px;text-decoration:none}.successActions button.secondary{cursor:pointer}
+
+.planAction{margin-top:auto;width:100%}
+
+.fieldError{color:var(--color-danger)!important;font-size:10.5px!important;font-weight:700!important;line-height:1.45}
+
+/* Contact Sales: focused enterprise inquiry experience */
+.salesHero{padding:38px 0 80px;background:radial-gradient(circle at 12% 8%,rgba(50,130,210,.10),transparent 30%),linear-gradient(180deg,#f5f9fd 0%,#fff 100%)}
+.salesLayout{display:grid;grid-template-columns:minmax(0,.94fr) minmax(0,1.06fr);align-items:start;gap:28px}
+.salesIntro{position:relative;overflow:hidden;min-width:0;padding:clamp(32px,4vw,58px);border-radius:26px;background:radial-gradient(circle at 100% 0,rgba(70,151,226,.24),transparent 34%),linear-gradient(150deg,#092541,#071b31 72%);color:#fff;box-shadow:0 28px 68px rgba(8,35,64,.15)}
+.salesIntro:after{content:"";position:absolute;right:-110px;bottom:-180px;width:330px;height:330px;border:1px solid rgba(160,205,245,.13);border-radius:50%;pointer-events:none}
+.salesEyebrow{display:inline-flex;align-items:center;gap:9px;color:#b7d9f5;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.salesEyebrowDot{width:7px;height:7px;border-radius:50%;background:#7cc8f6;box-shadow:0 0 0 4px rgba(124,200,246,.14)}
+.salesIntro h1{max-width:650px;margin:28px 0 20px;font-size:clamp(42px,4.4vw,66px);font-weight:760;line-height:1.06;letter-spacing:-.058em;text-wrap:balance}
+.salesIntro h1 span{color:#82c4f5}
+.salesLead{max-width:550px;margin:0;color:#c3d7e9;font-size:16px;line-height:1.72}
+.salesConversation{margin-top:46px;padding-top:26px;border-top:1px solid rgba(201,224,245,.18)}
+.salesConversationHead{display:flex;align-items:center;gap:11px;color:#b5d8f3}
+.salesConversationHead h2{margin:0;color:#fff;font-size:14px;font-weight:800;letter-spacing:.01em}
+.salesConversation ol{display:grid;gap:22px;margin:24px 0 0;padding:0;list-style:none}
+.salesConversation li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:13px}
+.salesNumber{display:grid;place-items:center;width:32px;height:32px;border:1px solid rgba(141,198,240,.35);border-radius:9px;color:#9cd2f9;font-size:11px;font-weight:850}
+.salesConversation strong{display:block;padding-top:1px;color:#fff;font-size:13px}
+.salesConversation li p{margin:5px 0 0;color:#adc5da;font-size:12px;line-height:1.55}
+.salesExplore{display:flex;align-items:center;flex-wrap:wrap;gap:10px 17px;margin-top:36px;padding-top:23px;border-top:1px solid rgba(201,224,245,.18);font-size:11px}
+.salesExplore>span{width:100%;color:#8db2cf;font-weight:700}
+.salesExplore a{display:inline-flex;align-items:center;gap:5px;color:#d5ebfc;font-weight:750;text-decoration:none;text-underline-offset:4px}
+.salesExplore a:hover{text-decoration:underline}
+.salesExplore a:focus-visible{outline:2px solid #a9dcff;outline-offset:4px}
+
+.salesForm{min-width:0;scroll-margin-top:110px}
+.salesForm .enterpriseForm,.salesForm .formSuccess{width:100%;box-shadow:0 25px 65px rgba(12,41,73,.10)}
+.salesAssurance{padding:30px 0 46px;border-top:1px solid #e4edf5;background:#fff}
+.salesAssuranceGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}
+.salesAssuranceGrid>div{display:flex;align-items:flex-start;gap:13px;min-width:0;padding:15px 2px}
+.salesAssuranceGrid svg{flex:0 0 auto;color:var(--kalam-blue)}
+.salesAssuranceGrid span{display:grid;gap:5px}
+.salesAssuranceGrid strong{color:#123450;font-size:13px}
+.salesAssuranceGrid small{color:#657c91;font-size:11px;line-height:1.5}
+@media(max-width:1040px){
+  .salesLayout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+  .salesIntro{padding:34px}
+  .salesIntro h1{font-size:clamp(40px,4.8vw,54px)}
+}
+@media(max-width:820px){
+  .salesHero{padding:26px 0 54px}
+  .salesLayout{grid-template-columns:minmax(0,1fr);gap:18px}
+  .salesIntro{padding:38px}
+  .salesConversation{margin-top:32px}
+  .salesAssuranceGrid{gap:12px}
+}
+@media(max-width:600px){
+  .salesHero{padding:16px 0 40px}
+  .salesIntro{padding:31px 24px;border-radius:19px}
+  .salesIntro h1{margin:23px 0 15px;font-size:clamp(38px,10vw,48px)}
+  .salesLead{font-size:14px;line-height:1.65}
+  .salesConversation{margin-top:27px;padding-top:22px}
+  .salesConversation ol{gap:17px;margin-top:18px}
+  .salesExplore{margin-top:25px}
+  .salesAssurance{padding:15px 0 24px}
+  .salesAssuranceGrid{grid-template-columns:1fr;gap:0}
+  .salesAssuranceGrid>div{padding:13px 2px;border-bottom:1px solid #edf2f7}
+}
+
+.salesJump{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;margin-top:26px;padding:0 17px;border:1px solid rgba(174,218,249,.42);border-radius:10px;background:rgba(123,191,239,.12);color:#fff;font-size:12px;font-weight:800;text-decoration:none;transition:background .18s ease,transform .18s ease}
+.salesJump:hover{background:rgba(123,191,239,.23);transform:translateY(-1px)}
+.salesJump:focus-visible{outline:3px solid #9fd8ff;outline-offset:3px}
+.salesAssuranceGrid small{color:#4f687e}
+.salesForm .formTrustBar small{color:#526c83}
+.page :global(.kalam-logo-descriptor){color:#a8c5df}
+@media(prefers-reduced-motion:reduce){.salesJump{transition:none}.salesJump:hover{transform:none}}
+
+
+/* Enterprise capability visual — replaces generic SaaS artwork with a restrained operating-model graphic */
+.capabilityVisual{position:relative;height:188px;margin:-4px -4px 24px;border:1px solid rgba(164,205,238,.16);border-radius:18px;background:radial-gradient(circle at 50% 50%,rgba(83,158,220,.16),transparent 31%),linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.015));overflow:hidden}
+.capabilityVisual:before,.capabilityVisual:after{content:"";position:absolute;left:50%;top:50%;width:68%;height:1px;background:linear-gradient(90deg,transparent,rgba(139,195,236,.28),transparent);transform:translate(-50%,-50%) rotate(25deg)}
+.capabilityVisual:after{transform:translate(-50%,-50%) rotate(-25deg)}
+.capabilityOrb{position:absolute;left:50%;top:50%;z-index:2;display:grid;place-items:center;width:82px;height:82px;transform:translate(-50%,-50%);border:1px solid rgba(174,220,249,.42);border-radius:50%;background:radial-gradient(circle at 35% 30%,#1c5d92,#0a2745 68%);box-shadow:0 0 0 9px rgba(91,165,219,.07),0 14px 35px rgba(0,0,0,.22)}
+.capabilityOrb span{font-size:25px;font-weight:850;letter-spacing:-.06em;color:#fff}.capabilityOrb small{margin-top:-20px;color:#a9cae5;font-size:6.5px;font-weight:800;letter-spacing:.11em;line-height:1.25;text-align:center}
+.capabilityNode{position:absolute;z-index:3;display:grid;gap:2px;min-width:82px;padding:8px 10px;border:1px solid rgba(173,214,241,.2);border-radius:10px;background:rgba(7,29,52,.88);box-shadow:0 8px 20px rgba(0,0,0,.12);text-align:center}
+.capabilityNode:before{content:"";position:absolute;width:6px;height:6px;border:1px solid #8fc6ec;border-radius:50%;background:#0e3b68;box-shadow:0 0 0 4px rgba(95,170,225,.08)}
+.capabilityNode strong{color:#e9f5ff;font-size:9px;font-weight:800}.capabilityNode small{color:#8eb0ca;font-size:7px;letter-spacing:.04em}
+.nodeLearning{left:13px;top:17px}.nodeLearning:before{right:-22px;bottom:7px}
+.nodeSkills{right:13px;top:17px}.nodeSkills:before{left:-22px;bottom:7px}
+.nodeCompliance{left:13px;bottom:17px}.nodeCompliance:before{right:-22px;top:7px}
+.nodeIntelligence{right:13px;bottom:17px}.nodeIntelligence:before{left:-22px;top:7px}
+.pricingHeroGrid>div:first-child{padding-left:4px}.pricingHeroGrid .heroActions{margin-top:28px}.pricingPromise>span{display:block}
+@media(max-width:980px){.pricingHeroGrid>div:first-child{padding-left:0}}
+@media(max-width:650px){.capabilityVisual{height:178px;margin-bottom:21px}.capabilityOrb{width:72px;height:72px}.capabilityNode{min-width:76px;padding:7px 8px}.nodeLearning{left:9px}.nodeSkills{right:9px}.nodeCompliance{left:9px}.nodeIntelligence{right:9px}.pricingHeroGrid>div:first-child{padding-left:0}}
+
+
+.promiseBrand{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.12)}
+.promiseBrand>span{color:#83b6df;font-size:8px;font-weight:800;letter-spacing:.12em;text-align:right;line-height:1.45}.promiseLogo{max-width:142px}.promiseLogo :global(.kalam-logo-asset){display:block}.promiseLogo img{display:block;width:142px;height:auto}
+.promiseArchitecture{display:grid;grid-template-columns:auto 1fr auto 1fr auto 1fr auto;align-items:center;gap:8px;margin:22px 0 14px;padding:11px 12px;border:1px solid rgba(255,255,255,.11);border-radius:11px;background:rgba(255,255,255,.035);color:#b9d7ef;font-size:7px;font-weight:850;letter-spacing:.1em}.promiseArchitecture i{display:block;height:1px;background:linear-gradient(90deg,rgba(120,186,231,.12),rgba(120,186,231,.5),rgba(120,186,231,.12))}
+.pricingHero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#b9d6ee 22%,#5e9ed0 50%,#b9d6ee 78%,transparent);opacity:.6}.pricingHero{position:relative}
+.pricingHeroGrid{position:relative}.pricingHeroGrid:before{content:"KALAM";position:absolute;right:-18px;top:-68px;color:rgba(22,75,122,.035);font-size:clamp(72px,10vw,150px);font-weight:900;letter-spacing:-.08em;pointer-events:none}
+@media(max-width:980px){.promiseBrand{align-items:flex-start}.pricingHeroGrid:before{display:none}}
+@media(max-width:650px){.promiseBrand{gap:10px}.promiseBrand>span{font-size:7px}.promiseArchitecture{gap:5px;padding:10px 7px;font-size:6.5px}.promiseArchitecture i{min-width:8px}.promiseLogo img{width:122px}}
+
+/* Enterprise pricing — CRM-governed SaaS commercial experience */
+.pricingHero{padding:92px 0 68px;background:radial-gradient(circle at 85% 10%,rgba(42,129,221,.14),transparent 29%),linear-gradient(180deg,#fbfdff 0%,#f4f8fc 100%);border-bottom:1px solid #e4edf6}
+.pricingHeroGrid{display:grid;grid-template-columns:minmax(0,.98fr) minmax(440px,.82fr);gap:72px;align-items:center}
+.pricingHero h1{max-width:760px;margin:18px 0 20px;font-size:clamp(48px,5.2vw,72px);line-height:1.01;letter-spacing:-.065em}
+.pricingHero h1 span{color:var(--kalam-blue)}
+.pricingHero p{max-width:690px;margin:0;color:var(--muted);font-size:16px;line-height:1.75}
+.pricingTrust{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:24px;color:#526b82;font-size:11px;font-weight:700}
+.pricingTrust span{display:inline-flex;align-items:center;gap:7px}.pricingTrust svg{color:var(--kalam-blue)}
+.pricingPromise{padding:30px;border-radius:24px;background:linear-gradient(145deg,#081c34,#0e3b6a);color:#fff;box-shadow:0 30px 70px rgba(6,30,58,.2)}
+.pricingPromise>span{color:#9dc9f2;font-size:10px;font-weight:850;letter-spacing:.15em}
+.pricingPromise h2{margin:14px 0 12px;font-size:31px;line-height:1.08;letter-spacing:-.045em}
+.pricingPromise p{color:#c6d9ec;font-size:13px;line-height:1.7}
+.promiseGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:24px}
+.promiseGrid div{padding:15px;border:1px solid rgba(255,255,255,.12);border-radius:13px;background:rgba(255,255,255,.055)}
+.promiseGrid strong,.promiseGrid small{display:block}.promiseGrid strong{font-size:14px}.promiseGrid small{margin-top:5px;color:#b8cfe5;font-size:9px;line-height:1.4}
+.pricingSection{padding:var(--public-section-y) 0;background:#fff}
+.pricingGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+.pricingCard{position:relative;display:flex;flex-direction:column;min-height:610px;padding:28px;border:1px solid #dbe5ef;border-radius:21px;background:#fff;box-shadow:0 10px 35px rgba(10,37,67,.045);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.pricingCard:hover{transform:translateY(-5px);border-color:#b7cfe7;box-shadow:0 24px 50px rgba(8,35,66,.10)}
+.pricingCardFeatured{border-color:#79afe2;box-shadow:0 24px 55px rgba(8,120,201,.12)}
+.pricingCardFeatured:before{content:"";position:absolute;left:24px;right:24px;top:0;height:3px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,var(--kalam-blue),#65a9df)}
+.pricingCard .planName{min-height:30px}
+.pricingCard .planTag{min-height:44px;max-width:34ch}
+.pricingCard .priceBlock{min-height:105px}
+.pricingCard .pricingFeatures{min-height:180px}
+.pricingCard .planAction{min-height:46px}
+.planTopline{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:28px}
+.recommendedBadge{padding:6px 9px;border-radius:999px;background:#123b65;color:#fff;font-size:9px;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+.priceBlock{margin:24px 0 0;padding-bottom:18px;border-bottom:1px solid #e7edf4}
+.priceBlock .price{margin:0;color:#102f4d;font-size:42px;line-height:1;font-weight:850;letter-spacing:-.055em}
+.priceBlock>span{display:block;margin-top:7px;color:#6c8194;font-size:11px;font-weight:700}
+.annualPrice{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px;margin-top:11px;color:#49647d;font-size:10px;line-height:1.4}
+.annualPrice strong{color:#173957;font-size:12px;font-weight:800}
+.annualPrice span{color:#71869a;font-size:9.5px;font-weight:650}
+.commercialMeta{display:grid;gap:7px;margin:16px 0 4px;color:#667b8f;font-size:10.5px;line-height:1.45}
+.commercialMeta span{display:flex;align-items:center;gap:7px}.commercialMeta svg{color:var(--kalam-blue)}
+.commercialMeta strong{width:max-content;padding:5px 8px;border-radius:7px;background:#edf7ef;color:#2d6840;font-size:10px}
+.pricingFeatures{display:grid;gap:10px;margin:22px 0 28px;padding:0;list-style:none}
+.pricingFeatures li{display:flex;align-items:flex-start;gap:9px;color:#4c6278;font-size:12px;line-height:1.5}
+.pricingFeatures svg{flex:0 0 auto;margin-top:1px;color:var(--kalam-blue)}
+.pricingCard .planAction{width:100%;margin-top:auto}
+.offerSection{padding:var(--public-section-y) 0;background:linear-gradient(180deg,#f4f8fc,#eef5fb)}
+.offerGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.offerCard{position:relative;padding:25px;border:1px solid #d7e5f2;border-radius:18px;background:#fff;box-shadow:0 14px 34px rgba(9,38,70,.055)}
+.offerCard>span{display:inline-block;padding:5px 8px;border-radius:999px;background:#e9f4ff;color:#165fa9;font-size:9px;font-weight:850;letter-spacing:.08em}
+.offerCard>strong{display:block;margin:18px 0 6px;color:var(--kalam-blue);font-size:25px;letter-spacing:-.04em}
+.offerCard h3{margin:0 0 8px;color:#143654;font-size:18px;letter-spacing:-.025em}
+.offerCard p{margin:0;color:#64788c;font-size:12px;line-height:1.6}
+.offerCard small{display:block;margin-top:16px;color:#7a8d9e;font-size:10px}
+.valueStrip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-bottom:26px;overflow:hidden;border:1px solid #dce6ef;border-radius:18px;background:#dce6ef}
+.valueStrip>div{padding:24px;background:#fbfdff}.valueStrip span{color:var(--kalam-blue);font-size:10px;font-weight:900;letter-spacing:.12em}
+.valueStrip strong{display:block;margin:10px 0 7px;color:#173956;font-size:15px}.valueStrip p{margin:0;color:#6b7e91;font-size:11px;line-height:1.55}
+@media(max-width:980px){.pricingHeroGrid{grid-template-columns:1fr;gap:36px}.pricingGrid,.offerGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.pricingCardFeatured{order:-1}}
+@media(max-width:650px){.pricingHero{padding:66px 0 54px}.pricingHero h1{font-size:clamp(40px,11vw,50px)}.pricingHeroGrid,.pricingGrid,.offerGrid,.valueStrip,.promiseGrid{grid-template-columns:1fr}.pricingPromise{padding:23px}.pricingCard{min-height:0;padding:23px}.pricingCardFeatured{order:0}.pricingTrust{display:grid}.valueStrip{gap:1px}}
+
+/* Public design-system consolidation — commercial surfaces */
+.card,.pricingCard,.offerCard{
+  border-radius:var(--public-radius-card);
+  border-color:var(--public-border);
+}
+.card,.offerCard{
+  box-shadow:var(--public-elevation-1);
+}
+.card:hover,.pricingCard:hover{
+  border-color:var(--public-border-strong);
+  box-shadow:var(--public-elevation-2);
+}
+.pricingCardFeatured{
+  border-color:#79afe2;
+  box-shadow:var(--public-elevation-2);
+}
+.heroPanel,.pricingPromise,.enterpriseForm,.formSuccess{
+  border-radius:var(--public-radius-panel);
+}
+.enterpriseForm,.formSuccess{
+  box-shadow:var(--public-elevation-3);
+}
+.formCard,.notice,.valueStrip{
+  border-radius:var(--public-radius-card);
+}
+.planBadge,.recommendedBadge{
+  border-radius:var(--public-radius-pill);
+}
+
+.comparisonLabel{margin-top:10px;color:#315b83;font-size:var(--public-type-meta);font-weight:750;line-height:1.45}
+
+/* Guided evaluation — enterprise decision experience */
+.evaluationHero{padding:76px 0 68px;background:radial-gradient(circle at 82% 10%,rgba(42,129,221,.13),transparent 26%),linear-gradient(180deg,#fbfdff 0%,#f3f7fb 100%);border-bottom:1px solid #e2eaf2}
+.evaluationGrid{display:grid;grid-template-columns:minmax(0,.88fr) minmax(520px,1.12fr);gap:58px;align-items:start}
+.evaluationIntro{padding-top:18px}.evaluationIntro h1{max-width:700px;margin:18px 0 18px;color:#102c4a;font-size:clamp(48px,5.4vw,72px);line-height:.98;letter-spacing:-.065em}
+.evaluationLead{max-width:670px;margin:0;color:#5f7489;font-size:16px;line-height:1.72}
+.evaluationBenefits{display:grid;gap:9px;margin-top:24px}.evaluationBenefits span{display:flex;align-items:flex-start;gap:9px;color:#36536f;font-size:12px;font-weight:700;line-height:1.45}.evaluationBenefits svg{flex:0 0 auto;margin-top:1px;color:var(--kalam-blue)}
+.evaluationSteps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:28px}.evaluationSteps>div{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;min-height:72px;padding:12px;border:1px solid #dbe5ef;border-radius:13px;background:rgba(255,255,255,.72)}
+.evaluationSteps b{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#edf4fa;color:#64819d;font-size:9px}.evaluationSteps span{display:grid;gap:3px}.evaluationSteps strong{color:#173957;font-size:10px}.evaluationSteps small{color:#7a8d9f;font-size:8.5px;line-height:1.35}
+.evaluationSteps .activeStep{border-color:#9bc2e7;background:#fff;box-shadow:0 8px 22px rgba(8,120,201,.07)}.evaluationSteps .activeStep b{background:var(--kalam-blue);color:#fff}
+.evaluationAssurance{display:flex;gap:11px;margin-top:14px;padding:14px 15px;border:1px solid #d9e6f2;border-radius:13px;background:#f8fbfe}.evaluationAssurance svg{flex:0 0 auto;color:var(--kalam-blue)}.evaluationAssurance div{display:grid;gap:3px}.evaluationAssurance strong{color:#173957;font-size:10.5px}.evaluationAssurance span{color:#6e8295;font-size:9.5px;line-height:1.5}
+.evaluationFramework{padding:84px 0;background:#fff}.evaluationPlans{padding:84px 0;background:linear-gradient(180deg,#f7fafd,#f1f6fb)}
+.evaluationSectionHead{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.6fr);gap:56px;align-items:end;margin-bottom:34px}.evaluationSectionHead h2{max-width:760px;margin:12px 0 0;color:#102f4d;font-size:clamp(34px,3.7vw,50px);line-height:1.06;letter-spacing:-.055em}.evaluationSectionHead>p{margin:0;color:#667b90;font-size:13px;line-height:1.65}
+.evaluationAreaGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.evaluationAreaGrid article{padding:23px;border:1px solid #dce6ef;border-radius:17px;background:#fbfdff;transition:.18s ease}.evaluationAreaGrid article:hover{transform:translateY(-2px);border-color:#b7cee4;box-shadow:0 14px 30px rgba(9,37,68,.06)}
+.evaluationAreaGrid article>span{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#eaf4ff;color:var(--kalam-blue)}.evaluationAreaGrid h3{margin:16px 0 7px;color:#173957;font-size:15px;letter-spacing:-.02em}.evaluationAreaGrid p{margin:0;color:#6c8094;font-size:11px;line-height:1.6}
+
+.evaluationPlanGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.evaluationPlanCard{display:flex;flex-direction:column;min-height:250px;padding:24px;border:1px solid #d9e4ee;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(10,37,67,.04);transition:.18s ease}
+.evaluationPlanCard:hover{transform:translateY(-2px);border-color:#b9d1e7;box-shadow:0 16px 34px rgba(10,37,67,.075)}
+.evaluationPlanCardActive{border-color:#7fb2df;box-shadow:0 18px 38px rgba(8,120,201,.10)}
+.evaluationPlanTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.selectedPlan{display:inline-flex;align-items:center;gap:5px;color:#247246;font-size:9px;font-weight:850}
+.evaluationPlanCard h3{margin:19px 0 8px;color:#143654;font-size:20px;letter-spacing:-.03em}
+.evaluationPlanCard p{margin:0;color:#667b8f;font-size:12px;line-height:1.6}
+.evaluationPlanMeta{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:18px;color:#61798f;font-size:9.5px;font-weight:700}
+.evaluationPlanMeta span{display:inline-flex;align-items:center;gap:6px}.evaluationPlanMeta svg{color:var(--kalam-blue)}
+.evaluationPlanLink{display:inline-flex;align-items:center;gap:6px;width:max-content;margin-top:auto;padding-top:22px;color:var(--kalam-blue);font-size:10px;font-weight:850}
+.evaluationPlanLink:hover{text-decoration:underline;text-underline-offset:3px}
+.evaluationFooterNote{display:flex;align-items:flex-start;gap:10px;margin-top:18px;padding:14px 16px;border:1px solid #dbe6ef;border-radius:13px;background:rgba(255,255,255,.72);color:#687e92;font-size:10px;line-height:1.55}
+.evaluationFooterNote svg{flex:0 0 auto;color:var(--kalam-blue)}.evaluationFooterNote strong{color:#244767}
+
+.evaluationHero .enterpriseForm{box-shadow:0 30px 75px rgba(8,34,66,.12)}
+.evaluationHero .formHeader h2{font-size:26px}
+.evaluationHero .formSection{padding-top:20px}
+.evaluationHero .enterpriseForm .formGrid{gap:13px}
+.evaluationHero .formTrustBar{margin-top:18px}
+@media(max-width:1100px){.evaluationGrid{grid-template-columns:1fr;gap:34px}.evaluationIntro{padding-top:0}.evaluationAreaGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.evaluationPlanGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.evaluationSectionHead{grid-template-columns:1fr;gap:12px}}
+@media(max-width:650px){.evaluationHero{padding:58px 0 52px}.evaluationIntro h1{font-size:clamp(40px,12vw,52px)}.evaluationLead{font-size:14px}.evaluationSteps{grid-template-columns:1fr}.evaluationFramework,.evaluationPlans{padding:64px 0}.evaluationAreaGrid,.evaluationPlanGrid{grid-template-columns:1fr}.evaluationSectionHead h2{font-size:34px}.evaluationPlanCard{min-height:0;padding:21px}}
+
+/* Public experience phases 6–8 — alignment, accessibility and responsive certification */
+.hero,.pricingHero,.evaluationHero{scroll-margin-top:92px}
+.heroGrid,.pricingHeroGrid,.evaluationGrid{align-items:center}
+.hero h1,.pricingHero h1,.evaluationIntro h1{text-wrap:balance}
+.hero p,.pricingHero p,.evaluationLead,.sectionHead>p,.evaluationSectionHead>p{max-width:62ch}
+.heroAccent{color:var(--public-brand)}
+.centeredActions{justify-content:center}
+.noticeSpacing{margin-top:24px}
+
+.sectionHead,.evaluationSectionHead{
+  margin-bottom:var(--public-section-gap);
+}
+.sectionHead h2,.evaluationSectionHead h2{
+  text-wrap:balance;
+}
+.grid3,.grid4,.evaluationAreaGrid,.evaluationPlanGrid{
+  align-items:stretch;
+}
+.card,.evaluationAreaGrid article,.evaluationPlanCard{
+  min-width:0;
+}
+.card h3,.evaluationAreaGrid h3,.evaluationPlanCard h3{
+  text-wrap:balance;
+}
+.card p,.evaluationAreaGrid p,.evaluationPlanCard p{
+  max-width:64ch;
+}
+.card>svg{
+  width:22px;
+  height:22px;
+  color:var(--public-brand);
+}
+.card a:focus-visible,.evaluationPlanLink:focus-visible,.secondary:focus-visible{
+  outline:none;
+  box-shadow:var(--public-focus-ring);
+  border-radius:var(--public-radius-control);
+}
+.evaluationAreaGrid article,.evaluationPlanCard{
+  border-radius:var(--public-radius-card);
+}
+.evaluationPlanCardActive{
+  box-shadow:var(--public-elevation-2);
+}
+.page input,.page select,.page textarea{
+  accent-color:var(--public-brand);
+}
+.enterpriseForm input:focus-visible,.enterpriseForm select:focus-visible,.enterpriseForm textarea:focus-visible{
+  outline:none;
+  border-color:var(--public-brand);
+  box-shadow:var(--public-focus-ring);
+}
+@media(max-width:1100px){
+  .heroGrid,.pricingHeroGrid,.evaluationGrid{gap:36px}
+}
+@media(max-width:820px){
+  .hero,.pricingHero,.evaluationHero{padding-top:56px}
+  .section,.sectionAlt,.pricingSection,.offerSection,.evaluationFramework,.evaluationPlans{padding-top:64px;padding-bottom:64px}
+  .sectionHead,.evaluationSectionHead{grid-template-columns:1fr;gap:14px;align-items:start}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  .hero,.pricingHero,.evaluationHero{padding-top:42px}
+  .heroActions{align-items:stretch;flex-direction:column}
+  .heroActions>a,.heroActions>button{width:100%}
+  .grid3,.grid4,.evaluationAreaGrid,.evaluationPlanGrid{grid-template-columns:1fr}
+  .card,.evaluationAreaGrid article,.evaluationPlanCard{padding:20px}
+}
+@media(prefers-reduced-motion:reduce){
+  .card,.evaluationPlanCard,.evaluationAreaGrid article{transition:none!important}
+}
+
+.evaluationFormStack{display:grid;gap:10px;min-width:0}
+.evaluationContextBar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 15px;border:1px solid #cfe0ef;border-radius:14px;background:rgba(255,255,255,.86);box-shadow:0 8px 22px rgba(8,120,201,.05)}
+.evaluationContextBar>span{display:grid;gap:2px}.evaluationContextBar b{color:#6f8498;font-size:8.5px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}.evaluationContextBar strong{color:#173957;font-size:12px}
+.evaluationContextBar>small{color:#60778d;font-size:9px;font-weight:650;line-height:1.4;text-align:right}
+.evaluationHero .enterpriseForm{border-color:#d3e1ee}
+.evaluationHero .enterpriseForm:before{height:2px}
+.evaluationHero .formHeader{padding-bottom:18px}
+.evaluationHero .formHeader p{max-width:620px}
+.evaluationHero .formSection legend{margin-bottom:13px;font-size:10.5px;letter-spacing:.09em}
+.evaluationHero .enterpriseForm input,.evaluationHero .enterpriseForm select,.evaluationHero .enterpriseForm textarea{min-height:45px}
+.evaluationHero .enterpriseForm textarea{min-height:112px}
+.evaluationHero .formActions{margin-top:16px}
+.evaluationHero .enterpriseSubmit{min-height:46px}
+.evaluationHero .enterpriseConsent{margin-top:15px}
+@media(max-width:650px){.evaluationContextBar{align-items:flex-start;flex-direction:column;gap:6px}.evaluationContextBar>small{text-align:left}}
+
+.verificationLink{display:inline-flex;align-items:center;justify-content:center;min-height:42px;margin-top:18px;padding:0 14px;border:1px solid var(--public-border-strong);border-radius:var(--public-radius-control);background:var(--public-surface);color:#174d82;font-size:12px;font-weight:800;text-decoration:none;transition:background var(--public-motion-fast) ease,border-color var(--public-motion-fast) ease,color var(--public-motion-fast) ease}
+.verificationLink:hover{background:var(--public-surface-subtle);border-color:#83add5;color:var(--public-brand-hover)}
+.verificationLink:focus-visible{outline:none;box-shadow:var(--public-focus-ring)}
+
+/* Pricing art direction v2 — enterprise brand system */
+.pricingHero{background:radial-gradient(circle at 88% 18%,rgba(8,120,201,.17),transparent 24%),radial-gradient(circle at 54% 100%,rgba(93,151,202,.08),transparent 32%),linear-gradient(135deg,#f9fcff 0%,#eef5fb 100%);overflow:hidden}
+.pricingHeroGrid{position:relative}
+.pricingHeroGrid>div:first-child{position:relative;z-index:2}
+.pricingHeroGrid>div:first-child:before{content:"K";position:absolute;z-index:-1;left:-34px;top:-82px;font-size:230px;font-weight:900;line-height:1;color:rgba(8,120,201,.035);letter-spacing:-.12em}
+.pricingHero h1{font-weight:850}
+.pricingHero h1 span{background:linear-gradient(100deg,var(--kalam-blue),#3188d4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pricingPromise{position:relative;overflow:hidden;border:1px solid rgba(142,197,237,.2);background:radial-gradient(circle at 78% 8%,rgba(63,143,211,.22),transparent 29%),linear-gradient(145deg,#06192e 0%,#0b3158 58%,#0b3d6f 100%);box-shadow:0 34px 85px rgba(4,26,50,.22)}
+.pricingPromise:before{content:"";position:absolute;inset:12px;border:1px solid rgba(157,207,241,.08);border-radius:18px;pointer-events:none}
+.capabilityVisual{height:205px;margin:4px -4px 25px;border-radius:20px;background:radial-gradient(circle at 50% 50%,rgba(67,154,222,.2),transparent 25%),linear-gradient(90deg,transparent 49.7%,rgba(130,190,232,.11) 50%,transparent 50.3%),linear-gradient(0deg,transparent 49.7%,rgba(130,190,232,.08) 50%,transparent 50.3%),rgba(255,255,255,.025)}
+.capabilityVisual:before,.capabilityVisual:after{width:76%;opacity:.9}
+.capabilityOrb{width:92px;height:92px;background:radial-gradient(circle at 32% 25%,#2678b9,#071e39 68%);box-shadow:0 0 0 10px rgba(88,170,228,.07),0 0 42px rgba(46,137,208,.16),0 18px 38px rgba(0,0,0,.25)}
+.capabilityNode{min-width:92px;padding:9px 12px;border-radius:11px;background:rgba(5,23,43,.9);border-color:rgba(157,207,241,.24);backdrop-filter:blur(8px)}
+.capabilityNode strong{font-size:9.5px}.capabilityNode small{font-size:7.5px;color:#91b7d5}
+.nodeLearning{left:17px;top:18px}.nodeSkills{right:17px;top:18px}.nodeCompliance{left:17px;bottom:18px}.nodeIntelligence{right:17px;bottom:18px}
+.promiseArchitecture{position:relative;z-index:1}
+.promiseGrid{position:relative;z-index:1}
+.pricingSection{background:#fff}
+.sectionHead{position:relative}
+.sectionHead:after{content:"COMMERCIAL ARCHITECTURE";position:absolute;right:0;top:0;color:#9bb1c4;font-size:8px;font-weight:850;letter-spacing:.18em}
+.pricingGrid{gap:20px}
+.pricingCard{min-height:625px;padding:30px;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 15px 40px rgba(8,35,66,.055)}
+.pricingCardFeatured{transform:translateY(-8px);background:linear-gradient(180deg,#fff 0%,#f6faff 100%);box-shadow:0 28px 62px rgba(10,64,112,.14)}
+.pricingCardFeatured:hover{transform:translateY(-12px)}
+.planTopline{padding-bottom:3px}
+.pricingCard .planName{font-size:27px;letter-spacing:-.04em}
+.priceBlock .price{font-size:46px}
+.pricingFeatures li{font-size:11.5px}
+.offerSection{position:relative;background:linear-gradient(135deg,#edf5fb 0%,#f8fbfe 52%,#eaf3fa 100%);overflow:hidden}
+.offerSection:after{content:"K";position:absolute;right:4%;bottom:-100px;font-size:300px;font-weight:900;color:rgba(8,120,201,.025);line-height:1;pointer-events:none}
+.offerGrid{position:relative;z-index:1}
+.offerCard{min-height:210px;background:rgba(255,255,255,.88);backdrop-filter:blur(10px)}
+.valueStrip{box-shadow:0 16px 35px rgba(9,38,70,.045)}
+
+/* Pricing art direction v3 — executive polish */
+.pricingHero{position:relative;isolation:isolate}
+.pricingHero:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(8,120,201,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(8,120,201,.035) 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.72),transparent 82%);opacity:.55}
+.pricingHeroGrid{gap:64px}
+.pricingHeroGrid>div:first-child{max-width:720px}
+.pricingHeroGrid>div:first-child:after{content:"PRICING / 01";display:block;margin-top:25px;color:#8aa1b5;font-size:8px;font-weight:850;letter-spacing:.2em}
+.pricingHero h1{max-width:760px;font-size:clamp(50px,5.35vw,76px);line-height:.99}
+.pricingHero h1 span{display:inline-block;padding-bottom:4px}
+.pricingHero p{max-width:60ch;font-size:15px;line-height:1.78}
+.pricingTrust{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:21px}
+.pricingTrust span{display:inline-flex;align-items:center;gap:7px;color:#597189;font-size:10px;font-weight:750}
+.pricingTrust svg{color:var(--kalam-blue)}
+.pricingPromise{padding:30px;min-height:620px}
+.pricingPromise:after{content:"";position:absolute;inset:auto -15% -28% auto;width:280px;height:280px;border:1px solid rgba(131,193,235,.1);border-radius:50%;box-shadow:0 0 0 32px rgba(120,184,229,.025),0 0 0 64px rgba(120,184,229,.015);pointer-events:none}
+.promiseBrand{position:relative;z-index:2}
+.capabilityVisual{position:relative;z-index:1;box-shadow:inset 0 0 0 1px rgba(162,211,241,.05),inset 0 -30px 70px rgba(0,0,0,.12)}
+.capabilityOrb:before{content:"";position:absolute;inset:-15px;border:1px solid rgba(126,194,236,.16);border-radius:50%;box-shadow:0 0 0 14px rgba(126,194,236,.025)}
+.capabilityNode{transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.capabilityNode:hover{transform:translateY(-2px);border-color:rgba(174,220,249,.4);background:rgba(8,31,55,.96)}
+.sectionHead:before{content:"";position:absolute;left:0;bottom:-16px;width:46px;height:2px;background:linear-gradient(90deg,var(--kalam-blue),#8dc0e7);border-radius:2px}
+.pricingGrid{padding-top:4px}
+.pricingCard{overflow:hidden}
+.pricingCard:after{content:"";position:absolute;right:-55px;top:-55px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(8,120,201,.07),transparent 68%);pointer-events:none}
+.pricingCardFeatured:after{background:radial-gradient(circle,rgba(8,120,201,.13),transparent 68%)}
+.pricingCardFeatured:before{left:22px;right:22px;height:4px;box-shadow:0 2px 12px rgba(8,120,201,.2)}
+.pricingCard .planBadge{background:#edf5fc;border:1px solid #d8e7f3}
+.pricingCard .planName{margin-top:19px;color:#102f4d}
+.pricingCard .planTag{color:#6a7e91}
+.pricingCard .priceBlock{margin-top:20px}
+.pricingCard .commercialMeta{min-height:67px}
+.pricingCard .pricingFeatures{min-height:180px;border-top:1px solid #edf1f5;padding-top:20px}
+.pricingCard .planAction{position:relative;z-index:2}
+.pricingCardFeatured .planAction{box-shadow:0 14px 28px rgba(8,120,201,.18)}
+.offerSection{border-top:1px solid #dfeaf3;border-bottom:1px solid #dfeaf3}
+.offerCard{overflow:hidden}.offerCard:after{content:"";position:absolute;right:-30px;bottom:-55px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(8,120,201,.08),transparent 70%);pointer-events:none}
+.valueStrip{background:#d5e1eb}.valueStrip>div{position:relative}.valueStrip>div:not(:last-child):after{content:"";position:absolute;right:0;top:22px;bottom:22px;width:1px;background:#d9e4ec}
+@media(max-width:980px){.pricingHeroGrid{gap:44px}.pricingPromise{min-height:0}.pricingHeroGrid>div:first-child:after{margin-top:21px}}
+@media(max-width:650px){.pricingHero:before{background-size:48px 48px;opacity:.35}.pricingHero h1{font-size:clamp(41px,11.5vw,54px)}.pricingHero p{font-size:14px}.pricingHeroGrid>div:first-child:after{margin-top:19px}.pricingPromise{padding:21px}.pricingCard .pricingFeatures{min-height:0}.valueStrip>div:not(:last-child):after{display:none}.sectionHead:after{display:none}.sectionHead:before{bottom:-12px}}
+@media(prefers-reduced-motion:reduce){.capabilityNode{transition:none}}
+
+/* Pricing v5 — enterprise procurement layer */
+.pricingSignalBar{position:relative;z-index:3;margin-top:-1px;padding:0;background:#fff;border-bottom:1px solid #dce7f0;box-shadow:0 12px 32px rgba(8,36,66,.045)}
+.pricingSignalGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-left:1px solid #e1eaf2;border-right:1px solid #e1eaf2}
+.pricingSignalGrid>div{min-height:108px;padding:19px 20px;border-right:1px solid #e1eaf2;display:flex;flex-direction:column;justify-content:center}
+.pricingSignalGrid>div:last-child{border-right:0}
+.pricingSignalGrid span{color:#7a91a5;font-size:8px;font-weight:850;letter-spacing:.15em}
+.pricingSignalGrid strong{margin:7px 0 4px;color:#123653;font-size:17px;letter-spacing:-.025em}
+.pricingSignalGrid small{color:#718598;font-size:10px;line-height:1.45}
+
+.procurementSection{padding:88px 0 92px;background:linear-gradient(180deg,#f7fafd 0%,#eef5fa 100%);border-top:1px solid #e0eaf2;border-bottom:1px solid #dce7ef}
+.procurementSection .sectionHead{margin-bottom:38px}
+.procurementGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.procurementGrid article{display:grid;grid-template-columns:auto minmax(0,1fr);gap:13px;min-width:0;padding:19px;border:1px solid #d8e4ed;border-radius:15px;background:rgba(255,255,255,.78);box-shadow:0 8px 24px rgba(10,38,68,.035);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.procurementGrid article:hover{transform:translateY(-2px);border-color:#b8cee1;box-shadow:0 14px 30px rgba(10,38,68,.065)}
+.procurementGrid article>span{display:grid;place-items:center;width:38px;height:38px;border:1px solid #d3e4f2;border-radius:10px;background:#edf6fd;color:var(--kalam-blue)}
+.procurementGrid strong{display:block;color:#153753;font-size:13px;letter-spacing:-.015em}
+.procurementGrid p{margin:5px 0 0;color:#6a7f92;font-size:10.5px;line-height:1.55}
+.procurementCta{display:flex;align-items:center;justify-content:space-between;gap:28px;margin-top:18px;padding:22px 23px;border:1px solid #c9dbea;border-radius:17px;background:linear-gradient(135deg,#092642,#0d3a66);box-shadow:0 18px 40px rgba(7,31,57,.12);color:#fff}
+.procurementCta>div{min-width:0}
+.procurementCta>div>span{color:#8fbde0;font-size:8px;font-weight:850;letter-spacing:.15em}
+.procurementCta strong{display:block;margin-top:6px;color:#fff;font-size:20px;letter-spacing:-.035em}
+.procurementCta p{max-width:720px;margin:5px 0 0;color:#bfd5e8;font-size:11px;line-height:1.55}
+.procurementCta .primary{flex:0 0 auto;background:#fff;color:#124c80;box-shadow:none}
+.procurementCta .primary:hover{background:#f2f8fd;color:#0d5d9d}
+@media(max-width:980px){.pricingSignalGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.pricingSignalGrid>div:nth-child(2){border-right:0}.pricingSignalGrid>div:nth-child(-n+2){border-bottom:1px solid #e1eaf2}.procurementGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.procurementCta{align-items:flex-start;flex-direction:column}.procurementCta .primary{width:max-content}}
+@media(max-width:650px){.pricingSignalGrid{grid-template-columns:1fr}.pricingSignalGrid>div{min-height:0;padding:15px 16px;border-right:0!important;border-bottom:1px solid #e1eaf2}.pricingSignalGrid>div:last-child{border-bottom:0}.pricingSignalGrid strong{font-size:15px}.procurementSection{padding:64px 0}.procurementGrid{grid-template-columns:1fr}.procurementGrid article{padding:17px}.procurementCta{padding:19px}.procurementCta .primary{width:100%}}
+
+/* Active offers v4 — compact offer command center */
+.offerSection{padding:64px 0 68px}
+.offerSection .sectionHead{align-items:center;gap:42px;margin-bottom:27px;padding-bottom:22px;border-bottom:1px solid #d7e5f0}
+.offerSection .sectionHead>div{position:relative}
+.offerSection .sectionHead>div:after{content:"CRM CONTROLLED";position:absolute;left:0;bottom:-35px;color:#8aa2b7;font-size:7px;font-weight:850;letter-spacing:.18em}
+.offerSection .sectionHead h2{margin:12px 0 0;font-size:clamp(32px,3.4vw,45px);line-height:1.04;letter-spacing:-.055em}
+.offerSection .sectionHead>p{max-width:430px;margin:0;padding:14px 16px;border:1px solid #d9e6f1;border-radius:12px;background:rgba(255,255,255,.58);font-size:11px;line-height:1.55;color:#647a8f}
+.offerGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.offerCard{min-height:0!important;padding:20px 21px 18px!important;border-radius:16px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 10px 28px rgba(9,38,70,.055)!important;display:flex;flex-direction:column}
+.offerCard:hover{transform:translateY(-3px);border-color:#b7d0e5;box-shadow:0 18px 38px rgba(9,38,70,.09)!important}
+.offerCard>span{padding:5px 8px;font-size:8px;letter-spacing:.1em}
+.offerCard>strong{margin:14px 0 4px;font-size:27px;line-height:1;letter-spacing:-.045em}
+.offerCard h3{margin:0 0 7px;font-size:17px;line-height:1.25}
+.offerCard>p{margin:0;min-height:38px;color:#64788c;font-size:11px;line-height:1.55}
+.offerFooter{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:17px;padding-top:13px;border-top:1px solid #e5edf4}
+.offerFooter small{display:block;margin:0!important;max-width:52%;color:#7a8d9e;font-size:9px;line-height:1.4}
+.offerAction{min-height:34px!important;padding:0 11px!important;border-radius:8px!important;font-size:9px!important;gap:5px!important;white-space:nowrap}
+@media(max-width:980px){.offerSection{padding:56px 0 60px}.offerSection .sectionHead{gap:22px}.offerGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.offerSection{padding:46px 0 50px}.offerSection .sectionHead{margin-bottom:22px;padding-bottom:18px}.offerSection .sectionHead>div:after{bottom:-29px}.offerSection .sectionHead>p{padding:12px 13px}.offerGrid{grid-template-columns:1fr}.offerCard{padding:18px!important}.offerCard>p{min-height:0}.offerFooter{align-items:flex-start}.offerFooter small{max-width:58%}}
+
+
+/* Pricing v6 ? simplified executive composition */
+.pricingHero{padding:78px 0 64px}
+.pricingHeroGrid{gap:58px}
+.pricingPromise{min-height:540px;padding:26px}
+.pricingPromise h2{font-size:25px;line-height:1.12;margin:12px 0 9px}
+.pricingPromise p{font-size:12px;line-height:1.6}
+.pricingArchitecture{position:relative;height:215px;margin:8px 0 19px;border:1px solid rgba(157,207,241,.08);border-radius:18px;background:radial-gradient(circle at 50% 50%,rgba(55,145,218,.18),transparent 25%),linear-gradient(135deg,rgba(255,255,255,.025),rgba(255,255,255,.01));overflow:hidden}
+.architectureHalo{position:absolute;left:50%;top:48%;width:168px;height:168px;transform:translate(-50%,-50%);border:1px solid rgba(127,195,237,.18);border-radius:50%;box-shadow:0 0 0 18px rgba(127,195,237,.025),0 0 0 42px rgba(127,195,237,.018)}
+.architectureCore{position:absolute;left:50%;top:48%;z-index:2;display:grid;place-items:center;width:94px;height:94px;transform:translate(-50%,-50%);border:1px solid rgba(164,218,248,.32);border-radius:50%;background:radial-gradient(circle at 35% 25%,#287dbd,#061a31 68%);box-shadow:0 0 38px rgba(47,143,216,.22),0 18px 35px rgba(0,0,0,.25)}
+.architectureCore span{font-size:30px;font-weight:900;line-height:1}.architectureCore small{margin-top:-22px;color:#a9d0ea;font-size:6.5px;font-weight:850;letter-spacing:.12em;text-align:center;line-height:1.3}
+.architectureOrbit{position:absolute;left:50%;top:48%;width:188px;height:118px;transform:translate(-50%,-50%) rotate(-12deg);border:1px solid rgba(137,199,234,.12);border-radius:50%}.architectureOrbit i{position:absolute;width:7px;height:7px;border:1px solid rgba(178,220,245,.4);border-radius:50%;background:#0d3b67;box-shadow:0 0 12px rgba(72,159,220,.35)}.architectureOrbit i:nth-child(1){left:12px;top:50%}.architectureOrbit i:nth-child(2){left:50%;top:4px}.architectureOrbit i:nth-child(3){right:12px;top:50%}.architectureOrbit i:nth-child(4){left:50%;bottom:4px}
+.architectureLabel{position:absolute;left:18px;right:18px;bottom:16px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border:1px solid rgba(157,207,241,.12);border-radius:10px;background:rgba(4,22,40,.72);backdrop-filter:blur(8px)}.architectureLabel b{color:#e5f3fd;font-size:8px;letter-spacing:.12em}.architectureLabel span{color:#8eafc9;font-size:7.5px}
+.promiseMeta{display:flex;justify-content:space-between;gap:12px;color:#86aac7;font-size:7.5px;font-weight:850;letter-spacing:.15em}
+.pricingTrust{margin-top:18px}
+.pricingTrust span{font-size:9.5px}
+.pricingSection{padding:76px 0 82px}
+.pricingSection .sectionHead{margin-bottom:30px}
+.pricingSection .sectionHead>p{max-width:300px;font-size:12px}
+.sectionHead:after{display:none}
+.sectionHead:before{bottom:-12px}
+.pricingGrid{gap:16px}
+.pricingCard{min-height:0;padding:25px;border-radius:16px}
+.pricingCardFeatured{transform:none}
+.pricingCardFeatured:hover{transform:translateY(-3px)}
+.pricingCard .planName{font-size:24px}
+.pricingCard .planTag{font-size:12px;min-height:38px}
+.pricingCard .priceBlock{margin-top:17px}
+.pricingCard .priceBlock .price{font-size:40px}
+.pricingCard .commercialMeta{min-height:0;margin-top:15px;padding:11px 0;border-top:1px solid #edf2f6;border-bottom:1px solid #edf2f6}
+.pricingCard .commercialMeta span,.pricingCard .commercialMeta strong{font-size:9.5px}
+.pricingCard .pricingFeatures{min-height:0;padding-top:16px;margin-bottom:18px}
+.pricingCard .pricingFeatures li{font-size:10.5px;line-height:1.45}
+.offerSection{padding:48px 0 52px}
+.offerSection .sectionHead{margin-bottom:22px;padding-bottom:17px}
+.offerSection .sectionHead h2{font-size:32px}
+.offerSection .sectionHead>p{max-width:330px}
+.offerGrid{gap:12px}
+.offerCard{padding:17px 18px 15px!important}
+.offerCard>strong{font-size:23px;margin-top:11px}
+.offerCard h3{font-size:15px}
+.offerCard>p{font-size:10px}
+.offerFooter{margin-top:13px;padding-top:11px}
+.pricingClose{padding:58px 0 26px;background:#f5f8fb;border-top:1px solid #dfe8f0}
+.pricingCloseInner{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:28px 30px;border-radius:18px;background:linear-gradient(135deg,#071d35,#0d3b68);box-shadow:0 22px 48px rgba(7,31,57,.13)}
+.pricingCloseInner h2{margin:8px 0 5px;color:#fff;font-size:28px;letter-spacing:-.04em}
+.pricingCloseInner p{margin:0;color:#bed4e7;font-size:11px;line-height:1.5}
+.pricingCloseInner .primary{flex:0 0 auto;background:#fff;color:#124c80;box-shadow:none}
+.pricingCloseInner .primary:hover{background:#f2f8fd;color:#0d5d9d}
+.pricingClose .notice{margin-top:13px;padding:0;border:0;background:transparent;color:#74889a;font-size:9px;box-shadow:none}
+.pricingClose .notice svg{color:var(--kalam-blue)}
+@media(max-width:820px){.pricingHero{padding:58px 0 48px}.pricingHeroGrid{gap:38px}.pricingPromise{min-height:0}.pricingSection{padding:60px 0 66px}.pricingCloseInner{align-items:flex-start;flex-direction:column}.pricingCloseInner .primary{width:max-content}}
+@media(max-width:600px){.pricingHero{padding:44px 0 40px}.pricingPromise{padding:20px}.capabilityVisual{height:175px}.pricingSection{padding:48px 0 54px}.pricingSection .sectionHead{gap:12px}.pricingCard{padding:21px}.offerSection{padding:40px 0 44px}.pricingClose{padding-top:44px}.pricingCloseInner{padding:23px}.pricingCloseInner h2{font-size:24px}.pricingCloseInner .primary{width:100%}}
+/* Pricing v7 — clear enterprise hero */
+.pricingHero{padding:86px 0 72px}
+.pricingHeroGrid{grid-template-columns:minmax(0,1fr) minmax(360px,.78fr);align-items:center;gap:64px}
+.pricingHero h1{font-size:clamp(52px,5.6vw,78px);line-height:.96;letter-spacing:-.065em;max-width:780px}
+.pricingHero p{max-width:610px;margin-top:22px;font-size:15px;line-height:1.72}
+.pricingPromise{min-height:0;padding:28px 30px 22px;border-radius:22px}
+.promiseBrand{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:20px;border-bottom:1px solid rgba(171,216,243,.12)}
+.promiseBrand :global(.kalam-logo-asset){display:flex!important;align-items:center!important;flex-direction:row!important;flex-wrap:nowrap!important;white-space:nowrap!important}
+.promiseBrand :global(.kalam-logo-wordmark){display:inline!important;white-space:nowrap!important}
+.promiseBrand>span{color:#8fb4d0;font-size:8px;font-weight:850;letter-spacing:.16em;text-align:right}
+.promiseIntro{display:flex;flex-direction:column;gap:7px;padding:25px 2px 17px}
+.promiseIntro strong{max-width:390px;color:#fff;font-size:21px;line-height:1.18;letter-spacing:-.025em}
+.promiseIntro span{color:#9fb9cc;font-size:11px;line-height:1.5}
+.promiseList{display:flex;flex-direction:column}
+.promiseList>div{display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;align-items:center;padding:15px 0;border-top:1px solid rgba(171,216,243,.11)}
+.promiseIndex{display:grid;place-items:center;width:29px;height:29px;border:1px solid rgba(149,207,241,.22);border-radius:8px;color:#7fb8df;font-size:8px;font-weight:850;letter-spacing:.08em;background:rgba(255,255,255,.035)}
+.promiseList b{display:block;color:#edf7fd;font-size:12px;line-height:1.2}
+.promiseList small{display:block;margin-top:3px;color:#89a8bf;font-size:9.5px;line-height:1.4}
+.promiseFoot{display:flex;justify-content:space-between;gap:10px;margin-top:13px;padding-top:14px;border-top:1px solid rgba(171,216,243,.11);color:#7599b3;font-size:7px;font-weight:850;letter-spacing:.14em}
+.pricingSection{padding:78px 0 86px}
+.pricingSection .sectionHead{margin-bottom:34px}
+.pricingSection .sectionHead h2{max-width:650px;font-size:clamp(32px,3.3vw,46px);letter-spacing:-.055em}
+.pricingSection .sectionHead>p{display:none}
+@media(max-width:980px){.pricingHero{padding:66px 0 58px}.pricingHeroGrid{grid-template-columns:1fr;gap:42px}.pricingPromise{max-width:720px;width:100%;justify-self:center}.promiseIntro strong{max-width:560px}}
+@media(max-width:600px){.pricingHero{padding:48px 0 44px}.pricingHeroGrid{gap:30px}.pricingHero h1{font-size:clamp(30px,9.4vw,52px)}.pricingHero p{font-size:14px}.pricingPromise{padding:22px 20px 18px;border-radius:18px}.promiseBrand{align-items:flex-start}.promiseBrand>span{font-size:7px}.promiseIntro{padding:20px 0 12px}.promiseIntro strong{font-size:19px}.promiseList>div{padding:13px 0}.pricingSection{padding:56px 0 62px}}
+
+/* Pricing v8 - intentional hero line hierarchy */
+.pricingHero h1 .heroLead,.pricingHero h1 .heroAccent{display:block}
+.pricingHero h1 .heroLead{white-space:normal;color:#102f4d;background:none;-webkit-background-clip:initial;background-clip:initial;-webkit-text-fill-color:#102f4d}
+.pricingHero h1 .heroAccent{margin-top:6px;padding-bottom:4px;background:linear-gradient(100deg,var(--kalam-blue),#3188d4);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+@media(max-width:600px){.pricingHero h1 .heroAccent{margin-top:4px}}
+
+
+
+
+/* Contact Sales v2 — executive conversation entry */
+.salesValueRow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:30px 0 24px;padding-top:22px;border-top:1px solid rgba(201,224,245,.16)}
+.salesValueRow>div{display:grid;gap:5px;min-width:0}
+.salesValueRow strong{color:#82c4f5;font-size:9px;letter-spacing:.14em}
+.salesValueRow span{color:#d8e9f7;font-size:10px;font-weight:700;line-height:1.35}
+.salesIntro .salesJump{margin-top:0}
+.salesForm .formHeader{position:relative;padding-right:120px}
+.salesForm .formHeader p{white-space:nowrap}
+.salesForm .formHeader:after{content:"ABOUT 2 MINUTES";position:absolute;top:2px;right:0;padding:7px 9px;border:1px solid #d9e7f2;border-radius:999px;background:#f5f9fd;color:#648098;font-size:7px;font-weight:850;letter-spacing:.12em}
+.salesForm .formSection{position:relative;min-width:0;margin:0;padding:18px 18px 19px;border:1px solid #e0e9f1;border-radius:15px;background:#f9fbfd;box-shadow:none}
+.salesForm .formSection + .formSection{margin-top:12px;padding-top:18px}
+.salesForm .salesSectionTitle{display:block;width:100%;margin:0 0 14px;padding:0 0 10px;border-bottom:1px solid #e5edf5;color:#102f4d;font-size:12px;font-weight:850;letter-spacing:.08em;line-height:1.25;text-transform:uppercase}
+.salesForm .formSection .formGrid{margin:0}
+.salesForm .formTrustBar{margin-top:14px}
+.salesForm .enterpriseConsent{margin-top:15px}
+.salesForm .formActions{margin-top:17px}
+.salesForm .enterpriseSubmit{min-height:52px;padding:0 22px}
+.salesForm .formResponseNote{max-width:none;white-space:nowrap}
+@media(max-width:820px){.salesValueRow{max-width:620px}.salesForm .formHeader{padding-right:0}.salesForm .formHeader:after{position:static;display:inline-flex;margin-top:13px}}
+@media(max-width:600px){.salesValueRow{gap:6px;margin:24px 0 20px;padding-top:18px}.salesValueRow span{font-size:9px}.salesForm .formSection{padding:16px}.salesForm .formHeader:after{font-size:6.5px}.salesForm .formHeader p{white-space:normal}.salesForm .formResponseNote{white-space:normal}.salesForm .enterpriseSubmit{min-height:50px}}
+
+/* Guided evaluation — five-step methodology card system */
+.evaluationStepGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:stretch}
+.evaluationStepGrid article{position:relative;min-width:0;min-height:205px;padding:20px 18px;border:1px solid #d8e5ef;border-radius:17px;background:linear-gradient(180deg,#fff 0%,#f8fbfe 100%);box-shadow:0 8px 24px rgba(9,37,68,.045);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.evaluationStepGrid article:after{content:"";position:absolute;top:36px;right:-13px;width:13px;border-top:1px solid #bfd5e7;z-index:2}
+.evaluationStepGrid article:last-child:after{display:none}
+.evaluationStepGrid article>span{display:grid;place-items:center;width:42px;height:42px;border:1px solid #cfe1ef;border-radius:12px;background:#edf6fd;color:var(--kalam-blue)}
+.evaluationStepGrid .stepNumber{font-size:9px;font-weight:900;letter-spacing:.08em}
+.evaluationStepGrid h3{margin:18px 0 7px;color:#123653;font-size:16px;letter-spacing:-.025em}
+.evaluationStepGrid p{margin:0;color:#6a7f92;font-size:10.5px;line-height:1.58}
+.evaluationStepGrid article:hover{transform:translateY(-3px);border-color:#abc9e1;box-shadow:0 16px 32px rgba(9,37,68,.075)}
+@media(max-width:1100px){.evaluationStepGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.evaluationStepGrid article:after{display:none}.evaluationStepGrid article{min-height:180px}}
+@media(max-width:700px){.evaluationStepGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.evaluationStepGrid article{min-height:175px;padding:18px 16px}.evaluationStepGrid h3{margin-top:14px;font-size:14px}.evaluationStepGrid p{font-size:10px}}
+@media(max-width:460px){.evaluationStepGrid{grid-template-columns:1fr}.evaluationStepGrid article{min-height:0}.evaluationStepGrid article>span{width:38px;height:38px}}
+
+/* Enterprise card refinement — compact geometry with stronger hierarchy */
+.planCard,.pricingCard,.evaluationPlanCard,.offerCard,.clientCard,.formCard{border-radius:14px;box-shadow:0 7px 22px rgba(10,38,68,.045);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.planCard,.pricingCard{padding:21px}
+.evaluationPlanCard{padding:20px}
+.clientCard,.formCard{padding:19px}
+.planCard:hover,.pricingCard:hover,.evaluationPlanCard:hover,.offerCard:hover,.clientCard:hover,.formCard:hover{transform:translateY(-3px);border-color:#b7cee2;box-shadow:0 16px 34px rgba(10,38,68,.08)}
+.pricingGrid,.evaluationPlanGrid,.offerGrid{gap:11px}
+.procurementGrid{gap:11px}
+.procurementGrid article{padding:17px;border-radius:13px}
+.pricingSignalGrid>div{min-height:96px;padding:16px 18px}
+.pricingSignalGrid strong{font-size:16px}
+.offerCard{padding:17px 18px 15px!important}
+.offerCard>strong{font-size:23px}
+.offerCard h3{font-size:15px}
+.offerCard>p{font-size:10px}
+.evaluationAreaGrid{gap:11px}
+.evaluationAreaGrid article{padding:19px;border-radius:14px}
+.evaluationAreaGrid h3{margin:14px 0 6px;font-size:14px}
+.evaluationAreaGrid p{font-size:10.5px;line-height:1.55}
+.evaluationStepGrid{gap:10px}
+.evaluationStepGrid article{min-height:190px;padding:18px 16px;border-radius:15px}
+.evaluationStepGrid h3{margin:15px 0 6px;font-size:15px}
+@media(max-width:700px){.planCard,.pricingCard,.evaluationPlanCard,.clientCard,.formCard{padding:17px}.procurementGrid article,.evaluationAreaGrid article{padding:16px}.evaluationStepGrid article{min-height:170px;padding:16px}}
+
+/* Contact Sales form heading — keep the core proposition on one visual line */
+.formHeader h2{font-size:clamp(22px,2.15vw,28px);letter-spacing:-.045em;white-space:nowrap}
+@media(max-width:600px){.formHeader h2{font-size:clamp(20px,5.7vw,25px);white-space:normal}}

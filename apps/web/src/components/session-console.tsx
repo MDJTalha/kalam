@@ -13,9 +13,17 @@ export function SessionConsole({courses}:{courses:Course[]}){
   const [message,setMessage]=useState<string|null>(null);
   const [busy,setBusy]=useState(false);
   async function submit(e:FormEvent){
-    e.preventDefault();setBusy(true);setMessage(null);
+    e.preventDefault();
+    setBusy(true);
+    setMessage(null);
     try{
-      const r=await fetch("/api/lms/sessions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({course_id:courseId,title,starts_at:new Date(starts).toISOString(),ends_at:new Date(ends).toISOString(),location})});
+      if (!starts || !ends) throw new Error("Start and end time are required.");
+      const startsAt = new Date(starts);
+      const endsAt = new Date(ends);
+      if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) throw new Error("Enter valid session times.");
+      if (endsAt <= startsAt) throw new Error("End time must be later than start time.");
+      if (!courseId) throw new Error("Select a course before creating the session.");
+      const r=await fetch("/api/lms/sessions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({course_id:courseId,title,starts_at:startsAt.toISOString(),ends_at:endsAt.toISOString(),location})});
       const d=await r.json();if(!r.ok)throw new Error(d.detail||"Unable to create session");
       setMessage("Session created successfully.");setTitle("");
     }catch(err){setMessage(err instanceof Error?err.message:"Unable to create session")}

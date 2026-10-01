@@ -1,46 +1,232 @@
-/* Kognivon public authentication experience */
-.k-auth{--k-navy:#071b37;--k-blue:#0b5caa;--k-gold:#eac779;grid-template-columns:minmax(0,1.05fr) minmax(420px,.95fr);background:#f5f8fc}
-.k-auth .auth-brand{position:relative;isolation:isolate;min-height:100svh;padding:clamp(30px,4.5vw,70px);overflow:hidden;background:radial-gradient(circle at 80% 17%,rgba(43,123,207,.38),transparent 36%),linear-gradient(146deg,#071b37 0%,#0a315d 62%,#104d85 100%);color:#fff}
-.k-auth .auth-brand:before{content:"";position:absolute;z-index:-1;width:58vw;height:58vw;max-width:780px;max-height:780px;right:-34%;bottom:-54%;border:1px solid rgba(255,255,255,.14);border-radius:50%;box-shadow:0 0 0 90px rgba(255,255,255,.025),0 0 0 190px rgba(255,255,255,.018)}
-.k-brand-lockup{display:inline-flex;align-items:center;gap:13px;width:max-content;color:#fff;font-size:22px;font-weight:800;letter-spacing:-.035em;text-decoration:none;line-height:1}
-.k-brand-lockup small{display:block;margin-top:6px;color:#a9c9e8;font-size:10px;font-weight:700;letter-spacing:.17em;text-transform:uppercase}
-.k-brand-mark{width:45px;height:45px;display:grid;place-items:center;border:1px solid rgba(234,199,121,.48);border-radius:14px;background:linear-gradient(150deg,rgba(234,199,121,.24),rgba(234,199,121,.07));color:var(--k-gold)}
+/* Kalam public authentication experience */
+.k-auth{
+  --k-navy:var(--kalam-navy);
+  --k-blue:var(--kalam-blue);
+  width:100%;
+  max-width:100vw;
+  overflow-x:hidden;
+  grid-template-columns:minmax(0,1.05fr) minmax(420px,.95fr);
+  background:#f5f8fc;
+}
+.k-auth .auth-brand{
+  position:relative;
+  isolation:isolate;
+  min-height:100svh;
+  padding:clamp(30px,4.5vw,70px);
+  overflow:hidden;
+  background:radial-gradient(circle at 80% 17%,rgba(43,123,207,.38),transparent 36%),linear-gradient(146deg,#071b37 0%,#0a315d 62%,#104d85 100%);
+  color:#fff;
+}
+.k-auth .auth-brand:before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:58vw;
+  height:58vw;
+  max-width:780px;
+  max-height:780px;
+  right:-34%;
+  bottom:-54%;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:50%;
+  box-shadow:0 0 0 90px rgba(255,255,255,.025),0 0 0 190px rgba(255,255,255,.018);
+}
+.k-brand-lockup{
+  display:inline-grid;
+  align-items:center;
+  gap:4px;
+  width:max-content;
+  color:#fff;
+  text-decoration:none;
+  line-height:1;
+}
+.k-auth .k-brand-lockup .kalam-logo-asset{width:220px}
+.k-brand-lockup .kalam-logo-descriptor{
+  display:block;
+  max-width:290px;
+  margin-top:2px;
+  color:#a9c9e8;
+  font-size:8px;
+  font-weight:750;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  line-height:1.35;
+}
 .k-auth .auth-brand-copy{max-width:650px;margin:auto 0}
-.k-overline{display:inline-flex;align-items:center;gap:9px;color:var(--k-gold);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
-.k-overline-dot{width:7px;height:7px;border-radius:50%;background:var(--k-gold);box-shadow:0 0 0 5px rgba(234,199,121,.15)}
-.k-auth .auth-brand-copy h1{max-width:650px;margin:24px 0 19px;font-size:clamp(45px,5vw,76px);line-height:1.04;letter-spacing:-.055em}
-.k-auth .auth-brand-copy h1 em{font-style:normal;color:var(--k-gold)}
-.k-auth .auth-brand-copy p{max-width:525px;margin:0;color:#c7d9ec;font-size:clamp(15px,1.15vw,18px);line-height:1.75}
+.k-overline{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  color:var(--k-blue);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+.k-overline-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--k-blue);
+  box-shadow:0 0 0 5px rgba(42,135,217,.16);
+}
+.k-auth .auth-brand-copy h1{
+  max-width:650px;
+  margin:24px 0 19px;
+  font-size:clamp(45px,5vw,76px);
+  line-height:1.04;
+  letter-spacing:-.055em;
+}
+.k-auth .auth-brand-copy h1 em{font-style:normal;color:var(--k-blue)}
+.k-auth .auth-brand-copy p{
+  max-width:525px;
+  margin:0;
+  color:#c7d9ec;
+  font-size:clamp(15px,1.15vw,18px);
+  line-height:1.75;
+}
 .k-proof{display:flex;flex-wrap:wrap;gap:10px;margin-top:31px}
-.k-proof span{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid rgba(255,255,255,.19);border-radius:999px;background:rgba(255,255,255,.055);color:#e7f1fb;font-size:12px;font-weight:650}
-.k-proof svg{color:var(--k-gold)}
+.k-proof span{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 13px;
+  border:1px solid rgba(255,255,255,.19);
+  border-radius:999px;
+  background:rgba(255,255,255,.055);
+  color:#e7f1fb;
+  font-size:12px;
+  font-weight:650;
+}
+.k-proof svg{color:var(--k-blue)}
 .k-brand-foot{margin:0;color:#9bbbdc;font-size:12px;letter-spacing:.025em}
 .k-auth .auth-panel{padding:35px clamp(22px,5vw,78px);background:#f6f9fd}
-.k-auth .auth-card{width:min(480px,100%);padding:clamp(28px,3.3vw,43px);border:1px solid #e4eaf2;border-radius:22px;box-shadow:0 24px 80px rgba(10,40,78,.09),0 3px 12px rgba(10,40,78,.03)}
-.k-form-eyebrow{display:inline-flex;align-items:center;gap:7px;color:var(--k-blue);font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
-.k-auth .auth-card-heading h2{margin:13px 0 7px;color:var(--k-navy);font-size:clamp(29px,2.5vw,36px);letter-spacing:-.045em}
-.k-auth .auth-card-heading p{margin:0 0 28px;color:#566980;font-size:14px;line-height:1.55}.k-auth .form-stack{gap:0}
+.k-auth .auth-card{
+  width:min(480px,100%);
+  padding:clamp(28px,3.3vw,43px);
+  border:1px solid #e4eaf2;
+  border-radius:22px;
+  box-shadow:0 24px 80px rgba(10,40,78,.09),0 3px 12px rgba(10,40,78,.03);
+}
+.k-form-eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:var(--k-blue);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+.k-auth .auth-card-heading h2{
+  margin:13px 0 7px;
+  color:var(--k-navy);
+  font-size:clamp(29px,2.5vw,36px);
+  letter-spacing:-.045em;
+}
+.k-auth .auth-card-heading p{margin:0 0 28px;color:#566980;font-size:14px;line-height:1.55}
+.k-auth .form-stack{gap:0}
 .k-auth .form-stack>label,.k-auth .k-label-row label{color:#173354;font-size:13px;font-weight:750}
-.k-auth .form-stack>input,.k-auth .password-field input{height:50px;margin:8px 0 19px;border:1px solid #bacada;border-radius:11px;background:#fff;color:#122c49;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s}
+.k-auth .form-stack>input,.k-auth .password-field input{
+  width:100%;
+  min-width:0;
+  height:50px;
+  margin:8px 0 19px;
+  border:1px solid #bacada;
+  border-radius:11px;
+  background:#fff;
+  color:#122c49;
+  font-size:15px;
+  outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
 .k-auth .form-stack>input:hover,.k-auth .password-field input:hover{border-color:#829eb9}
-.k-auth .form-stack input:focus{border-color:#1769c2;box-shadow:0 0 0 4px rgba(23,105,194,.14)}
+.k-auth .form-stack input:focus{border-color:var(--kalam-blue);box-shadow:0 0 0 4px rgba(8,120,201,.14)}
 .k-auth .form-stack input::placeholder{color:#718398}
 .k-auth .k-field-hint{margin:-12px 0 19px;color:#5b6e82;font-size:11px;line-height:1.4}
 .k-label-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .k-label-row a,.k-auth .text-link{color:#075da9;font-size:12px;font-weight:750;text-decoration:none}
 .k-label-row a:hover,.k-auth .text-link:hover{text-decoration:underline}
+.k-auth .password-field{width:100%;min-width:0}
 .k-auth .password-field input{margin-bottom:0;padding-right:54px}
 .k-auth .password-field .icon-button{width:42px;height:42px;color:#496780}
 .k-auth .form-error{margin-top:15px;padding:12px 14px;border:1px solid #f3d0d0;border-radius:10px;color:#8f2634;font-size:12px;line-height:1.5}
-.k-auth .submit-button{min-height:52px;margin-top:22px;border-radius:11px;background:#0a5dab;box-shadow:0 12px 25px rgba(10,93,171,.2);font-size:14px}
-.k-auth .submit-button:hover{background:#084e91}
+.k-auth .submit-button{width:100%;min-height:52px;margin-top:22px;border-radius:11px;background:var(--kalam-blue);box-shadow:0 12px 25px rgba(10,93,171,.2);font-size:14px}
+.k-auth .submit-button:hover{background:var(--kalam-blue-hover)}
 .k-auth .submit-button:disabled{opacity:.7;cursor:wait;transform:none}
 .k-support{margin:20px 0 0;color:#556a80;font-size:12px;line-height:1.6;text-align:center}
-.k-auth-footer{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:28px;padding-top:20px;border-top:1px solid #e9eef4;color:#5b7086;font-size:11px;line-height:1.5;text-align:center}
-.k-auth-footer svg{flex:0 0 auto;color:#18715d}
+.k-auth-footer{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  margin-top:28px;
+  padding-top:20px;
+  border-top:1px solid #e9eef4;
+  color:#5b7086;
+  font-size:11px;
+  line-height:1.5;
+  text-align:center;
+}
+.k-auth-footer svg{flex:0 0 auto;color:var(--k-blue)}
 .k-mobile-brand{display:none}
+.k-back-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  width:100%;
+  min-height:44px;
+  margin-top:10px;
+  color:#46647f;
+  font-size:11px;
+  font-weight:700;
+  text-decoration:none;
+}
+.k-back-link:hover{color:#0b5caa}
 .k-auth .auth-card>.text-link{display:inline-block;margin-top:20px}
-.k-auth :focus-visible{outline:3px solid #d49c32;outline-offset:3px}
-@media(max-width:960px){.k-auth{grid-template-columns:1fr}.k-auth .auth-panel{min-height:100svh;padding:36px 18px}.k-auth .auth-brand{display:none}.k-auth .auth-card{margin:auto}.k-mobile-brand{display:block;margin-bottom:30px;color:#0b3765;font-size:23px;font-weight:850;letter-spacing:-.04em}.k-mobile-brand span{display:block;margin-top:3px;color:#59799a;font-size:10px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}}
-@media(max-width:520px){.k-auth .auth-panel{display:block;padding:24px 16px;background:#fff}.k-auth .auth-card{width:100%;padding:0;border:0;border-radius:0;box-shadow:none}.k-auth .auth-card-heading p{margin-bottom:26px}.k-auth .form-stack>input,.k-auth .password-field input{height:52px}.k-auth-footer{margin-top:24px}}
+.k-auth :focus-visible{outline:3px solid rgba(42,135,217,.52);outline-offset:3px}
+
+@media(max-width:960px){
+  .k-auth{grid-template-columns:1fr}
+  .k-auth .auth-brand{display:none}
+  .k-auth .auth-panel{width:100%;min-height:100svh;padding:36px 18px;overflow-x:hidden}
+  .k-auth .auth-card{width:min(480px,100%);max-width:100%;margin:auto;box-sizing:border-box}
+  .k-mobile-brand.kalam-logo{
+    display:inline-grid;
+    max-width:100%;
+    margin-bottom:30px;
+    color:var(--kalam-navy);
+  }
+  .k-mobile-brand .kalam-logo-asset{width:min(190px,65vw)}
+  .k-mobile-brand .kalam-logo-descriptor{
+    display:block;
+    max-width:min(250px,82vw);
+    color:#59799a;
+    font-size:7px;
+    opacity:1;
+  }
+}
+@media(max-width:520px){
+  .k-auth,.k-auth *{box-sizing:border-box;min-width:0}
+  .k-auth .auth-panel{display:block;width:100%;max-width:100vw;padding:22px 16px;background:#fff}
+  .k-auth .auth-card{width:100%;max-width:100%;padding:0;border:0;border-radius:0;box-shadow:none}
+  .k-mobile-brand.kalam-logo{margin-bottom:28px}
+  .k-mobile-brand .kalam-logo-asset{width:184px;max-width:100%}
+  .k-auth .auth-card-heading p{margin-bottom:26px}
+  .k-auth .form-stack>input,.k-auth .password-field input{height:52px;max-width:100%}
+  .k-support,.k-auth-footer,.k-auth .auth-card-heading p{white-space:normal;overflow-wrap:anywhere}
+  .k-auth-footer{margin-top:24px}
+}
 @media(prefers-reduced-motion:reduce){.k-auth *{scroll-behavior:auto!important;transition:none!important}}
+
+.k-auth-method-note{display:flex;align-items:flex-start;gap:8px;margin:-8px 0 18px;padding:10px 11px;border:1px solid #d9e7f4;border-radius:10px;background:#f5f9fd;color:#4f6d88;font-size:10px;line-height:1.5}
+.k-auth-method-note svg{flex:0 0 auto;margin-top:1px;color:var(--kalam-blue)}
+
+.k-sso-stack{display:grid;gap:9px;margin:2px 0 16px}
+.k-sso-button{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;min-height:50px;padding:0 14px;border:1px solid #b9cee3;border-radius:11px;background:#f8fbff;color:#174d82;font-size:12px;font-weight:800;text-decoration:none;box-shadow:0 7px 18px rgba(18,66,112,.05)}
+.k-sso-button:hover{background:#eef6ff;border-color:#82add5}
+.k-sso-button:focus-visible{outline:3px solid rgba(8,120,201,.28);outline-offset:3px}
+.k-auth-divider{display:flex;align-items:center;gap:10px;margin:1px 0 17px;color:#8a9aaa;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.k-auth-divider:before,.k-auth-divider:after{content:"";height:1px;flex:1;background:#e5edf5}
+

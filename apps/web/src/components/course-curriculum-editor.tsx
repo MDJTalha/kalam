@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Check, Edit3, History, Plus, RotateCcw, Save } from "lucide-react";
 import { Notice, SectionCard } from "./ui";
-
+import { CourseContentBlockEditor } from "./course-content-block-editor";
 type Lesson = {
   id: string;
   title: string;
@@ -41,6 +41,7 @@ export function CourseCurriculumEditor({ courseId }: Props) {
   const [lessonTitle, setLessonTitle] = useState("");
   const [lessonType, setLessonType] = useState("rich_text");
   const [lessonBody, setLessonBody] = useState("");
+  const [lessonContent, setLessonContent] = useState<Record<string, unknown>>({ version: 2, blocks: [] });
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [changeNote, setChangeNote] = useState("");
   const [versions, setVersions] = useState<Record<string, Version[]>>({});
@@ -126,7 +127,7 @@ export function CourseCurriculumEditor({ courseId }: Props) {
     try {
       const selectedModuleData = modules.find((item) => item.id === selectedModule);
       const position = (selectedModuleData?.lessons.length ?? 0) + 1;
-      const body = lessonType === "rich_text" ? { body: lessonBody } : { url: lessonBody };
+      const body = lessonType === "rich_text" ? lessonContent : { url: lessonBody };
       const data = await request(
         "/api/lms/courses/" + courseId + "/modules/" + selectedModule + "/lessons",
         {
@@ -146,6 +147,7 @@ export function CourseCurriculumEditor({ courseId }: Props) {
       ));
       setLessonTitle("");
       setLessonBody("");
+      setLessonContent({ version: 2, blocks: [] });
       setChangeNote("");
       setMessage({ kind: "success", text: "Lesson created with version 1." });
     } catch (error) {
@@ -158,20 +160,31 @@ export function CourseCurriculumEditor({ courseId }: Props) {
     setEditingLesson(lesson);
     setLessonTitle(lesson.title);
     setLessonType(lesson.content_type);
-    setLessonBody(String(lesson.content_type === "rich_text" ? lesson.content.body ?? "" : lesson.content.url ?? ""));
+    if (lesson.content_type === "rich_text") {
+      setLessonContent(lesson.content);
+      setLessonBody("");
+    } else {
+      setLessonContent({ version: 2, blocks: [] });
+      setLessonBody(String(lesson.content.url ?? ""));
+    }
     setChangeNote("");
     setMessage(null);
   }
 
   async function saveLesson() {
     if (!editingLesson || !lessonTitle.trim()) return;
-    if (!lessonBody.trim() || (lessonType !== "rich_text" && !/^https?:\/\/[^\s/]+/i.test(lessonBody.trim()))) {
-      setMessage({ kind: "error", text: "Add lesson content or a valid http(s) resource URL." }); return;
+    if (lessonType === "rich_text") {
+      const blocks = Array.isArray(lessonContent.blocks) ? lessonContent.blocks : [];
+      if (!blocks.length) {
+        setMessage({ kind: "error", text: "Add at least one learner-facing content block." }); return;
+      }
+    } else if (!lessonBody.trim() || !/^https?:\/\/[^\s/]+/i.test(lessonBody.trim())) {
+      setMessage({ kind: "error", text: "Add a valid http(s) resource URL." }); return;
     }
     setBusy(true);
     setMessage(null);
     try {
-      const content = lessonType === "rich_text" ? { body: lessonBody } : { url: lessonBody };
+      const content = lessonType === "rich_text" ? lessonContent : { url: lessonBody };
       const owningModule = modules.find((item) => item.lessons.some((lesson) => lesson.id === editingLesson.id));
       if (!owningModule) throw new Error("Module not found.");
       const data = await request(
@@ -191,6 +204,7 @@ export function CourseCurriculumEditor({ courseId }: Props) {
         lessons: item.lessons.map((lesson) => lesson.id === editingLesson.id ? { ...lesson, ...data } : lesson),
       }));
       setEditingLesson(null);
+      setLessonContent({ version: 2, blocks: [] });
       setMessage({ kind: "success", text: "Lesson saved and a new content version was recorded." });
     } catch (error) {
       setMessage({ kind: "error", text: error instanceof Error ? error.message : "Lesson save failed." });
@@ -311,10 +325,10 @@ export function CourseCurriculumEditor({ courseId }: Props) {
           <label className="form-field"><span>Module</span><select value={selectedModule} onChange={(event) => setSelectedModule(event.target.value)}>{modules.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
           <div className="form-grid">
             <label className="form-field"><span>Lesson title</span><input value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)} required /></label>
-            <label className="form-field"><span>Content type</span><select value={lessonType} onChange={(event) => setLessonType(event.target.value)}><option value="rich_text">Text lesson</option><option value="video">Video</option><option value="document">Document</option><option value="link">External link</option></select></label>
-            <label className="form-field full"><span>{lessonType === "rich_text" ? "Learner content" : "Resource URL"}</span>{lessonType === "rich_text" ? <textarea required value={lessonBody} onChange={(event) => setLessonBody(event.target.value)} rows={5} placeholder="Write the learner-facing lesson content." /> : <input required type="url" pattern="https?://.+" value={lessonBody} onChange={(event) => setLessonBody(event.target.value)} placeholder="https://example.com/resource" />}</label>
-            <label className="form-field full"><span>Change note</span><input value={changeNote} onChange={(event) => setChangeNote(event.target.value)} placeholder="What changed in this version?" /></label>
+            <label className="form-field"><span>Content type</span><select value={lessonType} onChange={(event) => setLessonType(event.target.value)}><option value="rich_text">Structured lesson</option><option value="video">Video</option><option value="document">Document</option><option value="link">External link</option></select></label>
           </div>
+          {lessonType === "rich_text" ? <CourseContentBlockEditor value={lessonContent} onChange={setLessonContent} /> : <label className="form-field full"><span>Resource URL</span><input required type="url" pattern="https?://.+" value={lessonBody} onChange={(event) => setLessonBody(event.target.value)} placeholder="https://example.com/resource" /></label>}
+          <label className="form-field full"><span>Change note</span><input value={changeNote} onChange={(event) => setChangeNote(event.target.value)} placeholder="What changed in this version?" /></label>
           <div className="form-actions"><button className="button button-primary" disabled={busy || !lessonTitle.trim()}><Plus size={15} /> Add lesson</button></div>
         </form>
       )}
@@ -328,10 +342,10 @@ export function CourseCurriculumEditor({ courseId }: Props) {
             </div>
             <div className="form-grid">
               <label className="form-field"><span>Lesson title</span><input value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)} /></label>
-              <label className="form-field"><span>Content type</span><select value={lessonType} onChange={(event) => setLessonType(event.target.value)}><option value="rich_text">Text lesson</option><option value="video">Video</option><option value="document">Document</option><option value="link">External link</option></select></label>
-              <label className="form-field full"><span>{lessonType === "rich_text" ? "Learner content" : "Resource URL"}</span>{lessonType === "rich_text" ? <textarea value={lessonBody} onChange={(event) => setLessonBody(event.target.value)} rows={9} /> : <input type="url" value={lessonBody} onChange={(event) => setLessonBody(event.target.value)} />}</label>
-              <label className="form-field full"><span>Change note</span><input value={changeNote} onChange={(event) => setChangeNote(event.target.value)} placeholder="Describe this revision for audit/history." /></label>
+              <label className="form-field"><span>Content type</span><select value={lessonType} onChange={(event) => setLessonType(event.target.value)}><option value="rich_text">Structured lesson</option><option value="video">Video</option><option value="document">Document</option><option value="link">External link</option></select></label>
             </div>
+            {lessonType === "rich_text" ? <CourseContentBlockEditor value={lessonContent} onChange={setLessonContent} /> : <label className="form-field full"><span>Resource URL</span><input type="url" value={lessonBody} onChange={(event) => setLessonBody(event.target.value)} /></label>}
+            <label className="form-field full"><span>Change note</span><input value={changeNote} onChange={(event) => setChangeNote(event.target.value)} placeholder="Describe this revision for audit/history." /></label>
             <div className="form-actions"><button className="button button-primary" type="button" onClick={() => void saveLesson()} disabled={busy}><Save size={15} /> Save revision</button></div>
           </div>
         </div>

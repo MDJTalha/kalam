@@ -21,8 +21,8 @@ export default async function SessionsPage(){
       {name:"ends_at",label:"Ends at (ISO date/time)",required:true,placeholder:"2026-10-01T10:30:00+05:00"},
       {name:"location",label:"Location / meeting URL",placeholder:"Boardroom or https://..."},
     ]}/></Section>:null}
-    <Section eyebrow="Schedule" title="Tenant sessions">{sessions?.length?<div className="table-wrap"><table className="data-table">
-      <thead><tr><th>Session</th><th>Starts</th><th>Ends</th><th>Location</th><th>Status</th></tr></thead>
+    <Section eyebrow="Schedule" title="Tenant sessions">{sessions === null ? <div role="alert" className="empty-state"><h3>Sessions unavailable</h3><p>Schedule data could not be loaded. Try again later.</p></div> : sessions.length?<div className="table-wrap"><table className="data-table">
+      <thead><tr><th scope="col">Session</th><th scope="col">Starts</th><th scope="col">Ends</th><th scope="col">Location</th><th scope="col">Status</th></tr></thead>
       <tbody>{sessions.map(x=><tr key={x.id}><td><strong>{x.title}</strong></td><td>{new Date(x.starts_at).toLocaleString()}</td><td>{new Date(x.ends_at).toLocaleString()}</td><td>{x.location||"—"}</td><td><StatusBadge status={x.status}/></td></tr>)}</tbody>
     </table></div>:<EmptyState title="No live sessions" description="Schedule instructor-led learning to populate the session calendar."/>}</Section>
   </DashboardShell>;

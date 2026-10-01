@@ -26,6 +26,11 @@ class AssessmentCreate(BaseModel):
     passing_score: int = Field(default=70, ge=0, le=100)
     max_attempts: int | None = Field(default=None, ge=1)
     time_limit_minutes: int | None = Field(default=None, ge=1)
+    assessment_type: str = Field(default="knowledge_test", pattern="^(self|manager|assessor|360|knowledge_test|practical|evidence_review)$")
+    measurement_method: str = Field(default="score_based", pattern="^(score_based|level_based|review_based|360_aggregate)$")
+    validity_days: int | None = Field(default=None, ge=1)
+    reassessment_interval_days: int | None = Field(default=None, ge=1)
+    instructions: str | None = Field(default=None, max_length=4000)
 
 class QuestionCreate(BaseModel):
     question_type: str = Field(default="single_choice")
@@ -90,6 +95,11 @@ async def list_assessments(
             "passing_score": item.passing_score,
             "max_attempts": item.max_attempts,
             "time_limit_minutes": item.time_limit_minutes,
+            "assessment_type": item.assessment_type,
+            "measurement_method": item.measurement_method,
+            "validity_days": item.validity_days,
+            "reassessment_interval_days": item.reassessment_interval_days,
+            "active": item.active,
         }
         for item, course_title, question_count in result.all()
     ]
@@ -736,7 +746,9 @@ async def clone_assessment(assessment_id: UUID, user: User = Depends(require_per
         raise HTTPException(status_code=404, detail="Assessment not found")
     copy = Assessment(tenant_id=user.tenant_id, title=f"{original.title} (revision)", course_id=original.course_id,
                       passing_score=original.passing_score, max_attempts=original.max_attempts,
-                      time_limit_minutes=original.time_limit_minutes)
+                      time_limit_minutes=original.time_limit_minutes, assessment_type=original.assessment_type,
+                      measurement_method=original.measurement_method, validity_days=original.validity_days,
+                      reassessment_interval_days=original.reassessment_interval_days, instructions=original.instructions)
     db.add(copy)
     await db.flush()
     questions = (await db.execute(select(Question).where(Question.assessment_id == original.id).order_by(Question.position))).scalars().all()
@@ -754,6 +766,11 @@ class AssessmentUpdate(BaseModel):
     passing_score: int | None = Field(default=None, ge=0, le=100)
     max_attempts: int | None = Field(default=None, ge=1)
     time_limit_minutes: int | None = Field(default=None, ge=1)
+    assessment_type: str | None = Field(default=None, pattern="^(self|manager|assessor|360|knowledge_test|practical|evidence_review)$")
+    measurement_method: str | None = Field(default=None, pattern="^(score_based|level_based|review_based|360_aggregate)$")
+    validity_days: int | None = Field(default=None, ge=1)
+    reassessment_interval_days: int | None = Field(default=None, ge=1)
+    instructions: str | None = Field(default=None, max_length=4000)
 
 @router.patch("/{assessment_id}")
 async def update_assessment(assessment_id: UUID, payload: AssessmentUpdate, user: User = Depends(require_permission("assessments.manage")), db: AsyncSession = Depends(get_db)):

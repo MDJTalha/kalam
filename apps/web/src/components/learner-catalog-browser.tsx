@@ -81,10 +81,10 @@ export function LearnerCatalogBrowser({ courses, enrollmentStatus }: Props) {
             type="search"
           />
         </label>
-        <div className="learner-scope-tabs" role="tablist" aria-label="Course scope">
-          <button type="button" className={scope === "all" ? "active" : ""} onClick={() => setScope("all")} role="tab" aria-selected={scope === "all"}>All <span>{courses.length}</span></button>
-          <button type="button" className={scope === "learning" ? "active" : ""} onClick={() => setScope("learning")} role="tab" aria-selected={scope === "learning"}>My learning <span>{learningCount}</span></button>
-          <button type="button" className={scope === "available" ? "active" : ""} onClick={() => setScope("available")} role="tab" aria-selected={scope === "available"}>Available <span>{availableCount}</span></button>
+        <div className="learner-scope-tabs" role="group" aria-label="Filter courses by learning status">
+          <button type="button" className={scope === "all" ? "active" : ""} onClick={() => setScope("all")} aria-pressed={scope === "all"}>All <span>{courses.length}</span></button>
+          <button type="button" className={scope === "learning" ? "active" : ""} onClick={() => setScope("learning")} aria-pressed={scope === "learning"}>My learning <span>{learningCount}</span></button>
+          <button type="button" className={scope === "available" ? "active" : ""} onClick={() => setScope("available")} aria-pressed={scope === "available"}>Available <span>{availableCount}</span></button>
         </div>
       </div>
 
@@ -109,7 +109,7 @@ export function LearnerCatalogBrowser({ courses, enrollmentStatus }: Props) {
                       <span>{course.visibility === "private" ? "Assigned course" : course.enrollment_policy === "assignment_only" ? "Assignment only" : course.enrollment_policy === "approval" ? "Approval required" : "Self enrollment"}</span>
                     </div>
                     <h3>{course.title}</h3>
-                    <p>{course.description || "Build practical capability through structured learning."}</p>
+                    <p>{course.description || "No course description provided."}</p>
                     <div className="learner-course-footer">
                       <span><Clock3 size={13} aria-hidden="true" /> {course.estimated_minutes ?? "—"} min</span>
                       <span>{enrollment ? <CheckCircle2 size={13} aria-hidden="true" /> : <Sparkles size={13} aria-hidden="true" />} {action}</span>
@@ -122,8 +122,8 @@ export function LearnerCatalogBrowser({ courses, enrollmentStatus }: Props) {
         ) : (
           <div className="empty-state" role="status">
             <Search size={24} aria-hidden="true" />
-            <h3>No matching courses</h3>
-            <p>Try a broader topic or switch the learning scope.</p>
+            <h3>{courses.length ? "No matching courses" : "No courses available"}</h3>
+            <p>{courses.length ? "Try a broader topic or switch the learning scope." : "Published courses will appear here when available to your organization."}</p>
           </div>
         )}
       </div>
