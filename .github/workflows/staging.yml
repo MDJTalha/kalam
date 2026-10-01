@@ -1,0 +1,100 @@
+﻿name: Kalam Staging Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to deploy
+        required: true
+        default: main
+        type: string
+  push:
+    branches: [main]
+
+concurrency:
+  group: kalam-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout release ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.sha }}
+
+      - name: Validate staging inputs
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          STAGING_APP_DIR: ${{ vars.STAGING_APP_DIR }}
+          STAGING_WEB_ORIGIN: ${{ vars.STAGING_WEB_ORIGIN }}
+        run: |
+          test -n "$STAGING_HOST"
+          test -n "$STAGING_USER"
+          test -n "$STAGING_SSH_KEY"
+          test -n "$STAGING_APP_DIR"
+          test -n "$STAGING_WEB_ORIGIN"
+          echo "Staging deployment inputs are configured."
+
+      - name: Install SSH key
+        env:
+          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$STAGING_SSH_KEY" > ~/.ssh/staging_key
+          chmod 600 ~/.ssh/staging_key
+
+      - name: Trust staging host
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+        run: ssh-keyscan -H "$STAGING_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy exact commit
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          STAGING_APP_DIR: ${{ vars.STAGING_APP_DIR }}
+          STAGING_WEB_ORIGIN: ${{ vars.STAGING_WEB_ORIGIN }}
+          POSTGRES_PASSWORD: ${{ secrets.STAGING_POSTGRES_PASSWORD }}
+        run: |
+          set -euo pipefail
+          export GIT_SHA="${GITHUB_SHA}"
+          ssh -i ~/.ssh/staging_key "$STAGING_USER@$STAGING_HOST" "APP_DIR='$STAGING_APP_DIR' GIT_SHA='$GIT_SHA' WEB_ORIGIN='$STAGING_WEB_ORIGIN' POSTGRES_PASSWORD='$POSTGRES_PASSWORD' bash -s" <<'REMOTE'
+          set -euo pipefail
+          test -d "$APP_DIR/.git"
+          cd "$APP_DIR"
+          git fetch --prune origin
+          git checkout --detach "$GIT_SHA"
+          umask 077
+          cat > .env.staging <<EOF
+          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+          WEB_ORIGIN=$WEB_ORIGIN
+          API_ORIGIN=$WEB_ORIGIN/api
+          NEXT_PUBLIC_SITE_URL=$WEB_ORIGIN
+          NEXT_PUBLIC_API_ORIGIN=$WEB_ORIGIN/api
+          INTERNAL_API_ORIGIN=http://api:8000
+          ALLOWED_HOSTS=${WEB_ORIGIN#https://},${WEB_ORIGIN#http://},api
+          COOKIE_SECURE=true
+          EOF
+          docker compose --env-file .env.staging -f infra/docker/docker-compose.app.yml up -d --build --remove-orphans
+          docker compose --env-file .env.staging -f infra/docker/docker-compose.app.yml ps
+          REMOTE
+
+      - name: Verify staging health
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          STAGING_APP_DIR: ${{ vars.STAGING_APP_DIR }}
+        run: |
+          ssh -i ~/.ssh/staging_key "$STAGING_USER@$STAGING_HOST" "cd '$STAGING_APP_DIR' && docker compose --env-file .env.staging -f infra/docker/docker-compose.app.yml exec -T api python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=5)\""
+          ssh -i ~/.ssh/staging_key "$STAGING_USER@$STAGING_HOST" "cd '$STAGING_APP_DIR' && docker compose --env-file .env.staging -f infra/docker/docker-compose.app.yml exec -T gateway wget --spider -q http://127.0.0.1:8080/proxy-health"
+
+      - name: Cleanup SSH material
+        if: always()
+        run: rm -f ~/.ssh/staging_key
