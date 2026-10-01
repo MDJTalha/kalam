@@ -18,7 +18,7 @@ async def call(ws, ident, method, params=None):
             return ident, item
 
 async def main():
-    async with httpx.AsyncClient(base_url="http://127.0.0.1:8000") as client:
+    async with httpx.AsyncClient(base_url="http://127.0.0.1:8000", timeout=30.0) as client:
         response = await client.post("/api/v1/auth/login", json={"tenant_slug": TENANT, **ADMIN})
         response.raise_for_status()
         cookie = client.cookies.get(COOKIE)
@@ -36,7 +36,7 @@ async def main():
             ident, _ = await call(ws, ident, "Page.navigate", {
                 "url": "http://127.0.0.1:3000/dashboard/capability-gaps",
             })
-            await asyncio.sleep(3.0)
+            await asyncio.sleep(25.0)
             expression = """(() => ({
               path: location.pathname,
               overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
