@@ -29,7 +29,11 @@ jobs:
         ports:
           - 3310:3310
         options: >-
-          --no-healthcheck
+          --health-cmd "test -S /run/clamav/clamd.sock"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 10m
     defaults:
       run:
         working-directory: apps/api
