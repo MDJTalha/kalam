@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowRight, BarChart3, BriefcaseBusiness, UsersRound } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpenCheck, BriefcaseBusiness, UsersRound } from "lucide-react";
 import { CommercialShell } from "@/components/commercial-shell";
 import { PublicButton } from "@/components/public-button";
 import styles from "@/app/commercial.module.css";
