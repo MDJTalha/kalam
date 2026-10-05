@@ -29,11 +29,7 @@ jobs:
         ports:
           - 3310:3310
         options: >-
-          --health-cmd "printf 'PING\\n' | nc -w 3 127.0.0.1 3310 | grep -q PONG"
-          --health-interval 15s
-          --health-timeout 5s
-          --health-retries 10
-          --health-start-period 10m
+          --no-healthcheck
     defaults:
       run:
         working-directory: apps/api
@@ -77,6 +73,27 @@ jobs:
         run: .venv/bin/ruff check app tests
       - name: Type checks
         run: .venv/bin/mypy app
+      - name: Wait for ClamAV transport
+        run: |
+          .venv/bin/python - <<'PY'
+          import socket
+          import time
+
+          deadline = time.monotonic() + 600
+          while time.monotonic() < deadline:
+              try:
+                  with socket.create_connection(("127.0.0.1", 3310), timeout=3) as sock:
+                      sock.sendall(b"PING\n")
+                      result = sock.recv(100).strip()
+                      if result == b"PONG":
+                          print("ClamAV transport is ready.")
+                          break
+              except OSError:
+                  pass
+              time.sleep(5)
+          else:
+              raise SystemExit("ClamAV transport did not become ready within 10 minutes.")
+          PY
       - name: Verify ClamAV transport
         run: >-
           .venv/bin/python -c "import socket; s=socket.create_connection(('127.0.0.1', 3310), timeout=5); s.sendall(b'PING\\n'); result=s.recv(100); s.close(); assert result.strip()==b'PONG', result"
