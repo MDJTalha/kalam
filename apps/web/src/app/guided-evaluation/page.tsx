@@ -115,7 +115,7 @@ export default function GuidedEvaluationPage() {
       <div className={styles.container}><div className={styles.heroPanel}>
         <span className={styles.kicker}>READY TO EVALUATE KALAM?</span>
         <h2>Bring a real capability challenge.</h2>
-        <p>We'll use that context to shape an evaluation relevant to your organization.</p>
+        <p>We&apos;ll use that context to shape an evaluation relevant to your organization.</p>
         <div className={styles.heroActions}><PublicButton href="#evaluation-request">Plan my evaluation <ArrowRight size={16}/></PublicButton><PublicButton href="/contact-sales" variant="secondary">Talk to Sales</PublicButton></div>
       </div></div>
     </section>
