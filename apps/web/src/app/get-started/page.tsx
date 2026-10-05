@@ -29,7 +29,7 @@ export default function GetStartedPage() {
     </div></section>
 
     <section className={styles.sectionAlt}><div className={styles.container}><div className={styles.heroPanel}>
-      <span className={styles.kicker}><MessageSquareText size={14}/> NEED A CONVERSATION?</span><h2>Talk to Kalam.</h2><p>We'll shape the next step around your capability priority, operating model and enterprise requirements.</p><div className={styles.heroActions}><PublicButton href="/contact-sales">Talk to Sales <ArrowRight size={15}/></PublicButton><PublicButton href="/pricing" variant="secondary">View pricing</PublicButton></div>
+      <span className={styles.kicker}><MessageSquareText size={14}/> NEED A CONVERSATION?</span><h2>Talk to Kalam.</h2><p>We&apos;ll shape the next step around your capability priority, operating model and enterprise requirements.</p><div className={styles.heroActions}><PublicButton href="/contact-sales">Talk to Sales <ArrowRight size={15}/></PublicButton><PublicButton href="/pricing" variant="secondary">View pricing</PublicButton></div>
     </div></div></section>
   </CommercialShell>;
 }
