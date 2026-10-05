@@ -23,7 +23,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
       clamav:
-        image: clamav/clamav:1.4.3
+        image: clamav/clamav:1.4.6
         ports:
           - 3310:3310
         options: >-
@@ -77,7 +77,7 @@ jobs:
         run: .venv/bin/mypy app
       - name: Verify ClamAV transport
         run: >-
-          .venv/bin/python -c "import socket; s=socket.create_connection(('127.0.0.1', 3310), timeout=5); s.sendall(b'PING\n'); result=s.recv(100); s.close(); assert result.strip()==b'PONG', result"
+          .venv/bin/python -c "import socket; s=socket.create_connection(('127.0.0.1', 3310), timeout=5); s.sendall(b'PING\\n'); result=s.recv(100); s.close(); assert result.strip()==b'PONG', result"
       - name: Tests
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
@@ -128,7 +128,7 @@ jobs:
           docker compose -f infra/docker/docker-compose.app.yml config --quiet
           docker compose -f infra/docker/docker-compose.app.yml config --format json | python -c 'import json,sys; cfg=json.load(sys.stdin); port=cfg["services"]["gateway"]["ports"][0]; assert port["host_ip"] == "127.0.0.1" and port["published"] == "3100", f"Unsafe default gateway binding: {port}"; assert cfg["services"]["api"]["image"] == cfg["services"]["migrate"]["image"], "Migration service must use the exact API image"'
       - name: Validate Nginx policy
-        run: docker run --rm --add-host web:127.0.0.1 -v "$PWD/infra/reverse-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro" nginx:1.29-alpine nginx -t
+        run: docker run --rm --add-host web:127.0.0.1 --add-host api:127.0.0.1 -v "$PWD/infra/reverse-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro" nginx:1.29-alpine nginx -t
       - name: Build production images
         env:
           POSTGRES_PASSWORD: ci-release-validation-only
