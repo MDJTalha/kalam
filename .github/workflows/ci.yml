@@ -24,6 +24,8 @@ jobs:
           --health-retries 20
       clamav:
         image: clamav/clamav:1.4.6
+        env:
+          CLAMAV_NO_FRESHCLAMD: "true"
         ports:
           - 3310:3310
         options: >-
