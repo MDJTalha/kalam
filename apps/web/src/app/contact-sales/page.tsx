@@ -26,7 +26,7 @@ export default function ContactSalesPage() {
           <div className={styles.salesIntro}>
             <span className={styles.salesEyebrow}><span className={styles.salesEyebrowDot}/> TALK TO KALAM</span>
             <h1 id="sales-title">Start with the <span>outcome that matters.</span></h1>
-            <p className={styles.salesLead}>Tell us what your organization needs to build, measure or improve. We'll shape the conversation around your operating reality.</p>
+            <p className={styles.salesLead}>Tell us what your organization needs to build, measure or improve. We&apos;ll shape the conversation around your operating reality.</p>
             <div className={styles.salesValueRow} aria-label="What happens after you submit">
               <div><strong>01</strong><span>Share the priority</span></div>
               <div><strong>02</strong><span>Align the context</span></div>
