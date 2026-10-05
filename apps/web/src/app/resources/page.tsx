@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 };
 
 const resources = [
-  ["Capability", "Build a clearer organizational capability model.", "#"],
-  ["Workforce", "Understand readiness, gaps and workforce capability.", "#"],
-  ["Development", "Connect development activity to capability need.", "#"],
-  ["Enterprise", "Explore implementation, integration and trust.", "/trust"],
+  ["Capability", "Build a clearer organizational capability model.", "/platform", "Explore platform"],
+  ["Workforce", "Understand readiness, gaps and workforce capability.", "/solutions", "Explore solutions"],
+  ["Development", "Connect development activity to capability need.", "/get-started", "Get started"],
+  ["Enterprise", "Explore implementation, integration and trust.", "/trust", "Review trust"],
 ] as const;
 
 export default function ResourcesPage() {
@@ -26,7 +26,7 @@ export default function ResourcesPage() {
 
     <section className={styles.section}><div className={styles.container}>
       <div className={styles.sectionHead}><div><span className={styles.kicker}>EXPLORE</span><h2>Start with the question<br/><em>you need to answer.</em></h2></div><p>Resources are organized around the decisions that leaders and practitioners make about capability.</p></div>
-      <div className={styles.grid4}>{resources.map(([title,copy,href],index) => <article className={styles.card} key={title}><span className={styles.planBadge}>0{index+1}</span><FileText size={22}/><h3>{title}</h3><p>{copy}</p>{href === "#" ? <span className={styles.verificationLink}>Coming soon</span> : <Link className={styles.verificationLink} href={href}>Explore <ArrowRight size={14}/></Link>}</article>)}</div>
+      <div className={styles.grid4}>{resources.map(([title,copy,href,action],index) => <article className={styles.card} key={title}><span className={styles.planBadge}>0{index+1}</span><FileText size={22}/><h3>{title}</h3><p>{copy}</p><Link className={styles.verificationLink} href={href}>{action} <ArrowRight size={14}/></Link></article>)}</div>
     </div></section>
 
     <section className={styles.sectionAlt}><div className={styles.container}>
