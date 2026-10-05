@@ -29,7 +29,7 @@ jobs:
         ports:
           - 3310:3310
         options: >-
-          --health-cmd "test -S /run/clamav/clamd.sock"
+          --health-cmd "test -S /tmp/clamd.sock"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
