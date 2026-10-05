@@ -83,7 +83,7 @@ export default function Home() {
   return <div className={styles.page}>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
     <a className={styles.skip} href="#main">Skip to content</a>
-    <PublicHeader landing />
+    <PublicHeader />
 
     <main id="main">
       <section className={styles.hero} aria-labelledby="hero-title">
@@ -228,6 +228,6 @@ export default function Home() {
       </section>}
     </main>
 
-    <PublicFooter landing />
+    <PublicFooter />
   </div>;
 }
