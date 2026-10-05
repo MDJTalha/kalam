@@ -94,7 +94,7 @@ export default function Home() {
               <h1 id="hero-title"><span>Develop Capability.</span><em>Drive Performance.</em></h1>
               <p>Kalam connects business strategy, workforce capability, assessment and development in one intelligent enterprise platform.</p>
               <div className={styles.heroActions}>
-                <PublicButton href="/guided-evaluation">Get started <ArrowRight size={17} /></PublicButton>
+                <PublicButton href="/get-started">Get started <ArrowRight size={17} /></PublicButton>
                 <PublicButton href="/contact-sales" variant="secondary">Talk to Sales <ChevronRight size={16} /></PublicButton>
               </div>
               <div className={styles.heroNote}><ShieldCheck size={18} /> Built for organizations that want capability, development and performance connected.</div>
@@ -223,7 +223,7 @@ export default function Home() {
       {!inquiriesEnabled && <section className={styles.closing} aria-labelledby="closing-title">
         <div className={styles.container}><div className={styles.closingInner}>
           <div><span>THE NEXT STEP</span><h2 id="closing-title">Build the capabilities<br />your business needs.</h2><p>See how Kalam connects strategy, people, capability and development.</p></div>
-          <div><PublicButton href="/guided-evaluation">Get started <ArrowRight size={17} /></PublicButton><Link href="/contact-sales">Talk to Sales <ChevronRight size={15} /></Link></div>
+          <div><PublicButton href="/get-started">Get started <ArrowRight size={17} /></PublicButton><Link href="/contact-sales">Talk to Sales <ChevronRight size={15} /></Link></div>
         </div></div>
       </section>}
     </main>
