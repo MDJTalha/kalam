@@ -29,7 +29,7 @@ export default function FAQPage() {
     </div></div></section>
 
     <section className={styles.section}><div className={styles.container}>
-      <div className={styles.faqList}>{faqs.map(([question,answer],index) => <details className={styles.card} key={question} open={index===0}><summary><strong>{question}</strong><span>0{index+1}</span></summary><p>{answer}</p></details>)}</div>
+      <div className={styles.grid3}>{faqs.map(([question,answer],index) => <details className={styles.card} key={question} open={index===0}><summary><strong>{question}</strong><span>0{index+1}</span></summary><p>{answer}</p></details>)}</div>
     </div></section>
 
     <section className={styles.sectionAlt}><div className={styles.container}><div className={styles.heroPanel}>
