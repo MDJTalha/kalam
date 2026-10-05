@@ -32,7 +32,7 @@ services:
     volumes:
       - corplms_clamav_db:/var/lib/clamav
     healthcheck:
-      test: ["CMD", "test", "-S", "/run/clamav/clamd.sock"]
+      test: ["CMD", "test", "-S", "/tmp/clamd.sock"]
       interval: 10s
       timeout: 5s
       retries: 10
