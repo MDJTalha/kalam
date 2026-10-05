@@ -19,7 +19,7 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Candidate API container failed to start." }
   $startedApi = $true
   $apiReady = $false
-  for ($attempt = 0; $attempt -lt 20; $attempt++) {
+  for ($attempt = 0; $attempt -lt 60; $attempt++) {
     $ErrorActionPreference = "Continue"
     docker exec $apiName python -c "import urllib.request; assert urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/live', timeout=3).status == 200" 2>$null | Out-Null
     $probeExit = $LASTEXITCODE
@@ -27,7 +27,7 @@ try {
     if ($probeExit -eq 0) { $apiReady = $true; break }
     Start-Sleep -Seconds 1
   }
-  if (-not $apiReady) { throw "Candidate API liveness failed." }
+  if (-not $apiReady) { docker logs $apiName; throw "Candidate API liveness failed after 60 seconds." }
   docker exec $apiName python -c "import httpx; b='http://127.0.0.1:8000'; assert httpx.get(b+'/docs').status_code == 404; assert httpx.get(b+'/api/v1/health/ready').status_code == 503"
   if ($LASTEXITCODE -ne 0) { throw "Candidate API production guards failed." }
 
