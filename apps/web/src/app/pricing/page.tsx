@@ -74,7 +74,7 @@ export default async function PricingPage() {
       <div className={styles.container}>
         <div className={styles.sectionHead}>
           <div><span className={styles.kicker}>PLANS</span><h2>Choose the right scale.</h2></div>
-          <p>Clear pricing for the scope your organization needs. Active commercial plans are published directly from Kalam's approved pricing catalogue.</p>
+          <p>Clear pricing for the scope your organization needs. Active commercial plans are published directly from Kalam&apos;s approved pricing catalogue.</p>
         </div>
 
         {plans.length ? <div className={styles.pricingGrid}>{plans.map((plan) => {
