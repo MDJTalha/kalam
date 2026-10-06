@@ -12,11 +12,21 @@ Create an environment named `staging` and configure:
 - `STAGING_USER` — non-root SSH deployment user
 - `STAGING_SSH_KEY` — private SSH key for that deployment user
 - `STAGING_POSTGRES_PASSWORD` — unique staging PostgreSQL password
+- `STAGING_OPENAI_API_KEY` — optional OpenAI credential, required only when
+  `STAGING_AI_PROVIDER=openai_compatible` and `STAGING_AI_ENABLED=true`
+- `STAGING_ANTHROPIC_API_KEY` — optional Claude credential, required only when
+  `STAGING_AI_PROVIDER=anthropic` and `STAGING_AI_ENABLED=true`
 
 ### Environment variables
 
 - `STAGING_APP_DIR` — absolute path of the Kalam checkout on the staging host
 - `STAGING_WEB_ORIGIN` — public HTTPS origin, for example `https://staging.example.com`
+- `STAGING_AI_ENABLED` — optional `true`/`false`, default `false`; keep disabled
+  until provider, model and tenant policy approval
+- `STAGING_AI_PROVIDER` — optional `disabled`, `openai_compatible` or `anthropic`,
+  default `disabled`
+- `STAGING_AI_BASE_URL` — optional provider base URL, default `https://api.openai.com`
+- `STAGING_AI_MODEL` — optional model/deployment key, required when AI is enabled
 
 Do not put credentials in repository files, workflow YAML, or `.env.example`.
 
@@ -32,8 +42,11 @@ The deployment creates a mode-0600 `.env.staging` on the host, checks out the ex
 2. Configure the `staging` environment once.
 3. Push to `main` or manually dispatch the staging workflow with an exact ref.
 4. Confirm migration completion and all containers healthy.
-5. Run the hosted QA suite against the staging origin.
-6. Only after staging evidence is complete should a production deployment be considered.
+5. If AI is explicitly approved for staging, test the provider, enable it, enable the
+   approved model, then enable the tenant policy from `/dashboard/ai`; otherwise keep
+   the deployment kill switch closed.
+6. Run the hosted QA suite against the staging origin.
+7. Only after staging evidence is complete should a production deployment be considered.
 
 ## Important
 

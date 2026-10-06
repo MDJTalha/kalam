@@ -55,7 +55,7 @@ Known warning:
 
 ## Explicit boundaries
 
-- No real third-party model/provider certification is claimed.
+- No real third-party model/provider certification is claimed until a deployment secret and live connection test are supplied.
 - No external API-key secret is stored in the database.
-- Ollama is the only provider execution path currently implemented by the generation adapter; other provider types are registry-ready but require dedicated adapters before production use.
+- OpenAI-compatible and Anthropic execution adapters are implemented; Ollama remains available for local development. Azure OpenAI and custom provider types remain registry-ready but require a dedicated runtime adapter or approved compatible gateway. The deployment kill switch remains closed until a production credential, model, policy, and live provider handshake are approved.
 - Phase 7 overall remains IN PROGRESS.

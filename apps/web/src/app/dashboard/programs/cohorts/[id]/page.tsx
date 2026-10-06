@@ -7,6 +7,7 @@ import { apiJson, requireUser } from "@/lib/server-api";
 
 type Member = { user_id: string; name: string; email: string; status: string };
 type Person = { id: string; first_name: string; last_name: string; email: string; is_active: boolean };
+type PeoplePage = { items: Person[] };
 type Cohort = {
   id: string;
   program_id: string;
@@ -30,7 +31,7 @@ export default async function CohortDetailPage({
   const { id } = await params;
   const [cohort, people] = await Promise.all([
     apiJson<Cohort>("/api/v1/programs/cohorts/" + id),
-    canManage && canManageMembers ? apiJson<Person[]>("/api/v1/people") : Promise.resolve(null),
+    canManage && canManageMembers ? apiJson<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active") : Promise.resolve(null),
   ]);
   if (!cohort) notFound();
 
@@ -72,7 +73,7 @@ export default async function CohortDetailPage({
           </div>
         ) : <div className="empty-state"><UsersRound size={24}/><p>No learners are enrolled in this cohort yet.</p></div>}
       </section>
-      {canManage && <CohortEditor initialCohort={cohort} people={people ?? []} canManageMembers={canManageMembers} />}
+      {canManage && <CohortEditor initialCohort={cohort} people={people?.items ?? []} canManageMembers={canManageMembers} />}
     </DashboardShell>
   );
 }

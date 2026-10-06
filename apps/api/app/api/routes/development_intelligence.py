@@ -1,9 +1,10 @@
 """Phase 6 governed development intervention intelligence."""
 
+from collections.abc import Sequence
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, user_has_permission
 from app.db.models import (
@@ -126,97 +127,188 @@ async def _generate(user, db, target_id):
         for goal in (plan.goals or [])
         if isinstance(goal, dict)
     ]
-    out = []
-    for gap in gaps:
-        requirement = await db.scalar(
+
+    requirement_ids = {gap.role_requirement_id for gap in gaps}
+    requirement_rows = (
+        await db.execute(
             select(RoleRequirement).where(
-                RoleRequirement.id == gap.role_requirement_id,
                 RoleRequirement.tenant_id == user.tenant_id,
+                RoleRequirement.id.in_(requirement_ids or [UUID(int=0)]),
             )
         )
-        role = (
-            await db.scalar(
-                select(Role).where(
-                    Role.id == requirement.role_id, Role.tenant_id == user.tenant_id
-                )
+    ).scalars().all()
+    requirements_by_id = {row.id: row for row in requirement_rows}
+
+    role_ids = {row.role_id for row in requirement_rows}
+    role_rows = (
+        await db.execute(
+            select(Role).where(
+                Role.tenant_id == user.tenant_id,
+                Role.id.in_(role_ids or [UUID(int=0)]),
             )
-            if requirement
-            else None
         )
-        risk = (
-            await db.scalar(
+    ).scalars().all()
+    roles_by_id = {row.id: row for row in role_rows}
+
+    capability_target_ids = {
+        gap.target_id for gap in gaps if gap.target_type == "capability"
+    }
+    risk_by_capability = {}
+    if capability_target_ids:
+        risk_rows = (
+            await db.execute(
                 select(CapabilityRisk).where(
-                    CapabilityRisk.capability_id == gap.target_id,
                     CapabilityRisk.tenant_id == user.tenant_id,
+                    CapabilityRisk.capability_id.in_(capability_target_ids),
                 )
             )
-            if gap.target_type == "capability"
-            else None
+        ).scalars().all()
+        risk_by_capability = {
+            row.capability_id: row
+            for row in risk_rows
+        }
+
+    evidence_target_ids = {gap.target_id for gap in gaps}
+    evidence_rows = []
+    if evidence_target_ids:
+        latest_ranked = (
+            select(
+                CapabilityEvidence.target_type,
+                CapabilityEvidence.target_id,
+                CapabilityEvidence.observed_at,
+                CapabilityEvidence.confidence,
+                func.row_number()
+                .over(
+                    partition_by=[
+                        CapabilityEvidence.target_type,
+                        CapabilityEvidence.target_id,
+                    ],
+                    order_by=CapabilityEvidence.observed_at.desc(),
+                )
+                .label("evidence_rank"),
+            )
+            .where(
+                CapabilityEvidence.tenant_id == user.tenant_id,
+                CapabilityEvidence.user_id == uid,
+                CapabilityEvidence.target_id.in_(evidence_target_ids),
+            )
+            .subquery()
         )
-        priority = _priority(gap, risk)
-        urgency = {"critical": 100, "high": 80, "medium": 60, "low": 40}[priority]
         evidence_rows = (
             await db.execute(
-                select(CapabilityEvidence.observed_at, CapabilityEvidence.confidence)
-                .where(
-                    CapabilityEvidence.tenant_id == user.tenant_id,
-                    CapabilityEvidence.user_id == uid,
-                    CapabilityEvidence.target_type == gap.target_type,
-                    CapabilityEvidence.target_id == gap.target_id,
+                select(
+                    latest_ranked.c.target_type,
+                    latest_ranked.c.target_id,
+                    latest_ranked.c.observed_at,
+                    latest_ranked.c.confidence,
                 )
-                .order_by(CapabilityEvidence.observed_at.desc())
-                .limit(20)
+                .where(latest_ranked.c.evidence_rank <= 20)
+                .order_by(
+                    latest_ranked.c.target_type,
+                    latest_ranked.c.target_id,
+                    latest_ranked.c.observed_at.desc(),
+                )
             )
         ).all()
-        latest = evidence_rows[0][0] if evidence_rows else None
-        evidence_age = (
-            max(0, (datetime.now(timezone.utc) - latest).days) if latest else 9999
+    evidence_by_target = {}
+    for row in evidence_rows:
+        evidence_by_target.setdefault((row.target_type, row.target_id), []).append(
+            (row.observed_at, row.confidence)
         )
-        freshness = max(0, 100 - min(100, evidence_age / 180 * 100))
-        assessment_history = min(100, len(evidence_rows) * 20)
-        if gap.target_type == "capability":
-            skill_rows = (
-                await db.execute(
-                    select(CapabilitySkill.skill_id, CapabilitySkill.weight).where(
-                        CapabilitySkill.capability_id == gap.target_id
-                    )
+
+    capability_ids = {
+        gap.target_id for gap in gaps if gap.target_type == "capability"
+    }
+    competency_ids = {
+        gap.target_id for gap in gaps if gap.target_type == "competency"
+    }
+    capability_links_by_competency = {}
+    if competency_ids:
+        link_rows = (
+            await db.execute(
+                select(CapabilityCompetency).where(
+                    CapabilityCompetency.competency_id.in_(competency_ids)
                 )
-            ).all()
-        elif gap.target_type == "competency":
-            capability_ids = (
-                (
-                    await db.execute(
-                        select(CapabilityCompetency.capability_id).where(
-                            CapabilityCompetency.competency_id == gap.target_id
-                        )
-                    )
-                )
-                .scalars()
-                .all()
             )
-            skill_rows = (
-                await db.execute(
-                    select(CapabilitySkill.skill_id, CapabilitySkill.weight).where(
-                        CapabilitySkill.capability_id.in_(
-                            capability_ids or [UUID(int=0)]
-                        )
-                    )
+        ).scalars().all()
+        for link in link_rows:
+            capability_links_by_competency.setdefault(link.competency_id, []).append(
+                link.capability_id
+            )
+            capability_ids.add(link.capability_id)
+
+    skill_rows = []
+    if capability_ids:
+        skill_rows = (
+            await db.execute(
+                select(CapabilitySkill).where(
+                    CapabilitySkill.capability_id.in_(capability_ids)
                 )
-            ).all()
-        else:
-            skill_rows = [(gap.target_id, 100)]
-        skill_ids = {sid for sid, _ in skill_rows}
-        course_rows = (
+            )
+        ).scalars().all()
+    skills_by_capability = {}
+    for row in skill_rows:
+        skills_by_capability.setdefault(row.capability_id, []).append(
+            (row.skill_id, row.weight)
+        )
+
+    all_learning_skill_ids = set()
+    for skill_rows_for_capability in skills_by_capability.values():
+        all_learning_skill_ids.update(skill_id for skill_id, _ in skill_rows_for_capability)
+    all_learning_skill_ids.update(
+        gap.target_id for gap in gaps if gap.target_type == "skill"
+    )
+    course_rows_by_skill = {}
+    if all_learning_skill_ids:
+        all_course_rows = (
             await db.execute(
                 select(Course, CourseSkill.skill_id, CourseSkill.target_proficiency)
                 .join(CourseSkill, CourseSkill.course_id == Course.id)
                 .where(
                     Course.tenant_id == user.tenant_id,
                     Course.status == "published",
-                    CourseSkill.skill_id.in_(list(skill_ids) or [UUID(int=0)]),
+                    CourseSkill.skill_id.in_(all_learning_skill_ids),
                 )
             )
         ).all()
+        for course_row in all_course_rows:
+            course_rows_by_skill.setdefault(course_row[1], []).append(course_row)
+
+    out = []
+    now = datetime.now(timezone.utc)
+    for gap in gaps:
+        requirement = requirements_by_id.get(gap.role_requirement_id)
+        role = roles_by_id.get(requirement.role_id) if requirement else None
+        risk = (
+            risk_by_capability.get(gap.target_id)
+            if gap.target_type == "capability"
+            else None
+        )
+        priority = _priority(gap, risk)
+        urgency = {"critical": 100, "high": 80, "medium": 60, "low": 40}[priority]
+        evidence_rows = evidence_by_target.get((gap.target_type, gap.target_id), [])
+        latest = evidence_rows[0][0] if evidence_rows else None
+        evidence_age = max(0, (now - latest).days) if latest else 9999
+        freshness = max(0, 100 - min(100, evidence_age / 180 * 100))
+        assessment_history = min(100, len(evidence_rows) * 20)
+        if gap.target_type == "capability":
+            skill_rows = skills_by_capability.get(gap.target_id, [])
+        elif gap.target_type == "competency":
+            skill_rows = [
+                row
+                for capability_id in capability_links_by_competency.get(
+                    gap.target_id, []
+                )
+                for row in skills_by_capability.get(capability_id, [])
+            ]
+        else:
+            skill_rows = [(gap.target_id, 100)]
+        skill_ids = {sid for sid, _ in skill_rows}
+        course_rows = [
+            row
+            for skill_id in skill_ids
+            for row in course_rows_by_skill.get(skill_id, [])
+        ]
         course_scores = {}
         for course, skill_id, target in course_rows:
             fit = min(100, float(target) / max(1, float(gap.required_level)) * 100)
@@ -636,16 +728,18 @@ async def accept_recommendation(
         return {"status": "accepted", "recommendation_id": str(item.id)}
     item.status = "accepted"
     if item.source_type in {"course", "learning_path", "program", "session"}:
-        course_ids = []
+        course_ids: Sequence[UUID] = []
         if item.source_type == "course":
             course_ids = [UUID(item.source_id)]
         elif item.source_type == "learning_path":
             course_ids = (
                 (
                     await db.execute(
-                        select(LearningPathItem.course_id).where(
+                        select(LearningPathItem.course_id)
+                        .join(LearningPath, LearningPath.id == LearningPathItem.path_id)
+                        .where(
                             LearningPathItem.path_id == UUID(item.source_id),
-                            LearningPathItem.tenant_id == user.tenant_id,
+                            LearningPath.tenant_id == user.tenant_id,
                         )
                     )
                 )
@@ -656,9 +750,11 @@ async def accept_recommendation(
             course_ids = (
                 (
                     await db.execute(
-                        select(ProgramCourse.course_id).where(
+                        select(ProgramCourse.course_id)
+                        .join(Program, Program.id == ProgramCourse.program_id)
+                        .where(
                             ProgramCourse.program_id == UUID(item.source_id),
-                            ProgramCourse.tenant_id == user.tenant_id,
+                            Program.tenant_id == user.tenant_id,
                         )
                     )
                 )
@@ -680,7 +776,7 @@ async def accept_recommendation(
                     select(Course).where(
                         Course.tenant_id == user.tenant_id,
                         Course.status == "published",
-                        Course.id.in_(course_ids or [UUID(int(0))]),
+                        Course.id.in_(course_ids or [UUID(int=0)]),
                     )
                 )
             )

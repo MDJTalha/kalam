@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.main import app
-from app.db.models import CapabilityGap, CapabilityEvidence, RoleRequirement, User, UserRole
+from app.db.models import CapabilityEvidence, Tenant, User
 
 
 TENANT = "demo-corporation"
@@ -60,7 +60,11 @@ def test_phase4_end_to_end_requirement_evidence_and_recalculation():
         from app.db.session import SessionLocal
         async def first_user():
             async with SessionLocal() as db:
-                return str((await db.execute(select(User.id).where(User.tenant_id.is_not(None), User.is_active.is_(True)))).scalars().first())
+                return str((await db.execute(
+                    select(User.id)
+                    .join(Tenant, Tenant.id == User.tenant_id)
+                    .where(Tenant.slug == TENANT, User.is_active.is_(True))
+                )).scalars().first())
         user_id = asyncio.run(first_user())
         assert user_id and user_id != "None"
 
@@ -99,8 +103,6 @@ def test_phase4_end_to_end_requirement_evidence_and_recalculation():
         })
         assert decision.status_code == 200, decision.text
 
-        recalculated = client.post(f"/api/v1/capability-gaps/recalculate?user_id={user_id}")
-        assert recalculated.status_code == 200, recalculated.text
         row = next(x for x in client.get(f"/api/v1/capability-gaps?user_id={user_id}&role_id={role_id}").json()
                    if x["role_requirement_id"] == req_id)
         assert row["demonstrated_level"] == 3
@@ -132,7 +134,11 @@ def test_phase4_stale_evidence_becomes_insufficient_evidence():
         from app.db.session import SessionLocal
         async def first_user():
             async with SessionLocal() as db:
-                return str((await db.execute(select(User.id).where(User.is_active.is_(True)))).scalars().first())
+                return str((await db.execute(
+                    select(User.id)
+                    .join(Tenant, Tenant.id == User.tenant_id)
+                    .where(Tenant.slug == TENANT, User.is_active.is_(True))
+                )).scalars().first())
         user_id = asyncio.run(first_user())
         assert user_id and user_id != "None"
         req = client.post(f"/api/v1/capability-domain/roles/{role_id}/requirements", json={

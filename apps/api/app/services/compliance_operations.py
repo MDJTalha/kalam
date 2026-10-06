@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from typing import TypedDict
 from uuid import UUID
 
 from sqlalchemy import func, select, text
@@ -27,6 +28,15 @@ from app.services.notifications import create_notification
 OPEN_ASSIGNMENT_STATUSES = (
     "assigned", "due_soon", "overdue", "evidence_submitted", "exception_requested"
 )
+
+
+class ComplianceOperationResult(TypedDict):
+    status: str
+    overdue: int
+    expired_exceptions: int
+    recurring_created: int
+    escalated: int
+    processed_at: datetime
 
 
 async def _completion_timestamp(assignment: ComplianceAssignment, db: AsyncSession) -> datetime | None:
@@ -85,7 +95,7 @@ async def _ensure_enrollment(
 
 async def run_compliance_operations_for_tenant(
     db: AsyncSession, tenant_id: UUID, actor_id: UUID | None = None,
-) -> dict[str, int | str | datetime]:
+) -> ComplianceOperationResult:
     now = utcnow()
     # One transaction-wide advisory lock prevents duplicate recurrence/escalation work
     # when multiple worker replicas or a manual admin run overlap for the same tenant.
@@ -115,9 +125,9 @@ async def run_compliance_operations_for_tenant(
     assignment_by_id = {item.id: item for item in assignments}
     for exception in approved_exceptions:
         exception.status = "expired"
-        assignment = assignment_by_id.get(exception.assignment_id)
-        if assignment and assignment.status == "excepted":
-            assignment.status = "overdue" if assignment.due_at and assignment.due_at < now else "assigned"
+        exception_assignment: ComplianceAssignment | None = assignment_by_id.get(exception.assignment_id)
+        if exception_assignment and exception_assignment.status == "excepted":
+            exception_assignment.status = "overdue" if exception_assignment.due_at and exception_assignment.due_at < now else "assigned"
         expired_exceptions += 1
         await audit(db, tenant_id=tenant_id, actor_id=actor_id, action="compliance.exception.expired",
                     entity_type="compliance_exception", entity_id=str(exception.id))

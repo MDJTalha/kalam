@@ -15,17 +15,12 @@ export function DevelopmentExecution({canVerify}:Props){
   async function load(){
     setBusy(true); setError("");
     try {
-      const r=await fetch("/api/v1/development/interventions",{cache:"no-store"});
+      const r=await fetch("/api/v1/development/interventions?include_progress=true",{cache:"no-store"});
       const d=await r.json().catch(()=>[]);
       if(!r.ok) throw new Error(d.detail||"Development interventions could not be loaded.");
-      const next=Array.isArray(d)?d as Intervention[]:[];
-      const progressRows=await Promise.all(next.map(async item=>{
-        const response=await fetch("/api/v1/development/interventions/"+item.id+"/progress",{cache:"no-store"});
-        const value=await response.json().catch(()=>null);
-        return response.ok&&value&&typeof value==="object" ? [item.id,value as Progress] as const : null;
-      }));
+      const next=Array.isArray(d)?d as (Intervention & {progress?:Progress})[]:[];
       setItems(next);
-      setProgress(Object.fromEntries(progressRows.filter((x): x is readonly [string,Progress]=>Boolean(x))));
+      setProgress(Object.fromEntries(next.filter(item=>item.progress).map(item=>[item.id,item.progress as Progress])));
     }
     catch(e){setError(e instanceof Error?e.message:"Development interventions could not be loaded.");} finally{setBusy(false);}
   }

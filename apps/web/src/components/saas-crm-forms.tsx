@@ -429,7 +429,7 @@ export function OnboardingTemplateButton({accountId}:{accountId:string}){
   return <button className="button button-secondary" type="button" disabled={state.busy} onClick={()=>void state.run(()=>postJson("/api/lms/saas/crm/accounts/"+accountId+"/onboarding-template",{}))}>Create onboarding checklist</button>;
 }
 
-export function OnboardingItemCreateForm({accounts}:{accounts:Option[]}){
+export function OnboardingItemCreateForm(){
   const state=useSubmit();
   function submit(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -446,7 +446,7 @@ export function OnboardingItemCreateForm({accounts}:{accounts:Option[]}){
   }
   return <form className="studio-form" onSubmit={submit}>
     <div className="form-grid">
-      <label>Account<select name="account_id" required>{accounts.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
+      <SaaSLookupSelect name="account_id" label="Account" endpoint="/api/lms/saas/crm/lookups/accounts" required />
       <label>Category<select name="category"><option value="commercial">Commercial</option><option value="tenant">Tenant</option><option value="identity">Identity</option><option value="data">Data</option><option value="integration">Integration</option><option value="validation">Validation</option><option value="go_live">Go-live</option><option value="success">Customer success</option><option value="general">General</option></select></label>
       <label>Title<input name="title" required/></label>
       <label>Status<select name="status"><option value="pending">Pending</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="completed">Completed</option></select></label>
@@ -595,7 +595,7 @@ export function PaymentStatusControl({id,status}:{id:string;status:string}){
 }
 
 
-export function TaskCreateForm({accounts,team}:{accounts:Option[];team:Array<{id:string;name:string;is_active:boolean}>}){
+export function TaskCreateForm({team}:{team:Array<{id:string;name:string;is_active:boolean}>}){
   const state=useSubmit();
   function submit(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -613,7 +613,7 @@ export function TaskCreateForm({accounts,team}:{accounts:Option[];team:Array<{id
   }
   return <form className="studio-form" onSubmit={submit}>
     <div className="form-grid">
-      <label>Account<select name="account_id"><option value="">No account</option>{accounts.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
+      <SaaSLookupSelect name="account_id" label="Account (optional)" endpoint="/api/lms/saas/crm/lookups/accounts" />
       <label>Owner<select name="owner_user_id"><option value="">Unassigned</option>{team.filter(t=>t.is_active).map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
       <label>Task type<select name="task_type"><option value="follow_up">Follow-up</option><option value="renewal">Renewal</option><option value="trial">Trial</option><option value="proposal">Proposal</option><option value="contract">Contract</option><option value="billing">Billing</option><option value="customer_success">Customer success</option></select></label>
       <label>Status<select name="status"><option value="open">Open</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="completed">Completed</option></select></label>

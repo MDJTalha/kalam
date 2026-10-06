@@ -164,22 +164,41 @@ async def list_capabilities(
     if criticality:
         stmt = stmt.where(Capability.criticality == criticality)
     rows = await db.execute(stmt.order_by(Capability.name).limit(250))
-    return [await _serialize_capability(db, x) for x in rows.scalars()]
+    items = list(rows.scalars())
+    if not items:
+        return []
 
-
-async def _serialize_capability(db, item):
-    category = (
-        await db.scalar(
-            select(CapabilityCategory).where(CapabilityCategory.id == item.category_id)
+    category_ids = {item.category_id for item in items if item.category_id}
+    category_map = {}
+    if category_ids:
+        category_rows = await db.execute(
+            select(CapabilityCategory).where(
+                CapabilityCategory.tenant_id == user.tenant_id,
+                CapabilityCategory.id.in_(category_ids),
+            )
         )
-        if item.category_id
-        else None
-    )
-    levels = await db.execute(
+        category_map = {row.id: row for row in category_rows.scalars()}
+
+    level_rows = await db.execute(
         select(CapabilityLevel)
-        .where(CapabilityLevel.capability_id == item.id)
-        .order_by(CapabilityLevel.level)
+        .where(CapabilityLevel.capability_id.in_([item.id for item in items]))
+        .order_by(CapabilityLevel.capability_id, CapabilityLevel.level)
     )
+    levels_by_capability: dict[UUID, list[CapabilityLevel]] = {}
+    for level in level_rows.scalars():
+        levels_by_capability.setdefault(level.capability_id, []).append(level)
+
+    return [
+        _serialize_capability_payload(
+            item,
+            category_map.get(item.category_id) if item.category_id else None,
+            levels_by_capability.get(item.id, []),
+        )
+        for item in items
+    ]
+
+
+def _serialize_capability_payload(item, category, levels):
     return {
         "id": str(item.id),
         "code": item.code,
@@ -202,9 +221,30 @@ async def _serialize_capability(db, item):
                 "definition": level.definition,
                 "indicators": level.indicators,
             }
-            for level in levels.scalars()
+            for level in levels
         ],
     }
+
+
+async def _serialize_capability(db, item):
+    category = (
+        await db.scalar(
+            select(CapabilityCategory).where(
+                CapabilityCategory.id == item.category_id,
+                CapabilityCategory.tenant_id == item.tenant_id,
+            )
+        )
+        if item.category_id
+        else None
+    )
+    levels = (
+        await db.execute(
+            select(CapabilityLevel)
+            .where(CapabilityLevel.capability_id == item.id)
+            .order_by(CapabilityLevel.level)
+        )
+    ).scalars().all()
+    return _serialize_capability_payload(item, category, levels)
 
 
 @router.get("/{capability_id}")
@@ -220,7 +260,24 @@ async def get_capability(
     )
     if item is None:
         raise HTTPException(404, "Capability not found")
-    return await _serialize_capability(db, item)
+    category = (
+        await db.scalar(
+            select(CapabilityCategory).where(
+                CapabilityCategory.id == item.category_id,
+                CapabilityCategory.tenant_id == user.tenant_id,
+            )
+        )
+        if item.category_id
+        else None
+    )
+    levels = (
+        await db.execute(
+            select(CapabilityLevel)
+            .where(CapabilityLevel.capability_id == item.id)
+            .order_by(CapabilityLevel.level)
+        )
+    ).scalars().all()
+    return _serialize_capability_payload(item, category, levels)
 
 
 @router.post("", status_code=201)

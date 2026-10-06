@@ -1,59 +1,22 @@
-﻿import asyncio
-import json
-import urllib.request
-
-import httpx
-import websockets
-
-TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
-COOKIE = "corp_lms_session"
-
-async def call(ws, ident, method, params=None):
-    ident += 1
-    await ws.send(json.dumps({"id": ident, "method": method, "params": params or {}}))
-    while True:
-        item = json.loads(await ws.recv())
-        if item.get("id") == ident:
-            return ident, item
-
+import asyncio,json,urllib.request,websockets
+PAGES=['/dashboard/capability-gaps','/dashboard/capability-assessments']
+async def evaluate(ws,i,expr):
+ await ws.send(json.dumps({'id':i,'method':'Runtime.evaluate','params':{'expression':expr,'returnByValue':True}}))
+ while True:
+  x=json.loads(await asyncio.wait_for(ws.recv(),timeout=10))
+  if x.get('id')==i:return x
 async def main():
-    async with httpx.AsyncClient(base_url="http://127.0.0.1:8000", timeout=30.0) as client:
-        response = await client.post("/api/v1/auth/login", json={"tenant_slug": TENANT, **ADMIN})
-        response.raise_for_status()
-        cookie = client.cookies.get(COOKIE)
-    targets = json.load(urllib.request.urlopen("http://127.0.0.1:9222/json"))
-    page = next(item for item in targets if item.get("type") == "page")
-    async with websockets.connect(page["webSocketDebuggerUrl"], max_size=20_000_000) as ws:
-        ident, _ = await call(ws, 0, "Network.enable")
-        ident, _ = await call(ws, ident, "Network.setCookie", {
-            "name": COOKIE, "value": cookie, "domain": "127.0.0.1", "path": "/",
-        })
-        for width, height, name in [(1440, 1000, "desktop"), (390, 844, "mobile")]:
-            ident, _ = await call(ws, ident, "Emulation.setDeviceMetricsOverride", {
-                "width": width, "height": height, "deviceScaleFactor": 1, "mobile": width < 600,
-            })
-            ident, _ = await call(ws, ident, "Page.navigate", {
-                "url": "http://127.0.0.1:3000/dashboard/capability-gaps",
-            })
-            await asyncio.sleep(25.0)
-            expression = """(() => ({
-              path: location.pathname,
-              overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
-              unlabeled: [...document.querySelectorAll('input,select,textarea')].filter(x => !(x.getAttribute('aria-label') || x.getAttribute('aria-labelledby') || x.closest('label') || (x.id && document.querySelector('label[for="' + CSS.escape(x.id) + '"]')))).length,
-              h1: [...document.querySelectorAll('h1')].map(x => x.textContent?.trim()).filter(Boolean),
-              h2: [...document.querySelectorAll('h2')].map(x => x.textContent?.trim()).filter(Boolean),
-              body: document.body.innerText.slice(0, 240),
-              media760: matchMedia("(max-width:760px)").matches,
-              sectionActions: [...document.querySelectorAll(".section-actions")].slice(0,3).map(x => ({display:getComputedStyle(x).display, flexWrap:getComputedStyle(x).flexWrap, width:Math.round(x.getBoundingClientRect().width), parent:getComputedStyle(x.parentElement).flexDirection, parentClass:x.parentElement?.className?.toString()})),
-              overflowElements: [...document.querySelectorAll('*')].filter(x => x.getBoundingClientRect().right > document.documentElement.clientWidth + 1).slice(0, 12).map(x => ({tag: x.tagName, text: x.innerText?.slice(0, 60), cls: x.className?.toString().slice(0, 100), right: Math.round(x.getBoundingClientRect().right), width: Math.round(x.getBoundingClientRect().width), parent: x.parentElement?.className?.toString().slice(0, 100)})),
-              reviewButtons: [...document.querySelectorAll('button')].filter(x => ['Approve','Reject'].includes((x.textContent||'').trim())).length
-            }))()"""
-            ident, result = await call(ws, ident, "Runtime.evaluate", {
-                "expression": expression, "returnByValue": True,
-            })
-            print(name, json.dumps(result["result"]["result"].get("value"), ensure_ascii=False))
+ t=json.load(urllib.request.urlopen('http://127.0.0.1:9222/json',timeout=5)); page=next(x for x in t if x.get('type')=='page'); print('CDP_READY',flush=True)
+ async with websockets.connect(page['webSocketDebuggerUrl'],open_timeout=5,close_timeout=2,max_size=20000000) as ws:
+  i=1
+  for path in PAGES:
+   for width,height,name in [(1440,1000,'desktop'),(390,844,'mobile')]:
+    print(f'NAV {path} {name}',flush=True)
+    await ws.send(json.dumps({'id':i,'method':'Emulation.setDeviceMetricsOverride','params':{'width':width,'height':height,'deviceScaleFactor':1,'mobile':width<600}})); i+=1
+    await asyncio.sleep(.2)
+    await ws.send(json.dumps({'id':i,'method':'Page.navigate','params':{'url':'http://127.0.0.1:3000'+path}})); i+=1
+    await asyncio.sleep(7)
+    expr="""(()=>{const vw=document.documentElement.clientWidth;const els=[...document.querySelectorAll('*')];return {path:location.pathname,ready:document.readyState,title:document.title,overflow:document.documentElement.scrollWidth>vw+1,viewport:innerWidth,unlabeled:[...document.querySelectorAll('input,select,textarea')].filter(x=>!(x.getAttribute('aria-label')||x.getAttribute('aria-labelledby')||x.closest('label')||(x.id&&document.querySelector('label[for="'+CSS.escape(x.id)+'"]')))).length,h1:[...document.querySelectorAll('h1')].map(x=>x.innerText.trim()).filter(Boolean),h2:[...document.querySelectorAll('h2')].map(x=>x.innerText.trim()).filter(Boolean),loading:/loading/i.test(document.body.innerText.slice(0,1000)),actions:[...document.querySelectorAll('.section-actions')].map(x=>({wrap:getComputedStyle(x).flexWrap,width:Math.round(x.getBoundingClientRect().width),display:getComputedStyle(x).display,parentDirection:getComputedStyle(x.parentElement).flexDirection})).slice(0,6),badOverflow:els.filter(x=>x.getBoundingClientRect().right>vw+1).slice(0,8).map(x=>({tag:x.tagName,text:(x.innerText||'').slice(0,50),right:Math.round(x.getBoundingClientRect().right)})),buttons:[...document.querySelectorAll('button')].map(x=>x.innerText.trim()).filter(Boolean).slice(0,20),text:document.body.innerText.slice(0,700)}})()"""
+    x=await evaluate(ws,i,expr); i+=1
+    print(json.dumps(x.get('result',{}).get('result',{}).get('value'),ensure_ascii=False),flush=True)
 asyncio.run(main())
-
-
-

@@ -10,7 +10,7 @@ Project: C:\Projects\CorpLMS
 - Provider failover now uses explicit priority levels and one runtime candidate per priority; newest configuration wins equal-priority ties.
 - Canonical CorpLMS PostgreSQL service was restored on the project Docker stack.
 - Alembic was advanced to q2r3s4t5u6v7 (head), including provider token usage and tenant daily-token-budget controls.
-- AI interaction persistence records provider token usage when exposed by Ollama or OpenAI-compatible adapters.
+- AI interaction persistence records provider token usage when exposed by Ollama, OpenAI-compatible, or Anthropic adapters.
 - Admin telemetry now reports request, failure, latency, review and token-usage evidence.
 - Tenant governance can enforce a daily AI token budget and fail closed when the budget is exhausted.
 - Added formal retrieval hit-rate@K and mean-reciprocal-rank scorecards with explicit quality thresholds.
@@ -38,7 +38,7 @@ Project: C:\Projects\CorpLMS
 
 ## Remaining Phase 7 work
 - Expand the retrieval benchmark corpus before claiming embedding-grade semantic retrieval quality.
-- Additional provider-adapter certification beyond local Ollama/OpenAI-compatible code paths.
+- Additional provider-adapter certification beyond local Ollama/OpenAI-compatible/Anthropic code paths.
 - External-provider cost certification remains deployment-dependent; local budget enforcement is implemented.
 - Final Phase 7 exit evidence reconciliation is recorded in `docs/06-delivery/PHASE_7_EXIT_EVIDENCE.md`.
 

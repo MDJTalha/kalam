@@ -616,6 +616,13 @@
 .forecast-metric>span,.forecast-metric em,.forecast-stages span,.forecast-stages b{font-size:10px}
 @media(max-width:700px){.dashboard-chart-labels button{font-size:9px}}
 
+/* Phase 8 accessibility hardening — AA-safe muted text on light surfaces. */
+.executive-kpi>div,.executive-kpi small,.dashboard-chart-summary,.dashboard-chart-ranges button,.dashboard-chart-labels button,.dashboard-chart-detail span{color:#63738a}
+.people-filter-state,.people-filter-result,.people-filter-result span{color:#63738a}
+.executive-empty,.dashboard-chart-empty,.dashboard-chart-hint,.executive-momentum small,.executive-attention-card span,.executive-attention-card small,.dashboard-chart-legend{color:#596d84}
+.executive-momentum b{color:#076db5}
+
+
 /* Phase 7 mobile certification override: prevent compact section action overflow. */
 @media(max-width:760px){
   .section-heading.compact{flex-direction:column;align-items:flex-start;gap:10px;}

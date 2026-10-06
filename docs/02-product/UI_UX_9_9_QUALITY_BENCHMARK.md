@@ -605,7 +605,7 @@ Validation:
 
 Benchmark status:
 - Governed AI foundation: **IMPLEMENTED and locally evidenced**.
-- AI provider adapters beyond the existing Ollama execution path: **OPEN**.
+- OpenAI-compatible and Anthropic provider adapters: **IMPLEMENTED locally; external endpoint certification OPEN**. Ollama remains a local-development option.
 - Retrieval/evaluation/human-review controls: **NEXT**.
 - Final overall 9.9 certification: **NOT YET**.
 
@@ -631,5 +631,5 @@ Benchmark status:
 - Governed execution/retrieval: **IMPLEMENTED and locally safety-evidenced**.
 - Semantic retrieval/evaluation: **OPEN**.
 - Human review/approval UX: **OPEN**.
-- Additional production provider adapters: **OPEN**.
+- Additional production provider adapters beyond OpenAI-compatible/Anthropic: **OPEN**; external endpoint certification remains deployment-dependent.
 - Final overall 9.9 certification: **NOT YET**.

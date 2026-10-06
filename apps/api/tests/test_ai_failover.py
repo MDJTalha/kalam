@@ -76,6 +76,7 @@ def test_governed_query_fails_over_to_next_ready_provider(monkeypatch):
             assert provider.status_code == 200, provider.text
             provider_id = UUID(provider.json()["id"])
             provider_ids.append(provider_id)
+            asyncio.run(_mark_ready([provider_id]))
             model = client.post(
                 "/api/v1/ai/admin/models",
                 json={
@@ -87,8 +88,6 @@ def test_governed_query_fails_over_to_next_ready_provider(monkeypatch):
                 },
             )
             assert model.status_code == 200, model.text
-
-        asyncio.run(_mark_ready(provider_ids))
         policy = client.put(
             "/api/v1/ai/admin/policy",
             json={

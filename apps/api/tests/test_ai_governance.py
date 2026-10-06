@@ -4,6 +4,33 @@ from app.api.routes.ai import _generate, _lesson_text
 from app.db.models import Lesson
 
 
+class _FakeProviderResponse:
+    def __init__(self, payload=None):
+        self.payload = payload or {"data": [{"id": "test-model"}]}
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return self.payload
+
+
+class _FakeProviderClient:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, traceback):
+        return None
+
+    async def get(self, url, headers=None):
+        return _FakeProviderResponse()
+
+    async def post(self, url, headers=None, json=None):
+        if url.endswith("/messages"):
+            return _FakeProviderResponse({"content": [{"type": "text", "text": "Claude answer [S1]"}], "usage": {"input_tokens": 4, "output_tokens": 5}})
+        return _FakeProviderResponse({"choices": [{"message": {"content": "OpenAI answer [S1]"}}], "usage": {"prompt_tokens": 6, "completion_tokens": 7}})
+
+
 def test_ai_provider_fails_closed_when_disabled():
     async def run():
         try:
@@ -15,6 +42,25 @@ def test_ai_provider_fails_closed_when_disabled():
     assert asyncio.run(run()) == 503
 
 
+def test_openai_and_anthropic_adapters_return_governed_generation(monkeypatch):
+    from app.api.routes import ai as ai_route
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-openai-key")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-anthropic-key")
+    monkeypatch.setattr(ai_route.httpx, "AsyncClient", lambda *args, **kwargs: _FakeProviderClient())
+
+    async def run():
+        openai = await ai_route._generate("Mode: qa\nQuestion", "openai_compatible", "https://api.openai.com", "gpt-test", secret_ref="OPENAI_API_KEY")
+        claude = await ai_route._generate("Mode: qa\nQuestion", "anthropic", "https://api.anthropic.com", "claude-test", secret_ref="ANTHROPIC_API_KEY")
+        return openai, claude
+
+    openai, claude = asyncio.run(run())
+    assert openai.answer == "OpenAI answer [S1]"
+    assert (openai.input_tokens, openai.output_tokens) == (6, 7)
+    assert claude.answer == "Claude answer [S1]"
+    assert (claude.input_tokens, claude.output_tokens) == (4, 5)
+
+
 def test_lesson_context_extraction_is_bounded_to_supported_fields():
     lesson = Lesson(title="Governance", content={"text": "Primary text", "body": "Body text"})
     rendered = _lesson_text(lesson)
@@ -24,11 +70,13 @@ def test_lesson_context_extraction_is_bounded_to_supported_fields():
 
 
 
-def test_ai_registry_is_admin_only_and_persists_governance_contract(client=None):
+def test_ai_registry_is_admin_only_and_persists_governance_contract(monkeypatch, client=None):
     from fastapi.testclient import TestClient
     from app.main import app
+    from app.api.routes import ai as ai_route
     from uuid import uuid4
 
+    monkeypatch.setattr(ai_route.httpx, "AsyncClient", lambda *args, **kwargs: _FakeProviderClient())
     with TestClient(app, base_url="http://localhost") as client:
         login_payload = {"tenant_slug": "demo-corporation", "email": "learner@demo.corp", "password": "DemoOnly!1234"}
         assert client.post("/api/v1/auth/login", json=login_payload).status_code == 200
@@ -39,10 +87,10 @@ def test_ai_registry_is_admin_only_and_persists_governance_contract(client=None)
         assert client.post("/api/v1/auth/login", json=admin).status_code == 200
         token = uuid4().hex[:8]
         provider = client.post("/api/v1/ai/admin/providers", json={
-            "name": f"Ollama Local {token}",
-            "provider_type": "ollama",
-            "endpoint_url": "http://127.0.0.1:11434",
-            "secret_ref": "AI_TEST_TOKEN",
+            "name": f"OpenAI Compatible {token}",
+            "provider_type": "openai_compatible",
+            "endpoint_url": "https://api.openai.com",
+            "secret_ref": "OPENAI_API_KEY",
             "capabilities": {"chat": True, "grounding": True},
             "enabled": True,
         })
@@ -78,7 +126,7 @@ def test_ai_registry_is_admin_only_and_persists_governance_contract(client=None)
             "raw_response_storage_allowed": False,
             "max_input_chars": 4000,
             "max_output_tokens": 1200,
-            "allowed_provider_types": ["ollama"],
+            "allowed_provider_types": ["openai_compatible"],
         })
         assert policy.status_code == 200, policy.text
         status_response = client.get("/api/v1/ai/status")
@@ -98,14 +146,14 @@ def test_ai_registry_is_admin_only_and_persists_governance_contract(client=None)
             "raw_response_storage_allowed": False,
             "max_input_chars": 4000,
             "max_output_tokens": 1200,
-            "allowed_provider_types": ["ollama"],
+            "allowed_provider_types": ["openai_compatible"],
         })
         assert disabled_policy.status_code == 200
         disabled_provider = client.patch(f"/api/v1/ai/admin/providers/{provider_id}", json={
             "name": provider.json()["name"],
-            "provider_type": "ollama",
-            "endpoint_url": "http://127.0.0.1:11434",
-            "secret_ref": "AI_TEST_TOKEN",
+            "provider_type": "openai_compatible",
+            "endpoint_url": "https://api.openai.com",
+            "secret_ref": "OPENAI_API_KEY",
             "capabilities": {"chat": True, "grounding": True},
             "enabled": False,
         })
@@ -164,6 +212,7 @@ def test_ai_query_returns_citations_for_authorized_evidence(monkeypatch):
     monkeypatch.setattr(ai_route, "_generate", fake_generate)
     monkeypatch.setattr(ai_route, "retrieve_authorized_sources", fake_authorized_sources)
     monkeypatch.setattr(ai_route, "retrieve_capability_sources", fake_capability_sources)
+    monkeypatch.setattr(ai_route.httpx, "AsyncClient", lambda *args, **kwargs: _FakeProviderClient())
     with TestClient(app, base_url="http://localhost") as client:
         admin = {"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": "DemoOnly!1234"}
         learner = {"tenant_slug": "demo-corporation", "email": "learner@demo.corp", "password": "DemoOnly!1234"}
@@ -171,8 +220,9 @@ def test_ai_query_returns_citations_for_authorized_evidence(monkeypatch):
         token = uuid4().hex[:8]
         provider = client.post("/api/v1/ai/admin/providers", json={
             "name": f"Retrieval Test {token}",
-            "provider_type": "ollama",
-            "endpoint_url": "http://127.0.0.1:11434",
+            "provider_type": "openai_compatible",
+            "endpoint_url": "https://api.openai.com",
+            "secret_ref": "OPENAI_API_KEY",
             "enabled": True,
         })
         assert provider.status_code == 200, provider.text
@@ -197,7 +247,7 @@ def test_ai_query_returns_citations_for_authorized_evidence(monkeypatch):
             "raw_response_storage_allowed": False,
             "max_input_chars": 4000,
             "max_output_tokens": 1200,
-            "allowed_provider_types": ["ollama"],
+            "allowed_provider_types": ["openai_compatible"],
         })
         assert policy.status_code == 200
         content_assist = client.post(
@@ -264,8 +314,9 @@ def test_ai_query_returns_citations_for_authorized_evidence(monkeypatch):
 
         assert client.patch(f"/api/v1/ai/admin/providers/{provider_id}", json={
             "name": provider.json()["name"],
-            "provider_type": "ollama",
-            "endpoint_url": "http://127.0.0.1:11434",
+            "provider_type": "openai_compatible",
+            "endpoint_url": "https://api.openai.com",
+            "secret_ref": "OPENAI_API_KEY",
             "enabled": False,
         }).status_code == 200
         assert client.put("/api/v1/ai/admin/policy", json={
@@ -276,7 +327,7 @@ def test_ai_query_returns_citations_for_authorized_evidence(monkeypatch):
             "raw_response_storage_allowed": False,
             "max_input_chars": 4000,
             "max_output_tokens": 1200,
-            "allowed_provider_types": ["ollama"],
+            "allowed_provider_types": ["openai_compatible"],
         }).status_code == 200
 
 

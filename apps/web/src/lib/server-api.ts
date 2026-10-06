@@ -51,7 +51,8 @@ export async function apiJson<T>(path: string, init: RequestInit = {}): Promise<
 
 export async function requireUser<T = Record<string, unknown>>() {
   const response = await apiFetch("/api/v1/auth/me");
-  if (response.status === 401 || response.status === 403) redirect("/login");
+  if (response.status === 401) redirect("/login");
+  if (response.status === 403) redirect("/access-denied");
   if (!response.ok) {
     throw new Error(`Authentication service returned HTTP ${response.status}`);
   }

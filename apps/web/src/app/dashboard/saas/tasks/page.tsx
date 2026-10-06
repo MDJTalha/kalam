@@ -8,7 +8,6 @@ import { apiJson } from "@/lib/server-api";
 
 type Task={id:string;account_id?:string|null;account_name?:string|null;subscription_id?:string|null;owner_user_id?:string|null;task_type:string;title:string;description?:string|null;status:string;priority:string;due_at?:string|null;completed_at?:string|null;source_key?:string|null;created_at:string};
 type TaskPage={items:Task[];total:number;offset:number;limit:number;counts:{open:number;overdue:number;due_soon:number;completed:number}};
-type Account={id:string;name:string};
 type TeamMember={id:string;name:string;is_active:boolean};
 
 export default async function SaaSTasksPage({searchParams}:{searchParams:Promise<{status?:string;type?:string;page?:string}>}){
@@ -21,12 +20,11 @@ export default async function SaaSTasksPage({searchParams}:{searchParams:Promise
   const listQuery=new URLSearchParams(query);
   listQuery.set("limit","25");
   listQuery.set("offset",String((page-1)*25));
-  const [result,accounts,team]=await Promise.all([
+  const [result,team]=await Promise.all([
     apiJson<TaskPage>("/api/v1/saas/crm/page/tasks?"+listQuery.toString()),
-    apiJson<Account[]>("/api/v1/saas/crm/accounts"),
     apiJson<TeamMember[]>("/api/v1/saas/crm/team"),
   ]);
-  if(!result||!accounts||!team)return <DashboardShell title="Tasks" eyebrow="SaaS CRM"><EmptyState title="Task CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
+  if(!result||!team)return <DashboardShell title="Tasks" eyebrow="SaaS CRM"><EmptyState title="Task CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
   const tasks=result.items;
   const {open,overdue,due_soon:dueSoon,completed}=result.counts;
@@ -69,6 +67,6 @@ export default async function SaaSTasksPage({searchParams}:{searchParams:Promise
       </nav>
     </SectionCard>
 
-    <SectionCard eyebrow="New follow-up" title="Create task"><TaskCreateForm accounts={accounts} team={team}/></SectionCard>
+    <SectionCard eyebrow="New follow-up" title="Create task"><TaskCreateForm team={team}/></SectionCard>
   </DashboardShell>;
 }

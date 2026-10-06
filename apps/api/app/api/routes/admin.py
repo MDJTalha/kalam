@@ -8,10 +8,9 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_permission
-from app.core.config import settings
+from app.api.deps import is_platform_developer, require_permission
 from app.core.security import session_token_hash, utcnow
-from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
+from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.email import send_email
@@ -20,15 +19,7 @@ from app.services.learning_reminders import run_course_due_reminders
 router = APIRouter()
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
-    role = await db.scalar(
-        select(Role.id)
-        .join(UserRole, UserRole.role_id == Role.id)
-        .join(Tenant, Tenant.id == Role.tenant_id)
-        .where(UserRole.user_id == user.id)
-        .where(Tenant.slug == settings.saas_ops_tenant_slug)
-        .where(Role.name.ilike("platform developer"))
-    )
-    return role is not None
+    return await is_platform_developer(user, db)
 
 class InvitationCreate(BaseModel):
     email: EmailStr

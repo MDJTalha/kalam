@@ -96,7 +96,7 @@ export function IntegrationConsole({ initialRows }: { initialRows: Integration[]
       <div className="integration-console-status">{selected?.last_check_status==="passed"?<><CheckCircle2 size={15}/> Verified</>:selected?.last_check_status==="failed"?<><CircleAlert size={15}/> Needs attention</>:<><WifiOff size={15}/> Not tested</>}</div>
     </div>
     <div className="integration-console-grid">
-      <div className="integration-provider-list" role="listbox" aria-label="Integration provider">
+      <div className="integration-provider-list" role="group" aria-label="Integration provider choices">
         {Object.keys(labels).map(key=>{const row=rows.find(item=>item.provider===key);return <button type="button" className={provider===key?"integration-provider selected":"integration-provider"} key={key} onClick={()=>selectProvider(key)}><span><strong>{labels[key]}</strong><small>{row?.last_check_status==="passed"?"Connection verified":row?.status||"Not configured"}</small></span>{row?.last_check_status==="passed"?<CheckCircle2 size={15}/>:<ShieldCheck size={15}/>}</button>})}
       </div>
       <div className="integration-form-panel">

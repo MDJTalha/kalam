@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CheckCircle2, ClipboardCheck, Plus, RefreshCcw, Save, Target } from "lucide-react";
+import { PeopleLookupSelect } from "@/components/people-lookup-select";
 
 type Assessment={id:string;title:string;assessment_type:string;measurement_method:string;validity_days:number|null;reassessment_interval_days:number|null};
 type Person={id:string;first_name:string;last_name:string;email:string;job_title?:string|null};
@@ -9,20 +10,21 @@ type Candidate={id:string;type:string;name:string;code?:string};
 type Target={id:string;assessment_id:string;target_type:string;target_id:string;target_name:string|null;target_level:number;weight:number};
 type Cycle={id:string;assessment_id:string;assessment_title:string;assessment_type:string;user_id:string;target_type:string;target_id:string;required_level:number;baseline_level:number|null;current_level:number|null;gap:number|null;improvement:number|null;status:string;next_reassessment_due_at:string|null;development_plan_id:string|null};
 type Attempt={id:string;cycle_id:string;stage:string;assessment_id:string};
-type Props={assessments:Assessment[];people:Person[];candidates:Candidate[];initialTargets:Target[];initialCycles:Cycle[];canManage:boolean;currentUserId:string};
+type Props={assessments:Assessment[];initialAssessmentId:string;people:Person[];candidates:Candidate[];initialTargets:Target[];initialCycles:Cycle[];canManage:boolean;currentUserId:string};
 
 const levelName=(n:number)=>({1:"Foundational",2:"Developing",3:"Proficient",4:"Advanced",5:"Expert"} as Record<number,string>)[n]||"Level";
 const personName=(p?:Person)=>p ? ((p.first_name+" "+p.last_name).trim()||p.email) : "Unknown person";
 
-export function CapabilityAssessmentWorkspace({assessments,people,candidates,initialTargets,initialCycles,canManage,currentUserId}:Props){
-  const [assessmentId,setAssessmentId]=useState(assessments[0]?.id||"");
+export function CapabilityAssessmentWorkspace({assessments,initialAssessmentId,people,candidates,initialTargets,initialCycles,canManage,currentUserId}:Props){
+  const initialAssessment=assessments.find(item=>item.id===initialAssessmentId)||assessments[0];
+  const [assessmentId,setAssessmentId]=useState(initialAssessment?.id||"");
   const [candidateKey,setCandidateKey]=useState("");
   const [targetLevel,setTargetLevel]=useState("3");
   const [targetWeight,setTargetWeight]=useState("1");
-  const [assessmentType,setAssessmentType]=useState(assessments[0]?.assessment_type||"knowledge_test");
-  const [measurementMethod,setMeasurementMethod]=useState(assessments[0]?.measurement_method||"score_based");
-  const [validityDays,setValidityDays]=useState(String(assessments[0]?.validity_days||30));
-  const [reassessmentDays,setReassessmentDays]=useState(String(assessments[0]?.reassessment_interval_days||90));
+  const [assessmentType,setAssessmentType]=useState(initialAssessment?.assessment_type||"knowledge_test");
+  const [measurementMethod,setMeasurementMethod]=useState(initialAssessment?.measurement_method||"score_based");
+  const [validityDays,setValidityDays]=useState(String(initialAssessment?.validity_days||30));
+  const [reassessmentDays,setReassessmentDays]=useState(String(initialAssessment?.reassessment_interval_days||90));
   const [personId,setPersonId]=useState(people[0]?.id||currentUserId);
   const [cycleTargetId,setCycleTargetId]=useState(initialTargets[0]?.id||"");
   const [targets,setTargets]=useState(initialTargets);
@@ -189,7 +191,7 @@ export function CapabilityAssessmentWorkspace({assessments,people,candidates,ini
     {canManage&&<section className="data-panel">
       <div className="section-heading compact"><div><span className="eyebrow">Baseline setup</span><h2>Create assessment cycle</h2><p>Establish a required level before measuring demonstrated capability.</p></div></div>
       <div className="form-grid">
-        <label className="form-field"><span>Person *</span><select value={personId} onChange={e=>setPersonId(e.target.value)}>{people.map(p=><option key={p.id} value={p.id}>{personName(p)} · {p.job_title||p.email}</option>)}</select></label>
+        {canManage ? <PeopleLookupSelect label="Person *" value={personId} onChange={id=>{setPersonId(id);void refreshCycles(id);}} initialPeople={people} /> : <label className="form-field"><span>Person *</span><select value={personId} onChange={e=>{setPersonId(e.target.value);void refreshCycles(e.target.value);}}>{people.map(p=><option key={p.id} value={p.id}>{personName(p)} · {p.job_title||p.email}</option>)}</select></label>}
         <label className="form-field"><span>Assessment *</span><select value={assessmentId} onChange={e=>setAssessmentId(e.target.value)}>{assessments.map(a=><option key={a.id} value={a.id}>{a.title}</option>)}</select></label>
         <label className="form-field"><span>Mapped target *</span><select value={cycleTargetId} onChange={e=>setCycleTargetId(e.target.value)}>{mappedTargets.map(t=><option key={t.id} value={t.id}>{t.target_name||t.target_type} · {t.target_level.toFixed(2)}/5</option>)}</select></label>
         <label className="form-field"><span>Required level *</span><select value={targetLevel} onChange={e=>setTargetLevel(e.target.value)}>{[1,2,3,4,5].map(x=><option key={x} value={x}>{x} · {levelName(x)}</option>)}</select></label>

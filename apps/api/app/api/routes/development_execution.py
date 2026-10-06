@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
@@ -79,7 +79,13 @@ async def _intervention_access(intervention_id, user, db, write=False):
     return item
 
 @router.get("")
-async def list_interventions(user_id: UUID | None = None, status_filter: str | None = None, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def list_interventions(
+    user_id: UUID | None = None,
+    status_filter: str | None = None,
+    include_progress: bool = False,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     uid = await _target_scope(user, db, user_id)
     stmt = select(DevelopmentIntervention).where(DevelopmentIntervention.tenant_id == user.tenant_id, DevelopmentIntervention.user_id == uid).order_by(DevelopmentIntervention.due_at.asc().nulls_last(), DevelopmentIntervention.created_at.desc())
     if status_filter:
@@ -87,7 +93,94 @@ async def list_interventions(user_id: UUID | None = None, status_filter: str | N
             raise HTTPException(422, "Invalid intervention status")
         stmt = stmt.where(DevelopmentIntervention.status == status_filter)
     rows = (await db.execute(stmt.limit(250))).scalars().all()
-    return [_json_intervention(x) for x in rows]
+    if not include_progress or not rows:
+        return [_json_intervention(x) for x in rows]
+
+    intervention_ids = [row.id for row in rows]
+    interaction_counts = (
+        select(
+            DevelopmentInteraction.intervention_id.label("intervention_id"),
+            func.count(DevelopmentInteraction.id).label("interactions"),
+        )
+        .where(
+            DevelopmentInteraction.tenant_id == user.tenant_id,
+            DevelopmentInteraction.intervention_id.in_(intervention_ids),
+        )
+        .group_by(DevelopmentInteraction.intervention_id)
+        .subquery()
+    )
+    evidence_counts = (
+        select(
+            DevelopmentEvidence.intervention_id.label("intervention_id"),
+            func.count(DevelopmentEvidence.id).label("evidence_count"),
+            func.count(DevelopmentEvidence.id)
+            .filter(DevelopmentEvidence.verification_status == "verified")
+            .label("verified_evidence_count"),
+        )
+        .where(
+            DevelopmentEvidence.tenant_id == user.tenant_id,
+            DevelopmentEvidence.intervention_id.in_(intervention_ids),
+        )
+        .group_by(DevelopmentEvidence.intervention_id)
+        .subquery()
+    )
+    progress_rows = (
+        await db.execute(
+            select(
+                DevelopmentIntervention.id,
+                func.coalesce(interaction_counts.c.interactions, 0).label("interactions"),
+                func.coalesce(evidence_counts.c.evidence_count, 0).label("evidence_count"),
+                func.coalesce(
+                    evidence_counts.c.verified_evidence_count, 0
+                ).label("verified_evidence_count"),
+            )
+            .select_from(DevelopmentIntervention)
+            .outerjoin(
+                interaction_counts,
+                interaction_counts.c.intervention_id == DevelopmentIntervention.id,
+            )
+            .outerjoin(
+                evidence_counts,
+                evidence_counts.c.intervention_id == DevelopmentIntervention.id,
+            )
+            .where(
+                DevelopmentIntervention.tenant_id == user.tenant_id,
+                DevelopmentIntervention.id.in_(intervention_ids),
+            )
+        )
+    ).all()
+    progress = {}
+    status_by_id = {str(row.id): row.status for row in rows}
+    for intervention_id, interactions, evidence_count, verified_evidence_count in progress_rows:
+        progress[str(intervention_id)] = {
+            "status": status_by_id[str(intervention_id)],
+            "interactions": int(interactions),
+            "evidence_count": int(evidence_count),
+            "verified_evidence_count": int(verified_evidence_count),
+            "progress_signal": (
+                "evidence_verified"
+                if verified_evidence_count
+                else "activity_recorded"
+                if interactions or evidence_count
+                else "not_started"
+            ),
+        }
+    return [
+        {
+            **_json_intervention(row),
+            "progress": progress.get(
+                str(row.id),
+                {
+                    "status": row.status,
+                    "interactions": 0,
+                    "evidence_count": 0,
+                    "verified_evidence_count": 0,
+                    "progress_signal": "not_started",
+                },
+            ),
+        }
+        for row in rows
+    ]
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_intervention(payload: InterventionCreate, user: User = Depends(require_permission("development.recommendations.manage")), db: AsyncSession = Depends(get_db)):
@@ -198,12 +291,63 @@ async def verify_evidence(intervention_id: UUID, evidence_id: UUID, user: User =
     return _json_evidence(evidence)
 
 @router.get("/{intervention_id}/progress")
-async def intervention_progress(intervention_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def intervention_progress(
+    intervention_id: UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     item = await _intervention_access(intervention_id, user, db)
-    interactions = (await db.execute(select(DevelopmentInteraction).where(DevelopmentInteraction.intervention_id == item.id, DevelopmentInteraction.tenant_id == user.tenant_id))).scalars().all()
-    evidence = (await db.execute(select(DevelopmentEvidence).where(DevelopmentEvidence.intervention_id == item.id, DevelopmentEvidence.tenant_id == user.tenant_id))).scalars().all()
-    verified = sum(1 for x in evidence if x.verification_status == "verified")
-    return {"intervention_id": str(item.id), "status": item.status, "interactions": len(interactions), "evidence_count": len(evidence), "verified_evidence_count": verified, "progress_signal": "evidence_verified" if verified else "activity_recorded" if interactions or evidence else "not_started"}
+    interactions_query = (
+        select(func.count(DevelopmentInteraction.id))
+        .where(
+            DevelopmentInteraction.intervention_id == item.id,
+            DevelopmentInteraction.tenant_id == user.tenant_id,
+        )
+        .scalar_subquery()
+    )
+    evidence_query = (
+        select(func.count(DevelopmentEvidence.id))
+        .where(
+            DevelopmentEvidence.intervention_id == item.id,
+            DevelopmentEvidence.tenant_id == user.tenant_id,
+        )
+        .scalar_subquery()
+    )
+    verified_query = (
+        select(func.count(DevelopmentEvidence.id))
+        .where(
+            DevelopmentEvidence.intervention_id == item.id,
+            DevelopmentEvidence.tenant_id == user.tenant_id,
+            DevelopmentEvidence.verification_status == "verified",
+        )
+        .scalar_subquery()
+    )
+    counts = (
+        await db.execute(
+            select(
+                interactions_query.label("interactions"),
+                evidence_query.label("evidence_count"),
+                verified_query.label("verified_evidence_count"),
+            )
+        )
+    ).one()
+    interaction_count = int(counts.interactions or 0)
+    total_evidence = int(counts.evidence_count or 0)
+    verified_count = int(counts.verified_evidence_count or 0)
+    return {
+        "intervention_id": str(item.id),
+        "status": item.status,
+        "interactions": interaction_count,
+        "evidence_count": total_evidence,
+        "verified_evidence_count": verified_count,
+        "progress_signal": (
+            "evidence_verified"
+            if verified_count
+            else "activity_recorded"
+            if interaction_count or total_evidence
+            else "not_started"
+        ),
+    }
 
 def _json_intervention(x):
     return {"id": str(x.id), "user_id": str(x.user_id), "plan_id": str(x.plan_id) if x.plan_id else None, "recommendation_id": str(x.recommendation_id) if x.recommendation_id else None, "assignee_id": str(x.assignee_id) if x.assignee_id else None, "intervention_type": x.intervention_type, "title": x.title, "objective": x.objective, "status": x.status, "starts_at": x.starts_at, "due_at": x.due_at, "completed_at": x.completed_at, "metadata_json": x.metadata_json, "created_at": x.created_at, "updated_at": x.updated_at}

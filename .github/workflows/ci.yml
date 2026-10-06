@@ -23,7 +23,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
       clamav:
-        image: clamav/clamav:1.4.3
+        image: clamav/clamav:1.4.6
         ports:
           - 3310:3310
         options: >-
@@ -45,6 +45,10 @@ jobs:
       - run: .venv/bin/pip install -r requirements.txt
       - name: Dependency integrity
         run: .venv/bin/pip check
+      - name: Production dependency audit
+        run: |
+          .venv/bin/pip install pip-audit
+          .venv/bin/pip-audit -r requirements-prod.txt
       - name: Migrate database
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms

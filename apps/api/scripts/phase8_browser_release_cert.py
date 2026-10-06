@@ -11,6 +11,7 @@ COOKIE="corp_lms_session"
 DEBUG_PORT=os.getenv("BROWSER_DEBUG_PORT", "9222")
 WEB_BASE_URL=os.getenv("CERT_WEB_BASE_URL", "http://127.0.0.1:3000").rstrip("/")
 AUTH_URL=os.getenv("CERT_AUTH_URL", "http://127.0.0.1:8000/api/v1/auth/login")
+ROUTE_READY_ATTEMPTS=int(os.getenv("CERT_ROUTE_READY_ATTEMPTS", "60"))
 ALIASES = {
     "/dashboard/instructor": {"/dashboard/instructor", "/dashboard/sessions"},
     "/dashboard/instructors": {"/dashboard/instructors", "/dashboard/sessions"},
@@ -82,7 +83,7 @@ async def main():
                 ident,res=await call(ws,ident,"Runtime.evaluate",{"expression":expr,"returnByValue":True})
                 value=res.get("result",{}).get("result",{}).get("value",{})
                 expected_paths=ALIASES.get(route,{route})
-                for _ in range(16):
+                for _ in range(ROUTE_READY_ATTEMPTS):
                     if isinstance(value, dict) and value.get("path") in expected_paths and not value.get("loading"):
                         break
                     await asyncio.sleep(0.5)

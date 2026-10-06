@@ -6,9 +6,8 @@ import { OnboardingItemCreateForm, OnboardingQuickActions } from "@/components/s
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
 import { apiJson } from "@/lib/server-api";
 
-type Account={id:string;name:string};
 type Item={
-  id:string;account_id:string;managed_tenant_id?:string|null;owner_user_id?:string|null;
+  id:string;account_id:string;account_name:string;managed_tenant_id?:string|null;owner_user_id?:string|null;
   category:string;title:string;status:string;due_at?:string|null;completed_at?:string|null;
   notes?:string|null;sort_order:number;created_at:string;
 };
@@ -18,11 +17,8 @@ async function requestTimestamp():Promise<number>{
 }
 
 export default async function SaaSOnboardingPage(){
-  const [items,accounts]=await Promise.all([
-    apiJson<Item[]>("/api/v1/saas/crm/onboarding"),
-    apiJson<Account[]>("/api/v1/saas/crm/accounts"),
-  ]);
-  if(!items||!accounts)return <DashboardShell title="Onboarding" eyebrow="SaaS CRM"><EmptyState title="Onboarding CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
+  const items=await apiJson<Item[]>("/api/v1/saas/crm/onboarding");
+  if(!items)return <DashboardShell title="Onboarding" eyebrow="SaaS CRM"><EmptyState title="Onboarding CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
   const now=await requestTimestamp();
   const pending=items.filter(i=>i.status==="pending").length;
@@ -44,7 +40,7 @@ export default async function SaaSOnboardingPage(){
         columns={["Account","Task","Category","Due","Status","Update"]}
         empty={<EmptyState title="No onboarding tasks yet" description="Create a standard checklist from a client record or add an individual onboarding task here."/>}
         rows={items.map(item=>[
-          <Link className="text-link" href={"/dashboard/saas/clients/"+item.account_id} key="a">{accounts.find(a=>a.id===item.account_id)?.name||"Unknown account"}</Link>,
+          <Link className="text-link" href={"/dashboard/saas/clients/"+item.account_id} key="a">{item.account_name}</Link>,
           <span key="b"><strong>{item.title}</strong>{item.notes&&<small>{item.notes}</small>}</span>,
           <span key="c">{item.category.replaceAll("_"," ")}</span>,
           <span key="d">{item.due_at?new Date(item.due_at).toLocaleDateString():"—"}</span>,
@@ -55,7 +51,7 @@ export default async function SaaSOnboardingPage(){
     </SectionCard>
 
     <SectionCard eyebrow="Add task" title="Create onboarding item">
-      {accounts.length?<OnboardingItemCreateForm accounts={accounts}/>:<EmptyState title="Add a CRM account first" description="Onboarding tasks must belong to a CRM account."/>}
+      <OnboardingItemCreateForm />
     </SectionCard>
   </DashboardShell>;
 }

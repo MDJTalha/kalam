@@ -37,6 +37,16 @@ def validate_policy(max_input_chars: int, max_output_tokens: int, provider_types
         raise HTTPException(status_code=422, detail=f"Unsupported provider types: {', '.join(invalid)}")
 
 
+def validate_provider_activation(enabled: bool, provider_status: str) -> None:
+    if enabled and provider_status != "ready":
+        raise HTTPException(status_code=409, detail="Run and pass the provider connection test before enabling this provider.")
+
+
+def validate_model_activation(enabled: bool, provider_enabled: bool, provider_status: str) -> None:
+    if enabled and (not provider_enabled or provider_status != "ready"):
+        raise HTTPException(status_code=409, detail="Enable a provider only after its connection test has passed before enabling a model.")
+
+
 def validate_prompt_template(system_template: str, variables: list[str]) -> None:
     if not system_template.strip() or len(system_template) > 20000:
         raise HTTPException(status_code=422, detail="system_template must contain 1-20000 characters.")

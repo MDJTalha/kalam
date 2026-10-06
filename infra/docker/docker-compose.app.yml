@@ -27,7 +27,7 @@ services:
       retries: 20
 
   clamav:
-    image: clamav/clamav:1.4.3
+    image: clamav/clamav:1.4.6
     restart: unless-stopped
     volumes:
       - corplms_clamav_db:/var/lib/clamav
@@ -89,6 +89,13 @@ services:
       FILE_SCAN_HOST: clamav
       FILE_SCAN_PORT: 3310
       FILE_SCAN_TIMEOUT_SECONDS: ${FILE_SCAN_TIMEOUT_SECONDS:-30}
+      AI_PROVIDER: ${AI_PROVIDER:-disabled}
+      AI_ENABLED: ${AI_ENABLED:-false}
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com}
+      AI_MODEL: ${AI_MODEL:-}
+      AI_AZURE_API_VERSION: ${AI_AZURE_API_VERSION:-2024-10-21}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
@@ -198,6 +205,8 @@ services:
 
 volumes:
   corplms_postgres:
+    name: corplms_corplms_postgres_canonical
+    external: true
   corplms_valkey:
   corplms_uploads:
   corplms_clamav_db:

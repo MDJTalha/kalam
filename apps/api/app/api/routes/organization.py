@@ -3,27 +3,18 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select, func
+from sqlalchemy import and_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_permission
-from app.core.config import settings
-from app.db.models import OrgUnit, Role, Tenant, User, UserRole
+from app.api.deps import is_platform_developer, require_permission
+from app.db.models import OrgUnit, Role, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
 
 router = APIRouter()
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
-    role = await db.scalar(
-        select(Role.id)
-        .join(UserRole, UserRole.role_id == Role.id)
-        .join(Tenant, Tenant.id == Role.tenant_id)
-        .where(UserRole.user_id == user.id)
-        .where(Tenant.slug == settings.saas_ops_tenant_slug)
-        .where(Role.name.ilike("platform developer"))
-    )
-    return role is not None
+    return await is_platform_developer(user, db)
 
 class OrgUnitCreate(BaseModel):
     name: str = Field(min_length=2, max_length=160)
@@ -63,6 +54,36 @@ async def list_units(
         .order_by(OrgUnit.unit_type, OrgUnit.name)
     )
     return list(result.scalars().all())
+
+
+@router.get("/units/summary")
+async def organization_unit_summary(
+    user: User = Depends(require_permission("users.read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return the tenant's hierarchy with direct active-member counts, not a people dump."""
+    rows = await db.execute(
+        select(OrgUnit, func.count(User.id).label("member_count"))
+        .outerjoin(User, and_(
+            User.org_unit_id == OrgUnit.id,
+            User.tenant_id == user.tenant_id,
+            User.is_active.is_(True),
+        ))
+        .where(OrgUnit.tenant_id == user.tenant_id)
+        .group_by(OrgUnit.id)
+        .order_by(OrgUnit.unit_type, OrgUnit.name)
+    )
+    units = [{
+        "id": str(unit.id), "name": unit.name, "unit_type": unit.unit_type,
+        "code": unit.code, "parent_id": str(unit.parent_id) if unit.parent_id else None,
+        "member_count": int(member_count),
+    } for unit, member_count in rows.all()]
+    active_total = int(await db.scalar(select(func.count()).select_from(User).where(
+        User.tenant_id == user.tenant_id, User.is_active.is_(True)
+    )) or 0)
+    assigned_total = sum(unit["member_count"] for unit in units)
+    return {"units": units, "active_people": active_total, "assigned_people": assigned_total,
+            "unassigned_people": max(0, active_total - assigned_total)}
 
 @router.post("/units", response_model=OrgUnitOut, status_code=status.HTTP_201_CREATED)
 async def create_unit(

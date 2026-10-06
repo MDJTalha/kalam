@@ -3,6 +3,7 @@ import os
 import time
 from dataclasses import dataclass
 from typing import Literal
+from urllib.parse import urlsplit
 from uuid import UUID
 
 import httpx
@@ -12,6 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_permission
+from app.core.config import settings
 from app.db.models import (
     AIInteraction,
     AIInteractionReview,
@@ -35,6 +37,8 @@ from app.services.ai_governance import (
     validate_policy,
     validate_prompt_template,
     validate_provider_config,
+    validate_provider_activation,
+    validate_model_activation,
     validate_grounded_answer,
 )
 from app.services.ai_retrieval import build_grounded_context, lesson_text, public_sources, retrieve_authorized_sources, retrieve_capability_sources
@@ -81,6 +85,10 @@ class AIProviderRequest(BaseModel):
     enabled: bool = False
 
 
+class AIProviderStateRequest(BaseModel):
+    enabled: bool
+
+
 class AIModelRequest(BaseModel):
     provider_id: str
     model_key: str = Field(min_length=1, max_length=180)
@@ -118,6 +126,25 @@ def _provider_config() -> tuple[str, str, str]:
     return provider, base_url, model
 
 
+def _openai_base_url(base_url: str) -> str:
+    normalized = base_url.rstrip("/")
+    return normalized if normalized.endswith("/v1") else f"{normalized}/v1"
+
+
+def _anthropic_base_url(base_url: str) -> str:
+    normalized = base_url.rstrip("/")
+    return normalized if normalized.endswith("/v1") else f"{normalized}/v1"
+
+
+def _provider_secret(secret_ref: str | None) -> str:
+    if not secret_ref or not os.getenv(secret_ref):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The governed provider credential reference is unavailable.",
+        )
+    return os.environ[secret_ref]
+
+
 async def _authorized_lessons(user: User, course_id: str | None, db: AsyncSession) -> list[Lesson]:
     query = (
         select(Lesson)
@@ -153,7 +180,7 @@ async def _generate(
     system_override: str | None = None,
     secret_ref: str | None = None,
 ) -> GeneratedResponse:
-    if provider not in {"ollama", "openai_compatible"}:
+    if provider not in {"ollama", "openai_compatible", "anthropic"}:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="The selected governed AI provider does not have an execution adapter.",
@@ -203,17 +230,48 @@ async def _generate(
             answer = payload.get("message", {}).get("content")
             input_tokens = payload.get("prompt_eval_count") if isinstance(payload, dict) else None
             output_tokens = payload.get("eval_count") if isinstance(payload, dict) else None
-        else:
-            if not secret_ref or not os.getenv(secret_ref):
-                raise HTTPException(status_code=503, detail="The governed provider credential reference is unavailable.")
+        elif provider == "anthropic":
+            api_key = _provider_secret(secret_ref)
             response = await client.post(
-                f"{base_url.rstrip('/')}/v1/chat/completions",
-                headers={"Authorization": f"Bearer {os.environ[secret_ref]}"},
+                f"{_anthropic_base_url(base_url)}/messages",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
                 json={
                     "model": model,
                     "max_tokens": max_output_tokens,
+                    "system": system,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+            )
+            response.raise_for_status()
+            payload = response.json()
+            content = payload.get("content") if isinstance(payload, dict) else None
+            answer = "\n".join(
+                str(block.get("text", ""))
+                for block in content
+                if isinstance(block, dict) and block.get("type") == "text"
+            ) if isinstance(content, list) else None
+            usage = payload.get("usage", {}) if isinstance(payload, dict) else {}
+            input_tokens = usage.get("input_tokens")
+            output_tokens = usage.get("output_tokens")
+        else:
+            headers = {}
+            if secret_ref:
+                headers["Authorization"] = f"Bearer {_provider_secret(secret_ref)}"
+            is_openai_api = urlsplit(base_url).hostname == "api.openai.com"
+            instruction_role = "developer" if is_openai_api else "system"
+            token_limit_field = "max_completion_tokens" if is_openai_api else "max_tokens"
+            response = await client.post(
+                f"{_openai_base_url(base_url)}/chat/completions",
+                headers=headers,
+                json={
+                    "model": model,
+                    token_limit_field: max_output_tokens,
                     "messages": [
-                        {"role": "system", "content": system},
+                        {"role": instruction_role, "content": system},
                         {"role": "user", "content": prompt},
                     ],
                 },
@@ -323,12 +381,13 @@ async def ai_status(
             "daily_token_budget": policy.daily_token_budget if policy else 0,
             "daily_token_usage": daily_token_usage,
         },
+        "global_enabled": settings.ai_enabled,
         "provider": resolved_provider,
         "model": resolved_model,
-        "configured": bool(policy and policy.enabled and active_provider and active_model),
+        "configured": bool(settings.ai_enabled and policy and policy.enabled and active_provider and active_model),
         "fallback_provider_count": max(len(runtimes) - 1, 0),
         "degraded_mode": "fail_closed",
-        "environment_fallback_configured": provider == "ollama" and bool(model),
+        "environment_fallback_configured": provider in {"ollama", "openai_compatible", "anthropic"} and bool(model),
         "base_url_configured": bool(active_provider.endpoint_url if active_provider else base_url),
     }
 
@@ -340,6 +399,8 @@ async def governed_ai_query(
     db: AsyncSession = Depends(get_db),
 ):
     started = time.perf_counter()
+    if not settings.ai_enabled:
+        raise HTTPException(status_code=503, detail="Governed AI is disabled by deployment configuration.")
     policy = await _get_policy(db, user.tenant_id)
     if not policy or not policy.enabled:
         raise HTTPException(status_code=503, detail="Governed AI is disabled by the tenant policy.")
@@ -548,6 +609,8 @@ async def governed_content_assist(
     db: AsyncSession = Depends(get_db),
 ):
     started = time.perf_counter()
+    if not settings.ai_enabled:
+        raise HTTPException(status_code=503, detail="Governed AI is disabled by deployment configuration.")
     policy = await _get_policy(db, user.tenant_id)
     if not policy or not policy.enabled:
         raise HTTPException(status_code=503, detail="Governed AI is disabled by the tenant policy.")
@@ -764,6 +827,35 @@ async def update_ai_provider(
     return public_provider(provider)
 
 
+@router.patch("/admin/providers/{provider_id}/state")
+async def update_ai_provider_state(
+    provider_id: UUID,
+    payload: AIProviderStateRequest,
+    user: User = Depends(require_permission("ai.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    provider = await db.scalar(
+        select(AIProvider).where(AIProvider.id == provider_id, AIProvider.tenant_id == user.tenant_id)
+    )
+    if not provider:
+        raise HTTPException(status_code=404, detail="AI provider not found.")
+    validate_provider_activation(payload.enabled, provider.status)
+    provider.enabled = payload.enabled
+    if not payload.enabled:
+        provider.status = "disabled"
+    db.add(AuditLog(
+        tenant_id=user.tenant_id,
+        actor_id=user.id,
+        action="ai.provider.state_updated",
+        entity_type="ai_provider",
+        entity_id=str(provider.id),
+        summary="Governed AI provider activation state updated.",
+        record_metadata={"enabled": provider.enabled, "status": provider.status},
+    ))
+    await db.commit()
+    return public_provider(provider)
+
+
 @router.get("/admin/models")
 async def list_ai_models(
     user: User = Depends(require_permission("ai.manage")),
@@ -782,6 +874,7 @@ async def create_ai_model(
     provider = await db.scalar(select(AIProvider).where(AIProvider.id == UUID(payload.provider_id), AIProvider.tenant_id == user.tenant_id))
     if not provider:
         raise HTTPException(status_code=404, detail="AI provider not found for this tenant.")
+    validate_model_activation(payload.enabled, provider.enabled, provider.status)
     duplicate = await db.scalar(select(AIModel.id).where(AIModel.tenant_id == user.tenant_id, AIModel.model_key == payload.model_key))
     if duplicate:
         raise HTTPException(status_code=409, detail="An AI model with this key already exists for the tenant.")
@@ -820,6 +913,7 @@ async def update_ai_model(
     model = await db.scalar(select(AIModel).where(AIModel.id == model_id, AIModel.tenant_id == user.tenant_id))
     if not provider or not model:
         raise HTTPException(status_code=404, detail="AI provider or model not found for this tenant.")
+    validate_model_activation(payload.enabled, provider.enabled, provider.status)
     model.provider_id = provider.id
     model.model_key = payload.model_key.strip()
     model.display_name = payload.display_name.strip()
@@ -889,7 +983,7 @@ async def get_ai_policy(
 ):
     policy = await _get_policy(db, user.tenant_id)
     if not policy:
-        policy = AIGovernancePolicy(tenant_id=user.tenant_id, allowed_provider_types=["ollama"])
+        policy = AIGovernancePolicy(tenant_id=user.tenant_id, allowed_provider_types=["openai_compatible"])
         db.add(policy)
         await db.commit()
         await db.refresh(policy)
@@ -984,20 +1078,36 @@ async def test_ai_provider(
         raise HTTPException(status_code=404, detail="AI provider not found.")
     checked_at = utcnow()
     try:
-        if provider.provider_type != "ollama":
-            raise HTTPException(status_code=501, detail="A live adapter is not implemented for this provider type yet.")
         if not provider.endpoint_url:
-            raise HTTPException(status_code=422, detail="Ollama endpoint_url is required for the connection test.")
+            raise HTTPException(status_code=422, detail="An endpoint_url is required for the connection test.")
         async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(f"{provider.endpoint_url.rstrip('/')}/api/tags")
+            if provider.provider_type == "ollama":
+                response = await client.get(f"{provider.endpoint_url.rstrip('/')}/api/tags")
+            elif provider.provider_type == "openai_compatible":
+                headers = {}
+                if provider.secret_ref:
+                    headers["Authorization"] = f"Bearer {_provider_secret(provider.secret_ref)}"
+                response = await client.get(f"{_openai_base_url(provider.endpoint_url)}/models", headers=headers)
+            elif provider.provider_type == "anthropic":
+                response = await client.get(
+                    f"{_anthropic_base_url(provider.endpoint_url)}/models",
+                    headers={
+                        "x-api-key": _provider_secret(provider.secret_ref),
+                        "anthropic-version": "2023-06-01",
+                    },
+                )
+            else:
+                raise HTTPException(status_code=501, detail="A live adapter is not implemented for this provider type yet.")
             response.raise_for_status()
             payload = response.json()
-        models = payload.get("models") if isinstance(payload, dict) else None
+        models = payload.get("models") if provider.provider_type == "ollama" and isinstance(payload, dict) else None
+        if provider.provider_type in {"openai_compatible", "anthropic"} and isinstance(payload, dict):
+            models = payload.get("data")
         model_count = len(models) if isinstance(models, list) else 0
         provider.status = "ready"
         provider.last_checked_at = checked_at
         provider.last_check_status = "passed"
-        provider.last_check_message = f"Ollama handshake successful; {model_count} model(s) reported."
+        provider.last_check_message = f"{provider.provider_type} handshake successful; {model_count} model(s) reported."
         db.add(AuditLog(
             tenant_id=user.tenant_id,
             actor_id=user.id,

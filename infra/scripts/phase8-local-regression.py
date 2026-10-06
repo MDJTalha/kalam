@@ -36,6 +36,10 @@ async def verify() -> None:
     url = make_url(settings.database_url)
     if url.get_backend_name() != "postgresql" or url.host not in {"127.0.0.1", "localhost"}:
         raise RuntimeError("Verification requires a local PostgreSQL URL")
+    # asyncpg does not accept the local-development `ssl=disable` query
+    # parameter when opening the administrative connection. The application
+    # session factory already supplies ssl=False for localhost connections.
+    url = url.set(query={key: value for key, value in url.query.items() if key != "ssl"})
     name = "phase8_verify_" + uuid4().hex[:12]
     admin_url = url.set(drivername="postgresql", database="postgres")
     candidate_url = url.set(database=name)
@@ -60,7 +64,8 @@ async def verify() -> None:
             alembic = python.with_name("alembic.exe")
             print(f"Isolated database: {name}; scanner: {scanner_host}:{scanner_port}", flush=True)
             subprocess.run([str(alembic), "upgrade", "head"], cwd=API, env=env, check=True)
-            run_step("demo seed", ["scripts/seed.py"], env)
+            run_step("enterprise seed", ["scripts/seed.py"], env)
+            run_step("legacy demo compatibility seed", ["scripts/seed_legacy_demo.py"], env)
             run_step("SaaS operator bootstrap", ["scripts/bootstrap_saas_ops.py"], env)
             run_step("full API suite", ["-m", "pytest", "tests", "-q"], env)
     finally:

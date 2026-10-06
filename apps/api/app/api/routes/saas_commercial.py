@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_permission
+from app.api.deps import is_platform_developer, require_permission
 from app.core.config import settings
 from app.db.models import (
     CRMAccount,
@@ -87,15 +87,7 @@ async def _ops_tenant(db: AsyncSession) -> Tenant | None:
 
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
-    return (await db.scalar(
-        select(Role.id)
-        .join(UserRole, UserRole.role_id == Role.id)
-        .join(Tenant, Tenant.id == Role.tenant_id)
-        .where(UserRole.user_id == user.id)
-        .where(Tenant.slug == settings.saas_ops_tenant_slug)
-        .where(Role.role_kind == "platform")
-        .where(Role.name.ilike("platform developer"))
-    )) is not None
+    return await is_platform_developer(user, db)
 
 
 async def _is_demo_crm_user(user: User, db: AsyncSession) -> bool:
@@ -123,7 +115,11 @@ async def _require_ops_user(
     # must never receive CRM merely because they can administer their tenant.
     # Platform Developer is the explicit exception for engineering/support.
     if await _is_platform_developer(user, db):
-        return user
+        # A support context substitutes the request tenant on the user object.
+        # Never let it redirect internal CRM writes into a customer tenant.
+        home_tenant_id = await db.scalar(select(User.tenant_id).where(User.id == user.id))
+        if home_tenant_id == tenant.id:
+            return user
     if await _is_demo_crm_user(user, db):
         return user
     raise HTTPException(status_code=403, detail="SaaS CRM is restricted to authorized operations or demo administration")
@@ -799,60 +795,60 @@ async def crm_lookup(
 ):
     term = f"%{q.strip()}%" if q and q.strip() else None
     if kind == "accounts":
-        stmt = select(CRMAccount).where(CRMAccount.ops_tenant_id == user.tenant_id)
+        account_stmt = select(CRMAccount).where(CRMAccount.ops_tenant_id == user.tenant_id)
         if status:
-            stmt = stmt.where(CRMAccount.lifecycle_stage == status)
+            account_stmt = account_stmt.where(CRMAccount.lifecycle_stage == status)
         if term:
-            stmt = stmt.where(or_(CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term), CRMAccount.industry.ilike(term), CRMAccount.country.ilike(term)))
-        rows = (await db.execute(stmt.order_by(CRMAccount.name).limit(limit))).scalars().all()
-        return {"items": [{"id": str(row.id), "label": row.name, "meta": row.lifecycle_stage} for row in rows]}
+            account_stmt = account_stmt.where(or_(CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term), CRMAccount.industry.ilike(term), CRMAccount.country.ilike(term)))
+        account_rows = (await db.execute(account_stmt.order_by(CRMAccount.name).limit(limit))).scalars().all()
+        return {"items": [{"id": str(row.id), "label": row.name, "meta": row.lifecycle_stage} for row in account_rows]}
     if kind == "plans":
-        stmt = select(SaaSPlan).where(SaaSPlan.ops_tenant_id == user.tenant_id)
+        plan_stmt = select(SaaSPlan).where(SaaSPlan.ops_tenant_id == user.tenant_id)
         if status:
-            stmt = stmt.where(SaaSPlan.status == status)
+            plan_stmt = plan_stmt.where(SaaSPlan.status == status)
         if term:
-            stmt = stmt.where(or_(SaaSPlan.name.ilike(term), SaaSPlan.code.ilike(term)))
-        rows = (await db.execute(stmt.order_by(SaaSPlan.sort_order, SaaSPlan.name).limit(limit))).scalars().all()
-        return {"items": [{"id": str(row.id), "label": row.name, "meta": row.code} for row in rows]}
+            plan_stmt = plan_stmt.where(or_(SaaSPlan.name.ilike(term), SaaSPlan.code.ilike(term)))
+        plan_rows = (await db.execute(plan_stmt.order_by(SaaSPlan.sort_order, SaaSPlan.name).limit(limit))).scalars().all()
+        return {"items": [{"id": str(row.id), "label": row.name, "meta": row.code} for row in plan_rows]}
     if kind == "offers":
-        stmt = select(SaaSOffer).where(SaaSOffer.ops_tenant_id == user.tenant_id)
+        offer_stmt = select(SaaSOffer).where(SaaSOffer.ops_tenant_id == user.tenant_id)
         if status:
-            stmt = stmt.where(SaaSOffer.status == status)
+            offer_stmt = offer_stmt.where(SaaSOffer.status == status)
         if term:
-            stmt = stmt.where(or_(SaaSOffer.title.ilike(term), SaaSOffer.code.ilike(term)))
-        rows = (await db.execute(stmt.order_by(SaaSOffer.created_at.desc()).limit(limit))).scalars().all()
-        return {"items": [{"id": str(row.id), "label": row.title, "meta": row.code} for row in rows]}
+            offer_stmt = offer_stmt.where(or_(SaaSOffer.title.ilike(term), SaaSOffer.code.ilike(term)))
+        offer_rows = (await db.execute(offer_stmt.order_by(SaaSOffer.created_at.desc()).limit(limit))).scalars().all()
+        return {"items": [{"id": str(row.id), "label": row.title, "meta": row.code} for row in offer_rows]}
     if kind == "subscriptions":
-        stmt = select(CRMSubscription, CRMAccount).join(CRMAccount, CRMAccount.id == CRMSubscription.account_id).where(CRMSubscription.ops_tenant_id == user.tenant_id)
+        subscription_stmt = select(CRMSubscription, CRMAccount).join(CRMAccount, CRMAccount.id == CRMSubscription.account_id).where(CRMSubscription.ops_tenant_id == user.tenant_id)
         if account_id is not None:
-            stmt = stmt.where(CRMSubscription.account_id == account_id)
+            subscription_stmt = subscription_stmt.where(CRMSubscription.account_id == account_id)
         if status:
-            stmt = stmt.where(CRMSubscription.status == status)
+            subscription_stmt = subscription_stmt.where(CRMSubscription.status == status)
         if term:
-            stmt = stmt.where(or_(CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term), CRMSubscription.status.ilike(term), CRMSubscription.billing_cycle.ilike(term)))
-        rows = (await db.execute(stmt.order_by(CRMSubscription.created_at.desc()).limit(limit))).all()
-        return {"items": [{"id": str(subscription.id), "label": f"{account.name} · {subscription.billing_cycle}", "meta": subscription.status, "account_id": str(account.id), "currency": subscription.currency, "net_price_minor": subscription.net_price_minor} for subscription, account in rows]}
+            subscription_stmt = subscription_stmt.where(or_(CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term), CRMSubscription.status.ilike(term), CRMSubscription.billing_cycle.ilike(term)))
+        subscription_rows = (await db.execute(subscription_stmt.order_by(CRMSubscription.created_at.desc()).limit(limit))).all()
+        return {"items": [{"id": str(subscription.id), "label": f"{account.name} · {subscription.billing_cycle}", "meta": subscription.status, "account_id": str(account.id), "currency": subscription.currency, "net_price_minor": subscription.net_price_minor} for subscription, account in subscription_rows]}
     if kind == "contracts":
-        stmt = select(CRMContract, CRMAccount).join(CRMAccount, CRMAccount.id == CRMContract.account_id).where(CRMContract.ops_tenant_id == user.tenant_id)
+        contract_stmt = select(CRMContract, CRMAccount).join(CRMAccount, CRMAccount.id == CRMContract.account_id).where(CRMContract.ops_tenant_id == user.tenant_id)
         if account_id is not None:
-            stmt = stmt.where(CRMContract.account_id == account_id)
+            contract_stmt = contract_stmt.where(CRMContract.account_id == account_id)
         if status:
-            stmt = stmt.where(CRMContract.status == status)
+            contract_stmt = contract_stmt.where(CRMContract.status == status)
         if term:
-            stmt = stmt.where(or_(CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term), CRMContract.reference.ilike(term), CRMContract.status.ilike(term)))
-        rows = (await db.execute(stmt.order_by(CRMContract.updated_at.desc()).limit(limit))).all()
-        return {"items": [{"id": str(contract.id), "label": f"{contract.reference} · {account.name}", "meta": contract.status, "account_id": str(account.id), "currency": contract.currency, "total_value_minor": contract.total_value_minor} for contract, account in rows]}
+            contract_stmt = contract_stmt.where(or_(CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term), CRMContract.reference.ilike(term), CRMContract.status.ilike(term)))
+        contract_rows = (await db.execute(contract_stmt.order_by(CRMContract.updated_at.desc()).limit(limit))).all()
+        return {"items": [{"id": str(contract.id), "label": f"{contract.reference} · {account.name}", "meta": contract.status, "account_id": str(account.id), "currency": contract.currency, "total_value_minor": contract.total_value_minor} for contract, account in contract_rows]}
     if kind == "invoices":
-        stmt = select(CRMInvoice, CRMAccount).join(CRMAccount, CRMAccount.id == CRMInvoice.account_id).where(CRMInvoice.ops_tenant_id == user.tenant_id)
+        invoice_stmt = select(CRMInvoice, CRMAccount).join(CRMAccount, CRMAccount.id == CRMInvoice.account_id).where(CRMInvoice.ops_tenant_id == user.tenant_id)
         if account_id is not None:
-            stmt = stmt.where(CRMInvoice.account_id == account_id)
+            invoice_stmt = invoice_stmt.where(CRMInvoice.account_id == account_id)
         if status:
-            stmt = stmt.where(CRMInvoice.status == status)
+            invoice_stmt = invoice_stmt.where(CRMInvoice.status == status)
         if term:
-            stmt = stmt.where(or_(CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term), CRMInvoice.invoice_number.ilike(term), CRMInvoice.status.ilike(term)))
-        rows = (await db.execute(stmt.order_by(CRMInvoice.due_at.asc().nullslast(), CRMInvoice.created_at.desc()).limit(limit))).all()
+            invoice_stmt = invoice_stmt.where(or_(CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term), CRMInvoice.invoice_number.ilike(term), CRMInvoice.status.ilike(term)))
+        invoice_rows = (await db.execute(invoice_stmt.order_by(CRMInvoice.due_at.asc().nullslast(), CRMInvoice.created_at.desc()).limit(limit))).all()
         items = []
-        for invoice, account in rows:
+        for invoice, account in invoice_rows:
             paid_minor, outstanding_minor = await _reconcile_invoice(db, invoice)
             if outstanding_minor <= 0:
                 continue
@@ -1989,9 +1985,17 @@ async def list_onboarding_items(
             CRMOnboardingItem.created_at,
         )
     )).scalars().all()
+    account_ids = {item.account_id for item in items}
+    account_rows = (await db.execute(
+        select(CRMAccount.id, CRMAccount.name).where(
+            CRMAccount.ops_tenant_id == user.tenant_id, CRMAccount.id.in_(account_ids)
+        )
+    )).all() if account_ids else []
+    account_names: dict[UUID, str] = {account_id: name for account_id, name in account_rows}
     return [{
         "id": str(item.id),
         "account_id": str(item.account_id),
+        "account_name": account_names.get(item.account_id, "Unknown account"),
         "managed_tenant_id": str(item.managed_tenant_id) if item.managed_tenant_id else None,
         "owner_user_id": str(item.owner_user_id) if item.owner_user_id else None,
         "category": item.category,

@@ -1,7 +1,7 @@
 import { BarChart3, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { EmptyState, MetricCard, Section } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Summary={users:number;courses:number;enrollments:number;completed_enrollments:number;certificates:number;compliance_assignments:number};
 type Intelligence={population:number;skill_gaps:number;people_with_skill_gaps:number;open_compliance:number;overdue_compliance:number;risk_band:string;top_skill_gaps:Array<{user_name:string;role:string;skill:string;current:number;required:number;gap:number}>;recommended_actions:Array<{course_title:string;user_name:string;skill:string;gap:number}>};
@@ -17,21 +17,22 @@ export default async function AnalyticsPage(){
   const user=await requireUser<{permissions?:string[]}>();
   const canReadCapability=user.permissions?.includes("users.read")??false;
   if(!user.permissions?.includes("reports.read")) return <DashboardShell title="Executive analytics" eyebrow="Decision-ready workforce intelligence"><section className="data-panel" role="alert"><h2>Analytics access restricted</h2><p>Your role does not include reporting access.</p></section></DashboardShell>;
-  const [summary,intelligence,trends,performance,risk,effectiveness,engagement,assessments,organization]=await Promise.all([
-    apiJson<Summary>("/api/v1/reports/summary"),
-    canReadCapability?apiJson<Intelligence>("/api/v1/intelligence/capability"):Promise.resolve(null),
-    apiJson<Trends>("/api/v1/reports/learning-trends?days=30"),
-    apiJson<Performance>("/api/v1/reports/course-performance?page=1&page_size=12&sort_by=enrollments&sort_dir=desc"),
-    apiJson<Risk>("/api/v1/reports/compliance-risk"),
-    apiJson<Effectiveness>("/api/v1/reports/learning-effectiveness"),
-    apiJson<Engagement>("/api/v1/reports/engagement"),
-    apiJson<{assessments:Assessment[]}>("/api/v1/reports/assessment-performance"),
-    apiJson<{organization_units:OrgUnit[]}>("/api/v1/reports/organization-performance"),
+  const [summaryResult,intelligenceResult,trendsResult,performanceResult,riskResult,effectivenessResult,engagementResult,assessmentsResult,organizationResult]=await Promise.all([
+    apiJsonResult<Summary>("/api/v1/reports/summary"),
+    canReadCapability?apiJsonResult<Intelligence>("/api/v1/intelligence/capability"):Promise.resolve(null),
+    apiJsonResult<Trends>("/api/v1/reports/learning-trends?days=30"),
+    apiJsonResult<Performance>("/api/v1/reports/course-performance?page=1&page_size=12&sort_by=enrollments&sort_dir=desc"),
+    apiJsonResult<Risk>("/api/v1/reports/compliance-risk"),
+    apiJsonResult<Effectiveness>("/api/v1/reports/learning-effectiveness"),
+    apiJsonResult<Engagement>("/api/v1/reports/engagement"),
+    apiJsonResult<{assessments:Assessment[]}>("/api/v1/reports/assessment-performance"),
+    apiJsonResult<{organization_units:OrgUnit[]}>("/api/v1/reports/organization-performance"),
   ]);
+  const summary=summaryResult.data, intelligence=intelligenceResult?.data??null, trends=trendsResult.data, performance=performanceResult.data, risk=riskResult.data, effectiveness=effectivenessResult.data, engagement=engagementResult.data, assessments=assessmentsResult.data, organization=organizationResult.data;
   const completion=summary ? (summary.enrollments?Math.round(summary.completed_enrollments/summary.enrollments*100):0) : null;
-  const missing=[summary,trends,performance,risk,effectiveness,engagement,assessments,organization,...(canReadCapability?[intelligence]:[])].some(value=>value===null);
+  const failedResults=[summaryResult,trendsResult,performanceResult,riskResult,effectivenessResult,engagementResult,assessmentsResult,organizationResult,...(canReadCapability&&intelligenceResult?[intelligenceResult]:[])].filter(result=>!result.ok);
   return <DashboardShell title="Executive analytics" eyebrow="Decision-ready workforce intelligence" breadcrumbs={[{label:"Reports",href:"/dashboard/reports"},{label:"Executive analytics"}]}>
-    {missing && <section className="data-panel" role="alert"><h2>Some analytics are unavailable</h2><p>One or more reporting sources could not be loaded. A dash means unavailable data, not zero activity.</p></section>}
+    {failedResults.length>0 && <section className="data-panel" role="alert"><h2>Some analytics are unavailable</h2><p>{failedResults.some(result=>result.status===403)?"Some metrics are restricted for your role. ":""}One or more reporting sources could not be loaded. A dash means unavailable data, not zero activity.</p></section>}
     <div className="stat-grid"><MetricCard label="Workforce" value={summary?.users??"—"} hint="Workforce population" icon="users"/><MetricCard label="Completion" value={completion===null?"—":completion+"%"} hint="Enrollment completion ratio" icon="chart"/><MetricCard label="Compliance risk" value={risk?.risk_band||intelligence?.risk_band||"—"} hint={risk||intelligence?(risk?.overdue??intelligence?.overdue_compliance??0)+" overdue":"Data unavailable"} icon="shield"/><MetricCard label="Skill gaps" value={canReadCapability?intelligence?.skill_gaps??"—":"Restricted"} hint={canReadCapability?(intelligence?intelligence.people_with_skill_gaps+" people affected":"Data unavailable"):"Requires workforce access"} icon="target"/></div>
     <div className="two-column">
       <Section eyebrow="Learning velocity" title="30-day activity">{trends?.points?.length?<div className="compact-list">{trends.points.slice(-10).map(point=><div className="compact-row" key={point.date}><div><strong>{point.date}</strong><small>{point.enrollments} enrollments · {point.completions} completions</small></div><BarChart3 size={16}/></div>)}</div>:<EmptyState title="No learning activity yet" description="Enrollment and completion activity will appear here once learners begin using the workspace." icon={BarChart3}/>}</Section>

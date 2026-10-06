@@ -2,7 +2,7 @@ import csv
 from io import StringIO
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import and_, func, select
@@ -762,9 +762,22 @@ async def add_my_compliance_evidence(
 @router.get("/evidence")
 async def list_compliance_evidence_for_review(
     verified: bool = False,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     user: User = Depends(require_permission("compliance.manage")),
     db: AsyncSession = Depends(get_db),
 ):
+    filters = (
+        ComplianceEvidence.tenant_id == user.tenant_id,
+        ComplianceEvidence.verified_at.is_not(None) if verified else ComplianceEvidence.verified_at.is_(None),
+        ComplianceAssignment.status == "evidence_submitted" if not verified else ComplianceAssignment.status.in_(["completed", "evidence_submitted"]),
+        ComplianceEvidence.rejected_at.is_(None),
+    )
+    total = await db.scalar(
+        select(func.count(ComplianceEvidence.id))
+        .join(ComplianceAssignment, ComplianceAssignment.id == ComplianceEvidence.assignment_id)
+        .where(*filters)
+    ) or 0
     result = await db.execute(
         select(ComplianceEvidence, ComplianceAssignment, ComplianceRequirement, ComplianceRequirementVersion, User)
         .join(ComplianceAssignment, ComplianceAssignment.id == ComplianceEvidence.assignment_id)
@@ -774,13 +787,10 @@ async def list_compliance_evidence_for_review(
             ComplianceRequirementVersion.version == ComplianceAssignment.requirement_version,
         ))
         .join(User, User.id == ComplianceEvidence.user_id)
-        .where(
-            ComplianceEvidence.tenant_id == user.tenant_id,
-            ComplianceEvidence.verified_at.is_not(None) if verified else ComplianceEvidence.verified_at.is_(None),
-            ComplianceAssignment.status == "evidence_submitted" if not verified else ComplianceAssignment.status.in_(["completed", "evidence_submitted"]),
-            ComplianceEvidence.rejected_at.is_(None),
-        )
+        .where(*filters)
         .order_by(ComplianceEvidence.created_at.asc())
+        .limit(limit)
+        .offset(offset)
     )
     rows = result.all()
     file_ids = []
@@ -794,7 +804,7 @@ async def list_compliance_evidence_for_review(
         FileObject.tenant_id == user.tenant_id, FileObject.id.in_(file_ids),
     ))).all() if file_ids else []
     file_status = {str(item.id): item.status for item in files}
-    return [
+    items = [
         {
             "id": str(item.id),
             "assignment_id": str(assignment.id),
@@ -811,6 +821,7 @@ async def list_compliance_evidence_for_review(
         }
         for item, assignment, req, version, learner in rows
     ]
+    return {"total": total, "items": items}
 
 
 @router.get("/{assignment_id}/evidence")

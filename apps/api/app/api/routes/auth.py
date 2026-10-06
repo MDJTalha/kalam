@@ -21,7 +21,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, is_platform_developer
 from app.core.config import settings
 from app.core.security import hash_password, new_session_token, session_token_hash, utcnow, verify_password
 from app.db.models import Integration, Invitation, OrgUnit, PasswordResetToken, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
@@ -637,8 +637,14 @@ async def me(user: User = Depends(get_current_user), db: AsyncSession = Depends(
         if manager:
             manager_name = f"{manager.first_name} {manager.last_name}".strip()
     roles = list(role_map.values())
-    is_platform_developer = any(item["name"].strip().lower() == "platform developer" for item in roles)
-    if is_platform_developer:
+    platform_developer = await is_platform_developer(user, db)
+    if platform_developer and not any(item["name"].strip().lower() == "platform developer" for item in roles):
+        platform_role_id = await db.scalar(select(Role.id).join(Tenant, Tenant.id == Role.tenant_id).where(
+            Tenant.slug == settings.saas_ops_tenant_slug, Role.name.ilike("platform developer"), Role.role_kind == "platform"
+        ))
+        if platform_role_id is not None:
+            roles.append({"id": str(platform_role_id), "name": "Platform Developer"})
+    if platform_developer:
         # Platform Developer is the internal product-development role. Expose
         # the complete permission catalog so the web application can render
         # every authorized platform screen; endpoint authorization remains

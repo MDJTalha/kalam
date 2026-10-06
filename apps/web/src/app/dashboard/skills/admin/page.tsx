@@ -11,14 +11,15 @@ type Objective={id:string;objective:string;priority:number;status:string};
 type Competency={id:string;name:string;code:string;definition:string;type:string;status:string;levels?:Array<{level:number;definition:string;behavioral_indicators?:string[]}>};
 type Level={level:number;name:string;definition:string};
 type Person={id:string;first_name:string;last_name:string;email:string;is_active:boolean};
+type PeoplePage={items:Person[];total:number};
 type Governance={role_requirements:{role_id:string;role:string;skill_id:string;skill:string;required_proficiency:number}[];course_mappings:{course_id:string;course:string;skill_id:string;skill:string;target_proficiency:number}[]};
 export default async function CapabilityFramework(){
   const user=await requireUser<{permissions?:string[]}>();
   const canDomain = !!user.permissions?.some(permission => ["skills.manage","capabilities.manage","strategic_objectives.manage","competencies.manage","role_requirements.manage"].includes(permission));
   if(!canDomain)redirect("/dashboard/skills");
-  const [skills,roles,courses,governance,people,objectives,capabilities,competencies,levels]=await Promise.all([
+  const [skills,roles,courses,governance,peoplePage,objectives,capabilities,competencies,levels]=await Promise.all([
     apiJson<Skill[]>("/api/v1/skills"),apiJson<Role[]>("/api/v1/organization/roles"),
-    apiJson<Course[]>("/api/v1/courses"),apiJson<Governance>("/api/v1/skills/governance"),apiJson<Person[]>("/api/v1/people"),
+    apiJson<Course[]>("/api/v1/courses"),apiJson<Governance>("/api/v1/skills/governance"),apiJson<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"),
     apiJson<Objective[]>("/api/v1/capability-domain/objectives"),apiJson<Capability[]>("/api/v1/capabilities"),
     apiJson<Competency[]>("/api/v1/capability-domain/competencies"),apiJson<Level[]>("/api/v1/capability-domain/proficiency-levels")
   ]);
@@ -35,6 +36,6 @@ export default async function CapabilityFramework(){
     </section>
     <section className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Phase 1 architecture</span><h2>Strategy → capability → competency → role requirement</h2></div></div><p>Phase 1 adds the canonical capability domain around the existing skills foundation. Strategic objectives define business intent; capabilities express organizational capacity; competencies describe observable human capability; role requirements govern what each role must demonstrate. Learning mappings remain supporting evidence, not capability achievement.</p></section>
     <CapabilityDomainAdministration objectives={objectives??[]} capabilities={capabilities??[]} competencies={competencies??[]} roles={roles??[]} skills={skills??[]} levels={levels??[]}/>
-    <SkillAdministration skills={skills??[]} roles={roles??[]} courses={courses??[]} people={(people??[]).filter(person=>person.is_active)} initialGovernance={framework}/>
+    <SkillAdministration skills={skills??[]} roles={roles??[]} courses={courses??[]} people={peoplePage?.items??[]} initialGovernance={framework}/>
   </DashboardShell>;
 }

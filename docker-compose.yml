@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 20
   clamav:
-    image: clamav/clamav:1.4.3
+    image: clamav/clamav:1.4.6
     container_name: corplms-clamav
     restart: unless-stopped
     ports:

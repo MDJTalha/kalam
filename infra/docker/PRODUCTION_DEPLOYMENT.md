@@ -10,6 +10,17 @@ Set these outside source control:
 - ALLOWED_HOSTS must include both the public hostname and the internal Compose
   API hostname (for example, `lms.example.com,api`).
 - SMTP settings
+- Optional AI provider settings and secrets. Keep `AI_PROVIDER=disabled` until the
+  provider, model and tenant policy have been tested in the Kalam AI workspace.
+  Keep `AI_ENABLED=false` until the provider connection test has passed; set it to
+  `true` only for an approved tenant activation.
+  Use `OPENAI_API_KEY` for OpenAI-compatible providers or `ANTHROPIC_API_KEY` for
+  Claude; the API stores only the environment-variable reference.
+- The staging workflow maps `STAGING_AI_ENABLED`, `STAGING_AI_PROVIDER`,
+  `STAGING_AI_BASE_URL` and `STAGING_AI_MODEL` repository variables, plus
+  `STAGING_OPENAI_API_KEY` / `STAGING_ANTHROPIC_API_KEY` environment secrets. If
+  `STAGING_AI_ENABLED` is `true`, the matching provider secret is required by the
+  workflow; the default remains `false`.
 - future integration secrets
 
 Never commit real credentials.
@@ -23,6 +34,13 @@ docker compose -f infra/docker/docker-compose.app.yml up -d --build
 ```
 
 The one-shot `migrate` service applies Alembic migrations before the API starts. Verify that it exited successfully and that the API readiness endpoint passes. The dedicated `worker` image runs `/app/worker/run.py` for reminders, compliance, email, webhooks and scheduled reports; verify its container and controlled job-cycle evidence. Do not run an additional migration through `exec api`; follow the Phase 8 release runbook for health, smoke, and evidence checks.
+
+After the API and web services are healthy, an authorized tenant administrator can
+register the provider and model at `/dashboard/ai`, run the provider connection test,
+enable the tested provider, enable the approved model, and then enable the tenant
+policy. AI activation is fail-closed: without a ready and enabled provider, enabled
+model and enabled policy, core LMS workflows remain available and AI requests are
+rejected as unavailable.
 
 ## Seed
 

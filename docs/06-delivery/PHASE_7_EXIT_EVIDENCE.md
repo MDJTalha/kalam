@@ -20,7 +20,7 @@ Phase 7 is locally implemented and evidenced across governance, retrieval, execu
 - Governed learner Q&A, summaries, learning recommendations and skill-gap explanations.
 - Governed content-authoring assistance with mandatory human review semantics.
 - Human interaction review persistence and admin approval/rejection/needs-followup workflow.
-- Ollama execution plus OpenAI-compatible adapter path.
+- Ollama execution plus OpenAI-compatible and Anthropic adapter paths; external provider certification remains deployment-dependent.
 - Provider priority, deterministic failover and fail-closed degraded behavior.
 - Provider health evidence and runtime readiness gating.
 - Interaction latency and provider-reported token telemetry.

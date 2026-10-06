@@ -15,7 +15,7 @@ dependencies = [
   "email-validator>=2.3,<3",
   "redis>=6.4,<7",
   "structlog>=25.4,<26",
-  "cryptography>=45,<46",
+  "cryptography>=50,<51",
   "httpx>=0.28,<0.29",
   "joserfc>=1.7,<2"
 ]

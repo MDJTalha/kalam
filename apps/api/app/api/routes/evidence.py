@@ -3,9 +3,9 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
@@ -19,6 +19,57 @@ TARGET_TYPES = {"capability", "competency", "skill"}
 SOURCE_TYPES = {"assessment", "manual_observation", "work_product", "course_completion", "credential", "external"}
 EVIDENCE_TYPES = {"demonstration", "assessment_result", "observation", "artifact", "completion", "credential"}
 STATUSES = {"pending", "verified", "rejected"}
+
+
+@router.get("/page")
+async def page_evidence(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=25, ge=1, le=100),
+    q: str = Query(default="", max_length=160),
+    target_type: str | None = None,
+    target_id: UUID | None = None,
+    user_id: UUID | None = None,
+    status: str | None = None,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Bounded evidence queue for operational screens; all filters remain tenant-scoped."""
+    if user_id is None and not await user_has_permission(user, db, "evidence.read"):
+        raise HTTPException(403, "Evidence listing requires evidence.read permission or a self-scoped user filter")
+    if user_id is not None and user_id != user.id and not await user_has_permission(user, db, "evidence.read"):
+        raise HTTPException(403, "You may only view your own evidence")
+    if target_type and target_type not in TARGET_TYPES:
+        raise HTTPException(422, "Invalid target type")
+    if status and status not in STATUSES:
+        raise HTTPException(422, "Invalid evidence status")
+    conditions = [CapabilityEvidence.tenant_id == user.tenant_id]
+    if target_type:
+        conditions.append(CapabilityEvidence.target_type == target_type)
+    if target_id:
+        conditions.append(CapabilityEvidence.target_id == target_id)
+    if user_id:
+        target_user = await db.scalar(select(User).where(User.id == user_id, User.tenant_id == user.tenant_id))
+        if target_user is None:
+            raise HTTPException(404, "User not found")
+        conditions.append(CapabilityEvidence.user_id == user_id)
+    if status:
+        conditions.append(CapabilityEvidence.status == status)
+    term = q.strip()
+    if term:
+        escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        match = f"%{escaped}%"
+        conditions.append(or_(CapabilityEvidence.notes.ilike(match, escape="\\"), CapabilityEvidence.source_id.ilike(match, escape="\\")))
+    total = int(await db.scalar(select(func.count()).select_from(CapabilityEvidence).where(*conditions)) or 0)
+    rows = await db.execute(select(CapabilityEvidence, User.first_name, User.last_name, User.email)
+        .join(User, User.id == CapabilityEvidence.user_id)
+        .where(*conditions, User.tenant_id == user.tenant_id)
+        .order_by(CapabilityEvidence.observed_at.desc(), CapabilityEvidence.id.desc())
+        .offset((page - 1) * page_size).limit(page_size))
+    items = [
+        {**_json(item), "user_name": " ".join(part for part in (first_name, last_name) if part).strip() or email, "user_email": email}
+        for item, first_name, last_name, email in rows.all()
+    ]
+    return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
 def _assessment_score_to_level(score: int) -> int:
@@ -152,7 +203,7 @@ async def create_evidence(
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="capability.evidence.created", entity_type="capability_evidence", entity_id=str(item.id))
     await db.commit()
     await db.refresh(item)
-    return _json(item)
+    return {**_json(item), "user_name": " ".join(part for part in (learner.first_name, learner.last_name) if part).strip() or learner.email, "user_email": learner.email}
 
 
 @router.post("/{evidence_id}/decision")
@@ -174,6 +225,11 @@ async def decide_evidence(
     item.verified_at = datetime.now(timezone.utc) if payload.decision == "verified" else None
     item.rejection_reason = payload.reason if payload.decision == "rejected" else None
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action=f"capability.evidence.{payload.decision}", entity_type="capability_evidence", entity_id=str(item.id), metadata={"reason": payload.reason} if payload.reason else None)
+    # Keep the materialized gap snapshot in the same transaction as the evidence
+    # decision. Dynamic gap reads already see the decision; persisted reports must too.
+    from app.api.routes.capability_gap import _recalculate_user_internal
+
+    await _recalculate_user_internal(db, user.tenant_id, item.user_id, actor_id=user.id)
     await db.commit()
     return _json(item)
 

@@ -47,6 +47,30 @@ async def get_current_user(
     effective.tenant_id = support.target_tenant_id
     return effective
 
+
+async def is_platform_developer(user: User, db: AsyncSession) -> bool:
+    """Recognize only a Kalam-owned account carrying Kalam's platform role.
+
+    Looking up the persisted User row (rather than trusting the request-scoped
+    copy) keeps this check correct during a time-limited support context while
+    preventing a customer-tenant identity from gaining privileges by being
+    linked to an internal role.
+    """
+    if not settings.saas_ops_tenant_slug:
+        return False
+    result = await db.execute(
+        select(Role.id)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .join(User, User.id == UserRole.user_id)
+        .join(Tenant, Tenant.id == Role.tenant_id)
+        .where(UserRole.user_id == user.id)
+        .where(User.tenant_id == Tenant.id)
+        .where(Tenant.slug == settings.saas_ops_tenant_slug)
+        .where(Role.role_kind == "platform")
+        .where(Role.name.ilike("platform developer"))
+    )
+    return result.scalar_one_or_none() is not None
+
 async def user_has_permission(
     user: User,
     db: AsyncSession,
@@ -54,23 +78,15 @@ async def user_has_permission(
 ) -> bool:
     # CRM is a Kalam-internal capability and must never be granted to a
     # customer-tenant identity, even if a stale role-permission row exists.
-    developer_role = await db.execute(
-        select(Role.id)
-        .join(UserRole, UserRole.role_id == Role.id)
-        .join(Tenant, Tenant.id == Role.tenant_id)
-        .where(UserRole.user_id == user.id)
-        .where(Tenant.slug == settings.saas_ops_tenant_slug)
-        .where(Role.name.ilike("platform developer"))
-    )
-    is_platform_developer = developer_role.scalar_one_or_none() is not None
-    if permission_key.startswith("saas.crm.") and not is_platform_developer:
+    platform_developer = await is_platform_developer(user, db)
+    if permission_key.startswith("saas.crm.") and not platform_developer:
         return False
 
     # Platform Developer is the internal product-development role. It must be
     # able to exercise every product permission for support, QA and debugging.
     # This is role-based (not tenant/customer-specific) and does not bypass the
     # normal tenant/session boundary enforced by get_current_user().
-    if is_platform_developer:
+    if platform_developer:
         return True
 
     result = await db.execute(

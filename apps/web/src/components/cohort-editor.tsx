@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PeopleLookupSelect } from "@/components/people-lookup-select";
 type Member = { user_id: string; name: string; email: string; status: string };
 type Person = { id: string; first_name: string; last_name: string; email: string; is_active: boolean };
 type Cohort = { id: string; name: string; status: string; capacity?: number | null; members: Member[] };
@@ -12,7 +13,6 @@ export function CohortEditor({ initialCohort, people, canManageMembers }: { init
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const available = people.filter(person => person.is_active && !members.some(member => member.user_id === person.id));
   async function request(url: string, method: string, body?: object) {
     const response = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
     const data = await response.json().catch(() => ({}));
@@ -25,10 +25,11 @@ export function CohortEditor({ initialCohort, people, canManageMembers }: { init
     catch (err) { setError(err instanceof Error ? err.message : "Cohort update failed."); }
     finally { setBusy(false); }
   }
-  function add(event: FormEvent) { event.preventDefault(); if (!personId) return; const person = people.find(item => item.id === personId);
+  function add(event: FormEvent) { event.preventDefault(); if (!personId) return;
     void run(async () => {
-      await request(`/api/lms/programs/cohorts/${initialCohort.id}/members`, "POST", { user_id: personId });
-      setMembers(current => [...current, { user_id: personId, name: `${person?.first_name} ${person?.last_name}`, email: person?.email ?? "", status: "active" }]);
+      const result = await request(`/api/lms/programs/cohorts/${initialCohort.id}/members`, "POST", { user_id: personId });
+      if (result.status === "already_member") throw new Error("This learner is already in the cohort.");
+      setMembers(current => [...current, { user_id: personId, name: result.name || "Learner", email: result.email || "", status: "active" }]);
       setPersonId(""); setMessage("Learner added to cohort.");
     });
   }
@@ -52,8 +53,7 @@ export function CohortEditor({ initialCohort, people, canManageMembers }: { init
     <p>{status === "planned" ? "Add active learners before launch. Launch assigns the program courses and cannot be repeated." : "This cohort has launched; its learners have their course enrollments."}</p>
     {error && <p className="form-error" role="alert">{error}</p>}{message && <p className="form-success" role="status">{message}</p>}
     {status === "planned" && canManageMembers && <form className="studio-form" onSubmit={add}>
-      <div className="form-grid"><label>Active learner<select required value={personId} onChange={event => setPersonId(event.target.value)}>
-        <option value="">Choose a learner</option>{available.map(person => <option key={person.id} value={person.id}>{person.first_name} {person.last_name} · {person.email}</option>)}</select></label></div>
+      <div className="form-grid"><PeopleLookupSelect label="Active learner" value={personId} onChange={setPersonId} initialPeople={people} excludeIds={members.map(member => member.user_id)}/></div>
       <p className="form-help">{members.length}{initialCohort.capacity ? ` of ${initialCohort.capacity}` : ""} cohort members</p>
       <button type="submit" className="button button-secondary" disabled={busy || !personId}>Add learner</button>
     </form>}

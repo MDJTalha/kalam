@@ -17,6 +17,41 @@ type AIStatus = {
   };
 };
 
+type AIProvider = {
+  id: string;
+  name: string;
+  provider_type: string;
+  endpoint_url: string | null;
+  secret_ref_configured: boolean;
+  status: string;
+  priority: number;
+  enabled: boolean;
+  capabilities: Record<string, unknown>;
+  last_check_status: string | null;
+  last_check_message: string | null;
+};
+
+type AIModel = {
+  id: string;
+  provider_id: string;
+  model_key: string;
+  display_name: string;
+  enabled: boolean;
+};
+
+type AIPolicy = {
+  id: string;
+  enabled: boolean;
+  require_grounding: boolean;
+  employment_decisioning_allowed: boolean;
+  raw_prompt_storage_allowed: boolean;
+  raw_response_storage_allowed: boolean;
+  max_input_chars: number;
+  max_output_tokens: number;
+  daily_token_budget: number;
+  allowed_provider_types: string[];
+};
+
 type AITelemetry = { requests:number; allowed:number; blocked_or_failed:number; average_latency_ms:number|null; input_tokens:number; output_tokens:number; human_reviews:number };
 type AIInteraction = {
   id:string; request_type:string; provider:string; model:string|null; allowed:boolean; latency_ms:number|null;
@@ -31,6 +66,15 @@ export default async function AIPage() {
     canManage ? apiJsonResult<AITelemetry>("/api/v1/ai/admin/telemetry") : Promise.resolve(null),
     canManage ? apiJsonResult<{ interactions: AIInteraction[] }>("/api/v1/ai/admin/interactions") : Promise.resolve(null),
   ]);
+  const [providersResult, modelsResult, policyResult] = canManage
+    ? await Promise.all([
+      apiJsonResult<{ providers: AIProvider[] }>("/api/v1/ai/admin/providers"),
+      apiJsonResult<{ models: AIModel[] }>("/api/v1/ai/admin/models"),
+      apiJsonResult<AIPolicy>("/api/v1/ai/admin/policy"),
+    ])
+    : [null, null, null];
+  const governanceDataUnavailable = canManage && [telemetryResult, interactionResult].some((result) => result !== null && !result.ok);
+  const configurationDataUnavailable = canManage && [providersResult, modelsResult, policyResult].some((result) => result !== null && !result.ok);
   if (!statusResult.ok) {
     const restricted = statusResult.status === 403;
     const serviceFailure = statusResult.status >= 500;
@@ -41,12 +85,15 @@ export default async function AIPage() {
 
   return (
     <DashboardShell title="Kalam AI" eyebrow="Enterprise workforce intelligence">
-      {canManage && ((telemetryResult !== null && !telemetryResult.ok) || (interactionResult !== null && !interactionResult.ok)) && <section className="data-panel" role="alert"><h2>Some Kalam AI governance data is unavailable</h2><p>{(telemetryResult?.status === 403 || interactionResult?.status === 403) ? "Your role cannot access one or more governance datasets." : (telemetryResult?.status && telemetryResult.status >= 500) || (interactionResult?.status && interactionResult.status >= 500) ? "The AI governance service is unavailable for one or more datasets. Missing data is not shown as zero." : "Telemetry or interaction history could not be loaded. Review it again before making an administrative decision."}</p></section>}
+      {canManage && (governanceDataUnavailable || configurationDataUnavailable) && <section className="data-panel" role="alert"><h2>Some Kalam AI administration data is unavailable</h2><p>{configurationDataUnavailable ? "Provider, model or tenant-policy configuration could not be confirmed. Kalam is not presenting missing configuration as an empty state; retry after the AI service and database are healthy." : (telemetryResult?.status === 403 || interactionResult?.status === 403) ? "Your role cannot access one or more governance datasets." : (telemetryResult?.status && telemetryResult.status >= 500) || (interactionResult?.status && interactionResult.status >= 500) ? "The AI governance service is unavailable for one or more datasets. Missing data is not shown as zero." : "Telemetry or interaction history could not be loaded. Review it again before making an administrative decision."}</p></section>}
       <GovernedAIWorkspace
         initialStatus={status}
         canManage={canManage}
         initialTelemetry={telemetryResult?.data ?? null}
         initialInteractions={interactionResult?.data?.interactions ?? []}
+        initialProviders={providersResult?.data?.providers ?? []}
+        initialModels={modelsResult?.data?.models ?? []}
+        initialPolicy={policyResult?.data ?? null}
       />
     </DashboardShell>
   );

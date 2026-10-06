@@ -7,10 +7,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_permission
+from app.api.deps import get_current_user, is_platform_developer, require_permission
 from app.core.config import settings
 from app.core.security import session_token_hash
-from app.db.models import DeveloperSupportSession, Permission, Role, RolePermission, SupportCase, SupportCaseMessage, Tenant, User, UserRole
+from app.db.models import DeveloperSupportSession, Permission, RolePermission, SupportCase, SupportCaseMessage, Tenant, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.notifications import create_notification
@@ -24,14 +24,7 @@ class DeveloperSupportStart(BaseModel):
 
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
-    return (await db.scalar(
-        select(Role.id)
-        .join(UserRole, UserRole.role_id == Role.id)
-        .join(Tenant, Tenant.id == Role.tenant_id)
-        .where(UserRole.user_id == user.id)
-        .where(Tenant.slug == settings.saas_ops_tenant_slug)
-        .where(Role.name.ilike("platform developer"))
-    )) is not None
+    return await is_platform_developer(user, db)
 
 
 @router.get("/developer/tenants")

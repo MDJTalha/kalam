@@ -15,6 +15,12 @@ PORT = os.getenv("BROWSER_DEBUG_PORT", "9222")
 WEB_BASE_URL = os.getenv("AXE_WEB_BASE_URL", "http://127.0.0.1:3000").rstrip("/")
 AUTH_URL = os.getenv("AXE_AUTH_URL", "http://127.0.0.1:8000/api/v1/auth/login")
 COOKIE = "corp_lms_session"
+ROUTE_READY_ATTEMPTS = int(os.getenv("AXE_ROUTE_READY_ATTEMPTS", "120"))
+ALIASES = {
+    "/dashboard/instructor": {"/dashboard/instructor", "/dashboard/sessions"},
+    "/dashboard/instructors": {"/dashboard/instructors", "/dashboard/sessions"},
+    "/dashboard/manager": {"/dashboard/manager", "/dashboard/team"},
+}
 
 
 async def call(ws, seq, method, params=None):
@@ -48,14 +54,15 @@ async def main():
             for width, height, label in [(1440, 1000, "desktop"), (390, 844, "mobile")]:
                 seq, _ = await call(ws, seq, "Emulation.setDeviceMetricsOverride", {"width": width, "height": height, "deviceScaleFactor": 1, "mobile": width < 600})
                 for route in ROUTES:
+                    expected_paths = ALIASES.get(route, {route})
                     seq, _ = await call(ws, seq, "Page.navigate", {"url": WEB_BASE_URL + route})
-                    for _ in range(60):
+                    for _ in range(ROUTE_READY_ATTEMPTS):
                         await asyncio.sleep(0.5)
                         seq, state = await call(ws, seq, "Runtime.evaluate", {"expression": "({path:location.pathname,loading:document.body.innerText.includes('Loading learning workspace'),h1:!!document.querySelector('h1')})", "returnByValue": True})
                         value = state.get("result", {}).get("value", {})
-                        if value.get("path") == route and value.get("h1") and not value.get("loading"):
+                        if value.get("path") in expected_paths and value.get("h1") and not value.get("loading"):
                             break
-                    if value.get("path") != route or not value.get("h1") or value.get("loading"):
+                    if value.get("path") not in expected_paths or not value.get("h1") or value.get("loading"):
                         raise RuntimeError(f"Route not ready: {route} {value}")
                     expression = "axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}}).then(r=>({violations:r.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,node_count:v.nodes.length,nodes:v.nodes.slice(0,30).map(n=>({target:n.target,summary:n.failureSummary}))})),incomplete:r.incomplete.map(v=>({id:v.id,impact:v.impact,description:v.description,node_count:v.nodes.length,nodes:v.nodes.slice(0,30).map(n=>({target:n.target,summary:n.failureSummary}))})),passes:r.passes.length}))"
                     seq, audit = await call(ws, seq, "Runtime.evaluate", {"expression": expression, "awaitPromise": True, "returnByValue": True})

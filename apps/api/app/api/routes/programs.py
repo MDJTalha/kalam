@@ -356,7 +356,11 @@ async def add_cohort_member(
         metadata={"cohort_id": str(cohort.id)},
     )
     await db.commit()
-    return {"status": "added", "cohort_id": str(cohort.id), "user_id": str(learner.id)}
+    return {
+        "status": "added", "cohort_id": str(cohort.id), "user_id": str(learner.id),
+        "name": f"{learner.first_name} {learner.last_name}".strip() or learner.email,
+        "email": learner.email,
+    }
 
 
 @router.delete("/cohorts/{cohort_id}/members/{user_id}")

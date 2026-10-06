@@ -29,7 +29,7 @@ Mandatory governance rules:
 - Retrieval is tenant scoped and limited to published courses in which the signed-in user has an active/completed enrollment.
 - AI prompt explicitly requires answers to remain grounded in authorized LMS content.
 - Unsupported authoritative claims and employment decisioning are explicitly prohibited in the provider instruction.
-- Provider integration is fail-closed until `AI_PROVIDER=ollama` and `AI_MODEL` are configured.
+- Provider integration is fail-closed until a tenant registers a ready OpenAI-compatible, Anthropic, or local Ollama provider and model, then enables the tenant governance policy. Production deployment keeps AI disabled until the provider secret and live connection test are approved.
 
 ### Audit/evidence model
 
