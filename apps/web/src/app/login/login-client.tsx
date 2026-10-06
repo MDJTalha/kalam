@@ -97,17 +97,17 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
   return (
     <main className="auth-shell k-auth">
       <section className="auth-brand" aria-label="About Kalam">
-        <KalamBrand dark descriptor="Enterprise Workforce Capability Platform" className="k-brand-lockup" />
+        <KalamBrand dark descriptor="Corporate Capability Development Platform" className="k-brand-lockup" />
         <div className="auth-brand-copy">
-          <h1>Build capability. <em>Prove readiness.</em></h1>
-          <p>Access the role-aware workspace that connects learning, skills, compliance, assessments and development across your organization.</p>
+          <h1>Develop capability. <em>Drive performance.</em></h1>
+          <p>Access your organization’s connected capability workspace.</p>
           <div className="k-proof" aria-label="Platform principles">
             <span><ShieldCheck size={16} aria-hidden="true" /> Governed workflows</span>
             <span><Target size={16} aria-hidden="true" /> Connected evidence</span>
             <span><UsersRound size={16} aria-hidden="true" /> Role-aware access</span>
           </div>
         </div>
-        <p className="k-brand-foot">Workforce capability, with clarity.</p>
+        <p className="k-brand-foot">Capability, with clarity.</p>
       </section>
 
       <section className="auth-panel" aria-labelledby="login-title">

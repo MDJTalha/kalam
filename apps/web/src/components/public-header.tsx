@@ -11,41 +11,47 @@ import styles from "./public-chrome.module.css";
 const publicLinks = [
   {
     label: "Platform",
-    anchor: "#platform",
+    href: "/platform",
     items: [
-      ["Learning operations", "Courses, paths, programs and delivery"],
-      ["Skills & capability", "Role expectations, gaps and development"],
-      ["Assessments & credentials", "Verification, results and certificates"],
-      ["Compliance readiness", "Requirements, evidence and exceptions"],
-      ["Workforce intelligence", "Signals, reports and management action"],
+      ["Understand", "Strategy, capabilities and roles"],
+      ["Assess", "Assessment and evidence"],
+      ["Develop", "Focused development action"],
+      ["Improve", "Reassessment and performance"],
     ],
   },
   {
     label: "Solutions",
-    anchor: "#roles",
+    href: "/solutions",
     items: [
-      ["People leaders", "A clearer workforce capability picture"],
-      ["L&D teams", "Connected learning and development operations"],
-      ["Managers", "Team needs, evidence and next actions"],
-      ["Compliance teams", "Requirements, status and supporting evidence"],
+      ["Executives", "Organizational capability visibility"],
+      ["HR & People", "Workforce capability and readiness"],
+      ["L&D", "Development aligned to business need"],
+      ["Managers", "Team capability and next action"],
     ],
   },
   {
-    label: "Enterprise",
-    anchor: "#enterprise-readiness",
+    label: "Resources",
+    href: "/resources",
     items: [
-      ["Security & Trust", "Governance, access and evidence principles"],
-      ["Integrations", "Identity, people data, APIs and reporting"],
-      ["Implementation", "Discovery, validation, rollout and ownership"],
+      ["Security & Trust", "Governance and enterprise controls"],
+      ["Customer Stories", "Approved references and use cases"],
+      ["FAQ", "Clear answers for evaluation"],
+      ["Implementation", "A controlled path to adoption"],
     ],
   },
 ] as const;
 
-export function PublicHeader({ landing = false }: { landing?: boolean }) {
+const resourceLinks: Record<string, string> = {
+  "Security & Trust": "/trust",
+  "Customer Stories": "/clients",
+  "FAQ": "/faq",
+  "Implementation": "/implementation",
+};
+
+export function PublicHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const link = (anchor: string) => landing ? anchor : "/" + anchor;
   const routeActive = (route: string) => pathname === route;
 
   return <header className={styles.header}>
@@ -54,52 +60,44 @@ export function PublicHeader({ landing = false }: { landing?: boolean }) {
         <KalamBrand compact className={styles.brand}/>
         <div className={styles.links}>
           {publicLinks.map(item => <div key={item.label} className={styles.navGroup} onMouseEnter={() => setActiveMenu(item.label)} onMouseLeave={() => setActiveMenu(null)}>
-            <a className={styles.navTrigger} href={link(item.anchor)} aria-haspopup="true" aria-expanded={activeMenu === item.label}>
-              {item.label}<ArrowDown size={12} aria-hidden="true"/>
-            </a>
+            <Link className={styles.navTrigger} href={item.href} aria-haspopup="true" aria-expanded={activeMenu === item.label}>{item.label}<ArrowDown size={12} aria-hidden="true"/></Link>
             {activeMenu === item.label && <div className={styles.megaMenu}>
               <div className={styles.megaIntro}>
                 <span>EXPLORE KALAM</span>
                 <strong>{item.label}</strong>
-                <p>{item.label === "Platform" ? "The connected operating layer for learning, skills, evidence and workforce readiness." : item.label === "Solutions" ? "Role-relevant views that turn capability signals into accountable action." : "The controls, integrations and rollout foundations behind enterprise adoption."}</p>
-                <a href={link(item.anchor)} className={styles.megaView}>Explore {item.label} <ArrowRight size={14} aria-hidden="true"/></a>
+                <p>{item.label === "Platform" ? "One connected capability system." : item.label === "Solutions" ? "Clear capability insight for every decision-maker." : "Ideas, evidence and enterprise guidance."}</p>
+                <Link href={item.href} className={styles.megaView} onClick={() => setActiveMenu(null)}>Explore {item.label} <ArrowRight size={14} aria-hidden="true"/></Link>
               </div>
               <div className={styles.megaItems}>
-                {item.items.map(([title, description]) => <a key={title} href={title === "Security & Trust" ? "/trust" : title === "Integrations" ? "/integrations" : title === "Implementation" ? "/implementation" : link(item.anchor)} onClick={() => setActiveMenu(null)}>
-                  <span><strong>{title}</strong><small>{description}</small></span><ArrowRight size={14} aria-hidden="true"/>
-                </a>)}
+                {item.items.map(([title, description]) => {
+                  const href = resourceLinks[title] || item.href;
+                  return <Link key={title} href={href} onClick={() => setActiveMenu(null)}>
+                    <span><strong>{title}</strong><small>{description}</small></span><ArrowRight size={14} aria-hidden="true"/>
+                  </Link>;
+                })}
               </div>
             </div>}
           </div>)}
           <Link href="/pricing" aria-current={routeActive("/pricing") ? "page" : undefined}>Pricing</Link>
         </div>
         <div className={styles.actions}>
-          <PublicButton className={styles.guided} href="/guided-evaluation" variant="secondary">Guided evaluation</PublicButton>
           <Link className={styles.signin} href="/login"><LogIn size={14} strokeWidth={2.2} aria-hidden="true"/><span>Sign in</span></Link>
-          <PublicButton href="/contact-sales"><span className={styles.salesLabel}>Contact sales</span><ArrowRight size={15} aria-hidden="true"/></PublicButton>
-          <button
-            className={styles.menuButton}
-            type="button"
-            aria-label={open ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={open}
-            aria-controls="public-mobile-menu"
-            onClick={() => setOpen(value => !value)}
-          >
-            {open ? <X size={19} aria-hidden="true"/> : <Menu size={19} aria-hidden="true"/>}
-          </button>
+          <PublicButton href="/get-started"><span className={styles.salesLabel}>Get started</span><ArrowRight size={15} aria-hidden="true"/></PublicButton>
         </div>
+        <button className={styles.menuButton} type="button" aria-label={open ? "Close navigation menu" : "Open navigation menu"} aria-expanded={open} aria-controls="public-mobile-menu" onClick={() => setOpen(value => !value)}>
+          {open ? <X size={19} aria-hidden="true"/> : <Menu size={19} aria-hidden="true"/>}
+        </button>
       </nav>
       {open && <div id="public-mobile-menu" className={`${styles.mobileMenu} ${styles.mobileMenuOpen}`}>
         <nav className={styles.mobileMenuNav} aria-label="Explore Kalam">
           <span className={styles.mobileMenuLabel}>Explore Kalam</span>
-          {publicLinks.map(item => <a key={item.label} href={link(item.anchor)} onClick={() => setOpen(false)}>{item.label}<ArrowRight size={14} aria-hidden="true"/></a>)}
-          <Link href="/trust" onClick={() => setOpen(false)} aria-current={routeActive("/trust") ? "page" : undefined}>Security &amp; Trust <ArrowRight size={14} aria-hidden="true"/></Link>
+          {publicLinks.map(item => <Link key={item.label} href={item.href} onClick={() => setOpen(false)}>{item.label}<ArrowRight size={14} aria-hidden="true"/></Link>)}
           <Link href="/pricing" onClick={() => setOpen(false)} aria-current={routeActive("/pricing") ? "page" : undefined}>Pricing <ArrowRight size={14} aria-hidden="true"/></Link>
         </nav>
         <div className={styles.mobileMenuActions}>
           <Link href="/login" onClick={() => setOpen(false)}>Sign in</Link>
-          <PublicButton href="/guided-evaluation" variant="secondary" onClick={() => setOpen(false)}>Guided evaluation</PublicButton>
-          <PublicButton href="/contact-sales" onClick={() => setOpen(false)}>Contact sales <ArrowRight size={15} aria-hidden="true"/></PublicButton>
+          <PublicButton href="/get-started" onClick={() => setOpen(false)}>Get started <ArrowRight size={15} /></PublicButton>
+          <Link href="/contact-sales" onClick={() => setOpen(false)}>Talk to Sales <ArrowRight size={15} /></Link>
         </div>
       </div>}
     </div>

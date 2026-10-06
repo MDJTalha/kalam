@@ -27,16 +27,16 @@ services:
       retries: 20
 
   clamav:
-    image: clamav/clamav:1.4.3
+    image: clamav/clamav:1.4.6
     restart: unless-stopped
     volumes:
       - corplms_clamav_db:/var/lib/clamav
     healthcheck:
-      test: ["CMD-SHELL", "printf 'PING\\n' | nc 127.0.0.1 3310 | grep -q PONG"]
-      interval: 15s
+      test: ["CMD", "test", "-S", "/tmp/clamd.sock"]
+      interval: 10s
       timeout: 5s
-      retries: 20
-      start_period: 30s
+      retries: 10
+      start_period: 10m
 
   migrate:
     image: ${API_IMAGE:-docker-api:latest}
