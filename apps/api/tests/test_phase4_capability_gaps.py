@@ -142,9 +142,7 @@ def test_phase4_stale_evidence_becomes_insufficient_evidence():
         assert req.status_code == 201
         assert client.post(f"/api/v1/organization/users/{user_id}/roles/{role_id}").status_code in {201, 200}
 
-        # Evidence API rejects observations too far in the past
-        create a
-        # Create a valid record, then backdate it directly to exercise Phase 4 freshness.
+        # Evidence API rejects observations too far in the past; create a valid record, then backdate it directly to exercise Phase 4 freshness.
         evidence = client.post("/api/v1/evidence", json={
             "user_id": user_id, "target_type": "capability", "target_id": capability.json()["id"],
             "evidence_type": "assessment_result", "source_type": "assessment", "source_id": f"stale-{token}",
