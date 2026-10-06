@@ -80,6 +80,22 @@ jobs:
           ALLOWED_HOSTS: localhost,127.0.0.1
           SAAS_OPS_TENANT_SLUG: kognivon-operations
         run: .venv/bin/python scripts/bootstrap_saas_ops.py
+      - name: Ruff formatter snapshot
+        run: |
+          .venv/bin/ruff format app/api/routes/capability_gap.py app/api/routes/capability_risk.py tests/test_phase4_capability_gaps.py
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+          for path in (
+              "app/api/routes/capability_gap.py",
+              "app/api/routes/capability_risk.py",
+              "tests/test_phase4_capability_gaps.py",
+          ):
+              payload=base64.b64encode(Path(path).read_bytes()).decode()
+              print(f"RUFF_SNAPSHOT_BEGIN:{path}")
+              print(payload)
+              print(f"RUFF_SNAPSHOT_END:{path}")
+          PY
       - name: Static checks
         run: .venv/bin/ruff check app tests
       - name: Type checks
