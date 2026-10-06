@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.main import app
-from app.db.models import CapabilityGap, CapabilityEvidence, RoleRequirement, User, UserRole
+from app.db.models import CapabilityEvidence, User
 
 
 TENANT = "demo-corporation"
