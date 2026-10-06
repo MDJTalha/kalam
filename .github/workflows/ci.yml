@@ -74,6 +74,10 @@ jobs:
       - name: Bootstrap SaaS operations roles
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          REDIS_URL: redis://127.0.0.1:6379/0
+          APP_ENV: development
+          WEB_ORIGIN: http://localhost:3000
+          ALLOWED_HOSTS: localhost,127.0.0.1
           SAAS_OPS_TENANT_SLUG: kognivon-operations
         run: .venv/bin/python scripts/bootstrap_saas_ops.py
       - name: Static checks
