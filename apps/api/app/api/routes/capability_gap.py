@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from uuid import UUID
+from types import SimpleNamespace
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -76,7 +77,7 @@ async def _competency_fallback(db,tenant_id,user_id,capability_id,evidence):
     if not vals:
         return None,None,0,None
     total=sum(Decimal(str(w)) for _,w,_ in vals)
-    level=sum(l*Decimal(str(w)) for l,w,_ in vals)/total
+    level=sum(level_value*Decimal(str(w)) for level_value,w,_ in vals)/total
     confidence=round(sum(Decimal(str(e.confidence))*Decimal(str(w)) for _,w,e in vals)/total)
     newest=max((e for _,_,e in vals),key=lambda x:x.observed_at or datetime.min.replace(tzinfo=timezone.utc))
     return _round(level),confidence,len(vals),newest
