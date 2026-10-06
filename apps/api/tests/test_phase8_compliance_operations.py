@@ -65,6 +65,12 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
         login(client, ADMIN)
         verified = client.post(f"/api/v1/compliance/evidence/{evidence_id}/verify")
         assert verified.status_code == 200, verified.text
+        review_page = client.get("/api/v1/compliance/evidence?verified=true&limit=1&offset=0")
+        assert review_page.status_code == 200, review_page.text
+        assert review_page.json()["total"] >= 1
+        assert len(review_page.json()["items"]) == 1
+        oversized_review_page = client.get("/api/v1/compliance/evidence?limit=101")
+        assert oversized_review_page.status_code == 422
 
         async def age_verified_evidence() -> None:
             async with SessionLocal() as db:

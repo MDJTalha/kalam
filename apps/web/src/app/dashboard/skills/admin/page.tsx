@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SkillAdministration } from "@/components/skill-administration";
 import { CapabilityDomainAdministration } from "@/components/capability-domain-administration";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { StateMessage } from "@/components/ui";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 type Skill={id:string;name:string;description?:string|null;category?:string|null};
 type Role={id:string;name:string};type Course={id:string;title:string};
 type Capability={id:string;name:string;code:string};
@@ -17,12 +18,16 @@ export default async function CapabilityFramework(){
   const user=await requireUser<{permissions?:string[]}>();
   const canDomain = !!user.permissions?.some(permission => ["skills.manage","capabilities.manage","strategic_objectives.manage","competencies.manage","role_requirements.manage"].includes(permission));
   if(!canDomain)redirect("/dashboard/skills");
-  const [skills,roles,courses,governance,peoplePage,objectives,capabilities,competencies,levels]=await Promise.all([
-    apiJson<Skill[]>("/api/v1/skills"),apiJson<Role[]>("/api/v1/organization/roles"),
-    apiJson<Course[]>("/api/v1/courses"),apiJson<Governance>("/api/v1/skills/governance"),apiJson<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"),
-    apiJson<Objective[]>("/api/v1/capability-domain/objectives"),apiJson<Capability[]>("/api/v1/capabilities"),
-    apiJson<Competency[]>("/api/v1/capability-domain/competencies"),apiJson<Level[]>("/api/v1/capability-domain/proficiency-levels")
+  const results=await Promise.all([
+    apiJsonResult<Skill[]>("/api/v1/skills"),apiJsonResult<Role[]>("/api/v1/organization/roles"),
+    apiJsonResult<Course[]>("/api/v1/courses"),apiJsonResult<Governance>("/api/v1/skills/governance"),apiJsonResult<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"),
+    apiJsonResult<Objective[]>("/api/v1/capability-domain/objectives"),apiJsonResult<Capability[]>("/api/v1/capabilities"),
+    apiJsonResult<Competency[]>("/api/v1/capability-domain/competencies"),apiJsonResult<Level[]>("/api/v1/capability-domain/proficiency-levels")
   ]);
+  const failed=results.flatMap((result,index)=>result.ok?[]:[`Dataset ${index+1}: HTTP ${result.status} — ${result.error||"request failed"}`]);
+  if(failed.length)return <DashboardShell title="Capability Framework" eyebrow="Capability governance"><StateMessage tone="danger" title="Framework data is incomplete">{failed.join(" · ")} Refresh after the affected service or permission is available; governance controls are withheld to avoid treating failures as empty data.</StateMessage></DashboardShell>;
+  const [skillsResult,rolesResult,coursesResult,governanceResult,peopleResult,objectivesResult,capabilitiesResult,competenciesResult,levelsResult]=results;
+  const skills=skillsResult.data!,roles=rolesResult.data!,courses=coursesResult.data!,governance=governanceResult.data!,peoplePage=peopleResult.data!,objectives=objectivesResult.data!,capabilities=capabilitiesResult.data!,competencies=competenciesResult.data!,levels=levelsResult.data!;
   const framework=governance??{role_requirements:[],course_mappings:[]};
   const coveredRoles=new Set(framework.role_requirements.map(item=>item.role_id)).size;
   const alignedSkills=new Set(framework.course_mappings.map(item=>item.skill_id)).size;
