@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Layers3, Target } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { StateMessage } from "@/components/ui";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 type Skill={id:string;skill:string;proficiency:number;evidence_source?:string|null};
 type CatalogSkill={id:string;name:string;description?:string|null;category?:string|null};
 type Gap={role:string;role_id:string;skill:string;skill_id:string;required_proficiency:number;current_proficiency:number;gap:number};
@@ -9,7 +10,10 @@ type Gap={role:string;role_id:string;skill:string;skill_id:string;required_profi
 export default async function SkillsPage(){
   const user=await requireUser<{permissions?:string[]}>();
   const canManage=user.permissions?.includes("skills.manage")??false;
-  const [mine,catalog,gaps]=await Promise.all([apiJson<Skill[]>("/api/v1/skills/me"),apiJson<CatalogSkill[]>("/api/v1/skills"),apiJson<Gap[]>("/api/v1/skills/me/gaps")]);
+  const [mineResult,catalogResult,gapsResult]=await Promise.all([apiJsonResult<Skill[]>("/api/v1/skills/me"),apiJsonResult<CatalogSkill[]>("/api/v1/skills"),apiJsonResult<Gap[]>("/api/v1/skills/me/gaps")]);
+  const failed=[mineResult,catalogResult,gapsResult].filter(result=>!result.ok);
+  if(failed.length)return <DashboardShell title="Skills & development" eyebrow="Capability management"><StateMessage tone="danger" title="Capability profile unavailable">{failed.map(result=>`HTTP ${result.status}: ${result.error||"request failed"}`).join(" · ")}</StateMessage></DashboardShell>;
+  const mine=mineResult.data!,catalog=catalogResult.data!,gaps=gapsResult.data!;
   const average=mine?.length?(mine.reduce((sum,x)=>sum+x.proficiency,0)/mine.length).toFixed(1):"—";
   const evidenceCount=mine?.filter(x=>x.evidence_source).length??0;
   return <DashboardShell title="Skills & development" eyebrow="Capability management">

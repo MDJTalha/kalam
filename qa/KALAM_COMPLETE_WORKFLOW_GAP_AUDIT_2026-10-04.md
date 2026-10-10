@@ -3,6 +3,7 @@ Date: 2026-10-04
 
 ## Continuation update — 2026-10-10
 
+- Skills & Development and Assessment Operations now preserve HTTP status/error details for all required datasets and withhold empty-looking profile/library states when a read fails.
 - Added tenant-scoped `GET /api/v1/capability-domain/competencies/page` with bounded page size, escaped name/code search, total count, and batched proficiency-level hydration.
 - Added integration assertions for competency search/pagination, included level data, and rejected over-limit page sizes. These database-backed assertions remain unexecuted because the local API/database runtime is unavailable.
 - Evidence Admin, Capability Assessments, and Capability Framework now use the bounded competency endpoint. Screens explicitly withhold incomplete catalog workflows when more than 100 records exist rather than silently presenting partial target choices.
