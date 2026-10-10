@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 import { GitBranch } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LearningPathEditor } from "@/components/learning-path-editor";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
+import { StateMessage } from "@/components/ui";
 
 type Item = { course_id: string; title: string; position: number; prerequisite_item_id?: string | null };
 type Path = { id: string; title: string; slug: string; description?: string | null; status: string; items: Item[] };
 type Course = { id: string; title: string; status: string };
+type CoursePage = { items: Course[]; total: number };
 type Enrollment = { course_id: string; status: string };
 
 export default async function LearningPathDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +19,7 @@ export default async function LearningPathDetail({ params }: { params: Promise<{
   const [path, enrollments, courses] = await Promise.all([
     apiJson<Path>(`/api/v1/programs/paths/${id}`),
     apiJson<Enrollment[]>("/api/v1/courses/my/enrollments"),
-    canManage ? apiJson<Course[]>("/api/v1/courses?manage=true") : Promise.resolve(null),
+    canManage ? apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=100&manage=true") : Promise.resolve(null),
   ]);
   if (!path) notFound();
   const status = new Map((enrollments ?? []).map(item => [item.course_id, item.status]));
@@ -42,6 +44,8 @@ export default async function LearningPathDetail({ params }: { params: Promise<{
         </div>;
       })}</div> : <div className="empty-state"><GitBranch size={24} /><h3>No courses yet</h3><p>{canManage ? "Add the first course below." : "Your learning team is preparing this path."}</p></div>}
     </section>
-    {canManage && <LearningPathEditor initialPath={path} courses={courses ?? []} />}
+    {canManage && courses?.ok && courses.data && courses.data.total === courses.data.items.length && <LearningPathEditor initialPath={path} courses={courses.data.items} />}
+    {canManage && courses && !courses.ok && <StateMessage tone="danger" title="Learning path course catalog unavailable">HTTP {courses.status}: {courses.error || "Courses could not be loaded."}</StateMessage>}
+    {canManage && courses?.ok && courses.data && courses.data.total > courses.data.items.length && <StateMessage tone="danger" title="Course catalog exceeds the learning-path editor limit">More than 100 courses are available. Searchable course selection is required before this editor can safely offer the full catalog.</StateMessage>}
   </DashboardShell>;
 }

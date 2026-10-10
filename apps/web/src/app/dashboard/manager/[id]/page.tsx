@@ -4,20 +4,23 @@ import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ManagerDevelopmentWorkflow } from "@/components/manager-development-workflow";
 import { ManagerCourseAssignment } from "@/components/manager-course-assignment";
-import { apiJson, requireUser } from "@/lib/server-api";
-import { SectionCard, StatusBadge } from "@/components/ui";
+import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
+import { SectionCard, StateMessage, StatusBadge } from "@/components/ui";
 
 type Plan={id:string;title:string;status:string;goals:{title:string;target_date?:string|null;status:string;notes?:string|null}[]};
 type Person={id:string;email:string;first_name:string;last_name:string;job_title?:string|null};
 type Course={id:string;title:string;status:string};
+type CoursePage={items:Course[];total:number};
 
 export default async function ManagerPerson({params}:{params:Promise<{id:string}>}){
   await requireUser();
   const {id}=await params;
-  const [people,plans,courses]=await Promise.all([apiJson<Person[]>("/api/v1/people/team"),apiJson<Plan[]>("/api/v1/development/users/"+id),apiJson<Course[]>("/api/v1/courses")]);
+  const [people,plans,coursesResult]=await Promise.all([apiJson<Person[]>("/api/v1/people/team"),apiJson<Plan[]>("/api/v1/development/users/"+id),apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=100&status=published")]);
   const person=people?.find(x=>x.id===id);
   if(!person)notFound();
-  if(plans === null || courses === null) return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager development view"><section className="data-panel" role="alert"><h2>Team member data unavailable</h2><p>Check your access or try again later.</p></section></DashboardShell>;
+  if(plans === null || !coursesResult.ok || !coursesResult.data) return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager development view"><StateMessage tone="danger" title="Team member data unavailable">{!coursesResult.ok?`Course lookup HTTP ${coursesResult.status}: ${coursesResult.error||"request failed"}`:"Development plan data could not be loaded."}</StateMessage></DashboardShell>;
+  if(coursesResult.data.total>coursesResult.data.items.length)return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager development view"><StateMessage tone="danger" title="Published course catalog exceeds assignment limit">More than 100 published courses are available. Searchable course assignment is required before offering a complete selection.</StateMessage></DashboardShell>;
+  const courses=coursesResult.data.items;
   const goalCount=(plans??[]).reduce((sum,plan)=>sum+plan.goals.length,0);
   const activePlans=(plans??[]).filter(plan=>plan.status!=="completed").length;
   return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager development view" breadcrumbs={[{label:"Team",href:"/dashboard/team"},{label:person.first_name+" "+person.last_name}]}>

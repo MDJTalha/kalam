@@ -3,10 +3,12 @@ import { ArrowLeft, Layers3, UsersRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ProgramEditor } from "@/components/program-editor";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
+import { StateMessage } from "@/components/ui";
 
 type Course = { course_id: string; title: string; position: number; is_required: boolean };
 type CatalogCourse = { id: string; title: string; status: string };
+type CatalogCoursePage = { items: CatalogCourse[]; total: number };
 type Cohort = { id: string; program_id: string; name: string; status: string };
 type Program = { id: string; title: string; slug: string; description?: string | null; status: string; is_required: boolean; courses: Course[] };
 
@@ -17,7 +19,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
   const [program, cohorts, catalog] = await Promise.all([
     apiJson<Program>("/api/v1/programs/" + id),
     apiJson<Cohort[]>("/api/v1/programs/cohorts"),
-    canManage ? apiJson<CatalogCourse[]>("/api/v1/courses?manage=true") : Promise.resolve(null),
+    canManage ? apiJsonResult<CatalogCoursePage>("/api/v1/courses/page?page=1&page_size=100&manage=true") : Promise.resolve(null),
   ]);
   if (!program) notFound();
 
@@ -54,7 +56,9 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
         <p>Group learners into cohorts and launch delivery after publishing the program.</p>
         <div className="compact-list">{cohorts?.filter(item => item.program_id === id).map(item => <div className="compact-row" key={item.id}><Link className="text-link" href={"/dashboard/programs/cohorts/" + item.id}>{item.name}</Link><span className="status-badge">{item.status}</span></div>)}</div>
       </div>
-      {canManage && <ProgramEditor initialProgram={program} catalog={catalog ?? []} />}
+      {canManage && catalog?.ok && catalog.data && catalog.data.total === catalog.data.items.length && <ProgramEditor initialProgram={program} catalog={catalog.data.items} />}
+      {canManage && catalog && !catalog.ok && <StateMessage tone="danger" title="Program course catalog unavailable">HTTP {catalog.status}: {catalog.error || "Courses could not be loaded."}</StateMessage>}
+      {canManage && catalog?.ok && catalog.data && catalog.data.total > catalog.data.items.length && <StateMessage tone="danger" title="Course catalog exceeds the program editor limit">More than 100 courses are available. Searchable course selection is required before this editor can safely offer the full catalog.</StateMessage>}
     </DashboardShell>
   );
 }
