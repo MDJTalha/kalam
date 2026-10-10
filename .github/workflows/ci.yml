@@ -114,7 +114,11 @@ jobs:
           FILE_SCAN_PROVIDER: clamd
           FILE_SCAN_HOST: 127.0.0.1
           FILE_SCAN_PORT: 3310
-          SAAS_OPS_TENANT_SLUG: kognivon-operations
+          SAAS_OPS_TENANT_SLUG: kalam
+          SAAS_DEMO_CRM_ENABLED: "true"
+          MARKETING_INBOX_ENABLED: "true"
+          MARKETING_REVIEW_TENANT_SLUG: kalam
+          OPENAI_API_KEY: test-only-ci-credential
         run: .venv/bin/python -m pytest -q
 
   web:
