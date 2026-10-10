@@ -25,7 +25,17 @@ export type ApiJsonResult<T> = {
 };
 
 export async function apiJsonResult<T>(path: string, init: RequestInit = {}): Promise<ApiJsonResult<T>> {
-  const response = await apiFetch(path, init);
+  let response: Response;
+  try {
+    response = await apiFetch(path, init);
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      data: null,
+      error: "The API service could not be reached. Check that it is running and try again.",
+    };
+  }
   const body = await response.text();
   let parsed: unknown = null;
   if (body) {
