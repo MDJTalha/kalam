@@ -75,10 +75,17 @@ jobs:
           WEB_ORIGIN: http://localhost:3000
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: .venv/bin/python scripts/seed.py
+      - name: Seed API integration fixtures
+        env:
+          DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          APP_ENV: development
+          WEB_ORIGIN: http://localhost:3000
+          ALLOWED_HOSTS: localhost,127.0.0.1
+        run: .venv/bin/python scripts/seed_ci_fixtures.py
       - name: Bootstrap SaaS operations roles
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
-          SAAS_OPS_TENANT_SLUG: kognivon-operations
+          SAAS_OPS_TENANT_SLUG: kalam
         run: .venv/bin/python scripts/bootstrap_saas_ops.py
       - name: Static checks
         run: .venv/bin/ruff check app tests
