@@ -26,12 +26,6 @@ jobs:
         image: clamav/clamav:1.4.6
         ports:
           - 3310:3310
-        options: >-
-          --health-cmd "printf 'PING\\n' | nc -w 3 127.0.0.1 3310 | grep -q PONG"
-          --health-interval 15s
-          --health-timeout 5s
-          --health-retries 80
-          --health-start-period 300s
     defaults:
       run:
         working-directory: apps/api
@@ -80,8 +74,19 @@ jobs:
       - name: Type checks
         run: .venv/bin/mypy app
       - name: Verify ClamAV transport
-        run: >-
-          .venv/bin/python -c "import socket; s=socket.create_connection(('127.0.0.1', 3310), timeout=5); s.sendall(b'PING\n'); result=s.recv(100); s.close(); assert result.strip()==b'PONG', result"
+        run: |
+          for attempt in $(seq 1 90); do
+            if .venv/bin/python -c "import socket; s=socket.create_connection(('127.0.0.1', 3310), timeout=3); s.sendall(b'PING\\n'); result=s.recv(100); s.close(); assert result.strip()==b'PONG', result"; then
+              echo "ClamAV transport is ready."
+              exit 0
+            fi
+            echo "Waiting for ClamAV signature initialization ($attempt/90)..."
+            sleep 10
+          done
+          clamav_id=$(docker ps -aq --filter ancestor=clamav/clamav:1.4.6 | head -n 1)
+          if [ -n "$clamav_id" ]; then docker logs "$clamav_id"; fi
+          echo "ClamAV did not become ready within 15 minutes."
+          exit 1
       - name: Tests
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
