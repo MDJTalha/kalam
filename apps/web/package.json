@@ -14,18 +14,20 @@
     "intl-tel-input": "^25.12.5",
     "libphonenumber-js": "^1.13.14",
     "lucide-react": "^0.548.0",
-    "next": "16.3.6",
+    "next": "16.4.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-phone-number-input": "^3.4.18",
-    "react-select": "^5.10.2"
+    "react-select": "^5.10.2",
+    "sharp": "0.35.5",
+    "source-map-js": "1.2.2"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
+    "eslint-config-next": "16.4.0",
     "fdir": "^6.5.0",
     "typescript": "^5"
   }

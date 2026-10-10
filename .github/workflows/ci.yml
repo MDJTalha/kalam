@@ -30,8 +30,8 @@ jobs:
           --health-cmd "printf 'PING\\n' | nc -w 3 127.0.0.1 3310 | grep -q PONG"
           --health-interval 15s
           --health-timeout 5s
-          --health-retries 30
-          --health-start-period 60s
+          --health-retries 80
+          --health-start-period 300s
     defaults:
       run:
         working-directory: apps/api
@@ -132,7 +132,7 @@ jobs:
           docker compose -f infra/docker/docker-compose.app.yml config --quiet
           docker compose -f infra/docker/docker-compose.app.yml config --format json | python -c 'import json,sys; cfg=json.load(sys.stdin); port=cfg["services"]["gateway"]["ports"][0]; assert port["host_ip"] == "127.0.0.1" and port["published"] == "3100", f"Unsafe default gateway binding: {port}"; assert cfg["services"]["api"]["image"] == cfg["services"]["migrate"]["image"], "Migration service must use the exact API image"'
       - name: Validate Nginx policy
-        run: docker run --rm --add-host web:127.0.0.1 -v "$PWD/infra/reverse-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro" nginx:1.29-alpine nginx -t
+        run: docker run --rm --add-host web:127.0.0.1 --add-host api:127.0.0.1 -v "$PWD/infra/reverse-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro" nginx:1.29-alpine nginx -t
       - name: Build production images
         env:
           POSTGRES_PASSWORD: ci-release-validation-only
