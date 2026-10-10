@@ -109,6 +109,20 @@ def test_phase1_competency_levels_and_capability_relationship():
         assert saved.status_code == 200, saved.text
         assert [x["level"] for x in saved.json()["levels"]] == [1, 2, 3, 4, 5]
 
+        page = client.get(
+            "/api/v1/capability-domain/competencies/page",
+            params={"page": 1, "page_size": 1, "q": token},
+        )
+        assert page.status_code == 200, page.text
+        assert page.json()["total"] == 1
+        assert page.json()["items"][0]["id"] == competency_id
+        assert len(page.json()["items"][0]["levels"]) == 5
+        too_large = client.get(
+            "/api/v1/capability-domain/competencies/page",
+            params={"page_size": 101},
+        )
+        assert too_large.status_code == 422
+
         mapped = client.post(
             f"/api/v1/capability-domain/capabilities/{capability_id}/competencies",
             json={"competency_id": competency_id, "weight": 75},

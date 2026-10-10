@@ -13,6 +13,7 @@ type Competency={id:string;name:string;code:string;definition:string;type:string
 type Level={level:number;name:string;definition:string};
 type Person={id:string;first_name:string;last_name:string;email:string;is_active:boolean};
 type PeoplePage={items:Person[];total:number};
+type CompetencyPage={items:Competency[];total:number};
 type Governance={role_requirements:{role_id:string;role:string;skill_id:string;skill:string;required_proficiency:number}[];course_mappings:{course_id:string;course:string;skill_id:string;skill:string;target_proficiency:number}[]};
 export default async function CapabilityFramework(){
   const user=await requireUser<{permissions?:string[]}>();
@@ -22,12 +23,14 @@ export default async function CapabilityFramework(){
     apiJsonResult<Skill[]>("/api/v1/skills"),apiJsonResult<Role[]>("/api/v1/organization/roles"),
     apiJsonResult<Course[]>("/api/v1/courses"),apiJsonResult<Governance>("/api/v1/skills/governance"),apiJsonResult<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"),
     apiJsonResult<Objective[]>("/api/v1/capability-domain/objectives"),apiJsonResult<Capability[]>("/api/v1/capabilities"),
-    apiJsonResult<Competency[]>("/api/v1/capability-domain/competencies"),apiJsonResult<Level[]>("/api/v1/capability-domain/proficiency-levels")
+    apiJsonResult<CompetencyPage>("/api/v1/capability-domain/competencies/page?page=1&page_size=100"),apiJsonResult<Level[]>("/api/v1/capability-domain/proficiency-levels")
   ]);
   const failed=results.flatMap((result,index)=>result.ok?[]:[`Dataset ${index+1}: HTTP ${result.status} — ${result.error||"request failed"}`]);
   if(failed.length)return <DashboardShell title="Capability Framework" eyebrow="Capability governance"><StateMessage tone="danger" title="Framework data is incomplete">{failed.join(" · ")} Refresh after the affected service or permission is available; governance controls are withheld to avoid treating failures as empty data.</StateMessage></DashboardShell>;
   const [skillsResult,rolesResult,coursesResult,governanceResult,peopleResult,objectivesResult,capabilitiesResult,competenciesResult,levelsResult]=results;
-  const skills=skillsResult.data!,roles=rolesResult.data!,courses=coursesResult.data!,governance=governanceResult.data!,peoplePage=peopleResult.data!,objectives=objectivesResult.data!,capabilities=capabilitiesResult.data!,competencies=competenciesResult.data!,levels=levelsResult.data!;
+  const skills=skillsResult.data!,roles=rolesResult.data!,courses=coursesResult.data!,governance=governanceResult.data!,peoplePage=peopleResult.data!,objectives=objectivesResult.data!,capabilities=capabilitiesResult.data!,competencyPage=competenciesResult.data!,levels=levelsResult.data!;
+  if(competencyPage.total>competencyPage.items.length)return <DashboardShell title="Capability Framework" eyebrow="Capability governance"><StateMessage tone="danger" title="Competency catalog exceeds the loaded limit">The framework contains more than 100 competencies. Searchable, paginated editing is needed before this screen can safely manage the complete catalog.</StateMessage></DashboardShell>;
+  const competencies=competencyPage.items;
   const framework=governance??{role_requirements:[],course_mappings:[]};
   const coveredRoles=new Set(framework.role_requirements.map(item=>item.role_id)).size;
   const alignedSkills=new Set(framework.course_mappings.map(item=>item.skill_id)).size;

@@ -1,9 +1,9 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_permission
@@ -215,6 +215,43 @@ async def list_competencies(
         levels = await db.execute(select(CompetencyLevel).where(CompetencyLevel.competency_id == item.id).order_by(CompetencyLevel.level))
         result.append(_competency_json(item, list(levels.scalars())))
     return result
+
+
+@router.get("/competencies/page")
+async def page_competencies(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    q: str = Query(default="", max_length=160),
+    user: User = Depends(require_permission("competencies.read")),
+    db: AsyncSession = Depends(get_db),
+):
+    """Tenant-scoped, searchable competency lookup with bounded level hydration."""
+    conditions = [Competency.tenant_id == user.tenant_id]
+    term = q.strip()
+    if term:
+        escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        match = f"%{escaped}%"
+        conditions.append(or_(Competency.name.ilike(match, escape="\\"), Competency.code.ilike(match, escape="\\")))
+    total = int(await db.scalar(select(func.count()).select_from(Competency).where(*conditions)) or 0)
+    rows = (await db.scalars(
+        select(Competency).where(*conditions).order_by(Competency.name, Competency.id)
+        .offset((page - 1) * page_size).limit(page_size)
+    )).all()
+    competency_ids = [item.id for item in rows]
+    levels_by_competency: dict[UUID, list[CompetencyLevel]] = {}
+    if competency_ids:
+        level_rows = await db.scalars(
+            select(CompetencyLevel).where(CompetencyLevel.competency_id.in_(competency_ids))
+            .order_by(CompetencyLevel.competency_id, CompetencyLevel.level)
+        )
+        for level in level_rows:
+            levels_by_competency.setdefault(level.competency_id, []).append(level)
+    return {
+        "items": [_competency_json(item, levels_by_competency.get(item.id, [])) for item in rows],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
 
 
 @router.post("/competencies", status_code=201)

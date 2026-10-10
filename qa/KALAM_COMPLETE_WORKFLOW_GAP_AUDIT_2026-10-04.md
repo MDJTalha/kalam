@@ -1,6 +1,14 @@
 # Kalam 9.9 — Complete Workflow / Screen / Frontend–Backend Gap Audit
 Date: 2026-10-04
 
+## Continuation update — 2026-10-10
+
+- Added tenant-scoped `GET /api/v1/capability-domain/competencies/page` with bounded page size, escaped name/code search, total count, and batched proficiency-level hydration.
+- Added integration assertions for competency search/pagination, included level data, and rejected over-limit page sizes. These database-backed assertions remain unexecuted because the local API/database runtime is unavailable.
+- Evidence Admin, Capability Assessments, and Capability Framework now use the bounded competency endpoint. Screens explicitly withhold incomplete catalog workflows when more than 100 records exist rather than silently presenting partial target choices.
+- API Ruff passed for the changed route/tests; Web TypeScript typecheck and `git diff --check` passed. Local API and web ports remain unavailable, so browser/integration verification is still open.
+- The assessment-builder detail screen and other full competency-list consumers still require review/migration; this does not close the broader unbounded-data audit gate.
+
 ## Closure update — 2026-10-06
 
 This audit is a living record; the findings below describe historical risks unless explicitly marked open. Source-level remediation completed since the original audit:
