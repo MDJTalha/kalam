@@ -141,6 +141,25 @@ def test_learner_can_view_courses_but_cannot_manage_them(client: TestClient) -> 
     assert forbidden.status_code == 403
 
 
+def test_course_catalog_page_is_bounded_searchable_and_tenant_scoped(client: TestClient) -> None:
+    login(client, LEARNER)
+    page = client.get("/api/v1/courses/page", params={"page": 1, "page_size": 1, "q": "workplace"})
+    assert page.status_code == 200, page.text
+    payload = page.json()
+    assert payload["page"] == 1
+    assert payload["page_size"] == 1
+    assert payload["total"] >= 1
+    assert len(payload["items"]) == 1
+    assert payload["items"][0]["slug"] == DEMO_COURSE_SLUG
+    assert "enrollment_status" in payload["items"][0]
+
+    invalid = client.get("/api/v1/courses/page", params={"page_size": 101})
+    assert invalid.status_code == 422
+
+    invalid_scope = client.get("/api/v1/courses/page", params={"scope": "all-tenants"})
+    assert invalid_scope.status_code == 422
+
+
 def test_learner_can_enroll_idempotently(client: TestClient) -> None:
     login(client, LEARNER)
     courses = client.get("/api/v1/courses").json()

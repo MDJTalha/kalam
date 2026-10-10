@@ -352,6 +352,74 @@ async def list_courses(
     result = await db.execute(statement.order_by(Course.title.asc()))
     return list(result.scalars().all())
 
+
+@router.get("/page")
+async def page_courses(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=24, ge=1, le=100),
+    q: str = Query(default="", max_length=160),
+    scope: str = Query(default="all", pattern="^(all|learning|available)$"),
+    manage: bool = Query(default=False),
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Bounded tenant course catalog with per-learner enrollment status."""
+    can_manage = manage and await user_has_permission(user, db, "courses.manage")
+    conditions = [Course.tenant_id == user.tenant_id]
+    if not can_manage:
+        conditions.extend([
+            Course.status == "published",
+            or_(
+                Course.visibility == "tenant",
+                Course.id.in_(select(Enrollment.course_id).where(
+                    Enrollment.tenant_id == user.tenant_id,
+                    Enrollment.user_id == user.id,
+                )),
+            ),
+        ])
+        enrollment_exists = select(Enrollment.id).where(
+            Enrollment.tenant_id == user.tenant_id,
+            Enrollment.user_id == user.id,
+            Enrollment.course_id == Course.id,
+            Enrollment.status != "rejected",
+        ).exists()
+        if scope == "learning":
+            conditions.append(enrollment_exists)
+        elif scope == "available":
+            conditions.append(~enrollment_exists)
+    term = q.strip()
+    if term:
+        escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        match = f"%{escaped}%"
+        conditions.append(or_(
+            Course.title.ilike(match, escape="\\"),
+            Course.slug.ilike(match, escape="\\"),
+            Course.description.ilike(match, escape="\\"),
+        ))
+    total = int(await db.scalar(select(func.count(Course.id)).where(*conditions)) or 0)
+    rows = (await db.scalars(
+        select(Course).where(*conditions).order_by(Course.title.asc(), Course.id.asc())
+        .offset((page - 1) * page_size).limit(page_size)
+    )).all()
+    course_ids = [course.id for course in rows]
+    enrollment_by_course: dict[UUID, str] = {}
+    if course_ids and not can_manage:
+        enrollments = await db.scalars(
+            select(Enrollment).where(
+                Enrollment.tenant_id == user.tenant_id,
+                Enrollment.user_id == user.id,
+                Enrollment.course_id.in_(course_ids),
+            ).order_by(Enrollment.created_at.desc(), Enrollment.id.desc())
+        )
+        for enrollment in enrollments:
+            enrollment_by_course.setdefault(enrollment.course_id, enrollment.status)
+    items = []
+    for course in rows:
+        item = CourseOut.model_validate(course).model_dump(mode="json")
+        item["enrollment_status"] = enrollment_by_course.get(course.id)
+        items.append(item)
+    return {"items": items, "total": total, "page": page, "page_size": page_size}
+
 @router.get("/{course_id}", response_model=dict)
 async def course_detail(
     course_id: UUID,

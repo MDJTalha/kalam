@@ -3,6 +3,8 @@ Date: 2026-10-04
 
 ## Continuation update — 2026-10-10
 
+- Added a tenant-scoped, searchable, bounded course-page API with learner enrollment status and integrated the learner catalog's search, scope filters, and incremental loading. Added regression assertions for page-size bounds, search results, and invalid scope.
+- The new course catalog integration test was attempted but could not reach PostgreSQL: login fails with a connection-refused error. No DB-backed assertion or browser interaction is certified by this run.
 - Skills & Development and Assessment Operations now preserve HTTP status/error details for all required datasets and withhold empty-looking profile/library states when a read fails.
 - Added tenant-scoped `GET /api/v1/capability-domain/competencies/page` with bounded page size, escaped name/code search, total count, and batched proficiency-level hydration.
 - Added integration assertions for competency search/pagination, included level data, and rejected over-limit page sizes. These database-backed assertions remain unexecuted because the local API/database runtime is unavailable.

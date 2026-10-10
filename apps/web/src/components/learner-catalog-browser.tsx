@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { BookOpenCheck, CheckCircle2, Clock3, Search, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Course = {
   id: string;
@@ -14,11 +14,12 @@ type Course = {
   enrollment_policy?: string;
   visibility?: string;
   tags?: string[];
+  enrollment_status?: string | null;
 };
 
 type Props = {
   courses: Course[];
-  enrollmentStatus: Record<string, string>;
+  total: number;
 };
 
 const statusLabel: Record<string, string> = {
@@ -31,30 +32,53 @@ const statusLabel: Record<string, string> = {
   available: "Available",
 };
 
-export function LearnerCatalogBrowser({ courses, enrollmentStatus }: Props) {
+export function LearnerCatalogBrowser({ courses: initialCourses, total: initialTotal }: Props) {
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<"all" | "learning" | "available">("all");
+  const [courses, setCourses] = useState(initialCourses);
+  const [total, setTotal] = useState(initialTotal);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const firstRender = useRef(true);
+  const activeFilter = useRef({ query, scope });
 
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return courses.filter((course) => {
-      const enrollment = enrollmentStatus[course.id];
-      const matchesQuery = !normalized ||
-        course.title.toLowerCase().includes(normalized) ||
-        course.description?.toLowerCase().includes(normalized) ||
-        course.slug.toLowerCase().includes(normalized) ||
-        course.tags?.some(tag => tag.toLowerCase().includes(normalized));
-      const learning = Boolean(enrollment && enrollment !== "rejected");
-      const matchesScope =
-        scope === "all" ||
-        (scope === "learning" && learning) ||
-        (scope === "available" && !learning);
-      return matchesQuery && matchesScope;
-    });
-  }, [courses, enrollmentStatus, query, scope]);
+  useEffect(() => {
+    activeFilter.current = { query, scope };
+    if (firstRender.current) { firstRender.current = false; return; }
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setLoading(true); setError("");
+      try {
+        const params = new URLSearchParams({ page: "1", page_size: "24", q: query, scope });
+        const response = await fetch(`/api/v1/courses/page?${params}`, { signal: controller.signal, cache: "no-store" });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.detail || "Catalog search failed.");
+        setCourses(Array.isArray(data.items) ? data.items : []); setTotal(Number(data.total) || 0); setPage(1);
+      } catch (reason) {
+        if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : "Catalog search failed.");
+      } finally { if (!controller.signal.aborted) setLoading(false); }
+    }, 250);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [query, scope]);
 
-  const learningCount = courses.filter((course) => Boolean(enrollmentStatus[course.id] && enrollmentStatus[course.id] !== "rejected")).length;
-  const availableCount = courses.length - learningCount;
+  async function loadMore() {
+    if (loading || courses.length >= total) return;
+    const filterAtRequest = JSON.stringify(activeFilter.current);
+    setLoading(true); setError("");
+    try {
+      const nextPage = page + 1;
+      const params = new URLSearchParams({ page: String(nextPage), page_size: "24", q: query, scope });
+      const response = await fetch(`/api/v1/courses/page?${params}`, { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail || "More courses could not be loaded.");
+      if (filterAtRequest !== JSON.stringify(activeFilter.current)) return;
+      setCourses(current => [...current, ...(Array.isArray(data.items) ? data.items : [])]);
+      setTotal(Number(data.total) || 0); setPage(nextPage);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "More courses could not be loaded."); }
+    finally { setLoading(false); }
+  }
+
 
   return (
     <section className="learner-catalog" aria-labelledby="learner-catalog-title">
@@ -65,8 +89,8 @@ export function LearnerCatalogBrowser({ courses, enrollmentStatus }: Props) {
           <p>Discover assigned and self-service learning in one place, with progress-aware status and clear next actions.</p>
         </div>
         <div className="learner-catalog-stat" aria-label="Catalog summary">
-          <strong>{courses.length}</strong>
-          <span>Published courses</span>
+            <strong>{total}</strong>
+            <span>Matching published courses</span>
         </div>
       </div>
 
@@ -77,26 +101,26 @@ export function LearnerCatalogBrowser({ courses, enrollmentStatus }: Props) {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by title, topic or keyword"
+            placeholder="Search by title or description"
             type="search"
           />
         </label>
         <div className="learner-scope-tabs" role="group" aria-label="Filter courses by learning status">
-          <button type="button" className={scope === "all" ? "active" : ""} onClick={() => setScope("all")} aria-pressed={scope === "all"}>All <span>{courses.length}</span></button>
-          <button type="button" className={scope === "learning" ? "active" : ""} onClick={() => setScope("learning")} aria-pressed={scope === "learning"}>My learning <span>{learningCount}</span></button>
-          <button type="button" className={scope === "available" ? "active" : ""} onClick={() => setScope("available")} aria-pressed={scope === "available"}>Available <span>{availableCount}</span></button>
+          <button type="button" className={scope === "all" ? "active" : ""} onClick={() => setScope("all")} aria-pressed={scope === "all"}>All</button>
+          <button type="button" className={scope === "learning" ? "active" : ""} onClick={() => setScope("learning")} aria-pressed={scope === "learning"}>My learning</button>
+          <button type="button" className={scope === "available" ? "active" : ""} onClick={() => setScope("available")} aria-pressed={scope === "available"}>Available</button>
         </div>
       </div>
 
       <div className="learner-catalog-results" aria-live="polite">
         <div className="learner-results-meta">
-          <span>{filtered.length} {filtered.length === 1 ? "course" : "courses"} shown</span>
+          <span>{courses.length} of {total} {total === 1 ? "course" : "courses"} shown{loading ? " · Updating…" : ""}</span>
           {query && <span>Search: “{query}”</span>}
         </div>
-        {filtered.length ? (
+        {courses.length ? (
           <div className="learner-course-grid">
-            {filtered.map((course) => {
-              const enrollment = enrollmentStatus[course.id];
+            {courses.map((course) => {
+              const enrollment = course.enrollment_status ?? undefined;
               const label = statusLabel[enrollment ?? "available"] ?? enrollment ?? "Available";
               const completed = enrollment === "completed";
               const action = completed ? "Review course" : enrollment === "pending_approval" ? "View request" : enrollment === "waitlisted" ? "View waitlist" : enrollment === "rejected" ? "Request again" : enrollment ? "Continue learning" : course.enrollment_policy === "assignment_only" ? "View course" : course.enrollment_policy === "approval" ? "Request access" : "Explore course";
@@ -122,10 +146,12 @@ export function LearnerCatalogBrowser({ courses, enrollmentStatus }: Props) {
         ) : (
           <div className="empty-state" role="status">
             <Search size={24} aria-hidden="true" />
-            <h3>{courses.length ? "No matching courses" : "No courses available"}</h3>
-            <p>{courses.length ? "Try a broader topic or switch the learning scope." : "Published courses will appear here when available to your organization."}</p>
+            <h3>{query || scope !== "all" ? "No matching courses" : "No courses available"}</h3>
+            <p>{query || scope !== "all" ? "Try a broader search or switch the learning scope." : "Published courses will appear here when available to your organization."}</p>
           </div>
         )}
+        {error && <p className="form-error" role="alert">{error}</p>}
+        {courses.length < total && <button className="button button-secondary" type="button" disabled={loading} onClick={() => void loadMore()}>{loading ? "Loading…" : `Load more (${courses.length} of ${total})`}</button>}
       </div>
     </section>
   );
