@@ -359,6 +359,7 @@ async def page_courses(
     page_size: int = Query(default=24, ge=1, le=100),
     q: str = Query(default="", max_length=160),
     scope: str = Query(default="all", pattern="^(all|learning|available)$"),
+    status_filter: str = Query(default="all", alias="status", pattern="^(all|draft|review|published|archived)$"),
     manage: bool = Query(default=False),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -366,6 +367,8 @@ async def page_courses(
     """Bounded tenant course catalog with per-learner enrollment status."""
     can_manage = manage and await user_has_permission(user, db, "courses.manage")
     conditions = [Course.tenant_id == user.tenant_id]
+    if can_manage and status_filter != "all":
+        conditions.append(Course.status == status_filter)
     if not can_manage:
         conditions.extend([
             Course.status == "published",

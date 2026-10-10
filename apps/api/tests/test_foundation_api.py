@@ -159,6 +159,13 @@ def test_course_catalog_page_is_bounded_searchable_and_tenant_scoped(client: Tes
     invalid_scope = client.get("/api/v1/courses/page", params={"scope": "all-tenants"})
     assert invalid_scope.status_code == 422
 
+    login(client, ADMIN)
+    drafts = client.get("/api/v1/courses/page", params={"manage": "true", "status": "draft", "page_size": 10})
+    assert drafts.status_code == 200, drafts.text
+    assert all(item["status"] == "draft" for item in drafts.json()["items"])
+    invalid_status = client.get("/api/v1/courses/page", params={"manage": "true", "status": "hidden"})
+    assert invalid_status.status_code == 422
+
 
 def test_learner_can_enroll_idempotently(client: TestClient) -> None:
     login(client, LEARNER)

@@ -4,6 +4,7 @@ Date: 2026-10-04
 ## Continuation update — 2026-10-10
 
 - Added a tenant-scoped, searchable, bounded course-page API with learner enrollment status and integrated the learner catalog's search, scope filters, and incremental loading. Added regression assertions for page-size bounds, search results, and invalid scope.
+- Course Studio now uses server-side search and incremental pagination, including validated all/draft/review/published/archived filtering. Capability Framework, equivalency management, and live-session scheduling now use bounded course lookups and explicitly withhold mapping/scheduling controls when their 100-item catalog window would be incomplete.
 - The new course catalog integration test was attempted but could not reach PostgreSQL: login fails with a connection-refused error. No DB-backed assertion or browser interaction is certified by this run.
 - Environment diagnosis: Kalam is configured for PostgreSQL at `127.0.0.1:55434`; that port still refuses connections. A separate Windows PostgreSQL service listens at `5432`, but the configured `lms` credentials fail there, so it is not a safe substitute. Docker Desktop was started, but its engine did not become responsive during the check; no database or volume was changed.
 - Skills & Development and Assessment Operations now preserve HTTP status/error details for all required datasets and withhold empty-looking profile/library states when a read fails.
