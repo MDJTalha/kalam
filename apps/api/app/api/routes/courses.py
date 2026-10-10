@@ -360,6 +360,7 @@ async def page_courses(
     q: str = Query(default="", max_length=160),
     scope: str = Query(default="all", pattern="^(all|learning|available)$"),
     status_filter: str = Query(default="all", alias="status", pattern="^(all|draft|review|published|archived)$"),
+    course_ids: list[UUID] | None = Query(default=None),
     manage: bool = Query(default=False),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -367,6 +368,10 @@ async def page_courses(
     """Bounded tenant course catalog with per-learner enrollment status."""
     can_manage = manage and await user_has_permission(user, db, "courses.manage")
     conditions = [Course.tenant_id == user.tenant_id]
+    if course_ids is not None:
+        if len(course_ids) > 100:
+            raise HTTPException(status_code=422, detail="At most 100 course IDs may be requested")
+        conditions.append(Course.id.in_(course_ids))
     if can_manage and status_filter != "all":
         conditions.append(Course.status == status_filter)
     if not can_manage:

@@ -152,6 +152,9 @@ def test_course_catalog_page_is_bounded_searchable_and_tenant_scoped(client: Tes
     assert len(payload["items"]) == 1
     assert payload["items"][0]["slug"] == DEMO_COURSE_SLUG
     assert "enrollment_status" in payload["items"][0]
+    by_id = client.get("/api/v1/courses/page", params={"course_ids": payload["items"][0]["id"]})
+    assert by_id.status_code == 200, by_id.text
+    assert [item["id"] for item in by_id.json()["items"]] == [payload["items"][0]["id"]]
 
     invalid = client.get("/api/v1/courses/page", params={"page_size": 101})
     assert invalid.status_code == 422

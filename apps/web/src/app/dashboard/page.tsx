@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Activity, AlertTriangle, ArrowRight, Award, BookOpenCheck, CalendarDays, CheckCircle2, Clock3, FileText, ShieldCheck, Target, TrendingUp, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LearningMomentumChart, WorkforceUnitChart } from "./dashboard-visuals";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Summary = { users:number; courses:number; enrollments:number; completed_enrollments:number; certificates:number };
 type Engagement = { active_learners:number; enrolled_learners:number; learner_activation_rate?:number; learner_completion_reach?:number };
@@ -10,6 +10,7 @@ type Trends = { days:number; points:Array<{date:string;enrollments:number;comple
 type Risk = { total:number; open:number; overdue:number; risk_band:string };
 type Effectiveness = { completed:number; in_progress:number; completion_rate:number; average_days_to_complete:number|null; measured_completions:number };
 type Course = { id:string; title:string; status:string; estimated_minutes?:number|null };
+type CoursePage = { items:Course[]; total:number; page:number; page_size:number };
 type Enrollment = { id:string; course_id:string; status:string; due_at?:string|null };
 type Compliance = { id:string; requirement:string; status:string; due_state?:string };
 type Intelligence = { population:number; skill_gaps:number; people_with_skill_gaps:number; open_compliance:number; overdue_compliance:number; risk_band:string; top_skill_gaps:{user_name:string;skill:string;gap:number}[]; recommended_actions?:{course_title:string;user_name:string;skill:string;gap:number}[] };
@@ -40,8 +41,7 @@ export default async function DashboardPage(){
   const roleMode = isExecutive ? "executive" : isLd ? "ld" : isHrBp ? "hrbp" : isManager ? "manager" : isTrainer ? "trainer" : "standard";
   const specializedView = roleMode !== "standard";
   const executiveView = roleMode === "executive" && canReport && canSeeCapability;
-  const [courses,enrollments,compliance,summary,engagement,intelligence,trends,risk,effectiveness,organization,audit,team,queue,sessions] = await Promise.all([
-    apiJson<Course[]>("/api/v1/courses"),
+  const [enrollments,compliance,summary,engagement,intelligence,trends,risk,effectiveness,organization,audit,team,queue,sessions] = await Promise.all([
     apiJson<Enrollment[]>("/api/v1/courses/my/enrollments"),
     apiJson<Compliance[]>("/api/v1/compliance/my"),
     canReport ? apiJson<Summary>("/api/v1/reports/summary") : Promise.resolve(null),
@@ -59,12 +59,20 @@ export default async function DashboardPage(){
   const assigned = enrollments?.length ?? 0;
   const completed = enrollments?.filter(row => row.status === "completed").length ?? 0;
   const openCompliance = compliance?.filter(row => !["completed","excepted"].includes(row.status)).length ?? 0;
-  const courseNames = new Map((courses ?? []).map(row => [row.id,row.title]));
   // Request-time clock is used for server-rendered due dates.
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const upcoming = (enrollments ?? []).filter(row => row.due_at && row.status !== "completed" && new Date(row.due_at).getTime() >= now)
     .sort((a,b) => new Date(a.due_at!).getTime() - new Date(b.due_at!).getTime()).slice(0,4);
+  const courseParams = new URLSearchParams({ page: "1", page_size: String(Math.max(1, upcoming.length)) });
+  upcoming.forEach(row => courseParams.append("course_ids", row.course_id));
+  const [courseLookup,catalogCount] = await Promise.all([
+    upcoming.length
+      ? apiJsonResult<CoursePage>(`/api/v1/courses/page?${courseParams}`)
+      : Promise.resolve({ ok: true, data: { items: [], total: 0, page: 1, page_size: 1 }, status: 200, error: null }),
+    apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=1"),
+  ]);
+  const courseNames = new Map((courseLookup.data?.items ?? []).map(row => [row.id,row.title]));
   const quickActions = [
     {label:"Explore learning",href:"/dashboard/catalog",icon:BookOpenCheck,permission:"learning.access"},
     {label:"Create learning",href:"/dashboard/catalog/new",icon:BookOpenCheck,permission:"courses.manage"},
@@ -75,7 +83,7 @@ export default async function DashboardPage(){
     {label:"Open analytics",href:"/dashboard/analytics",icon:Activity,permission:"reports.read"},
     {label:"Open commercial CRM",href:"/dashboard/saas",icon:Target,permission:"saas.crm.read"},
   ].filter(action => permissions.includes(action.permission));
-  const coreUnavailable = courses === null || enrollments === null || compliance === null;
+  const coreUnavailable = !courseLookup.ok || !catalogCount.ok || enrollments === null || compliance === null;
   const metric = (label:string,value:string | number,detail:string,Icon:typeof Activity) =>
     <div className="stat-card stat-card-enhanced" key={label}><div className="metric-card-top"><span>{label}</span><Icon size={16} aria-hidden="true"/></div><strong>{value}</strong><small>{detail}</small></div>;
   const learnerActivation = engagement?.learner_activation_rate ?? null;
@@ -191,7 +199,7 @@ export default async function DashboardPage(){
       {metric("My enrollments",enrollments ? assigned : "—","Assigned learning records",BookOpenCheck)}
       {metric("My completions",enrollments ? completed : "—","Completed enrollments",CheckCircle2)}
       {metric("Open obligations",compliance ? openCompliance : "—","Assigned compliance actions",ShieldCheck)}
-      {metric("Course catalog",courses ? courses.length : "—","Courses visible to this role",BookOpenCheck)}
+      {metric("Course catalog",catalogCount.ok ? catalogCount.data?.total ?? "—" : "—","Courses visible to this role",BookOpenCheck)}
       {canReport && metric("Workforce people",summary?.users ?? "—","Workforce records",UsersRound)}
       {canReport && metric("Active learners",engagement?.active_learners ?? "—","Distinct active learners",Activity)}
       {canReport && metric("Enrollment completion",summary ? `${pct(summary.completed_enrollments,summary.enrollments)}%` : "—","Workforce enrollment ratio",CheckCircle2)}
