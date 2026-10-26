@@ -1,4 +1,4 @@
-﻿name: Kalam Staging Deploy
+name: Kalam Staging Deploy
 
 on:
   workflow_dispatch:
@@ -26,6 +26,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.ref || github.sha }}
+
+      - name: Record checked-out release commit
+        shell: bash
+        run: echo "KALAM_DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Validate staging inputs
         env:
@@ -93,7 +97,7 @@ jobs:
           STAGING_ANTHROPIC_API_KEY: ${{ secrets.STAGING_ANTHROPIC_API_KEY }}
         run: |
           set -euo pipefail
-          export GIT_SHA="${GITHUB_SHA}"
+          export GIT_SHA="${KALAM_DEPLOY_SHA}"
           app_dir_q=$(printf '%q' "$STAGING_APP_DIR")
           git_sha_q=$(printf '%q' "$GIT_SHA")
           web_origin_q=$(printf '%q' "$STAGING_WEB_ORIGIN")
