@@ -1,20 +1,43 @@
 import csv
+from datetime import UTC, datetime, timedelta
 from io import StringIO
-from datetime import datetime, timedelta, timezone
 from uuid import UUID
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile
-from fastapi.responses import FileResponse
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Response,
+    UploadFile,
+)
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user, require_permission, user_has_permission
-from app.db.models import ComplianceAssignment, ComplianceEvidence, ComplianceException, ComplianceRequirement, ComplianceRequirementVersion, Course, Enrollment, FileObject, Role, User, UserRole
-from app.db.session import get_db
 from app.api.routes.files import ALLOWED_MIME_TYPES
-from app.services.file_scanner import FileScanError, scan_file
-from app.services.storage import get_storage
+from app.db.models import (
+    ComplianceAssignment,
+    ComplianceEvidence,
+    ComplianceException,
+    ComplianceRequirement,
+    ComplianceRequirementVersion,
+    Course,
+    Enrollment,
+    FileObject,
+    Role,
+    User,
+    UserRole,
+)
+from app.db.session import get_db
 from app.services.audit import audit
 from app.services.compliance_operations import run_compliance_operations_for_tenant
+from app.services.file_scanner import FileScanError, scan_file
+from app.services.storage import download_headers, get_storage
 
 router = APIRouter()
 
@@ -163,7 +186,7 @@ async def compliance_operations_summary(
     user: User = Depends(require_permission("compliance.manage")),
     db: AsyncSession = Depends(get_db),
 ):
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     open_assignments = list(
         (
             await db.scalars(
@@ -359,7 +382,7 @@ async def assign_requirement(requirement_id: UUID, payload: AssignmentCreate, us
                                                 Course.status == "published").with_for_update())
         if course is None:
             raise HTTPException(status_code=404, detail="Published course not found")
-    due = datetime.now(timezone.utc).replace(microsecond=0)
+    due = datetime.now(UTC).replace(microsecond=0)
     if req.due_days:
         from datetime import timedelta
         due += timedelta(days=req.due_days)
@@ -403,7 +426,7 @@ async def assign_requirement_to_applicable_users(
     created = 0
     skipped = 0
     from datetime import timedelta
-    due = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=req.due_days or 30)
+    due = datetime.now(UTC).replace(microsecond=0) + timedelta(days=req.due_days or 30)
     for learner in learners.all():
         if not await requirement_applies_to_user(req, learner, db):
             skipped += 1
@@ -495,7 +518,7 @@ async def compliance_report(
     by_status: dict[str, int] = {}
     for assignment in assignments:
         by_status[assignment.status] = by_status.get(assignment.status, 0) + 1
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     pending_evidence = await db.scalar(
         select(func.count(func.distinct(ComplianceEvidence.assignment_id))).where(
             ComplianceEvidence.tenant_id == user.tenant_id,
@@ -506,7 +529,7 @@ async def compliance_report(
     ) or 0
     terminal_statuses = {"completed", "excepted"}
     return {
-        "generated_at": datetime.now(timezone.utc),
+        "generated_at": datetime.now(UTC),
         "requirements": len(requirements),
         "active_requirements": sum(1 for item in requirements if item.active),
         "assignments": len(assignments),
@@ -549,7 +572,7 @@ async def my_compliance(user: User = Depends(get_current_user), db: AsyncSession
             "requirement_version": item.requirement_version,
             "status": item.status,
             "rejection_reason": latest_rejection.get(item.id),
-            "due_state": "overdue" if item.due_at and item.due_at < datetime.now(timezone.utc) and item.status not in {"completed", "excepted"} else item.status,
+            "due_state": "overdue" if item.due_at and item.due_at < datetime.now(UTC) and item.status not in {"completed", "excepted"} else item.status,
             "due_at": item.due_at,
             "course_id": str(item.course_id) if item.course_id else None,
             "course_title": course.title if course else None,
@@ -598,7 +621,7 @@ async def list_compliance_assignments(
                 "user_email": learner.email,
                 "status": item.status,
                 "due_at": item.due_at,
-                "due_state": "overdue" if item.due_at and item.due_at < datetime.now(timezone.utc) and item.status not in {"completed", "excepted"} else item.status,
+                "due_state": "overdue" if item.due_at and item.due_at < datetime.now(UTC) and item.status not in {"completed", "excepted"} else item.status,
                 "course_id": str(item.course_id) if item.course_id else None,
             }
             for item, req, version, learner in result.all()
@@ -684,6 +707,11 @@ async def upload_my_compliance_evidence(
     if not clean:
         storage.delete(object_key)
         raise HTTPException(status_code=422, detail="File rejected by malware scanner")
+    try:
+        storage.finalize_upload(object_key, upload.content_type)
+    except Exception as exc:
+        storage.delete(object_key)
+        raise HTTPException(status_code=503, detail="File storage is unavailable") from exc
     file_item = FileObject(
         tenant_id=user.tenant_id, uploaded_by=user.id, object_key=object_key,
         original_name=upload.filename[:255], mime_type=upload.content_type,
@@ -883,7 +911,7 @@ async def request_compliance_exception(
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     if assignment.status in CLOSED_ASSIGNMENT_STATUSES or assignment.status == "evidence_submitted":
         raise HTTPException(status_code=409, detail="Resolve pending evidence before requesting an exception")
-    if payload.expires_at.tzinfo is None or payload.expires_at <= datetime.now(timezone.utc):
+    if payload.expires_at.tzinfo is None or payload.expires_at <= datetime.now(UTC):
         raise HTTPException(status_code=422, detail="A future, time-zone-aware expiry is required")
 
     existing = await db.scalar(
@@ -940,10 +968,18 @@ async def download_compliance_evidence(
     ))
     if file_item is None:
         raise HTTPException(status_code=404, detail="Attachment is awaiting clearance or unavailable")
-    path = get_storage().path_for(file_item.object_key)
-    if not path.is_file():
+    storage = get_storage()
+    try:
+        exists = storage.exists(file_item.object_key)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="File storage is unavailable") from exc
+    if not exists:
         raise HTTPException(status_code=404, detail="Attachment content not found")
-    return FileResponse(path, media_type=file_item.mime_type, filename=file_item.original_name)
+    return StreamingResponse(
+        storage.iter_bytes(file_item.object_key),
+        media_type=file_item.mime_type,
+        headers=download_headers(file_item.original_name),
+    )
 
 
 @router.post("/evidence/{evidence_id}/reject")
@@ -970,9 +1006,9 @@ async def reject_compliance_evidence(
     if assignment is None or assignment.status != "evidence_submitted":
         raise HTTPException(status_code=409, detail="The obligation is no longer awaiting evidence review")
     evidence.rejected_by = user.id
-    evidence.rejected_at = datetime.now(timezone.utc)
+    evidence.rejected_at = datetime.now(UTC)
     evidence.rejection_reason = payload.reason
-    assignment.status = "overdue" if assignment.due_at and assignment.due_at < datetime.now(timezone.utc) else "assigned"
+    assignment.status = "overdue" if assignment.due_at and assignment.due_at < datetime.now(UTC) else "assigned"
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id,
                 action="compliance.evidence.rejected", entity_type="compliance_evidence",
                 entity_id=str(evidence.id), metadata={"reason": payload.reason})
@@ -1017,7 +1053,7 @@ async def verify_compliance_evidence(
         if cleared is None:
             raise HTTPException(status_code=409, detail="The attachment must clear its security scan before verification")
     evidence.verified_by = user.id
-    evidence.verified_at = datetime.now(timezone.utc)
+    evidence.verified_at = datetime.now(UTC)
     if assignment.course_id is None:
         assignment.status = "completed"
 
@@ -1051,11 +1087,11 @@ async def approve_compliance_exception(
         return {"status": "already_approved", "exception_id": str(item.id)}
     if item.status != "requested":
         raise HTTPException(status_code=409, detail="Only requested exceptions can be approved")
-    if item.expires_at is None or item.expires_at <= datetime.now(timezone.utc):
+    if item.expires_at is None or item.expires_at <= datetime.now(UTC):
         raise HTTPException(status_code=409, detail="A future expiry is required before approval")
     item.status = "approved"
     item.approved_by = user.id
-    item.approved_at = datetime.now(timezone.utc)
+    item.approved_at = datetime.now(UTC)
     assignment = await db.scalar(
         select(ComplianceAssignment).where(
             ComplianceAssignment.id == item.assignment_id,
@@ -1101,7 +1137,7 @@ async def reject_compliance_exception(
         ).with_for_update()
     )
     if assignment and assignment.status == "exception_requested":
-        assignment.status = "overdue" if assignment.due_at and assignment.due_at < datetime.now(timezone.utc) else "assigned"
+        assignment.status = "overdue" if assignment.due_at and assignment.due_at < datetime.now(UTC) else "assigned"
     await audit(
         db,
         tenant_id=user.tenant_id,

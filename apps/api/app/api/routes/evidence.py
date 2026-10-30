@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -9,7 +9,16 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
-from app.db.models import Assessment, AssessmentAttempt, AssessmentCompetency, Capability, CapabilityEvidence, Competency, Skill, User
+from app.db.models import (
+    Assessment,
+    AssessmentAttempt,
+    AssessmentCompetency,
+    Capability,
+    CapabilityEvidence,
+    Competency,
+    Skill,
+    User,
+)
 from app.db.session import get_db
 from app.services.audit import audit
 
@@ -195,7 +204,7 @@ async def create_evidence(
         target_id=payload.target_id, evidence_type=payload.evidence_type,
         source_type=payload.source_type, source_id=payload.source_id,
         demonstrated_level=payload.demonstrated_level, confidence=payload.confidence,
-        observed_at=payload.observed_at or datetime.now(timezone.utc), expires_at=payload.expires_at,
+        observed_at=payload.observed_at or datetime.now(UTC), expires_at=payload.expires_at,
         assessor_id=assessor.id, notes=payload.notes, record_metadata=payload.metadata,
     )
     db.add(item)
@@ -222,7 +231,7 @@ async def decide_evidence(
         raise HTTPException(409, "Only pending evidence can be decided; use a new evidence record for a changed finding")
     item.status = payload.decision
     item.verified_by = user.id if payload.decision == "verified" else None
-    item.verified_at = datetime.now(timezone.utc) if payload.decision == "verified" else None
+    item.verified_at = datetime.now(UTC) if payload.decision == "verified" else None
     item.rejection_reason = payload.reason if payload.decision == "rejected" else None
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action=f"capability.evidence.{payload.decision}", entity_type="capability_evidence", entity_id=str(item.id), metadata={"reason": payload.reason} if payload.reason else None)
     # Keep the materialized gap snapshot in the same transaction as the evidence
@@ -251,7 +260,7 @@ async def evidence_summary(
         CapabilityEvidence.user_id == user_id,
         CapabilityEvidence.status == "verified",
     ))
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     current = [item for item in result.scalars().all() if item.expires_at is None or item.expires_at > now]
     grouped: dict[str, dict[str, Any]] = {}
     for item in current:
@@ -378,7 +387,7 @@ async def create_assessment_evidence(
             status="verified", observed_at=attempt.submitted_at, assessor_id=user.id,
             notes=f"Assessment score: {attempt.score}; passed: {attempt.passed}",
             record_metadata={"assessment_id": str(attempt.assessment_id), "attempt_number": attempt.attempt_number},
-            verified_by=user.id, verified_at=datetime.now(timezone.utc),
+            verified_by=user.id, verified_at=datetime.now(UTC),
         )
         db.add(item)
         created.append(item)

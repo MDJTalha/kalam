@@ -1,20 +1,22 @@
-from datetime import datetime, timezone
-from decimal import Decimal, ROUND_HALF_UP
+from datetime import UTC, datetime
+from decimal import ROUND_HALF_UP, Decimal
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user, require_permission, user_has_permission
 from app.db.models import (
     Capability,
     CapabilityGap,
-    RoleRequirement,
-    User,
-    Role,
-    StrategicObjectiveCapability,
-    DevelopmentPlan,
-    Certificate,
     CapabilityRisk,
+    Certificate,
+    DevelopmentPlan,
+    Role,
+    RoleRequirement,
+    StrategicObjectiveCapability,
+    User,
 )
 from app.db.session import get_db
 from app.services.audit import audit
@@ -39,7 +41,7 @@ WEIGHTS = {
 
 
 def _score(value):
-    return max(Decimal("0"), min(Decimal("100"), Decimal(str(value)))).quantize(
+    return max(Decimal(0), min(Decimal(100), Decimal(str(value)))).quantize(
         Decimal(".01"), rounding=ROUND_HALF_UP
     )
 
@@ -158,7 +160,7 @@ async def _calculate(user, db):
                     Certificate.tenant_id == user.tenant_id,
                     Certificate.expires_at.is_not(None),
                     Certificate.expires_at
-                    <= datetime.now(timezone.utc)
+                    <= datetime.now(UTC)
                     + __import__("datetime").timedelta(days=90),
                     Certificate.revoked_at.is_(None),
                 )
@@ -193,7 +195,7 @@ async def _build(user, db):
     grouped, capmap, total_people, active_plan_users, certset = await _calculate(
         user, db
     )
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     out = []
     for cid, items in grouped.items():
         cap = capmap.get(cid)
@@ -301,7 +303,7 @@ async def _build(user, db):
         }
         risk = _score(
             sum(scores[k] * Decimal(str(v)) / 100 for k, v in WEIGHTS.items())
-            / Decimal("1")
+            / Decimal(1)
         )
         reasons = [_reason(k, scores[k]) for k in scores if scores[k] >= 50]
         explanation = {
@@ -412,9 +414,9 @@ async def risk_detail(
         people,
         roles,
         critical_roles,
-        evidence,
+        _evidence,
         plans,
-        age,
+        _age,
         expiring,
         explanation,
         _,
@@ -473,7 +475,7 @@ async def recalculate(
     db: AsyncSession = Depends(get_db),
 ):
     rows = await _build(user, db)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     count = 0
     for (
         cid,

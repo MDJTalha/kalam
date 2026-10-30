@@ -1,0 +1,77 @@
+{
+  "web": "http://127.0.0.1:3014",
+  "method": "real frontend form submission; role-specific workspace and same-origin API verification",
+  "roles": {
+    "manager": {
+      "email": "manager@demo.corp",
+      "form_fields": {
+        "tenant": "demo-corporation",
+        "email": "manager@demo.corp",
+        "passwordLength": 43,
+        "valid": true
+      },
+      "post_login": {
+        "path": "/dashboard",
+        "title": "Kalam | Enterprise Workforce Capability Platform",
+        "body": "Skip to main content\nalam\nMenu\nTEAM LEADERSHIP\nTeam Overview\n6\nDM\nLead Your Team.\n\nFocus on the people, learning, compliance and development signals that need your attention.\n\nOpen team workspace\nTEAM\n1\nDirect reports in your team\nLEARNING COMPLETION\n38%\nAcross tracked team learning\nOVERDUE LEARNING\n0\nItems requiring follow-up\nOVERDUE COMPLIANCE\n3\nTeam obligations past due\nMANAGER ATTENTION\nPeople who need follow-up\nOpen team workspace\nDemo Learner\nLearner · 0 overdue learning · 3 overdue compliance",
+        "error": ""
+      },
+      "session_cookie": [
+        {
+          "name": "corp_lms_session",
+          "httpOnly": true,
+          "sameSite": "Lax"
+        }
+      ],
+      "workspace": {
+        "path": "/dashboard/team",
+        "title": "Kalam | Enterprise Workforce Capability Platform",
+        "h1": [
+          "Team"
+        ],
+        "body": "Skip to main content\nalam\nMenu\nOverview\nTeam\nMANAGER WORKSPACE\nTeam\nDM\nPEOPLE YOU MANAGE\nTurn team signals into action\n\nReview direct reports, prioritize overdue learning and compliance, and open an individual learner to assign learning or discuss development.\n\nDIRECT REPORTS\n1\nActive people you manage\nOVERDUE LEARNING\n0\nAssignments past due\nOVERDUE COMPLIANCE\n3\nRequirements past due\nACTIVE DEVELOPMENT PLANS\n6\nAcross direct reports\nMANAGER SCOPE\nDirect reports\n1 shown\n\nPeople needing attention appear first. Open a learner to assign a course or review their development plans.\n\nSearch direct reports\nAttention\nAll direct reports\nOverdue items\nNo overdue items\nPERSON\tLEARNING\tCOMPLIANCE\tDEVELOPMENT\tACTION\n\nDemo Learner\nLearner · learner@demo.corp\n\t18 open · 11 completed\t6 open\n3 overdue\n\t6 active plans\tReview learner",
+        "loading": false
+      },
+      "restricted_people_api": {
+        "status": 403
+      },
+      "passed": true
+    },
+    "learner": {
+      "email": "learner@demo.corp",
+      "form_fields": {
+        "tenant": "demo-corporation",
+        "email": "learner@demo.corp",
+        "passwordLength": 43,
+        "valid": true
+      },
+      "post_login": {
+        "path": "/dashboard",
+        "title": "Kalam | Enterprise Workforce Capability Platform",
+        "body": "Skip to main content\nalam\nMenu\nLEARNING, CAPABILITY AND EVIDENCE\nOverview\n9+\nDL\nYour workforce at a glance\n\nReview recorded learning and compliance work. Organization measures appear when your role has reporting access.\n\nExplore learning\nMY ENROLLMENTS\n29\nAssigned learning records\nMY COMPLETIONS\n11\nCompleted enrollments\nOPEN OBLIGATIONS\n6\nAssigned compliance actions\nCOURSE CATALOG\n37\nCourses visible to this role\nLEARNING PRIORITIES\nUpcoming due dates\nOpen learning\nPhase 2 Reminder Course d0546b92\nDue 10/31/2026 · enrolled\nPhase 2 Reminder Course 98f825be\nDue 10/31/2026 · enrolled\nPhase 2 Reminder Course f8e3e01e\nDue 10/31/2026 · enrolled\nPhase 4 Manager Assignment ea662dff\nDue 6/1/2030 · enr",
+        "error": ""
+      },
+      "session_cookie": [
+        {
+          "name": "corp_lms_session",
+          "httpOnly": true,
+          "sameSite": "Lax"
+        }
+      ],
+      "workspace": {
+        "path": "/dashboard/catalog",
+        "title": "Kalam | Enterprise Workforce Capability Platform",
+        "h1": [
+          "Learning catalog"
+        ],
+        "body": "Skip to main content\nalam\nMenu\nLEARNING OPERATIONS\nLearning catalog\n9+\nDL\nFIND YOUR NEXT CAPABILITY\nLearning catalog\n\nDiscover assigned and self-service learning in one place, with progress-aware status and clear next actions.\n\n37\nMATCHING PUBLISHED COURSES\nSearch courses\nAll\nMy learning\nAvailable\n24 of 37 courses shown\nCOMPLETED\nSELF ENROLLMENT\nBrowser QA lifecycle 024230bbcb\n\nTemporary local browser acceptance course.\n\n5 min\nReview course\nAVAILABLE\nSELF ENROLLMENT\nBrowser QA lifecycle 258f195920\n\nTemporary local browser acceptance course.\n\n5 min\nExplore course\nAVAILABLE\nSELF ENROLLMENT\nBrowser QA lifecycle 39cadac11d\n\nTemporary local browser acceptance course.\n\n5 min\nExplore course\nCOMPLETED\nAPPROVAL REQUIRED\nPhase 2 Approval Course\n\nNo course description provided.\n\n— min\nReview course\nCOMPLETED\nAPPROVAL REQUIRED\nPhase 2 Approval Course\n\nNo course description provided.\n\n— min\nReview course\nCOMPLETED\nAPPROVAL REQUIRED\nPhase 2 Approval Course\n\nNo course description provided.\n\n— min\nReview course\nIN PROGRESS\nSELF ENROLLMENT\nPhase 2 Capacity Course\n\nNo course description provided.\n\n— min\nContinue learning\nIN PROGRESS\nSELF ENROLLMENT\nPhase 2 Capacity Course\n\nNo course description prov",
+        "loading": false
+      },
+      "restricted_people_api": {
+        "status": 403
+      },
+      "passed": true
+    }
+  },
+  "passed": true
+}

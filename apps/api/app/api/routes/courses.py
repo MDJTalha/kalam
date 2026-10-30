@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
-from uuid import UUID
+from datetime import UTC, datetime
 from urllib.parse import urlparse
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -8,7 +8,21 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
-from app.db.models import ComplianceAssignment, Course, CourseCategory, CourseContentVersion, CourseModule, CourseSkill, Enrollment, FileObject, Lesson, LessonProgress, OrgUnit, User, UserSkill
+from app.db.models import (
+    ComplianceAssignment,
+    Course,
+    CourseCategory,
+    CourseContentVersion,
+    CourseModule,
+    CourseSkill,
+    Enrollment,
+    FileObject,
+    Lesson,
+    LessonProgress,
+    OrgUnit,
+    User,
+    UserSkill,
+)
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.notifications import create_notification
@@ -596,19 +610,19 @@ async def update_course(
             tenant_id=user.tenant_id,
             org_unit_ids=values["audience_org_units"],
         )
-    if "category_id" in values and values["category_id"]:
+    if values.get("category_id"):
         category = await db.scalar(select(CourseCategory).where(
             CourseCategory.id == values["category_id"], CourseCategory.tenant_id == user.tenant_id
         ))
         if category is None:
             raise HTTPException(status_code=422, detail="Category does not belong to this tenant")
-    if "owner_id" in values and values["owner_id"]:
+    if values.get("owner_id"):
         owner = await db.scalar(select(User).where(
             User.id == values["owner_id"], User.tenant_id == user.tenant_id, User.is_active.is_(True)
         ))
         if owner is None:
             raise HTTPException(status_code=422, detail="Owner does not belong to this tenant")
-    if "prerequisites" in values and values["prerequisites"]:
+    if values.get("prerequisites"):
         prerequisite_count = await db.scalar(select(func.count(Course.id)).where(
             Course.tenant_id == user.tenant_id,
             Course.id.in_(values["prerequisites"]),
@@ -1003,9 +1017,11 @@ async def enroll(
         raise HTTPException(status_code=404, detail="Published course not found")
     if course.visibility == "private" or course.enrollment_policy == "assignment_only":
         raise HTTPException(status_code=404, detail="Course is not open for self-enrollment")
-    if course.audience_org_units:
-        if user.org_unit_id is None or str(user.org_unit_id) not in {str(item) for item in course.audience_org_units}:
-            raise HTTPException(status_code=403, detail="You are outside this course audience")
+    if course.audience_org_units and (
+        user.org_unit_id is None
+        or str(user.org_unit_id) not in {str(item) for item in course.audience_org_units}
+    ):
+        raise HTTPException(status_code=403, detail="You are outside this course audience")
     if course.prerequisites:
         completed_count = await db.scalar(select(func.count(func.distinct(Enrollment.course_id))).where(
             Enrollment.tenant_id == user.tenant_id,
@@ -1173,9 +1189,13 @@ class ManagerEnrollmentCreate(BaseModel):
 async def manager_assignment(
     course_id: UUID,
     payload: ManagerEnrollmentCreate,
-    manager: User = Depends(require_permission("users.read")),
+    manager: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    can_assign_team = await user_has_permission(manager, db, "courses.assign_team")
+    can_manage_courses = await user_has_permission(manager, db, "courses.manage")
+    if not can_assign_team and not can_manage_courses:
+        raise HTTPException(status_code=403, detail="Team learning assignment is not permitted")
     course = await db.scalar(
         select(Course).where(
             Course.id == course_id,
@@ -1454,12 +1474,12 @@ async def complete_lesson(
         LessonProgress.lesson_id == lesson.id,
     ))
     if progress is None:
-        progress = LessonProgress(enrollment_id=enrollment.id, lesson_id=lesson.id, status="completed", progress_percent=100, completed_at=datetime.now(timezone.utc))
+        progress = LessonProgress(enrollment_id=enrollment.id, lesson_id=lesson.id, status="completed", progress_percent=100, completed_at=datetime.now(UTC))
         db.add(progress)
     else:
         progress.status = "completed"
         progress.progress_percent = 100
-        progress.completed_at = datetime.now(timezone.utc)
+        progress.completed_at = datetime.now(UTC)
     total = await db.scalar(
         select(func.count(Lesson.id))
         .join(CourseModule, CourseModule.id == Lesson.module_id)
@@ -1472,7 +1492,7 @@ async def complete_lesson(
     course_completed = bool(total and completed and completed >= total)
     if course_completed:
         enrollment.status = "completed"
-        enrollment.completed_at = datetime.now(timezone.utc)
+        enrollment.completed_at = datetime.now(UTC)
         obligations = (await db.scalars(select(ComplianceAssignment).where(
             ComplianceAssignment.tenant_id == user.tenant_id,
             ComplianceAssignment.user_id == user.id,
@@ -1515,8 +1535,7 @@ async def complete_lesson(
                 db.add(skill)
                 await db.flush()
             else:
-                if skill.proficiency < mapping.target_proficiency:
-                    skill.proficiency = mapping.target_proficiency
+                skill.proficiency = max(skill.proficiency, mapping.target_proficiency)
                 skill.evidence_source = evidence
             await audit(
                 db,

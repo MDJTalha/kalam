@@ -6,7 +6,18 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Course, CourseModule, CourseSkill, Enrollment, Lesson, RoleSkillRequirement, Skill, User, UserRole, UserSkill
+from app.db.models import (
+    Course,
+    CourseModule,
+    CourseSkill,
+    Enrollment,
+    Lesson,
+    RoleSkillRequirement,
+    Skill,
+    User,
+    UserRole,
+    UserSkill,
+)
 
 _WORDS = re.compile(r"[a-zA-Z0-9]{2,}")
 _SEMANTIC_ALIASES = {

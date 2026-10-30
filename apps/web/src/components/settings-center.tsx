@@ -9,14 +9,21 @@ type UserContext={first_name:string;last_name:string;email:string;employee_numbe
 type SsoProvider={provider:string;label:string};
 type NotificationPreferences={email_enabled:boolean;learning:boolean;compliance:boolean;assessment:boolean;credentials:boolean;support:boolean;approvals:boolean;system:boolean;security:boolean};
 
-export function SettingsCenter({user,unreadCount,ssoProviders,passwordAvailable=true,initialNotificationPreferences}:{user:UserContext;unreadCount:number;ssoProviders:SsoProvider[];passwordAvailable?:boolean;initialNotificationPreferences?:NotificationPreferences}) {
+const isNotificationPreferences=(value:unknown):value is NotificationPreferences=>
+  typeof value==="object"&&value!==null&&
+  ["email_enabled","learning","compliance","assessment","credentials","support","approvals","system","security"]
+    .every(key=>typeof (value as Record<string,unknown>)[key]==="boolean");
+
+export function SettingsCenter({user,unreadCount,ssoProviders,passwordAvailable=true,initialNotificationPreferences,notificationPreferencesError}:{user:UserContext;unreadCount:number;ssoProviders:SsoProvider[];passwordAvailable?:boolean;initialNotificationPreferences:NotificationPreferences|null;notificationPreferencesError:string|null}) {
   const [preferredName,setPreferredName]=useState(user.preferences?.preferred_name||"");
   const [density,setDensity]=useState<"comfortable"|"compact">(user.preferences?.density==="compact"?"compact":"comfortable");
   const [reduceMotion,setReduceMotion]=useState(Boolean(user.preferences?.reduce_motion));
   const [timezone,setTimezone]=useState(user.preferences?.timezone||"UTC");
   const [busy,setBusy]=useState(false); const [message,setMessage]=useState(""); const [error,setError]=useState("");
   const [currentPassword,setCurrentPassword]=useState(""); const [newPassword,setNewPassword]=useState(""); const [confirmPassword,setConfirmPassword]=useState(""); const [passwordMessage,setPasswordMessage]=useState(""); const [passwordError,setPasswordError]=useState(""); const [passwordBusy,setPasswordBusy]=useState(false);
-  const [notificationPreferences,setNotificationPreferences]=useState<NotificationPreferences>(initialNotificationPreferences||{email_enabled:false,learning:true,compliance:true,assessment:true,credentials:true,support:true,approvals:true,system:true,security:true});
+  const [notificationPreferences,setNotificationPreferences]=useState<NotificationPreferences|null>(initialNotificationPreferences);
+  const [notificationLoadError,setNotificationLoadError]=useState(initialNotificationPreferences?null:notificationPreferencesError||"Notification preferences could not be loaded.");
+  const [notificationLoading,setNotificationLoading]=useState(false);
   const [notificationBusy,setNotificationBusy]=useState(false); const [notificationMessage,setNotificationMessage]=useState(""); const [notificationError,setNotificationError]=useState("");
   const timezones=useMemo(()=>{try{const values=Intl.supportedValuesOf("timeZone");return values.includes("UTC")?values:["UTC",...values]}catch{return["UTC","Asia/Karachi","Asia/Dubai","Europe/London","America/New_York","America/Los_Angeles"]}},[]);
   const canTenantManage=user.permissions?.includes("tenant.manage")??false;
@@ -25,7 +32,21 @@ export function SettingsCenter({user,unreadCount,ssoProviders,passwordAvailable=
   const displayName=preferredName.trim()||user.first_name;
   const initials=((displayName[0]||"K")+(user.last_name?.[0]||"")).toUpperCase();
 
+  async function loadNotificationPreferences(){
+    setNotificationLoading(true);setNotificationLoadError(null);setNotificationError("");setNotificationMessage("");
+    try{
+      const response=await fetch("/api/lms/notifications/preferences",{cache:"no-store"});
+      const data:unknown=await response.json().catch(()=>null);
+      if(!response.ok)throw new Error(data&&typeof data==="object"&&"detail" in data&&typeof data.detail==="string"?data.detail:"Notification preferences could not be loaded.");
+      if(!isNotificationPreferences(data))throw new Error("The notification preferences response was incomplete. Refresh and try again.");
+      setNotificationPreferences(data);
+    }catch(cause){
+      setNotificationLoadError(cause instanceof Error?cause.message:"Notification preferences could not be loaded.");
+    }finally{setNotificationLoading(false)}
+  }
+
   async function saveNotificationPreferences(){
+    if(!notificationPreferences)return;
     setNotificationBusy(true);setNotificationMessage("");setNotificationError("");
     try{
       const {security: _security,...payload}=notificationPreferences;
@@ -33,7 +54,8 @@ export function SettingsCenter({user,unreadCount,ssoProviders,passwordAvailable=
       const response=await fetch("/api/lms/notifications/preferences",{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(typeof data.detail==="string"?data.detail:"Notification preferences could not be saved.");
-      setNotificationPreferences(data as NotificationPreferences);
+      if(!isNotificationPreferences(data))throw new Error("The saved notification preferences response was incomplete. Reload the page to verify your settings.");
+      setNotificationPreferences(data);
       setNotificationMessage("Notification preferences saved.");
     }catch(cause){setNotificationError(cause instanceof Error?cause.message:"Notification preferences could not be saved.")}finally{setNotificationBusy(false)}
   }
@@ -89,12 +111,14 @@ export function SettingsCenter({user,unreadCount,ssoProviders,passwordAvailable=
       </section>
 
       <section className="settings-section" id="notifications"><div className="settings-section-heading"><div><span className="eyebrow">Notifications</span><h2>Notification preferences</h2><p>Choose which categories may use optional notification delivery. Security notifications remain enabled because they may be required to protect your account.</p></div><Bell size={20}/></div>
+        {!notificationPreferences?<div className="ds-state ds-state-danger" role="alert"><div><strong className="ds-state-title">Notification preferences unavailable</strong><span className="ds-state-copy">{notificationLoadError||"Your saved choices could not be confirmed, so editing is disabled to avoid overwriting them."}</span><button className="button button-secondary" type="button" onClick={()=>void loadNotificationPreferences()} disabled={notificationLoading}>{notificationLoading?"Loading…":"Try again"}</button></div></div>:<>
         <div className="notification-preference-grid">
           <label className="settings-switch"><input type="checkbox" checked={notificationPreferences.email_enabled} onChange={e=>setNotificationPreferences({...notificationPreferences,email_enabled:e.target.checked})}/><span><strong>Email delivery</strong><small>Allow eligible notification categories to also use email when email delivery is configured.</small></span></label>
           <label className="settings-switch locked"><input type="checkbox" checked readOnly/><span><strong>Security</strong><small>Mandatory account and sign-in security notifications cannot be disabled.</small></span></label>
           {(["learning","compliance","assessment","credentials","support","approvals","system"] as const).map(key=><label className="settings-switch" key={key}><input type="checkbox" checked={notificationPreferences[key]} onChange={e=>setNotificationPreferences({...notificationPreferences,[key]:e.target.checked})}/><span><strong>{key.charAt(0).toUpperCase()+key.slice(1)}</strong><small>{key==="learning"?"Assignments, enrollment and learning activity.":key==="compliance"?"Readiness, obligation and compliance reminders.":key==="assessment"?"Assessment availability and completion updates.":key==="credentials"?"Certificates, credentials and expiry-related updates.":key==="support"?"Support-case replies and status changes.":key==="approvals"?"Approval and workflow decisions that need attention.":"General platform and operational notices."}</small></span></label>)}
         </div>
-        <div className="settings-actions"><button className="button button-primary" type="button" onClick={()=>void saveNotificationPreferences()} disabled={notificationBusy}><Save size={15}/>{notificationBusy?"Saving…":"Save notification preferences"}</button>{notificationMessage&&<span className="form-success" role="status">{notificationMessage}</span>}{notificationError&&<span className="form-error" role="alert">{notificationError}</span>}</div>
+        <div className="settings-actions"><button className="button button-primary" type="button" onClick={()=>void saveNotificationPreferences()} disabled={notificationBusy||!notificationPreferences}><Save size={15}/>{notificationBusy?"Saving…":"Save notification preferences"}</button>{notificationMessage&&<span className="form-success" role="status">{notificationMessage}</span>}{notificationError&&<span className="form-error" role="alert">{notificationError}</span>}</div>
+        </>}
         <div className="settings-action-row"><div><strong>{unreadCount} unread notification{unreadCount===1?"":"s"}</strong><span>Review your current inbox, filter by category and open the source workflow directly.</span></div><Link className="button button-secondary" href="/dashboard/notifications">Open Notification Center <ChevronRight size={15}/></Link></div>
       </section>
 

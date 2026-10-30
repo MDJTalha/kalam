@@ -11,8 +11,8 @@ from app.core.security import utcnow
 from app.db.models import (
     AuditLog,
     ComplianceAssignment,
-    ComplianceException,
     ComplianceEvidence,
+    ComplianceException,
     ComplianceRequirement,
     Course,
     Enrollment,

@@ -1,4 +1,4 @@
-from alembic import op
+from alembic import context, op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
@@ -9,8 +9,9 @@ depends_on = None
 
 def upgrade():
     bind = op.get_bind()
-    inspector = sa.inspect(bind)
-    if not inspector.has_table("developer_support_sessions"):
+    offline = context.is_offline_mode()
+    inspector = None if offline else sa.inspect(bind)
+    if offline or not inspector.has_table("developer_support_sessions"):
         op.create_table(
             "developer_support_sessions",
             sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
@@ -31,7 +32,8 @@ def upgrade():
 
 def downgrade():
     bind = op.get_bind()
-    if sa.inspect(bind).has_table("developer_support_sessions"):
+    offline = context.is_offline_mode()
+    if offline or sa.inspect(bind).has_table("developer_support_sessions"):
         op.drop_index("ix_dev_support_session_developer", table_name="developer_support_sessions", if_exists=True)
         op.drop_index("ix_dev_support_session_token", table_name="developer_support_sessions", if_exists=True)
         op.drop_table("developer_support_sessions")

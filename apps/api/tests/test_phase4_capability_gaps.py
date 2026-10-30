@@ -1,18 +1,20 @@
-from datetime import datetime, timedelta, timezone
+import asyncio
+import os
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from app.main import app
 from app.db.models import CapabilityEvidence, Tenant, User
-
+from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
+DEMO_PASSWORD = os.environ.get("KALAM_QA_DEMO_PASSWORD", os.environ["CI_FIXTURE_PASSWORD"])
+ADMIN = {"email": "admin@demo.corp", "password": DEMO_PASSWORD}
 OTHER_TENANT = "isolation-corporation"
-OTHER_USER = {"email": "isolated@other.corp", "password": "DemoOnly!1234"}
+OTHER_USER = {"email": "isolated@other.corp", "password": DEMO_PASSWORD}
 
 
 def login(client, credentials=ADMIN, tenant=TENANT):
@@ -23,12 +25,12 @@ def login(client, credentials=ADMIN, tenant=TENANT):
 def test_phase4_severity_matrix():
     from app.api.routes.capability_gap import _severity
     cases = [
-        (Decimal("4"), None, "insufficient_evidence"),
-        (Decimal("4"), Decimal("4"), "met"),
-        (Decimal("4"), Decimal("3.6"), "minor_gap"),
-        (Decimal("4"), Decimal("3"), "moderate_gap"),
-        (Decimal("4"), Decimal("2"), "major_gap"),
-        (Decimal("4"), Decimal("1"), "critical_gap"),
+        (Decimal(4), None, "insufficient_evidence"),
+        (Decimal(4), Decimal(4), "met"),
+        (Decimal(4), Decimal("3.6"), "minor_gap"),
+        (Decimal(4), Decimal(3), "moderate_gap"),
+        (Decimal(4), Decimal(2), "major_gap"),
+        (Decimal(4), Decimal(1), "critical_gap"),
     ]
     for required, demonstrated, expected in cases:
         assert _severity(required, demonstrated) == expected
@@ -36,7 +38,7 @@ def test_phase4_severity_matrix():
 
 def test_phase4_negative_gap_is_met():
     from app.api.routes.capability_gap import _severity
-    assert _severity(Decimal("3"), Decimal("4")) == "met"
+    assert _severity(Decimal(3), Decimal(4)) == "met"
 
 
 def test_phase4_end_to_end_requirement_evidence_and_recalculation():
@@ -57,6 +59,7 @@ def test_phase4_end_to_end_requirement_evidence_and_recalculation():
 
         # Use a seeded user without relying on a non-existent /users listing route.
         import asyncio
+
         from app.db.session import SessionLocal
         async def first_user():
             async with SessionLocal() as db:
@@ -93,7 +96,7 @@ def test_phase4_end_to_end_requirement_evidence_and_recalculation():
             "user_id": user_id, "target_type": "capability", "target_id": capability_id,
             "evidence_type": "assessment_result", "source_type": "assessment",
             "source_id": source, "demonstrated_level": 3, "confidence": 90,
-            "observed_at": datetime.now(timezone.utc).isoformat()
+            "observed_at": datetime.now(UTC).isoformat()
         })
         assert evidence.status_code == 201, evidence.text
         evidence_id = evidence.json()["id"]
@@ -116,7 +119,10 @@ def test_phase4_end_to_end_requirement_evidence_and_recalculation():
 
         snapshots = client.get(f"/api/v1/capability-gaps/snapshots?user_id={user_id}")
         assert snapshots.status_code == 200
-        assert any(x["role_requirement_id"] == req_id for x in snapshots.json())
+        snapshot = next(
+            x for x in snapshots.json() if x["role_requirement_id"] == req_id
+        )
+        assert snapshot["target"] == f"P4 Gap Capability {token}"
 
 
 def test_phase4_stale_evidence_becomes_insufficient_evidence():
@@ -131,6 +137,7 @@ def test_phase4_stale_evidence_becomes_insufficient_evidence():
         roles = client.get("/api/v1/organization/roles").json()
         role_id = roles[0]["id"]
         import asyncio
+
         from app.db.session import SessionLocal
         async def first_user():
             async with SessionLocal() as db:
@@ -163,7 +170,7 @@ def test_phase4_stale_evidence_becomes_insufficient_evidence():
         async def backdate():
             async with SessionLocal() as db:
                 item = await db.scalar(select(CapabilityEvidence).where(CapabilityEvidence.id == evidence_id))
-                item.observed_at = datetime.now(timezone.utc) - timedelta(days=181)
+                item.observed_at = datetime.now(UTC) - timedelta(days=181)
                 await db.commit()
         asyncio.run(backdate())
 
@@ -175,11 +182,66 @@ def test_phase4_stale_evidence_becomes_insufficient_evidence():
 
 
 def test_phase4_manager_and_tenant_isolation():
+    async def demo_user_id() -> str:
+        from app.db.session import SessionLocal
+
+        async with SessionLocal() as db:
+            value = await db.scalar(
+                select(User.id)
+                .join(Tenant, Tenant.id == User.tenant_id)
+                .where(Tenant.slug == TENANT, User.is_active.is_(True))
+                .order_by(User.email)
+                .limit(1)
+            )
+            assert value is not None
+            return str(value)
+
+    foreign_user_id = asyncio.run(demo_user_id())
     with TestClient(app, base_url="http://localhost") as client:
         login(client)
-        own = client.get("/api/v1/capability-gaps")
-        assert own.status_code == 200
+        own_gaps = client.get("/api/v1/capability-gaps", params={"user_id": foreign_user_id})
+        assert own_gaps.status_code == 200, own_gaps.text
+        own_snapshots = client.get(
+            "/api/v1/capability-gaps/snapshots", params={"user_id": foreign_user_id}
+        )
+        assert own_snapshots.status_code == 200, own_snapshots.text
 
         login(client, tenant=OTHER_TENANT, credentials=OTHER_USER)
-        assert client.get("/api/v1/capability-gaps").status_code in {200, 403}
-        assert client.get("/api/v1/capability-gaps/snapshots").status_code in {200, 403}
+        cross_tenant_gaps = client.get(
+            "/api/v1/capability-gaps", params={"user_id": foreign_user_id}
+        )
+        assert (
+            cross_tenant_gaps.status_code in {403, 404}
+            or (cross_tenant_gaps.status_code == 200 and cross_tenant_gaps.json() == [])
+        ), cross_tenant_gaps.text
+
+        cross_tenant_recalculation = client.post(
+            "/api/v1/capability-gaps/recalculate", params={"user_id": foreign_user_id}
+        )
+        assert (
+            cross_tenant_recalculation.status_code in {403, 404}
+            or (
+                cross_tenant_recalculation.status_code == 200
+                and cross_tenant_recalculation.json().get("records") == 0
+            )
+        ), cross_tenant_recalculation.text
+
+        cross_tenant_snapshots = client.get(
+            "/api/v1/capability-gaps/snapshots", params={"user_id": foreign_user_id}
+        )
+        assert (
+            cross_tenant_snapshots.status_code in {403, 404}
+            or (
+                cross_tenant_snapshots.status_code == 200
+                and cross_tenant_snapshots.json() == []
+            )
+        ), cross_tenant_snapshots.text
+
+        cross_tenant_summary = client.get(
+            "/api/v1/capability-gaps/summary",
+            params={"scope": "person", "scope_id": foreign_user_id},
+        )
+        assert cross_tenant_summary.status_code in {403, 404} or (
+            cross_tenant_summary.status_code == 200
+            and cross_tenant_summary.json().get("total_requirements") == 0
+        ), cross_tenant_summary.text

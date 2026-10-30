@@ -34,7 +34,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
     <DashboardShell title={course.title} eyebrow="Course workspace">
       <div className="data-panel">
         <div className="course-header">
-          <div><span className="tag">{course.enrollment?.status ?? "NOT ENROLLED"}</span><h2>{course.title}</h2><p>{course.description || "Course content and learning objectives."}</p></div>
+          <div><span className="tag">COURSE OVERVIEW</span><h2>{course.title}</h2><p>{course.description || "Course content and learning objectives."}</p></div>
           <div className="hero-status-card light"><strong>Duration</strong><span>{course.estimated_minutes ?? "—"} minutes</span><small>{course.modules.length} learning modules</small>{canManage && <Link className="text-link" href={`/dashboard/catalog/${course.id}/studio`}>Open course studio →</Link>}</div>
         </div>
       </div>

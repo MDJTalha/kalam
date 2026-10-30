@@ -12,7 +12,6 @@ RUN set -eux; for attempt in 1 2 3; do pip install --no-cache-dir --retries 10 -
 COPY app ./app
 COPY alembic.ini .
 COPY alembic ./alembic
-COPY scripts ./scripts
 
 RUN mkdir -p /data/uploads && chown -R app:app /app /data/uploads
 USER app

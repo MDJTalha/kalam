@@ -13,7 +13,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from sqlalchemy import delete, insert, select
+from sqlalchemy.engine import make_url
 
+from app.core.config import settings
 from app.core.security import hash_password
 from app.db.models import (
     Assessment, AssessmentAttempt, Certificate, ComplianceAssignment,
@@ -23,14 +25,59 @@ from app.db.models import (
     RoleSkillRequirement, Skill, Tenant, User, UserRole, UserSkill,
     DevelopmentPlan, DevelopmentMilestone, AuditLog,
 )
-from app.db.session import SessionLocal
-
 TENANT_NAME = "Nexa Beverage & Water International"
 TENANT_SLUG = "nexa-beverage-water-international"
 EMAIL_DOMAIN = "nbwi.global"
 ADMIN_EMAIL = "admin@nbwi.global"
-ADMIN_PASSWORD = os.getenv("ENTERPRISE_ADMIN_PASSWORD", "ChangeMe!2026#NBWI")
+ADMIN_PASSWORD = os.getenv("ENTERPRISE_ADMIN_PASSWORD", "").strip()
 NOW = datetime.now(timezone.utc)
+
+
+def _assert_safe_reference_seed_target() -> None:
+    """Fail closed before any destructive reference-data operation."""
+    environment = settings.app_env.strip().lower()
+    if environment not in {"development", "test", "ci"}:
+        raise RuntimeError(
+            "Reference seeding is disabled outside development/test/CI environments."
+        )
+    if os.getenv("KALAM_ALLOW_DESTRUCTIVE_REFERENCE_SEED", "").strip().lower() != "true":
+        raise RuntimeError(
+            "Set KALAM_ALLOW_DESTRUCTIVE_REFERENCE_SEED=true to explicitly authorize "
+            "the destructive reference-data seed."
+        )
+    if not ADMIN_PASSWORD:
+        raise RuntimeError(
+            "ENTERPRISE_ADMIN_PASSWORD must be explicitly set; no default password is permitted."
+        )
+
+    try:
+        database_url = make_url(settings.database_url)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("Reference seeding requires an explicit PostgreSQL target.") from exc
+
+    if not database_url.drivername.startswith("postgresql"):
+        raise RuntimeError("Reference seeding refuses SQLite and non-PostgreSQL databases.")
+    if database_url.host not in {"localhost", "127.0.0.1", "::1"}:
+        raise RuntimeError("Reference seeding only permits a loopback PostgreSQL database.")
+
+    expected_database = os.getenv("KALAM_REFERENCE_SEED_DB_NAME", "").strip()
+    if not expected_database or database_url.database != expected_database:
+        raise RuntimeError(
+            "KALAM_REFERENCE_SEED_DB_NAME must exactly match the intended PostgreSQL database."
+        )
+
+    if environment in {"test", "ci"}:
+        declared_test_url = os.getenv("KALAM_TEST_DATABASE_URL", "").strip()
+        configured_url = os.getenv("DATABASE_URL", "").strip()
+        if (
+            not declared_test_url
+            or not configured_url
+            or make_url(declared_test_url) != make_url(configured_url)
+            or "test" not in str(database_url.database or "").lower()
+        ):
+            raise RuntimeError(
+                "Test reference seeding requires an explicitly isolated test PostgreSQL database."
+            )
 
 REGIONS = {
     "Asia": [
@@ -72,13 +119,27 @@ def distribute(total, weights):
 
 async def get_permissions(session):
     definitions = {
-        "tenant.read":"View tenant","tenant.manage":"Manage tenant","users.read":"View users",
-        "users.manage":"Manage users","courses.read":"View courses","courses.manage":"Manage courses",
+        "tenant.read":"View tenant","tenant.manage":"Manage tenant",
+        "users.read":"View users","users.manage":"Manage users",
+        "users.team.read":"View direct reports","users.invite.learning_roles":"Invite learning roles",
+        "roles.manage":"Manage delegated custom roles",
+        "courses.assign_team":"Assign published learning to direct reports",
+        "development.team.read":"Read direct reports' development plans and progress",
+        "development.team.manage":"Manage development milestones and feedback for direct reports",
+        "courses.read":"View courses","courses.manage":"Manage courses",
         "learning.access":"Access learning","assessments.manage":"Manage assessments",
         "certificates.manage":"Manage certificates","compliance.manage":"Manage compliance",
-        "skills.manage":"Manage skills","capabilities.read":"View capability framework","capabilities.manage":"Manage capability framework","development.manage":"Manage development plans",
-        "reports.read":"View reports","reports.manage":"Manage saved reports and schedules",
+        "skills.manage":"Manage skills","capabilities.read":"View capability framework",
+        "capabilities.manage":"Manage capability framework","development.manage":"Manage development plans",
+        "capability_assessments.read":"View capability assessments",
+        "capability_assessments.execute":"Execute capability assessments",
+        "competencies.read":"View competencies","competencies.manage":"Manage competencies",
+        "role_requirements.read":"View role requirements","role_requirements.manage":"Manage role requirements",
+        "capability_gaps.read":"View capability gaps","capability_risk.read":"View capability risks",
+        "reports.read":"View reports","reports.team.read":"View manager-scoped team reports",
+        "reports.manage":"Manage saved reports and schedules",
         "audit.read":"View audit logs","files.read":"View governed files","files.manage":"Manage file controls",
+        "evidence.read":"View evidence","evidence.verify":"Verify evidence",
         "integrations.manage":"Manage integrations","ai.manage":"Manage governed AI",
     }
     existing = {item.key: item for item in (await session.execute(select(Permission))).scalars().all()}
@@ -91,12 +152,18 @@ async def get_permissions(session):
     return existing
 
 async def purge_reference_tenants(session):
+    _assert_safe_reference_seed_target()
     await session.execute(delete(Tenant).where(Tenant.slug.in_([
         "demo-corporation", "isolation-corporation", TENANT_SLUG
     ])))
     await session.commit()
 
 async def seed():
+    _assert_safe_reference_seed_target()
+    # Importing the engine can connect to its configured database. Keep it after
+    # the destructive-seed guard so unauthorized environments fail before setup.
+    from app.db.session import SessionLocal
+
     async with SessionLocal() as session:
         await purge_reference_tenants(session)
         tenant_id = uuid4()
@@ -114,19 +181,37 @@ async def seed():
         permissions = await get_permissions(session)
 
         role_permissions = {
-            "Tenant Owner": ["tenant.read","reports.read","audit.read"],
-             "Tenant Administrator": ["tenant.read","tenant.manage","users.read","users.manage","reports.read","audit.read","integrations.manage","capabilities.read","capabilities.manage"],
-            "HR / People Administrator": ["users.read","users.manage","reports.read"],
-            "L&D Administrator": ["courses.read","courses.manage","learning.access","assessments.manage","certificates.manage","reports.read","skills.manage","capabilities.read","capabilities.manage","development.manage"],
-            "Manager": ["users.read","courses.read","learning.access","reports.read","development.manage"],
-            "Instructor": ["courses.read","learning.access","assessments.manage"],
-            "Learner / Employee": ["courses.read","learning.access","development.manage"],
-            "HR/L&D Admin": ["users.read","users.manage","courses.read","courses.manage","learning.access","assessments.manage","certificates.manage","reports.read","skills.manage","capabilities.read","capabilities.manage","development.manage"],
-            "HR Business Partner": ["users.read","reports.read","development.manage"],
-            "Quality & Compliance": ["users.read","courses.read","learning.access","compliance.manage","reports.read","audit.read"],
-            "Auditor": ["reports.read","audit.read","files.read"],
-            "Regional Executive": ["users.read","courses.read","learning.access","reports.read","development.manage"],
-            "Global Executive": ["tenant.read","users.read","courses.read","learning.access","reports.read","audit.read","compliance.manage","skills.manage","capabilities.read","development.manage"],
+            "Tenant Owner": ["tenant.read", "reports.read", "audit.read"],
+            "Tenant Administrator": [
+                "tenant.read", "tenant.manage", "users.read", "users.manage", "reports.read",
+                "audit.read", "integrations.manage", "capabilities.read", "capabilities.manage",
+                "roles.manage",
+            ],
+            "HR / People Administrator": ["users.read", "users.manage", "reports.read", "compliance.manage"],
+            "L&D Administrator": [
+                "courses.read", "courses.manage", "learning.access", "assessments.manage",
+                "certificates.manage", "reports.read", "skills.manage", "capabilities.read",
+                "capabilities.manage", "competencies.read", "competencies.manage",
+                "role_requirements.read", "role_requirements.manage", "development.manage",
+                "users.read", "users.invite.learning_roles",
+            ],
+            "Manager": ["users.team.read", "courses.read", "courses.assign_team", "learning.access", "reports.team.read", "development.manage", "development.team.read", "development.team.manage"],
+            "Instructor": ["courses.read", "learning.access", "assessments.manage"],
+            "Trainer": ["courses.read", "learning.access", "assessments.manage"],
+            "Learner / Employee": ["courses.read", "learning.access", "development.manage", "capability_assessments.read", "capability_assessments.execute"],
+            "HR/L&D Admin": [
+                "users.read", "users.invite.learning_roles", "courses.read", "courses.manage",
+                "learning.access", "assessments.manage", "certificates.manage", "reports.read",
+                "skills.manage", "capabilities.read", "capabilities.manage", "development.manage",
+                "competencies.read", "competencies.manage", "role_requirements.read", "role_requirements.manage",
+            ],
+            "HR Business Partner": ["courses.read", "learning.access", "development.manage"],
+            "Quality & Compliance": ["users.read", "courses.read", "learning.access", "compliance.manage", "reports.read", "audit.read", "files.read", "evidence.read", "evidence.verify"],
+            "Auditor": ["reports.read", "audit.read", "files.read", "evidence.read"],
+            "Assessor": ["capability_assessments.read", "capability_assessments.execute", "competencies.read"],
+            "L&D Analyst": ["courses.read", "reports.read", "capabilities.read", "competencies.read", "capability_assessments.read", "role_requirements.read"],
+            "Regional Executive": ["tenant.read", "courses.read", "learning.access"],
+            "Global Executive": ["tenant.read", "users.read", "courses.read", "learning.access", "reports.read", "audit.read", "compliance.manage", "skills.manage", "capabilities.read", "development.manage", "capability_gaps.read", "capability_risk.read"],
         }
         roles = {}
         for name, keys in role_permissions.items():
@@ -488,7 +573,7 @@ async def seed():
 
         print(f"ENTERPRISE_SEED_COMPLETE tenant={TENANT_SLUG} users={len(users)} courses={len(courses)} org_units={len(org_rows)}")
         print(f"ADMIN_EMAIL={ADMIN_EMAIL}")
-        print(f"ADMIN_PASSWORD={ADMIN_PASSWORD}")
+        print("ADMIN_PASSWORD supplied explicitly via ENTERPRISE_ADMIN_PASSWORD; value not displayed.")
         print("NOTE: Employee identities are synthetic reference records; no dashboard KPI is hardcoded.")
 
 if __name__ == "__main__":

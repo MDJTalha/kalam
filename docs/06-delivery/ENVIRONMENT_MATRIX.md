@@ -1,12 +1,12 @@
-# Corporate LMS — Environment Matrix
+# Kalam — Environment Matrix
 
-Version: 0.3
-Status: Phase 0 current-tree local foundation gate passed — 2026-09-28
+Version: 0.4
+Status: Local API/web checks refreshed — 2026-10-30; hosted QA/UAT/production remain unverified.
 
 | Environment | Web | API | Database | Redis/Jobs | Storage | Secrets |
 |---|---|---|---|---|---|---|
 | Development | Next.js local Windows | FastAPI/Uvicorn | PostgreSQL Docker | Valkey local | Local filesystem | .env files, never committed |
-| QA | Planned isolated web/API | Planned isolated API | Separate DB | Separate worker/cache | Isolated object store | CI/secret store |
+| QA (local smoke only) | Temporary browser instance on port 3002 | Temporary API on port 8003 | Browser smoke used configured local app DB; API regression suite used separate kalam_test DB on port 5435 | No persistent QA worker/cache environment certified | No isolated QA object store certified | Local test-only values; no production secrets |
 | UAT | Production-like containers | Production-like API | Separate DB | Separate worker/cache | Isolated object store | Secret manager |
 | Production | Container behind reverse proxy | Container | Managed/HA PostgreSQL option | Redis/Valkey service | S3-compatible object storage | Secret manager |
 
@@ -17,6 +17,8 @@ Status: Phase 0 current-tree local foundation gate passed — 2026-09-28
 - PostgreSQL host port: 55434 -> container 5432
 - Valkey host port: 56379 -> container 6379
 - ClamAV host port: 55000 -> container 3310
+
+The temporary port-3002/8003 browser pair is a local pre-authentication test harness, not a separately provisioned QA data plane. Its browser checks were read-only. The full API pytest suite and targeted database regressions used the dedicated PostgreSQL test database on port 5435. Do not describe either local harness as hosted QA or UAT.
 
 ## Environment rules
 

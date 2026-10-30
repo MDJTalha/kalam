@@ -31,3 +31,7 @@ No production code change was required for this audit. The active API surface di
 - `pnpm --filter web typecheck` — passed.
 - `git diff --check` — exit code 0; existing repository line-ending normalization warnings remain.
 - Runtime API test execution remains pending because `pytest` is unavailable in the current environment.
+
+## Follow-up — 2026-10-11
+
+The previously identified unmounted finance CRUD implementations were removed from `saas_finance.py`. Active contract, invoice, and payment mutations remain in `saas_commercial.py`; `finance_overview`, `paged_invoices`, and `paged_payments` remain explicitly registered from the finance module at their existing API paths. Database-free route contract tests protect those registrations and the active CRUD operation IDs. The finance integration test now asserts the overview response, but that database-backed test still requires an isolated, healthy test database before it can be executed safely.

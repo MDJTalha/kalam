@@ -10,6 +10,8 @@ Set these outside source control:
 - ALLOWED_HOSTS must include both the public hostname and the internal Compose
   API hostname (for example, `lms.example.com,api`).
 - SMTP settings
+- `STORAGE_BACKEND=s3`, `S3_BUCKET`, and `S3_REGION`; optionally `S3_ENDPOINT_URL` for a compatible provider. Prefer workload identity; otherwise provide `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY` through the deployment secret store. The production Compose default is S3 and startup fails closed if the bucket is missing.
+- `OUTBOUND_HTTP_PROXY` must point to an egress-filtering HTTP(S) proxy used by integration, SSO, AI-provider, and webhook requests. Configure the proxy to block loopback, private, link-local, metadata-service, and non-public destinations after DNS resolution; the application also performs URL/DNS checks and disables ambient proxy inheritance.
 - Optional AI provider settings and secrets. Keep `AI_PROVIDER=disabled` until the
   provider, model and tenant policy have been tested in the Kalam AI workspace.
   Keep `AI_ENABLED=false` until the provider connection test has passed; set it to

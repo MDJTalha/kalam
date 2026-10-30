@@ -1,7 +1,7 @@
-# Kalam 9.9 — Phase 7 Plan & Status
+# Kalam — Phase 5B Plan & Status
 
 ## Phase
-Phase 7 — Coaching, Mentoring & Experience
+Phase 5B — Coaching, Mentoring & Experience
 
 ## Objective
 Turn accepted development recommendations into executable interventions with ownership, activity tracking, evidence capture, verification, and progress signals.
@@ -35,25 +35,24 @@ The Development workspace now includes an execution surface showing active inter
 
 ## Validation
 - Backend compileall: PASS.
-- Backend Ruff on Phase 7/affected files: PASS.
+- Backend Ruff on Phase 5B/affected files: PASS.
 - Alembic heads: single head r7s8t9u0v1w2.
 - Alembic current: r7s8t9u0v1w2.
-- Phase 7 focused API/security tests: 3 passed.
-- Combined Phase 6 + Phase 7 regression tests: 7 passed.
+- Legacy-named focused API/security tests for this Phase 5B scope: 3 passed.
+- Combined development-intelligence/intervention regression tests (historically labeled Phase 6 + Phase 7): 7 passed.
 - Frontend TypeScript: PASS.
-- Production frontend build after Phase 7 UI integration: 86/86 static pages generated; exit code 0.
-## Remaining certification work
-1. Populate controlled non-learning recommendation data and exercise the complete acceptance → intervention → interaction → evidence → verification → capability-evidence workflow end-to-end against live tenant data.
-2. Recalculate capability gaps after verified evidence and certify the post-intervention gap reduction path.
-3. Perform rendered browser QA across employee/manager/admin intervention views.
-4. Resolve the previously observed workspace ESLint execution stall and rerun final lint certification.
+- Historical production frontend build for this intervention UI increment: 86/86 static pages generated; exit code 0. Current-tree build evidence is recorded in PHASE_NUMBERING_AND_ACCEPTANCE_RECONCILIATION_2026-10-27.md.
+## Remaining acceptance work
+1. Perform rendered browser QA across employee/manager/admin intervention views, including keyboard and accessibility checks.
+2. Re-run the quality gate against the exact reviewed commit before release; current-tree local results do not automatically certify a future commit.
+3. Complete applicable Phase 8 target-environment and external-provider gates before any production/commercial release.
 
 ## Acceptance gate
-A Phase 7 intervention is considered operationally complete when Kalam can demonstrate:
+A Phase 5B intervention is considered operationally complete when Kalam can demonstrate:
 
 Capability Gap → Recommended Intervention → Accepted Intervention → Assigned/Executed Action → Interaction → Evidence → Verification → Capability Evidence → Gap Recalculation → Reassessment
 
-Phase 7 currently provides the execution, interaction, evidence and verification foundation. Gap recalculation/reassessment remains an explicit certification gate rather than being claimed complete without live populated data.
+Phase 5B provides the execution, interaction, evidence and verification foundation. Gap recalculation/reassessment remains an explicit acceptance criterion; the 2026-10-27 controlled local journey is recorded in PHASE_NUMBERING_AND_ACCEPTANCE_RECONCILIATION_2026-10-27.md, while rendered browser acceptance remains open.
 
 ## Next phase
-Phase 8 — Performance & Outcome Engine: connect demonstrated capability to performance indicators and organizational/business outcomes.
+Next capability-development increment (scope to be approved through change control): connect demonstrated capability to performance indicators and organizational/business outcomes. This does not change the canonical Phase 8 — Commercial / Production Release Readiness.

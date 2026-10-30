@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from datetime import timedelta
 
 from sqlalchemy import select
@@ -11,6 +12,8 @@ from app.db.session import SessionLocal
 from app.services.email import send_email
 from app.services.notifications import create_notification
 from app.services.phase5_compliance import run_compliance_automation
+
+logger = logging.getLogger("kalam.worker")
 
 POLL_SECONDS = 60
 DUE_SOON_HOURS = 72
@@ -102,6 +105,7 @@ async def run() -> None:
                 await run_compliance_automation(db)
             await process_compliance_notifications()
         except Exception:
+            logger.exception("Compliance worker cycle failed; retrying after backoff")
             await asyncio.sleep(5)
         await asyncio.sleep(POLL_SECONDS)
 

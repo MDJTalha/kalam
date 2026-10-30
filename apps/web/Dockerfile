@@ -25,8 +25,10 @@ RUN npm run lint
 RUN npm run build -- --webpack
 
 # Package a host/CI-prebuilt Next standalone artifact when the Docker builder
-# cannot run the full webpack build within its memory budget.
-FROM deps AS prebuilt-runner
+# cannot run the full webpack build within its memory budget. Next standalone
+# already contains its traced runtime dependencies, so do not install the full
+# development dependency tree again in this runtime-only stage.
+FROM node:24-alpine AS prebuilt-runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -37,6 +39,7 @@ RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 COPY apps/web/public ./apps/web/public
 COPY apps/web/${PREBUILT_DIST_DIR}/standalone ./
 COPY apps/web/${PREBUILT_DIST_DIR}/static ./apps/web/${PREBUILT_DIST_DIR}/static
+RUN chown -R nextjs:nodejs /app
 USER nextjs
 WORKDIR /app/apps/web
 EXPOSE 3000

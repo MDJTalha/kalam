@@ -2,7 +2,7 @@ import { Webhook } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ResourceForm } from "@/components/resource-form";
 import { EmptyState, Section, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Hook={id:string;url:string;event_types:string[];active:boolean;created_at:string};
 
@@ -13,7 +13,9 @@ export default async function WebhooksPage(){
       <EmptyState title="Access restricted" description="Webhook administration requires integration management permission." icon={Webhook}/>
     </DashboardShell>;
   }
-  const hooks=await apiJson<Hook[]>("/api/v1/webhooks");
+  const hooksResult=await apiJsonResult<Hook[]>("/api/v1/webhooks");
+  if(!hooksResult.ok||hooksResult.data===null)return <DashboardShell title="Webhooks" eyebrow="Event delivery" breadcrumbs={[{label:"Integrations",href:"/dashboard/integrations"},{label:"Webhooks"}]}><EmptyState title={hooksResult.status===403?"Webhook access restricted":"Webhook registry unavailable"} description={hooksResult.status===403?"Your role does not have permission to view webhook endpoints.":hooksResult.status===0?"The API service could not be reached. Try again when it is available.":`Webhook endpoints could not be loaded (HTTP ${hooksResult.status}). No empty registry is being shown.`} icon={Webhook}/></DashboardShell>;
+  const hooks=hooksResult.data;
   return <DashboardShell title="Webhooks" eyebrow="Event delivery" breadcrumbs={[{label:"Integrations",href:"/dashboard/integrations"},{label:"Webhooks"}]}>
     <div className="two-column">
       <Section eyebrow="Endpoint" title="Create webhook">

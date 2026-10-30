@@ -1,5 +1,6 @@
 import asyncio
-from datetime import datetime, timedelta, timezone
+import os
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -9,8 +10,8 @@ from app.db.session import SessionLocal
 from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
-LEARNER = {"email": "learner@demo.corp", "password": "DemoOnly!1234"}
+ADMIN = {"email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
+LEARNER = {"email": "learner@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
 
 
 def login(client: TestClient, credentials: dict[str, str]) -> None:
@@ -76,7 +77,7 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
             async with SessionLocal() as db:
                 item = await db.get(ComplianceEvidence, evidence_id)
                 assert item is not None
-                item.verified_at = datetime.now(timezone.utc) - timedelta(days=2)
+                item.verified_at = datetime.now(UTC) - timedelta(days=2)
                 await db.commit()
 
         asyncio.run(age_verified_evidence())
@@ -107,7 +108,7 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
             f"/api/v1/compliance/{exception_assignment_id}/exceptions",
             json={
                 "reason": "Phase 8 expiry lifecycle proof",
-                "expires_at": (datetime.now(timezone.utc) + timedelta(days=2)).isoformat(),
+                "expires_at": (datetime.now(UTC) + timedelta(days=2)).isoformat(),
             },
         )
         assert exception.status_code == 201, exception.text
@@ -120,7 +121,7 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
                 item = await db.get(ComplianceException, exception_id)
                 assignment_item = await db.get(ComplianceAssignment, exception_assignment_id)
                 assert item is not None and assignment_item is not None
-                item.expires_at = datetime.now(timezone.utc) - timedelta(hours=1)
+                item.expires_at = datetime.now(UTC) - timedelta(hours=1)
                 assignment_item.status = "excepted"
                 await db.commit()
 
@@ -170,7 +171,7 @@ def test_phase8_compliance_escalation_is_idempotent() -> None:
             async with SessionLocal() as db:
                 item = await db.get(ComplianceAssignment, assignment_id)
                 assert item is not None
-                item.due_at = datetime.now(timezone.utc) - timedelta(days=3)
+                item.due_at = datetime.now(UTC) - timedelta(days=3)
                 item.status = "assigned"
                 await db.commit()
 

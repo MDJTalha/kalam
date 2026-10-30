@@ -3,10 +3,10 @@
 Enterprise Workforce Capability Platform. The repository keeps the historical `CorpLMS` technical identifier for continuity.
 
 ## Project root
-C:\Projects\CorpLMS
+C:\Projects\Kalam
 
 ## Baseline status
-Phase 0 current-tree local foundation gate passed on 2026-09-28. Hosted CI evidence requires a configured Git remote.
+Local acceptance evidence was refreshed on 2026-10-28: 191 API tests passed; frontend typecheck, lint, production build, authenticated browser lifecycle, accessibility smoke, dependency audit, and local Docker image runtime smoke passed. See `docs/06-delivery/KALAM_LOCAL_ACCEPTANCE_2026-10-28.md` for the evidence and remaining release gates. Hosted CI and staging/production acceptance remain open because the exact candidate has not been committed/pushed or deployed.
 
 ## Primary objective
 Build a production-grade, multi-tenant enterprise workforce capability platform covering learning administration, learners, instructors, HR/L&D workflows, content, assessments, certifications, skills, compliance, readiness, analytics, integrations, commercial SaaS operations and governed AI capabilities.

@@ -5,6 +5,7 @@ import { apiJson, requireUser } from "@/lib/server-api";
 type SupportCase={
   id:string;case_number:string;category:string;severity:string;subject:string;status:string;route?:string|null;created_at:string;resolved_at?:string|null;
 };
+type KnowledgeArticle={id:string;title:string;summary?:string|null;body?:string;category:string;tags:string[];status:string;published_at?:string|null;updated_at:string};
 
 type User={
   first_name:string;last_name:string;email:string;tenant_name?:string|null;job_title?:string|null;
@@ -14,7 +15,8 @@ type User={
 export default async function HelpPage(){
   const user=await requireUser<User>();
   const cases=await apiJson<SupportCase[]>("/api/v1/support/cases");
+  const articles=await apiJson<KnowledgeArticle[]>("/api/v1/support/knowledge");
   return <DashboardShell title="Help & Support" eyebrow="Guidance, diagnostics & service support">
-    {cases===null ? <section className="data-panel" role="alert"><h2>Support history unavailable</h2><p>Your support workspace could not be loaded. Refresh and try again.</p></section> : <HelpCenter user={user} initialCases={cases}/>} 
+    {cases===null ? <section className="data-panel" role="alert"><h2>Support history unavailable</h2><p>Your support workspace could not be loaded. Refresh and try again.</p></section> : <HelpCenter user={user} initialCases={cases} initialArticles={articles??[]} knowledgeUnavailable={articles===null}/>}
   </DashboardShell>;
 }

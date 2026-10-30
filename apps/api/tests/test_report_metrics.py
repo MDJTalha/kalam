@@ -1,9 +1,11 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
+ADMIN = {"email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
 
 
 def test_phase6_metric_contracts_reconcile():

@@ -9,7 +9,7 @@ export default async function AssessmentsPage() {
   const user=await requireUser<{permissions?:string[]}>();
   const canManage=user.permissions?.includes("assessments.manage")??false;
   const result = await apiJsonResult<Assessment[]>("/api/v1/assessments");
-  if (!result.ok) {
+  if (!result.ok || result.data === null) {
     const restricted = result.status === 403;
     const serviceFailure = result.status >= 500;
     return <DashboardShell title="Assessments" eyebrow="Assessment operations"><section className="data-panel" role="alert"><h2>{restricted ? "Assessment access restricted" : serviceFailure ? "Assessment service unavailable" : "Assessments could not be loaded"}</h2><p>{restricted ? "Your role does not have access to the assessment library." : serviceFailure ? "The assessment service did not respond successfully. No empty library is being shown." : result.error || "The assessment library could not be loaded. Refresh and try again."}</p></section></DashboardShell>;

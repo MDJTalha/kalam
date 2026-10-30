@@ -1,3 +1,8 @@
+param(
+    [switch]$RunDatabaseTests,
+    [string]$IsolatedDatabaseUrl
+)
+
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
@@ -75,24 +80,22 @@ docker compose config --quiet
 if ($LASTEXITCODE -ne 0) { throw "docker compose config failed" }
 Write-Host "PASS  docker-compose.yml parses"
 
-docker compose up -d postgres valkey clamav
-if ($LASTEXITCODE -ne 0) { throw "Phase 0 dependency startup failed" }
-
-$postgresReady = $false
-$clamavReady = $false
-for ($i = 0; $i -lt 60; $i++) {
-    $postgresHealth = docker inspect corplms-postgres --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}running{{end}}' 2>$null
-    $clamavHealth = docker inspect corplms-clamav --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}unknown{{end}}' 2>$null
-    if ($postgresHealth -eq "healthy") { $postgresReady = $true }
-    if ($clamavHealth -eq "healthy") { $clamavReady = $true }
-    if ($postgresReady -and $clamavReady) { break }
-    Start-Sleep -Seconds 5
+if ($RunDatabaseTests) {
+    if (-not $IsolatedDatabaseUrl) {
+        throw "Database tests require -IsolatedDatabaseUrl pointing to a separately provisioned disposable test database."
+    }
+    $normalizedTestUrl = $IsolatedDatabaseUrl -replace '^postgresql\+asyncpg:', 'postgresql:'
+    try { $testUri = [uri]$normalizedTestUrl } catch { throw "The isolated database URL is invalid." }
+    $testDbName = $testUri.AbsolutePath.TrimStart('/')
+    if ($testDbName -notmatch '^corplms_test_[a-z0-9_]+$' -or
+        $testUri.Host -notin @('localhost', '127.0.0.1', '::1', 'kalam-test-postgres') -or
+        $testUri.Port -eq 55434) {
+        throw "Refusing database tests: target must be a disposable corplms_test_* database on an isolated test endpoint, never the canonical host port 55434."
+    }
 }
-if (-not $postgresReady) { throw "PostgreSQL did not become healthy" }
-if (-not $clamavReady) { throw "ClamAV did not become healthy" }
-$valkeyPong = docker exec corplms-valkey valkey-cli ping
-if ($valkeyPong -ne "PONG") { throw "Valkey readiness check failed" }
-Write-Host "PASS  PostgreSQL, Valkey and ClamAV are ready"
+else {
+    Write-Warning "Skipping database-connected checks. Use -RunDatabaseTests with a verified isolated corplms_test_* database. No Docker services will be started by this script."
+}
 
 Step "API foundation"
 $Python = "apps/api/.venv/Scripts/python.exe"
@@ -100,17 +103,41 @@ if (-not (Test-Path $Python)) { throw "API virtual environment missing: $Python"
 
 Push-Location "apps/api"
 try {
-    & ".venv/Scripts/python.exe" "scripts/check_migration_head.py"
-    if ($LASTEXITCODE -ne 0) { throw "Alembic head verification failed" }
-
     & ".venv/Scripts/python.exe" -m ruff check app tests
     if ($LASTEXITCODE -ne 0) { throw "Ruff failed" }
 
     & ".venv/Scripts/python.exe" -m mypy app
     if ($LASTEXITCODE -ne 0) { throw "mypy failed" }
 
-    & ".venv/Scripts/python.exe" -m pytest -q
-    if ($LASTEXITCODE -ne 0) { throw "API pytest failed" }
+    if ($RunDatabaseTests) {
+        if (-not $env:CI_FIXTURE_PASSWORD) {
+            throw "Database tests require CI_FIXTURE_PASSWORD matching the isolated test fixtures."
+        }
+        $previousDatabaseUrl = $env:DATABASE_URL
+        $previousTestDatabaseUrl = $env:KALAM_TEST_DATABASE_URL
+        try {
+            $env:DATABASE_URL = $IsolatedDatabaseUrl
+            $env:KALAM_TEST_DATABASE_URL = $IsolatedDatabaseUrl
+            & ".venv/Scripts/python.exe" "scripts/check_migration_head.py"
+            if ($LASTEXITCODE -ne 0) { throw "Alembic head verification failed on isolated test database" }
+            & ".venv/Scripts/python.exe" -m pytest -q
+            if ($LASTEXITCODE -ne 0) { throw "API pytest failed on isolated test database" }
+        }
+        finally {
+            if ($null -eq $previousDatabaseUrl) {
+                Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:DATABASE_URL = $previousDatabaseUrl
+            }
+            if ($null -eq $previousTestDatabaseUrl) {
+                Remove-Item Env:KALAM_TEST_DATABASE_URL -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:KALAM_TEST_DATABASE_URL = $previousTestDatabaseUrl
+            }
+        }
+    }
 }
 finally {
     Pop-Location
@@ -122,8 +149,21 @@ if ($LASTEXITCODE -ne 0) { throw "Web TypeScript failed" }
 npm --workspace apps/web run lint
 if ($LASTEXITCODE -ne 0) { throw "Web ESLint failed" }
 
-npm --workspace apps/web run build
-if ($LASTEXITCODE -ne 0) { throw "Web production build failed" }
+$previousNextDistDir = $env:NEXT_DIST_DIR
+try {
+    # Keep production output isolated from a running local development server.
+    $env:NEXT_DIST_DIR = ".next-phase8-final"
+    npm --workspace apps/web run build
+    if ($LASTEXITCODE -ne 0) { throw "Web production build failed" }
+}
+finally {
+    if ($null -eq $previousNextDistDir) {
+        Remove-Item Env:NEXT_DIST_DIR -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:NEXT_DIST_DIR = $previousNextDistDir
+    }
+}
 
 Step "Repository state"
 $branch = git branch --show-current

@@ -26,6 +26,8 @@ __pycache__/
 apps/web/.next-*/
 qa/chrome-*/
 qa/edge-*/
+# Browser profile captures may contain cookies, session tokens, and local storage.
+qa/phase8-cdp-final/
 .tmp-chrome-qa/
 backups/
 # Local/non-Kalam design collateral

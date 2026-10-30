@@ -1,8 +1,12 @@
-import asyncio, json, urllib.request
-import httpx, websockets
+import asyncio
+import json
+import os
 
-TENANT="demo-corporation"
-ADMIN={"email":"admin@demo.corp","password":"DemoOnly!1234"}
+import httpx
+import websockets
+
+TENANT = "demo-corporation"
+ADMIN = {"email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
 COOKIE_NAME="corp_lms_session"
 
 async def call(ws, i, method, params=None):
@@ -18,8 +22,11 @@ async def main():
         r=await c.post("/api/v1/auth/login",json={"tenant_slug":TENANT,**ADMIN})
         r.raise_for_status()
         cookie=c.cookies.get(COOKIE_NAME)
-    targets=json.load(urllib.request.urlopen("http://127.0.0.1:9222/json"))
-    page=next(x for x in targets if x.get("type")=="page")
+    async with httpx.AsyncClient() as browser_client:
+        targets_response = await browser_client.get("http://127.0.0.1:9222/json")
+        targets_response.raise_for_status()
+        targets = targets_response.json()
+    page = next(x for x in targets if x.get("type") == "page")
     async with websockets.connect(page["webSocketDebuggerUrl"],max_size=20_000_000) as ws:
         i,_=await call(ws,0,"Network.enable")
         i,_=await call(ws,i,"Network.setCookie",{"name":COOKIE_NAME,"value":cookie,"domain":"127.0.0.1","path":"/"})

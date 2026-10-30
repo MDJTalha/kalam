@@ -29,9 +29,25 @@ with httpx.Client(base_url=BASE, timeout=20) as c:
     recs = c.get("/api/v1/development/recommendations", params={"user_id": learner_id, "limit": 50})
     recs.raise_for_status()
     candidates = [x for x in recs.json() if x["intervention_type"] in {"coaching", "mentoring", "experiential", "evidence_building"}]
-    if not candidates:
-        raise RuntimeError("No controlled non-learning recommendation was generated.")
-    recommendation = candidates[0]
+    snapshots_response = c.get("/api/v1/capability-gaps/snapshots", params={"user_id": learner_id})
+    snapshots_response.raise_for_status()
+    snapshots = snapshots_response.json()
+    dynamic_by_requirement = {x["role_requirement_id"]: x for x in gaps}
+    snapshot_by_id = {x["id"]: x for x in snapshots}
+    recommendation = next(
+        (x for x in candidates
+         if x.get("capability_gap_id") in snapshot_by_id
+         and snapshot_by_id[x["capability_gap_id"]]["role_requirement_id"] in dynamic_by_requirement),
+        None,
+    )
+    if recommendation is None:
+        raise RuntimeError("No non-learning recommendation was linked to a current, controlled capability gap.")
+    snapshot = snapshot_by_id[recommendation["capability_gap_id"]]
+    initial = dynamic_by_requirement[snapshot["role_requirement_id"]]
+    if snapshot["target_id"] != initial["target_id"] or snapshot["target_type"] != initial["target_type"]:
+        raise RuntimeError("Recommendation target and dynamic capability gap are inconsistent.")
+    print("INITIAL_GAP", initial["role_requirement_id"], initial["target_type"], initial["target_id"], initial["gap"], initial["severity"])
+    print("RECOMMENDATION_GAP_LINK", recommendation["capability_gap_id"], snapshot["role_requirement_id"])
     accepted = c.post(f"/api/v1/development/recommendations/{recommendation['id']}/accept")
     accepted.raise_for_status()
     interventions = c.get("/api/v1/development/interventions", params={"user_id": learner_id})
@@ -57,7 +73,9 @@ with httpx.Client(base_url=BASE, timeout=20) as c:
     verified.raise_for_status()
     after_evidence = gap_for(c, learner_id, initial["role_requirement_id"])
     print("EVIDENCE_VERIFIED", evidence.json()["id"], verified.status_code)
-    print("POST_EVIDENCE_GAP", after_evidence["gap"], after_evidence["severity"], after_evidence["evidence_count"])
+    print("POST_EVIDENCE_GAP", after_evidence["gap"], after_evidence["severity"], after_evidence["evidence_count"], after_evidence["demonstrated_level"])
+    if after_evidence["evidence_count"] != 1 or after_evidence["demonstrated_level"] != 3.2 or after_evidence["gap"] != 0.8:
+        raise RuntimeError("Verified development evidence did not propagate to the same capability gap; observed=" + repr(after_evidence))
     # Create a governed assessment against the same target and prove baseline -> reassessment.
     assessment = c.post("/api/v1/assessments", json={
         "title": "Phase 7 Live Loop Controlled Assessment",

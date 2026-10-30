@@ -13,9 +13,11 @@ type Course={id:string;title:string;status:string};
 type CoursePage={items:Course[];total:number};
 
 export default async function ManagerPerson({params}:{params:Promise<{id:string}>}){
-  await requireUser();
+  const user = await requireUser<{ permissions?: string[] }>();
+  const canManageDevelopment = user.permissions?.includes("development.team.manage") || user.permissions?.includes("users.read");
+  const canAssignTeamLearning = user.permissions?.includes("courses.assign_team") || user.permissions?.includes("courses.manage");
   const {id}=await params;
-  const [people,plans,coursesResult]=await Promise.all([apiJson<Person[]>("/api/v1/people/team"),apiJson<Plan[]>("/api/v1/development/users/"+id),apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=100&status=published")]);
+  const [people,plans,coursesResult]=await Promise.all([apiJson<Person[]>("/api/v1/people/team"),apiJson<Plan[]>("/api/v1/development/users/"+id),canAssignTeamLearning ? apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=100&status=published") : Promise.resolve({ok:true as const,data:{items:[],total:0}})]);
   const person=people?.find(x=>x.id===id);
   if(!person)notFound();
   if(plans === null || !coursesResult.ok || !coursesResult.data) return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager development view"><StateMessage tone="danger" title="Team member data unavailable">{!coursesResult.ok?`Course lookup HTTP ${coursesResult.status}: ${coursesResult.error||"request failed"}`:"Development plan data could not be loaded."}</StateMessage></DashboardShell>;
@@ -43,12 +45,12 @@ export default async function ManagerPerson({params}:{params:Promise<{id:string}
       <div className="detail-grid manager-profile-grid"><span><b>Email</b>{person.email}</span><span><b>Job title</b>{person.job_title||"—"}</span><span><b>Plans</b>{plans?.length??0}</span><span><b>Goals</b>{goalCount}</span></div>
     </SectionCard>
 
-    <SectionCard eyebrow="Manager action" title="Assign a course">
+    {canAssignTeamLearning ? <SectionCard eyebrow="Manager action" title="Assign a course">
       <div className="manager-action-intro"><BookOpenCheck size={17}/><p>Assign learning with an explicit due date. The learner keeps the assignment in the same learning workflow used by the catalog.</p></div>
       <ManagerCourseAssignment learnerId={person.id} courses={courses??[]} />
-    </SectionCard>
+    </SectionCard> : <SectionCard eyebrow="Manager action" title="Course assignment is read-only"><p>Your current role can review this learner but does not include team course-assignment permission.</p></SectionCard>}
 
     <SectionCard eyebrow="Development" title="Development plans" meta={(plans?.length??0)+" plans"}>{plans?.length?<div className="compact-list manager-plan-list">{plans.map(plan=><div className="compact-row" key={plan.id}><div><strong>{plan.title}</strong><small>{plan.goals.length} goals · {plan.goals.filter(goal=>goal.status==="completed").length} completed</small></div><StatusBadge status={plan.status}/></div>)}</div>:<div className="empty-state"><Target size={25}/><h3>No development plans</h3><p>No plan is currently visible within your manager scope.</p></div>}</SectionCard>
-    <ManagerDevelopmentWorkflow plans={plans??[]} />
+    <ManagerDevelopmentWorkflow plans={plans??[]} canManage={canManageDevelopment} />
   </DashboardShell>;
 }

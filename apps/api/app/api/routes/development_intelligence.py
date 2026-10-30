@@ -1,11 +1,13 @@
 """Phase 6 governed development intervention intelligence."""
 
 from collections.abc import Sequence
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user, user_has_permission
 from app.db.models import (
     CapabilityCompetency,
@@ -15,8 +17,8 @@ from app.db.models import (
     CapabilitySkill,
     Course,
     CourseSkill,
-    DevelopmentPlan,
     DevelopmentIntervention,
+    DevelopmentPlan,
     DevelopmentRecommendation,
     Enrollment,
     LearningPath,
@@ -275,7 +277,7 @@ async def _generate(user, db, target_id):
             course_rows_by_skill.setdefault(course_row[1], []).append(course_row)
 
     out = []
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     for gap in gaps:
         requirement = requirements_by_id.get(gap.role_requirement_id)
         role = roles_by_id.get(requirement.role_id) if requirement else None
@@ -473,7 +475,7 @@ async def _generate(user, db, target_id):
                 .where(
                     LiveSession.tenant_id == user.tenant_id,
                     LiveSession.status == "scheduled",
-                    LiveSession.starts_at >= datetime.now(timezone.utc),
+                    LiveSession.starts_at >= datetime.now(UTC),
                     LiveSession.course_id.in_(list(course_scores) or [UUID(int=0)]),
                 )
                 .limit(20)
@@ -507,7 +509,7 @@ async def _generate(user, db, target_id):
                         7,
                         min(
                             120,
-                            (session.starts_at - datetime.now(timezone.utc)).days + 7,
+                            (session.starts_at - datetime.now(UTC)).days + 7,
                         ),
                     ),
                     {
@@ -804,7 +806,7 @@ async def accept_recommendation(
                         user_id=item.user_id,
                         status="enrolled",
                         source="development_recommendation",
-                        due_at=datetime.now(timezone.utc)
+                        due_at=datetime.now(UTC)
                         + timedelta(days=item.timeframe_days),
                     )
                 )
@@ -821,7 +823,7 @@ async def accept_recommendation(
         goal = {
             "title": f"{item.title} — {item.intervention_type}",
             "target_date": (
-                datetime.now(timezone.utc) + timedelta(days=item.timeframe_days)
+                datetime.now(UTC) + timedelta(days=item.timeframe_days)
             )
             .date()
             .isoformat(),
@@ -857,7 +859,7 @@ async def accept_recommendation(
                     title=item.title,
                     objective=item.rationale,
                     status="planned",
-                    due_at=datetime.now(timezone.utc) + timedelta(days=item.timeframe_days),
+                    due_at=datetime.now(UTC) + timedelta(days=item.timeframe_days),
                     metadata_json={"recommendation_version": item.recommendation_version},
                 )
             )

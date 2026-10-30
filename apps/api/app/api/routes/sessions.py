@@ -2,12 +2,12 @@ from datetime import datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from pydantic import BaseModel, Field, model_validator
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
-from app.db.models import AttendanceRecord, Course, LiveSession, User
+from app.db.models import AttendanceRecord, Course, Enrollment, LiveSession, User
 from app.db.session import get_db
 from app.services.audit import audit
 
@@ -19,7 +19,15 @@ class SessionCreate(BaseModel):
     title: str = Field(min_length=3, max_length=240)
     starts_at: datetime
     ends_at: datetime
-    location: str | None = None
+    location: str | None = Field(default=None, max_length=240)
+
+    @model_validator(mode="after")
+    def validate_time_window(self) -> "SessionCreate":
+        if self.starts_at.utcoffset() is None or self.ends_at.utcoffset() is None:
+            raise ValueError("Session start and end times must include a timezone")
+        if self.ends_at <= self.starts_at:
+            raise ValueError("Session end time must be later than its start time")
+        return self
 
 class AttendanceUpdate(BaseModel):
     user_id: UUID
@@ -29,7 +37,14 @@ class AttendanceUpdate(BaseModel):
 async def list_sessions(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     stmt = select(LiveSession).where(LiveSession.tenant_id == user.tenant_id)
     if not await user_has_permission(user, db, "courses.manage"):
-        stmt = stmt.where(LiveSession.instructor_id == user.id)
+        enrolled_courses = select(Enrollment.course_id).where(
+            Enrollment.tenant_id == user.tenant_id,
+            Enrollment.user_id == user.id,
+            Enrollment.status.notin_(["rejected", "declined"]),
+        )
+        stmt = stmt.where(
+            or_(LiveSession.instructor_id == user.id, LiveSession.course_id.in_(enrolled_courses))
+        )
     result = await db.execute(stmt.order_by(LiveSession.starts_at))
     return list(result.scalars().all())
 
@@ -42,6 +57,16 @@ async def create_session(
     course = await db.scalar(select(Course).where(Course.id == payload.course_id, Course.tenant_id == user.tenant_id))
     if course is None:
         raise HTTPException(status_code=404, detail="Course not found")
+    if payload.instructor_id is not None:
+        instructor = await db.scalar(
+            select(User).where(
+                User.id == payload.instructor_id,
+                User.tenant_id == user.tenant_id,
+                User.is_active.is_(True),
+            )
+        )
+        if instructor is None:
+            raise HTTPException(status_code=404, detail="Instructor not found")
     session = LiveSession(tenant_id=user.tenant_id, **payload.model_dump())
     db.add(session)
     await db.flush()
@@ -63,6 +88,16 @@ async def mark_attendance(
     can_manage_all = await user_has_permission(user, db, "courses.manage")
     if not can_manage_all and session.instructor_id != user.id:
         raise HTTPException(status_code=403, detail="Facilitator scope does not include this session")
+    enrollment = await db.scalar(
+        select(Enrollment.id).where(
+            Enrollment.tenant_id == user.tenant_id,
+            Enrollment.course_id == session.course_id,
+            Enrollment.user_id == learner.id,
+            Enrollment.status.notin_(["rejected", "declined"]),
+        )
+    )
+    if enrollment is None:
+        raise HTTPException(status_code=409, detail="Attendance can only be recorded for an enrolled learner")
     row = await db.scalar(select(AttendanceRecord).where(AttendanceRecord.live_session_id == session.id, AttendanceRecord.user_id == learner.id))
     if row is None:
         row = AttendanceRecord(live_session_id=session.id, user_id=learner.id, status=payload.status)
@@ -104,10 +139,20 @@ async def session_analytics(
 
     roster = await db.execute(
         select(User.id, User.first_name, User.last_name, User.email, AttendanceRecord.status)
-        .join(AttendanceRecord, AttendanceRecord.user_id == User.id)
+        .join(
+            Enrollment,
+            (Enrollment.user_id == User.id)
+            & (Enrollment.course_id == session.course_id)
+            & (Enrollment.tenant_id == user.tenant_id),
+        )
+        .outerjoin(
+            AttendanceRecord,
+            (AttendanceRecord.user_id == User.id)
+            & (AttendanceRecord.live_session_id == session.id),
+        )
         .where(
             User.tenant_id == user.tenant_id,
-            AttendanceRecord.live_session_id == session.id,
+            Enrollment.status.notin_(["rejected", "declined"]),
         )
         .order_by(User.last_name, User.first_name)
     )

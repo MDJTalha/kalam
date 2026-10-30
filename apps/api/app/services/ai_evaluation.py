@@ -4,10 +4,10 @@ import re
 from dataclasses import dataclass
 
 _INJECTION_PATTERNS = (
-    re.compile(r"ignore (all|any|the|previous|prior) instructions", re.I),
-    re.compile(r"(reveal|show|print|return).{0,30}(system prompt|hidden prompt|secret|api key)", re.I),
-    re.compile(r"(you are now|act as|roleplay as).{0,40}(admin|system|developer|root)", re.I),
-    re.compile(r"(bypass|disable|override).{0,30}(policy|guardrail|permission|authorization)", re.I),
+    re.compile(r"ignore (all|any|the|previous|prior) instructions", re.IGNORECASE),
+    re.compile(r"(reveal|show|print|return).{0,30}(system prompt|hidden prompt|secret|api key)", re.IGNORECASE),
+    re.compile(r"(you are now|act as|roleplay as).{0,40}(admin|system|developer|root)", re.IGNORECASE),
+    re.compile(r"(bypass|disable|override).{0,30}(policy|guardrail|permission|authorization)", re.IGNORECASE),
 )
 
 

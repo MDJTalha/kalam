@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from sqlalchemy import delete, select
 
 from app.api.routes.ai import _daily_token_usage, _enforce_daily_token_budget
-from app.db.models import AIInteraction, AIGovernancePolicy, Tenant, User
+from app.db.models import AIGovernancePolicy, AIInteraction, Tenant, User
 from app.db.session import SessionLocal
 
 

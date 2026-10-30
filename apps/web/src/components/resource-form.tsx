@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 
@@ -17,14 +17,21 @@ function LookupMultiField({ value, onChange, label, endpoint, required }: {
   endpoint: string;
   required?: boolean;
 }) {
+  const errorId = useId();
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState<LookupOption[]>([]);
+  const [knownOptions, setKnownOptions] = useState<LookupOption[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const selectedIds = value.split(",").map((item) => item.trim()).filter(Boolean);
-  const selected = selectedIds.map((id) => options.find((item) => item.id === id) ?? { id, label: id });
+  const selected = selectedIds.map((id) => knownOptions.find((item) => item.id === id) ?? options.find((item) => item.id === id) ?? { id, label: id });
 
   useEffect(() => {
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
+      setLoading(true);
+      setError("");
+      setOptions([]);
       try {
         const separator = endpoint.includes("?") ? "&" : "?";
         const selectedIds = value.split(",").map((item) => item.trim()).filter(Boolean);
@@ -36,10 +43,23 @@ function LookupMultiField({ value, onChange, label, endpoint, required }: {
         const response = await fetch(endpoint + separator + lookupParameter, {
           headers: { Accept: "application/json" }, signal: controller.signal,
         });
-        const payload = await response.json().catch(() => ({ items: [] }));
-        const next = Array.isArray(payload.items) ? payload.items : Array.isArray(payload) ? payload : [];
-        if (response.ok) setOptions(next);
-      } catch { /* Keep current options on transient lookup failures. */ }
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const detail = payload && typeof payload === "object" && "detail" in payload && typeof payload.detail === "string" ? payload.detail : null;
+          throw new Error(response.status === 403 ? "You do not have permission to search these records." : detail || `Lookup failed (HTTP ${response.status}).`);
+        }
+        const next = Array.isArray(payload.items) ? payload.items : Array.isArray(payload) ? payload : null;
+        if (!next) throw new Error("The lookup service returned an unexpected response.");
+        setOptions(next);
+        setKnownOptions(current => [...current.filter(item => !next.some((option: LookupOption) => option.id === item.id)), ...next]);
+      } catch (reason) {
+        if (!controller.signal.aborted) {
+          setOptions([]);
+          setError(reason instanceof Error ? reason.message : "The lookup service is unavailable.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
     }, 180);
     return () => { controller.abort(); window.clearTimeout(timer); };
   }, [endpoint, query, value]);
@@ -52,11 +72,12 @@ function LookupMultiField({ value, onChange, label, endpoint, required }: {
   }
 
   return <div className="lookup-multi-field">
-    <label><span>{label}{required ? " *" : ""}</span><input value={query} placeholder="Search people…" onChange={(event) => setQuery(event.target.value)} aria-label={label + " search"} /></label>
+    <label><span>{label}{required ? " *" : ""}</span><input value={query} placeholder="Search people…" onChange={(event) => setQuery(event.target.value)} aria-label={label + " search"} aria-required={required || undefined} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined} /></label>
+    {error ? <small id={errorId} className="form-error" role="alert">{error}</small> : loading ? <small role="status">Searching…</small> : null}
     {selected.length ? <div className="lookup-multi-chips" aria-label="Selected records">{selected.map((item) => <button type="button" key={item.id} onClick={() => toggle(item)}>{item.label} ×</button>)}</div> : null}
     <div className="lookup-multi-options" role={options.length ? "listbox" : undefined} aria-label={options.length ? label + " results" : undefined}>
       {options.slice(0, 8).map((option) => <button type="button" role="option" aria-selected={selectedIds.includes(option.id)} className={selectedIds.includes(option.id) ? "lookup-multi-option selected" : "lookup-multi-option"} key={option.id} onClick={() => toggle(option)}><span>{option.label}</span>{option.meta ? <small>{option.meta}</small> : null}</button>)}
-      {!options.length ? <small className="lookup-multi-empty">Search by name, email or employee number.</small> : null}
+      {!options.length && !loading && !error ? <small className="lookup-multi-empty">{query.trim() ? "No matching records found." : "Search by name, email or employee number."}</small> : null}
     </div>
   </div>;
 }
@@ -115,7 +136,13 @@ export function ResourceForm({ title, endpoint, method="POST", fields, submitLab
   };
 
   async function submit(event: FormEvent) {
-    event.preventDefault(); setBusy(true); setError(""); setMessage("");
+    event.preventDefault(); setError(""); setMessage("");
+    const missingField = fields.find((field) => field.required && !String(values[field.name] ?? "").trim());
+    if (missingField) {
+      setError(`${missingField.label} is required.`);
+      return;
+    }
+    setBusy(true);
     try {
       const requestPayload = buildRequestPayload();
       const resolvedEndpoint = resolveEndpoint(endpoint);

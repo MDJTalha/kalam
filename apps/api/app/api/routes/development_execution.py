@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -7,13 +7,19 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
+from app.api.routes.capability_gap import _recalculate_user_internal
 from app.db.models import (
-    CapabilityEvidence, CapabilityGap, DevelopmentEvidence, DevelopmentInteraction,
-    DevelopmentIntervention, DevelopmentPlan, DevelopmentRecommendation, User,
+    CapabilityEvidence,
+    CapabilityGap,
+    DevelopmentEvidence,
+    DevelopmentInteraction,
+    DevelopmentIntervention,
+    DevelopmentPlan,
+    DevelopmentRecommendation,
+    User,
 )
 from app.db.session import get_db
 from app.services.audit import audit
-from app.api.routes.capability_gap import _recalculate_user_internal
 
 router = APIRouter()
 INTERVENTION_TYPES = {"learning", "coaching", "mentoring", "experiential", "evidence_building"}
@@ -52,28 +58,57 @@ class EvidenceCreate(BaseModel):
     demonstrated_level: float | None = Field(default=None, ge=1, le=5)
     metadata_json: dict = Field(default_factory=dict)
 
-async def _target_scope(user, db, target_id):
+async def _target_scope(user, db, target_id, *, write: bool = False):
     if target_id is None or target_id == user.id:
         return user.id
-    if not await user_has_permission(user, db, "users.read"):
-        raise HTTPException(403, "You cannot manage development for another user")
-    target = await db.scalar(select(User).where(User.id == target_id, User.tenant_id == user.tenant_id, User.is_active.is_(True)))
+
+    can_read_tenant = await user_has_permission(user, db, "users.read")
+    can_read_team = await user_has_permission(user, db, "development.team.read")
+    can_manage_team = await user_has_permission(user, db, "development.team.manage")
+    can_manage_all = await user_has_permission(user, db, "development.recommendations.manage")
+    if not (can_read_tenant or can_read_team or can_manage_team or can_manage_all):
+        raise HTTPException(403, "You cannot access development records for another user")
+
+    target = await db.scalar(select(User).where(
+        User.id == target_id,
+        User.tenant_id == user.tenant_id,
+        User.is_active.is_(True),
+    ))
     if target is None:
         raise HTTPException(404, "User not found")
-    if target.manager_id != user.id and not await user_has_permission(user, db, "development.recommendations.manage"):
+
+    is_direct_report = target.manager_id == user.id
+    if not is_direct_report and not can_read_tenant and not can_manage_all:
         raise HTTPException(403, "Manager scope does not include this user")
+    if write and is_direct_report and not (can_manage_team or can_manage_all or can_read_tenant):
+        raise HTTPException(403, "Team development management is not permitted")
     return target.id
 
 async def _intervention_access(intervention_id, user, db, write=False):
-    item = await db.scalar(select(DevelopmentIntervention).where(DevelopmentIntervention.id == intervention_id, DevelopmentIntervention.tenant_id == user.tenant_id))
+    item = await db.scalar(select(DevelopmentIntervention).where(
+        DevelopmentIntervention.id == intervention_id,
+        DevelopmentIntervention.tenant_id == user.tenant_id,
+    ))
     if item is None:
         raise HTTPException(404, "Development intervention not found")
+
+    # Owners and explicitly assigned facilitators can work on their own records.
     allowed = item.user_id == user.id or item.assignee_id == user.id
-    if not allowed and await user_has_permission(user, db, "users.read"):
-        target = await db.scalar(select(User).where(User.id == item.user_id, User.tenant_id == user.tenant_id))
-        allowed = bool(target and target.manager_id == user.id)
-    if not allowed and await user_has_permission(user, db, "development.recommendations.manage"):
-        allowed = True
+    if not allowed:
+        target = await db.scalar(select(User).where(
+            User.id == item.user_id,
+            User.tenant_id == user.tenant_id,
+            User.is_active.is_(True),
+        ))
+        is_direct_report = bool(target and target.manager_id == user.id)
+        if is_direct_report:
+            permission_key = "development.team.manage" if write else "development.team.read"
+            allowed = await user_has_permission(user, db, permission_key)
+        if not allowed:
+            allowed = await user_has_permission(user, db, "users.read")
+        if not allowed:
+            allowed = await user_has_permission(user, db, "development.recommendations.manage")
+
     if not allowed:
         raise HTTPException(403, "Development intervention access is not permitted")
     return item
@@ -183,8 +218,12 @@ async def list_interventions(
     ]
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-async def create_intervention(payload: InterventionCreate, user: User = Depends(require_permission("development.recommendations.manage")), db: AsyncSession = Depends(get_db)):
-    uid = await _target_scope(user, db, payload.user_id)
+async def create_intervention(payload: InterventionCreate, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    can_manage_all = await user_has_permission(user, db, "development.recommendations.manage")
+    can_manage_team = await user_has_permission(user, db, "development.team.manage")
+    if not can_manage_all and not (can_manage_team and payload.user_id is not None and payload.user_id != user.id):
+        raise HTTPException(403, "Development intervention creation is not permitted")
+    uid = await _target_scope(user, db, payload.user_id, write=True)
     recommendation = None
     if payload.recommendation_id:
         recommendation = await db.scalar(select(DevelopmentRecommendation).where(DevelopmentRecommendation.id == payload.recommendation_id, DevelopmentRecommendation.tenant_id == user.tenant_id, DevelopmentRecommendation.user_id == uid))
@@ -228,7 +267,7 @@ async def update_intervention(intervention_id: UUID, payload: InterventionUpdate
         if key in values:
             setattr(item, key, values[key])
     if item.status == "completed" and item.completed_at is None:
-        item.completed_at = datetime.now(timezone.utc)
+        item.completed_at = datetime.now(UTC)
     elif item.status != "completed":
         item.completed_at = None
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="development.intervention.updated", entity_type="development_intervention", entity_id=str(item.id), metadata={"status": item.status})
@@ -273,7 +312,7 @@ async def verify_evidence(intervention_id: UUID, evidence_id: UUID, user: User =
         raise HTTPException(404, "Development evidence not found")
     evidence.verification_status = "verified"
     evidence.verified_by = user.id
-    evidence.verified_at = datetime.now(timezone.utc)
+    evidence.verified_at = datetime.now(UTC)
     recommendation = await db.scalar(select(DevelopmentRecommendation).where(DevelopmentRecommendation.id == item.recommendation_id, DevelopmentRecommendation.tenant_id == user.tenant_id)) if item.recommendation_id else None
     gap = await db.scalar(select(CapabilityGap).where(CapabilityGap.id == recommendation.capability_gap_id, CapabilityGap.tenant_id == user.tenant_id)) if recommendation else None
     level = evidence.metadata_json.get("demonstrated_level") if isinstance(evidence.metadata_json, dict) else None

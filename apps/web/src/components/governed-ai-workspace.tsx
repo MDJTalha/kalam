@@ -124,6 +124,7 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
   const [modelEnabled, setModelEnabled] = useState(false);
   const [adminBusy, setAdminBusy] = useState(false);
   const [adminMessage, setAdminMessage] = useState("");
+  const [adminMessageTone, setAdminMessageTone] = useState<"success" | "warning" | "danger">("warning");
   const [reviewBusy, setReviewBusy] = useState("");
   const [answer, setAnswer] = useState("");
   const [sources, setSources] = useState<AISource[]>([]);
@@ -157,8 +158,10 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
       setProviders((items) => [...items, payload]);
       setModelProviderId((value) => value || payload.id);
       setProviderName("");
+      setAdminMessageTone("success");
       setAdminMessage("Provider saved. Run its connection test before enabling AI policy.");
     } catch (err) {
+      setAdminMessageTone("danger");
       setAdminMessage(err instanceof Error ? err.message : "Provider could not be saved.");
     } finally {
       setAdminBusy(false);
@@ -171,8 +174,10 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
     try {
       const payload = await jsonResponse(await fetch(`/api/lms/ai/admin/providers/${providerId}/test`, { method: "POST" }));
       setProviders((items) => items.map((item) => item.id === providerId ? { ...item, status: payload.provider_status, last_check_status: "passed", last_check_message: payload.message } : item));
+      setAdminMessageTone("success");
       setAdminMessage(payload.message || "Provider connection passed.");
     } catch (err) {
+      setAdminMessageTone("danger");
       setAdminMessage(err instanceof Error ? err.message : "Provider connection test failed.");
     } finally {
       setAdminBusy(false);
@@ -189,8 +194,10 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
         body: JSON.stringify({ enabled }),
       }));
       setProviders((items) => items.map((item) => item.id === providerId ? payload : item));
+      setAdminMessageTone("success");
       setAdminMessage(enabled ? "Provider enabled. Enable the tenant policy only after selecting the approved model and controls." : "Provider disabled.");
     } catch (err) {
+      setAdminMessageTone("danger");
       setAdminMessage(err instanceof Error ? err.message : "Provider state could not be updated.");
     } finally {
       setAdminBusy(false);
@@ -217,8 +224,10 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
       setModels((items) => [...items.filter((item) => !(modelEnabled && item.provider_id === payload.provider_id)), payload]);
       setModelKey("");
       setModelDisplayName("");
+      setAdminMessageTone("success");
       setAdminMessage("Model saved. Enable the governance policy only after the provider and model are ready.");
     } catch (err) {
+      setAdminMessageTone("danger");
       setAdminMessage(err instanceof Error ? err.message : "Model could not be saved.");
     } finally {
       setAdminBusy(false);
@@ -237,8 +246,10 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
         body: JSON.stringify(policy),
       }));
       setPolicy(payload);
+      setAdminMessageTone("success");
       setAdminMessage(payload.enabled ? "AI policy enabled. Confirm provider status and model readiness before user rollout." : "AI policy saved disabled.");
     } catch (err) {
+      setAdminMessageTone("danger");
       setAdminMessage(err instanceof Error ? err.message : "AI policy could not be saved.");
     } finally {
       setAdminBusy(false);
@@ -278,7 +289,24 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
     }
   }
 
-  async function reviewInteraction(interactionId: string, decision: "approved" | "rejected") {
+  async function refreshGovernance() {
+    setAdminBusy(true);
+    setAdminMessage("");
+    try {
+      const response = await fetch("/api/lms/ai/admin/telemetry", { cache: "no-store" });
+      const payload = await jsonResponse(response);
+      setTelemetry(payload);
+      setAdminMessageTone("success");
+      setAdminMessage("Governance telemetry refreshed from the server.");
+    } catch (err) {
+      setAdminMessageTone("danger");
+      setAdminMessage(err instanceof Error ? err.message : "Governance telemetry could not be refreshed.");
+    } finally {
+      setAdminBusy(false);
+    }
+  }
+
+  async function reviewInteraction(interactionId: string, decision: "approved" | "rejected" | "needs_followup") {
     setReviewBusy(interactionId);
     setError("");
     try {
@@ -327,14 +355,14 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
             <div><span className="eyebrow">Deployment configuration</span><h2>Connect and govern an AI provider</h2><p>Credentials remain in the deployment secret store; Kalam stores only the environment-variable reference.</p></div>
             <ShieldCheck size={22} aria-hidden="true" />
           </div>
-          {adminMessage ? <StateMessage tone="warning" title="AI configuration update">{adminMessage}</StateMessage> : null}
+          {adminMessage ? <StateMessage tone={adminMessageTone} title={adminMessageTone === "success" ? "AI configuration updated" : adminMessageTone === "danger" ? "AI configuration failed" : "AI configuration update"}>{adminMessage}</StateMessage> : null}
           <div className="form-grid">
             <form className="soft-panel stack-md" onSubmit={createProvider}>
               <strong>Register provider</strong>
               <label className="form-field"><span>Name</span><input value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder="Production OpenAI" required /></label>
               <label className="form-field"><span>Provider type</span><select value={providerType} onChange={(event) => setProviderType(event.target.value)}>{PROVIDER_TYPES.map((item) => <option value={item.value} key={item.value}>{item.label}</option>)}</select></label>
               <label className="form-field"><span>Endpoint URL</span><input type="url" value={providerEndpoint} onChange={(event) => setProviderEndpoint(event.target.value)} placeholder="https://api.openai.com" required={providerType !== "ollama"} /><small>Use the provider base URL; OpenAI-compatible endpoints may include /v1.</small></label>
-              <label className="form-field"><span>Secret reference</span><input value={providerSecretRef} onChange={(event) => setProviderSecretRef(event.target.value.toUpperCase())} placeholder="OPENAI_API_KEY" /><small>Kalam never accepts or stores the secret value itself.</small></label>
+              <label className="form-field"><span>Secret reference</span><input value={providerSecretRef} onChange={(event) => setProviderSecretRef(event.target.value.toUpperCase())} placeholder="OPENAI_API_KEY" /><small>Only OPENAI_API_KEY at api.openai.com or ANTHROPIC_API_KEY at api.anthropic.com is accepted. Credentials are deployment-managed; tenant-isolated secret-vault integration is still required for separate customer keys.</small></label>
               <div className="form-grid">
                 <label className="form-field"><span>Priority</span><input type="number" min={0} max={1000} value={providerPriority} onChange={(event) => setProviderPriority(Number(event.target.value))} /></label>
                 <label className="form-field"><span>Initial state</span><select value={providerEnabled ? "enabled" : "disabled"} onChange={(event) => setProviderEnabled(event.target.value === "enabled")}><option value="disabled">Disabled until tested</option><option value="enabled">Enabled</option></select></label>
@@ -391,7 +419,7 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
         <section className="data-panel">
           <div className="section-heading compact">
             <div><span className="eyebrow">Kalam AI governance</span><h2>Governance &amp; oversight</h2></div>
-            <ShieldCheck size={22} aria-hidden="true" />
+            <div className="button-row"><button className="button button-secondary" type="button" disabled={adminBusy} onClick={() => void refreshGovernance()}>{adminBusy ? "Refreshing..." : "Refresh telemetry"}</button><ShieldCheck size={22} aria-hidden="true" /></div>
           </div>
           {telemetry ? <div className="metric-grid">
             <div className="metric-card"><span>Requests</span><strong>{telemetry.requests}</strong></div>
@@ -412,7 +440,7 @@ export function GovernedAIWorkspace({ initialStatus, canManage = false, initialT
                 </div>
                 <div className="button-row">
                   <button className="button button-secondary" type="button" disabled={reviewBusy === item.id} onClick={() => reviewInteraction(item.id, "approved")}>Approve</button>
-                  <button className="button button-secondary" type="button" disabled={reviewBusy === item.id} onClick={() => reviewInteraction(item.id, "rejected")}>Reject</button>
+                  <button className="button button-secondary" type="button" disabled={reviewBusy === item.id} onClick={() => reviewInteraction(item.id, "rejected")}>Reject</button><button className="button button-secondary" type="button" disabled={reviewBusy === item.id} onClick={() => reviewInteraction(item.id, "needs_followup")}>Follow up</button>
                 </div>
               </div>
             ))}

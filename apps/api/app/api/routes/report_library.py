@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -39,7 +39,7 @@ class SchedulePayload(BaseModel):
 
 
 def _schedule_guard(payload: SchedulePayload) -> None:
-    if payload.next_run_at <= datetime.now(timezone.utc):
+    if payload.next_run_at <= datetime.now(UTC):
         raise HTTPException(status_code=422, detail="next_run_at must be in the future")
     if any("@" not in item or len(item) > 320 for item in payload.recipients):
         raise HTTPException(status_code=422, detail="Invalid recipient")
@@ -213,7 +213,7 @@ async def run_saved_report(
             "measured_completions": len(durations),
         }
     else:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         result = await db.execute(
             select(ComplianceAssignment.status, ComplianceAssignment.due_at)
             .where(ComplianceAssignment.tenant_id == user.tenant_id)
@@ -238,7 +238,7 @@ async def run_saved_report(
         metadata={"report_type": item.report_type},
     )
     await db.commit()
-    return {"id": str(item.id), "name": item.name, "report_type": item.report_type, "generated_at": datetime.now(timezone.utc), "data": data}
+    return {"id": str(item.id), "name": item.name, "report_type": item.report_type, "generated_at": datetime.now(UTC), "data": data}
 
 
 @router.patch("/saved/{report_id}")

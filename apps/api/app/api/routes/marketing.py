@@ -1,8 +1,8 @@
 """Public inquiry intake and a tenant-restricted Kalam review queue."""
 
-from datetime import datetime, timezone
-from hashlib import sha256
 import re
+from datetime import UTC, datetime
+from hashlib import sha256
 from typing import Literal
 from uuid import UUID
 
@@ -138,7 +138,7 @@ async def create_inquiry(payload: InquiryCreate, db: AsyncSession = Depends(get_
         utm_medium=payload.utm_medium or None,
         utm_campaign=payload.utm_campaign or None,
         landing_path=payload.landing_path or None,
-        consent_at=datetime.now(timezone.utc),
+        consent_at=datetime.now(UTC),
     )
     db.add(inquiry)
     await db.commit()

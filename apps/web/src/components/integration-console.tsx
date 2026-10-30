@@ -57,13 +57,14 @@ export function IntegrationConsole({ initialRows }: { initialRows: Integration[]
 
   const selected=rows.find(x=>x.provider===provider);
   const providerFields=useMemo(()=>fields(provider),[provider]);
+  const configurationDirty=JSON.stringify(config)!==JSON.stringify(selected?.config??{})||status!==(selected?.status??"configured");
 
   function selectProvider(value:string){
     const row=rows.find(x=>x.provider===value);
     setProvider(value); setConfig(row?.config || {}); setStatus(row?.status || "configured"); setTestResult(null); setMessage(""); setError("");
   }
 
-  function setValue(key:string,value:string|boolean|number){setConfig(current=>({...current,[key]:value}));setMessage("");setError("");setTestResult(null);}
+  function setValue(key:string,value:string|boolean|number){setConfig(current=>({...current,[key]:value}));setStatus(current=>current==="disabled"?"disabled":"configured");setMessage("");setError("");setTestResult(null);}
 
   async function request<T>(url:string,init:RequestInit={}){
     const response=await fetch(url,{...init,headers:{"Content-Type":"application/json",...(init.headers||{})}});
@@ -76,7 +77,7 @@ export function IntegrationConsole({ initialRows }: { initialRows: Integration[]
     setBusy(true);setMessage("");setError("");setTestResult(null);
     try{
       const data=await request<Integration>("/api/lms/integrations/"+provider,{method:"PUT",body:JSON.stringify({provider,status,config})});
-      setRows(current=>[...current.filter(item=>item.provider!==provider),data]);setMessage("Configuration saved. Run a connection test before treating it as healthy.");
+      setRows(current=>[...current.filter(item=>item.provider!==provider),data]);setConfig(data.config??config);setStatus(data.status??status);setMessage("Configuration saved. Run a connection test before treating it as healthy.");
     }catch(e){setError(e instanceof Error?e.message:"Unable to save integration.");}finally{setBusy(false);}
   }
 
@@ -84,9 +85,24 @@ export function IntegrationConsole({ initialRows }: { initialRows: Integration[]
     setBusy(true);setMessage("");setError("");setTestResult(null);
     try{
       const data=await request<{ok:boolean;message:string;latency_ms:number}>("/api/lms/integrations/"+provider+"/test",{method:"POST"});
-      setTestResult(data);setMessage("Connection verified. Registry evidence has been updated.");
-      setRows(current=>current.map(item=>item.provider===provider?{...item,status:"connected",last_check_status:"passed",last_check_message:data.message}:item));
-    }catch(e){setError(e instanceof Error?e.message:"Connection test failed.");setTestResult({ok:false,message:e instanceof Error?e.message:"Connection test failed."});}
+      const checkedAt=new Date().toISOString();
+      setTestResult(data);
+      if(data.ok){
+        setStatus("connected");
+        setMessage("Connection verified. Registry evidence has been updated.");
+        setRows(current=>current.map(item=>item.provider===provider?{...item,status:"connected",last_check_status:"passed",last_check_message:data.message,last_checked_at:checkedAt}:item));
+      }else{
+        const failureMessage=data.message||"Connection test failed.";
+        setStatus(current=>current==="disabled"?"disabled":"error");
+        setError(failureMessage);
+        setRows(current=>current.map(item=>item.provider===provider?{...item,status:item.status==="disabled"?"disabled":"error",last_check_status:"failed",last_check_message:failureMessage,last_checked_at:checkedAt}:item));
+      }
+    }catch(e){
+      const failureMessage=e instanceof Error?e.message:"Connection test failed.";
+      setError(failureMessage);setTestResult({ok:false,message:failureMessage});
+      setStatus(current=>current==="disabled"?"disabled":"error");
+      setRows(current=>current.map(item=>item.provider===provider?{...item,status:item.status==="disabled"?"disabled":"error",last_check_status:"failed",last_check_message:failureMessage,last_checked_at:new Date().toISOString()}:item));
+    }
     finally{setBusy(false);}
   }
 
@@ -100,14 +116,15 @@ export function IntegrationConsole({ initialRows }: { initialRows: Integration[]
         {Object.keys(labels).map(key=>{const row=rows.find(item=>item.provider===key);return <button type="button" className={provider===key?"integration-provider selected":"integration-provider"} key={key} onClick={()=>selectProvider(key)}><span><strong>{labels[key]}</strong><small>{row?.last_check_status==="passed"?"Connection verified":row?.status||"Not configured"}</small></span>{row?.last_check_status==="passed"?<CheckCircle2 size={15}/>:<ShieldCheck size={15}/>}</button>})}
       </div>
       <div className="integration-form-panel">
-        <div className="integration-form-heading"><div><span className="eyebrow">{labels[provider]}</span><h4>{provider==="email"?"Transactional delivery":provider==="hris"?"Workforce data":"Enterprise integration"}</h4></div><select value={status} onChange={e=>setStatus(e.target.value)} aria-label="Connection state"><option value="configured">Configured</option><option value="disabled">Disabled</option></select></div>
+        <div className="integration-form-heading"><div><span className="eyebrow">{labels[provider]}</span><h4>{provider==="email"?"Transactional delivery":provider==="hris"?"Workforce data":"Enterprise integration"}</h4></div><select value={status} onChange={e=>setStatus(e.target.value)} aria-label="Connection state"><option value="configured">Configured</option><option value="disabled">Disabled</option><option value="connected" disabled>Connected (verified by test)</option><option value="error" disabled>Connection error (test failed)</option></select></div>
         <div className="form-grid integration-fields">
-          {providerFields.map(field=>field.type==="boolean"?<label className="integration-toggle" key={field.key}><input type="checkbox" checked={Boolean(config[field.key])} onChange={e=>setValue(field.key,e.target.checked)}/><span><strong>{field.label}</strong>{field.help?<small>{field.help}</small>:null}</span></label>:<label className="form-field" key={field.key}><span>{field.label}</span><input type={field.type==="url"?"url":"text"} inputMode={field.type==="number"?"numeric":undefined} value={String(config[field.key]??"")} placeholder={field.placeholder} onChange={e=>setValue(field.key,field.type==="number"?Number(e.target.value):e.target.value)}/>{field.help?<small>{field.help}</small>:null}</label>)}
+          {providerFields.map(field=>field.type==="boolean"?<label className="integration-toggle" key={field.key}><input type="checkbox" checked={Boolean(config[field.key])} onChange={e=>setValue(field.key,e.target.checked)}/><span><strong>{field.label}</strong>{field.help?<small>{field.help}</small>:null}</span></label>:<label className="form-field" key={field.key}><span>{field.label}</span><input type={field.type==="url"?"url":field.type==="number"?"number":"text"} inputMode={field.type==="number"?"numeric":undefined} value={String(config[field.key]??"")} placeholder={field.placeholder} onChange={e=>setValue(field.key,field.type==="number"?(e.target.value===""?"":Number(e.target.value)):e.target.value)}/>{field.help?<small>{field.help}</small>:null}</label>)}
         </div>
+        {configurationDirty?<p className="form-hint" role="status">Save configuration changes before running the connection test.</p>:null}
         {error?<div className="form-error" role="alert">{error}</div>:null}
         {message?<div className="form-success" role="status"><CheckCircle2 size={14}/>{message}</div>:null}
         {testResult?<div className={testResult.ok?"integration-test-result passed":"integration-test-result failed"}><FlaskConical size={15}/><div><strong>{testResult.ok?"Connection test passed":"Connection test failed"}</strong><p>{testResult.message}{testResult.latency_ms!=null?" · "+testResult.latency_ms+" ms":""}</p></div></div>:null}
-        <div className="form-actions integration-actions"><button className="button button-secondary" type="button" onClick={()=>void save()} disabled={busy}><Save size={15}/> Save configuration</button><button className="button button-primary" type="button" onClick={()=>void test()} disabled={busy||!selected}><FlaskConical size={15}/> Test connection</button></div>
+        <div className="form-actions integration-actions"><button className="button button-secondary" type="button" onClick={()=>void save()} disabled={busy}><Save size={15}/> Save configuration</button><button className="button button-primary" type="button" onClick={()=>void test()} disabled={busy||!selected||configurationDirty}><FlaskConical size={15}/> {configurationDirty?"Save before testing":"Test connection"}</button></div>
       </div>
     </div>
   </div>;

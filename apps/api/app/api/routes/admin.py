@@ -1,6 +1,6 @@
 from datetime import timedelta
-from typing import Any
 from secrets import token_urlsafe
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -8,15 +8,45 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, require_permission
+from app.api.deps import (
+    get_current_user,
+    is_platform_developer,
+    require_permission,
+    user_has_permission,
+)
 from app.core.security import session_token_hash, utcnow
-from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User
+from app.db.models import (
+    AuditLog,
+    Invitation,
+    OrgUnit,
+    Permission,
+    Role,
+    RolePermission,
+    SessionRecord,
+    Tenant,
+    User,
+)
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.email import send_email
 from app.services.learning_reminders import run_course_due_reminders
 
 router = APIRouter()
+
+# Tenant administrators may delegate normal workforce and learning tasks to
+# custom roles, but cannot delegate account/tenant/role administration,
+# integrations, audit control, platform permissions or SaaS CRM access.
+TENANT_DELEGABLE_ROLE_PERMISSIONS = {
+    "users.read", "users.team.read",
+    "courses.read", "courses.manage", "courses.assign_team", "learning.access",
+    "development.team.read", "development.team.manage",
+    "assessments.manage", "capability_assessments.read", "capability_assessments.execute",
+    "certificates.manage", "compliance.manage", "skills.manage",
+    "capabilities.read", "competencies.read", "role_requirements.read",
+    "development.manage", "development.recommendations.read",
+    "capability_gaps.read", "capability_risk.read", "evidence.read", "files.read",
+    "reports.read", "reports.team.read",
+}
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
     return await is_platform_developer(user, db)
@@ -106,11 +136,9 @@ class RoleCreate(BaseModel):
 @router.post("/roles", status_code=201)
 async def create_role(
     payload: RoleCreate,
-    user: User = Depends(require_permission("tenant.manage")),
+    user: User = Depends(require_permission("roles.manage")),
     db: AsyncSession = Depends(get_db),
 ):
-    if not await _is_platform_developer(user, db):
-        raise HTTPException(status_code=403, detail="Only Kalam Platform Developers can create tenant roles")
     name = payload.name.strip()
     if not name:
         raise HTTPException(status_code=422, detail="Role name is required")
@@ -118,8 +146,12 @@ async def create_role(
     if duplicate:
         raise HTTPException(status_code=409, detail="A role with this name already exists")
     requested = sorted(set(payload.permission_keys))
-    if any(key.startswith("saas.crm.") for key in requested):
-        raise HTTPException(status_code=403, detail="Kalam CRM permissions cannot be assigned to tenant roles")
+    forbidden = sorted(set(requested) - TENANT_DELEGABLE_ROLE_PERMISSIONS)
+    if forbidden:
+        raise HTTPException(
+            status_code=403,
+            detail={"non_delegable_permissions": forbidden},
+        )
     permission_rows = list((await db.execute(select(Permission).where(Permission.key.in_(requested)))).scalars().all()) if requested else []
     found = {item.key for item in permission_rows}
     unknown = sorted(set(requested) - found)
@@ -141,7 +173,10 @@ async def list_permissions(
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Permission).order_by(Permission.key)
-    stmt = stmt.where(~Permission.key.like("saas.crm.%"))
+    stmt = stmt.where(
+        ~Permission.key.like("saas.crm.%"),
+        ~Permission.key.like("platform.%"),
+    )
     result = await db.execute(stmt)
     return [{"id": str(item.id), "key": item.key, "description": item.description} for item in result.scalars().all()]
 
@@ -168,27 +203,27 @@ async def role_permissions(
 async def update_role_permissions(
     role_id: UUID,
     payload: RolePermissionsUpdate,
-    user: User = Depends(require_permission("tenant.manage")),
+    user: User = Depends(require_permission("roles.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == user.tenant_id))
     if role is None:
         raise HTTPException(status_code=404, detail="Role not found")
-    is_developer = await _is_platform_developer(user, db)
-    if not is_developer:
-        raise HTTPException(status_code=403, detail="Role permission changes are governed by Kalam Platform Developers")
+    if role.role_kind != "custom":
+        raise HTTPException(status_code=403, detail="Predefined and platform roles are protected")
     requested = sorted(set(payload.permission_keys))
-    if any(key.startswith("saas.crm.") for key in requested):
-        raise HTTPException(status_code=403, detail="Kalam CRM permissions are platform-only")
+    forbidden = sorted(set(requested) - TENANT_DELEGABLE_ROLE_PERMISSIONS)
+    if forbidden:
+        raise HTTPException(
+            status_code=403,
+            detail={"non_delegable_permissions": forbidden},
+        )
     permission_result = await db.execute(select(Permission).where(Permission.key.in_(requested)))
     permissions = list(permission_result.scalars().all())
     found = {item.key for item in permissions}
     unknown = sorted(set(requested) - found)
     if unknown:
         raise HTTPException(status_code=422, detail={"unknown_permissions": unknown})
-
-    if role.name == "Tenant Administrator" and "tenant.manage" not in requested:
-        raise HTTPException(status_code=422, detail="Tenant Administrator must retain tenant.manage")
 
     existing_result = await db.execute(
         select(RolePermission).where(RolePermission.role_id == role.id)
@@ -217,17 +252,53 @@ async def update_role_permissions(
     return {"role_id": str(role.id), "permission_keys": requested}
 
 
+@router.get("/invitations/roles")
+async def list_invitable_roles(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return only tenant roles the caller is allowed to assign in an invitation."""
+    can_manage_all_users = await user_has_permission(user, db, "users.manage")
+    can_invite_learning_roles = await user_has_permission(user, db, "users.invite.learning_roles")
+    if not can_manage_all_users and not can_invite_learning_roles:
+        raise HTTPException(status_code=403, detail="User invitation is not permitted")
+
+    stmt = select(Role.id, Role.name).where(Role.tenant_id == user.tenant_id)
+    if not can_manage_all_users:
+        allowed_names = (
+            "manager", "trainer", "instructor", "learner",
+            "learner / employee", "employee / learner",
+        )
+        stmt = stmt.where(Role.name.in_(allowed_names))
+    result = await db.execute(stmt.order_by(Role.name))
+    return [{"id": str(row.id), "name": row.name} for row in result.all()]
+
+
 @router.post("/invitations", status_code=201)
 async def create_invitation(
     payload: InvitationCreate,
-    user: User = Depends(require_permission("users.manage")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    can_manage_all_users = await user_has_permission(user, db, "users.manage")
+    can_invite_learning_roles = await user_has_permission(user, db, "users.invite.learning_roles")
+    if not can_manage_all_users and not can_invite_learning_roles:
+        raise HTTPException(status_code=403, detail="User invitation is not permitted")
+
     role = await db.scalar(
         select(Role).where(Role.id == payload.role_id, Role.tenant_id == user.tenant_id)
     )
     if role is None:
         raise HTTPException(status_code=404, detail="Role not found")
+    learning_invite_roles = {
+        "manager", "trainer", "instructor", "learner", "learner / employee",
+        "employee / learner",
+    }
+    if not can_manage_all_users and role.name.strip().lower() not in learning_invite_roles:
+        raise HTTPException(
+            status_code=403,
+            detail="L&D administrators may invite learners, trainers and managers only",
+        )
     existing = await db.scalar(
         select(User).where(User.tenant_id == user.tenant_id, User.email == str(payload.email).lower())
     )

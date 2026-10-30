@@ -155,17 +155,51 @@ export function WorkspaceNav({ roles, permissions }: Props) {
     return () => { active = false; };
   }, [permissions]);
 
-  const isPlatformDeveloper = roles.some((role) => role.trim().toLowerCase() === "platform developer");
-
-  const visibleGroups = useMemo(
-    () => baseGroups
-      .map((group) => ({ ...group, items: group.items.filter((navItem) =>
-        allowed(permissions, navItem.permission) &&
-        (navItem.href !== "/dashboard/admin/support" || isPlatformDeveloper)
-      ) }))
-      .filter((group) => group.items.length > 0),
-    [permissions, isPlatformDeveloper],
+  const normalizedRoles = roles.map((role) => role.trim().toLowerCase());
+  const hasPlatformDeveloperRole = normalizedRoles.includes("platform developer");
+  const isPlatformDeveloper = hasPlatformDeveloperRole && permissions.includes("platform.tenants.read");
+  const hasCommercialRead = permissions.includes("saas.crm.read");
+  const isSaaSOwner = hasCommercialRead && normalizedRoles.includes("saas owner");
+  const isSaaSReadOnly = hasCommercialRead && (
+    isSaaSOwner || normalizedRoles.includes("sales viewer")
   );
+  const isSaaSBusinessUser = hasCommercialRead && normalizedRoles.some((role) =>
+    ["saas owner", "sales operations", "sales viewer", "customer success / account manager", "finance / billing administrator"].includes(role)
+  );
+
+  const visibleGroups = useMemo(() => {
+    if (isPlatformDeveloper) {
+      return [{
+        label: "Platform Operations",
+        items: [
+          item("/dashboard/platform", "Operations Overview", Activity, "platform.tenants.read", true),
+        ].filter((navItem) => allowed(permissions, navItem.permission)),
+      }];
+    }
+    if (isSaaSReadOnly) {
+      return [{
+        label: "Commercial Overview",
+        items: [
+          item("/dashboard/saas", "Commercial Overview", Building2, "saas.crm.read", true),
+          item("/dashboard/saas/tenants", "Customer Portfolio", Building2, "saas.crm.read"),
+        ].filter((navItem) => allowed(permissions, navItem.permission)),
+      }];
+    }
+    const groups = isSaaSBusinessUser
+      ? baseGroups.filter((group) => group.label === "Workspace" || group.label === "Commercial Operations")
+      : baseGroups.filter((group) => group.label !== "Commercial Operations");
+    return groups
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((navItem) => {
+          if (navItem.href === "/dashboard/team") {
+            return permissions.includes("users.read") || permissions.includes("users.team.read");
+          }
+          return allowed(permissions, navItem.permission);
+        }),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [permissions, isPlatformDeveloper, isSaaSBusinessUser, isSaaSReadOnly]);
 
   const isActive = (navItem: NavItem) =>
     navItem.exact ? pathname === navItem.href : pathname === navItem.href || pathname.startsWith(`${navItem.href}/`);

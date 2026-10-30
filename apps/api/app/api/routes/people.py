@@ -1,11 +1,21 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api.deps import get_current_user, require_permission
-from app.db.models import User, Role, UserRole, OrgUnit, Enrollment, ComplianceAssignment, DevelopmentPlan
-from app.db.session import get_db
+
+from app.api.deps import get_current_user, require_permission, user_has_permission
 from app.core.security import utcnow
+from app.db.models import (
+    ComplianceAssignment,
+    DevelopmentPlan,
+    Enrollment,
+    OrgUnit,
+    Role,
+    User,
+    UserRole,
+)
+from app.db.session import get_db
 
 router = APIRouter()
 
@@ -104,9 +114,14 @@ async def profile(user: User = Depends(get_current_user)):
 
 @router.get("/team")
 async def team(
-    user: User = Depends(require_permission("users.read")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    if not (
+        await user_has_permission(user, db, "users.team.read")
+        or await user_has_permission(user, db, "users.read")
+    ):
+        raise HTTPException(status_code=403, detail="Team access is not permitted")
     result = await db.execute(
         select(User)
         .where(
@@ -167,11 +182,19 @@ async def team(
 @router.get("/{person_id}")
 async def person_detail(
     person_id: UUID,
-    user: User = Depends(require_permission("users.read")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     person = await db.scalar(select(User).where(User.id == person_id, User.tenant_id == user.tenant_id))
     if person is None:
+        raise HTTPException(status_code=404, detail="Person not found")
+    can_read_tenant_directory = await user_has_permission(user, db, "users.read")
+    can_read_direct_report = (
+        person.manager_id == user.id
+        and await user_has_permission(user, db, "users.team.read")
+    )
+    if not can_read_tenant_directory and not can_read_direct_report:
+        # Return 404 so callers cannot enumerate other people's existence.
         raise HTTPException(status_code=404, detail="Person not found")
     role_result = await db.execute(
         select(Role.name).join(UserRole, UserRole.role_id == Role.id)

@@ -36,8 +36,13 @@ jobs:
           STAGING_HOST: ${{ secrets.STAGING_HOST }}
           STAGING_USER: ${{ secrets.STAGING_USER }}
           STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          STAGING_SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
+          STAGING_POSTGRES_PASSWORD: ${{ secrets.STAGING_POSTGRES_PASSWORD }}
+          STAGING_OUTBOUND_HTTP_PROXY: ${{ secrets.STAGING_OUTBOUND_HTTP_PROXY }}
           STAGING_APP_DIR: ${{ vars.STAGING_APP_DIR }}
           STAGING_WEB_ORIGIN: ${{ vars.STAGING_WEB_ORIGIN }}
+          STAGING_S3_BUCKET: ${{ vars.STAGING_S3_BUCKET }}
+          STAGING_S3_REGION: ${{ vars.STAGING_S3_REGION || 'us-east-1' }}
           STAGING_AI_ENABLED: ${{ vars.STAGING_AI_ENABLED || 'false' }}
           STAGING_AI_PROVIDER: ${{ vars.STAGING_AI_PROVIDER || 'disabled' }}
           STAGING_AI_BASE_URL: ${{ vars.STAGING_AI_BASE_URL || 'https://api.openai.com' }}
@@ -48,8 +53,16 @@ jobs:
           test -n "$STAGING_HOST"
           test -n "$STAGING_USER"
           test -n "$STAGING_SSH_KEY"
+          test -n "$STAGING_SSH_KNOWN_HOSTS"
+          test -n "$STAGING_POSTGRES_PASSWORD"
+          test -n "$STAGING_OUTBOUND_HTTP_PROXY"
+          test -n "$STAGING_S3_BUCKET"
           test -n "$STAGING_APP_DIR"
           test -n "$STAGING_WEB_ORIGIN"
+          if [[ ! "$STAGING_POSTGRES_PASSWORD" =~ ^[A-Za-z0-9._~-]{24,128}$ ]]; then
+            echo "STAGING_POSTGRES_PASSWORD must be 24-128 characters from the URL-safe allowlist [A-Za-z0-9._~-]."
+            exit 1
+          fi
           case "$STAGING_AI_ENABLED" in true|false) ;; *) echo "STAGING_AI_ENABLED must be true or false"; exit 1 ;; esac
           if [ "$STAGING_AI_ENABLED" = "true" ] && [ "$STAGING_AI_PROVIDER" = "disabled" ]; then
             echo "A provider type is required when staging AI is explicitly enabled."
@@ -77,10 +90,18 @@ jobs:
           printf '%s\n' "$STAGING_SSH_KEY" > ~/.ssh/staging_key
           chmod 600 ~/.ssh/staging_key
 
-      - name: Trust staging host
+      - name: Trust staging host using pre-verified key material
         env:
           STAGING_HOST: ${{ secrets.STAGING_HOST }}
-        run: ssh-keyscan -H "$STAGING_HOST" >> ~/.ssh/known_hosts
+          STAGING_SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$STAGING_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          ssh-keygen -F "$STAGING_HOST" -f ~/.ssh/known_hosts >/dev/null || {
+            echo "STAGING_SSH_KNOWN_HOSTS does not contain a trusted entry for STAGING_HOST."
+            exit 1
+          }
 
       - name: Deploy exact commit
         env:
@@ -89,6 +110,9 @@ jobs:
           STAGING_APP_DIR: ${{ vars.STAGING_APP_DIR }}
           STAGING_WEB_ORIGIN: ${{ vars.STAGING_WEB_ORIGIN }}
           POSTGRES_PASSWORD: ${{ secrets.STAGING_POSTGRES_PASSWORD }}
+          STAGING_OUTBOUND_HTTP_PROXY: ${{ secrets.STAGING_OUTBOUND_HTTP_PROXY }}
+          STAGING_S3_BUCKET: ${{ vars.STAGING_S3_BUCKET }}
+          STAGING_S3_REGION: ${{ vars.STAGING_S3_REGION || 'us-east-1' }}
           STAGING_AI_ENABLED: ${{ vars.STAGING_AI_ENABLED || 'false' }}
           STAGING_AI_PROVIDER: ${{ vars.STAGING_AI_PROVIDER || 'disabled' }}
           STAGING_AI_BASE_URL: ${{ vars.STAGING_AI_BASE_URL || 'https://api.openai.com' }}
@@ -102,6 +126,9 @@ jobs:
           git_sha_q=$(printf '%q' "$GIT_SHA")
           web_origin_q=$(printf '%q' "$STAGING_WEB_ORIGIN")
           postgres_password_b64=$(printf '%s' "$POSTGRES_PASSWORD" | base64 -w0)
+          outbound_http_proxy_b64=$(printf '%s' "$STAGING_OUTBOUND_HTTP_PROXY" | base64 -w0)
+          s3_bucket_b64=$(printf '%s' "$STAGING_S3_BUCKET" | base64 -w0)
+          s3_region_b64=$(printf '%s' "$STAGING_S3_REGION" | base64 -w0)
           ai_enabled_b64=$(printf '%s' "$STAGING_AI_ENABLED" | base64 -w0)
           ai_provider_b64=$(printf '%s' "$STAGING_AI_PROVIDER" | base64 -w0)
           ai_base_url_b64=$(printf '%s' "$STAGING_AI_BASE_URL" | base64 -w0)
@@ -114,6 +141,9 @@ jobs:
           GIT_SHA=$git_sha_q
           WEB_ORIGIN=$web_origin_q
           POSTGRES_PASSWORD_B64='$postgres_password_b64'
+          OUTBOUND_HTTP_PROXY_B64='$outbound_http_proxy_b64'
+          S3_BUCKET_B64='$s3_bucket_b64'
+          S3_REGION_B64='$s3_region_b64'
           AI_ENABLED_B64='$ai_enabled_b64'
           AI_PROVIDER_B64='$ai_provider_b64'
           AI_BASE_URL_B64='$ai_base_url_b64'
@@ -127,6 +157,9 @@ jobs:
           umask 077
           cat > .env.staging <<EOF
           POSTGRES_PASSWORD=\$(printf '%s' "\$POSTGRES_PASSWORD_B64" | base64 -d)
+          OUTBOUND_HTTP_PROXY=\$(printf '%s' "\$OUTBOUND_HTTP_PROXY_B64" | base64 -d)
+          S3_BUCKET=\$(printf '%s' "\$S3_BUCKET_B64" | base64 -d)
+          S3_REGION=\$(printf '%s' "\$S3_REGION_B64" | base64 -d)
           WEB_ORIGIN=\$WEB_ORIGIN
           API_ORIGIN=\$WEB_ORIGIN/api
           NEXT_PUBLIC_SITE_URL=\$WEB_ORIGIN
@@ -156,4 +189,4 @@ jobs:
 
       - name: Cleanup SSH material
         if: always()
-        run: rm -f ~/.ssh/staging_key
+        run: rm -f ~/.ssh/staging_key ~/.ssh/known_hosts

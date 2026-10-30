@@ -88,4 +88,4 @@ Phase 5 implementation is complete. The next release-gate QA should verify seede
 9. explainability and drill-down consistency.
 
 ## Next phase
-Phase 6 — Development Intelligence will consume governed capability gaps/risk and connect them to development interventions rather than course matching alone.
+Phase 5A — Development Intelligence consumes governed capability gaps/risk and connects them to development interventions rather than course matching alone. Phase 5B — Coaching, Mentoring & Experience executes accepted non-learning interventions. Canonical Phase 6 remains Reporting, Analytics & Integrations.

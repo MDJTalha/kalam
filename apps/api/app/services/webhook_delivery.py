@@ -11,6 +11,7 @@ import httpx
 
 from app.core.config import settings
 from app.core.security import utcnow
+from app.services.integration_adapters import IntegrationCheckError, _url_allowed
 
 
 def _signature(secret: str, timestamp: str, body: bytes) -> str:
@@ -19,6 +20,10 @@ def _signature(secret: str, timestamp: str, body: bytes) -> str:
 
 
 async def deliver_webhook(*, url: str, secret: str, event_type: str, event_id: UUID, tenant_id: UUID, payload: dict) -> None:
+    try:
+        _url_allowed(url)
+    except IntegrationCheckError as exc:
+        raise ValueError(f"Webhook destination rejected by outbound URL policy: {exc}") from None
     body = json.dumps(payload, separators=(",", ":"), default=str).encode("utf-8")
     timestamp = str(int(utcnow().timestamp()))
     signature = _signature(secret, timestamp, body)
@@ -32,7 +37,12 @@ async def deliver_webhook(*, url: str, secret: str, event_type: str, event_id: U
         "X-LMS-Tenant": str(tenant_id),
     }
     timeout = max(1, settings.webhook_delivery_timeout_seconds)
-    async with httpx.AsyncClient(timeout=timeout, follow_redirects=False) as client:
+    async with httpx.AsyncClient(
+        timeout=timeout,
+        follow_redirects=False,
+        trust_env=False,
+        proxy=settings.outbound_http_proxy,
+    ) as client:
         response = await client.post(url, content=body, headers=headers)
         response.raise_for_status()
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import select
@@ -11,7 +11,7 @@ REMINDER_WINDOWS = ((7, "7d"), (1, "1d"))
 
 
 def _as_utc(value: datetime) -> datetime:
-    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    return value if value.tzinfo else value.replace(tzinfo=UTC)
 
 
 async def run_course_due_reminders(
@@ -21,7 +21,7 @@ async def run_course_due_reminders(
     now: datetime | None = None,
 ) -> dict[str, int]:
     """Create idempotent in-app reminders for active course assignments."""
-    current = _as_utc(now or datetime.now(timezone.utc))
+    current = _as_utc(now or datetime.now(UTC))
     statement = (
         select(Enrollment, Course, User)
         .join(Course, Course.id == Enrollment.course_id)

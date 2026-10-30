@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import and_, func, select
@@ -86,7 +86,7 @@ async def capability_intelligence(
         for row in gap_rows
     ]
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     compliance_result = await db.execute(
         select(
             func.count(ComplianceAssignment.id),

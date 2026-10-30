@@ -1,6 +1,6 @@
 """Idempotent SaaS renewal task reconciliation shared by API and worker."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import select, text
@@ -17,7 +17,7 @@ async def reconcile_renewal_tasks(
         text("SELECT pg_advisory_xact_lock(hashtext(:key))"),
         {"key": f"crm-renewals:{ops_tenant_id}"},
     )
-    horizon = datetime.now(timezone.utc) + timedelta(days=horizon_days)
+    horizon = datetime.now(UTC) + timedelta(days=horizon_days)
     rows = (await db.execute(
         select(CRMSubscription, CRMAccount)
         .join(CRMAccount, CRMAccount.id == CRMSubscription.account_id)
@@ -32,7 +32,8 @@ async def reconcile_renewal_tasks(
     )).all()
     created = updated = skipped = 0
     for subscription, account in rows:
-        assert subscription.renews_at is not None
+        if subscription.renews_at is None:
+            continue
         for milestone_days in (90, 60, 30):
             due_at = subscription.renews_at - timedelta(days=milestone_days)
             if due_at > horizon:

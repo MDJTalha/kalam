@@ -9,11 +9,10 @@ from app.db.models import Course, Tenant, User
 from app.db.session import SessionLocal
 from app.main import app
 
-
 PASSWORD = "Phase8Tenant!2026"
 
 
-async def _seed_fixture() -> tuple[str, str, str, str, str, str]:
+async def _seed_fixture() -> tuple[str, str, str, str, str, str, str]:
     suffix = uuid4().hex[:10]
     slug_a = f"phase8-a-{suffix}"
     slug_b = f"phase8-b-{suffix}"

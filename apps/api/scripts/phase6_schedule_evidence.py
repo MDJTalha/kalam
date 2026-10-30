@@ -13,7 +13,6 @@ sys.path.insert(0, str(WORKER_ROOT))
 
 from app.core.security import utcnow
 from app.db.session import SessionLocal
-from report_scheduler import process_scheduled_reports
 
 async def main():
     report_id = uuid4()

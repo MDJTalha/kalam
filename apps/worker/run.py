@@ -14,7 +14,7 @@ API_ROOT = Path(__file__).resolve().parents[1] / "api"
 os.chdir(API_ROOT)
 sys.path.insert(0, str(API_ROOT))
 
-from sqlalchemy import select, text
+from sqlalchemy import or_, select, text
 from app.core.security import utcnow
 from app.core.config import settings
 from app.db.models import Notification, Tenant, User, WebhookEndpoint
@@ -41,8 +41,18 @@ async def process_notification_webhooks() -> int:
             .join(WebhookEndpoint, WebhookEndpoint.tenant_id == Notification.tenant_id)
             .where(WebhookEndpoint.active.is_(True))
             .where(WebhookEndpoint.secret_encrypted.is_not(None))
-            .where(Notification.created_at >= now - timedelta(hours=24))
+            .where(Notification.created_at >= WebhookEndpoint.created_at)
             .where(WebhookEndpoint.event_types.contains(["notification.created"]))
+            .where(
+                text(
+                    "NOT EXISTS (SELECT 1 FROM webhook_deliveries d "
+                    "WHERE d.webhook_id = webhook_endpoints.id "
+                    "AND d.notification_id = notifications.id "
+                    "AND (d.status IN ('delivered', 'failed') "
+                    "OR (d.next_attempt_at IS NOT NULL AND d.next_attempt_at > :now)))"
+                ).bindparams(now=now)
+            )
+            .order_by(Notification.created_at.asc(), WebhookEndpoint.created_at.asc())
             .limit(WEBHOOK_BATCH_LIMIT)
         )
         delivered = 0
@@ -61,7 +71,8 @@ async def process_notification_webhooks() -> int:
                     text(
                         "INSERT INTO webhook_deliveries "
                         "(id, webhook_id, notification_id, event_type, status, attempts, next_attempt_at) "
-                        "VALUES (:id, :webhook_id, :notification_id, :event_type, 'pending', 0, :next_attempt_at)"
+                        "VALUES (:id, :webhook_id, :notification_id, :event_type, 'pending', 0, :next_attempt_at) "
+                        "ON CONFLICT (webhook_id, notification_id) DO NOTHING"
                     ),
                     {
                         "id": delivery_id,
@@ -72,19 +83,30 @@ async def process_notification_webhooks() -> int:
                     },
                 )
                 await db.flush()
-
-            state = (
-                await db.execute(
+                delivery_id = await db.scalar(
                     text(
-                        "SELECT status, attempts, next_attempt_at FROM webhook_deliveries WHERE id = :id"
+                        "SELECT id FROM webhook_deliveries "
+                        "WHERE webhook_id = :webhook_id AND notification_id = :notification_id"
                     ),
-                    {"id": delivery_id},
+                    {"webhook_id": endpoint.id, "notification_id": notification.id},
                 )
-            ).mappings().one()
 
-            if state["status"] == "delivered" or (
-                state["next_attempt_at"] is not None and state["next_attempt_at"] > now
-            ):
+            claim = await db.execute(
+                text(
+                    "UPDATE webhook_deliveries SET status = 'processing', attempts = attempts + 1, "
+                    "next_attempt_at = :lease_until, updated_at = :now "
+                    "WHERE id = :id AND status NOT IN ('delivered', 'failed') "
+                    "AND (next_attempt_at IS NULL OR next_attempt_at <= :now) "
+                    "RETURNING attempts"
+                ),
+                {
+                    "id": delivery_id,
+                    "now": now,
+                    "lease_until": now + timedelta(seconds=max(60, settings.webhook_delivery_timeout_seconds + 30)),
+                },
+            )
+            attempts_value = claim.scalar_one_or_none()
+            if attempts_value is None:
                 continue
 
             payload = {
@@ -95,11 +117,7 @@ async def process_notification_webhooks() -> int:
                 "user_id": str(notification.user_id),
                 "created_at": notification.created_at,
             }
-            attempts = int(state["attempts"]) + 1
-            await db.execute(
-                text("UPDATE webhook_deliveries SET attempts = :attempts, updated_at = :now WHERE id = :id"),
-                {"attempts": attempts, "now": now, "id": delivery_id},
-            )
+            attempts = int(attempts_value)
 
             try:
                 await deliver_webhook(
@@ -146,11 +164,14 @@ async def process_notification_webhooks() -> int:
 
 async def process_notification_emails() -> int:
     async with SessionLocal() as db:
+        now = utcnow()
         result = await db.execute(
             select(Notification, User)
             .join(User, User.id == Notification.user_id)
             .where(Notification.email_sent_at.is_(None))
-            .where(Notification.created_at >= utcnow() - timedelta(hours=24))
+            .where(Notification.email_suppressed_at.is_(None))
+            .where(Notification.email_failed_at.is_(None))
+            .where(or_(Notification.email_next_attempt_at.is_(None), Notification.email_next_attempt_at <= now))
             .where(User.is_active.is_(True))
             .order_by(Notification.created_at.asc())
             .limit(100)
@@ -162,13 +183,23 @@ async def process_notification_emails() -> int:
             email_enabled = bool(preferences.get("email_enabled", False))
             category_enabled = bool(preferences.get(category, True))
             if category != "security" and (not email_enabled or not category_enabled):
+                # Record the user's preference decision so suppressed rows do not
+                # permanently occupy the oldest page of the delivery queue.
+                notification.email_suppressed_at = utcnow()
                 continue
             try:
                 send_email(recipient=user.email, subject=notification.title, text=notification.body)
             except RuntimeError:
-                # Leave email_sent_at unset so the next worker run retries delivery.
+                notification.email_attempts += 1
+                if notification.email_attempts >= 8:
+                    notification.email_failed_at = now
+                    notification.email_next_attempt_at = None
+                else:
+                    notification.email_next_attempt_at = now + retry_delay(notification.email_attempts)
                 continue
+            notification.email_attempts += 1
             notification.email_sent_at = utcnow()
+            notification.email_next_attempt_at = None
             sent += 1
         await db.commit()
         return sent

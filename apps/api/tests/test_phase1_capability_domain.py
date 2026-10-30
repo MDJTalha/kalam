@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+import os
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -6,10 +7,10 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
-LEARNER = {"email": "learner@demo.corp", "password": "DemoOnly!1234"}
+ADMIN = {"email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
+LEARNER = {"email": "learner@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
 OTHER_TENANT = "isolation-corporation"
-OTHER_USER = {"email": "isolated@other.corp", "password": "DemoOnly!1234"}
+OTHER_USER = {"email": "isolated@other.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
 
 
 def login(client: TestClient, tenant: str = TENANT, credentials: dict[str, str] = ADMIN) -> None:
@@ -248,7 +249,7 @@ def test_phase1_effective_dating_and_overlap_rules():
         assert capability.status_code == 201
         capability_id = capability.json()["id"]
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         future = now + timedelta(days=30)
         future2 = now + timedelta(days=60)
         invalid = client.post("/api/v1/capabilities", json={
@@ -300,7 +301,7 @@ def test_phase1_permission_and_tenant_isolation_for_capability_domain():
         assert capability.status_code == 201
         capability_id = capability.json()["id"]
 
-        manager = {"email": "manager@demo.corp", "password": "DemoOnly!1234"}
+        manager = {"email": "manager@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
         login(client, TENANT, manager)
         assert client.get("/api/v1/capabilities").status_code == 200
         assert client.get("/api/v1/capability-domain/competencies").status_code == 403

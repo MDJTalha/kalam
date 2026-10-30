@@ -75,10 +75,20 @@ jobs:
           WEB_ORIGIN: http://localhost:3000
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: .venv/bin/python scripts/seed.py
+      - name: Generate ephemeral CI fixture password
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import secrets
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env_file:
+              env_file.write(f"CI_FIXTURE_PASSWORD={secrets.token_urlsafe(32)}\n")
+          PY
       - name: Seed API integration fixtures
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
-          APP_ENV: development
+          KALAM_TEST_DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          APP_ENV: ci
           WEB_ORIGIN: http://localhost:3000
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: .venv/bin/python scripts/seed_ci_fixtures.py
@@ -108,7 +118,8 @@ jobs:
       - name: Tests
         env:
           DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
-          APP_ENV: development
+          KALAM_TEST_DATABASE_URL: postgresql+asyncpg://lms:lms_ci_password@127.0.0.1:5432/corplms
+          APP_ENV: ci
           WEB_ORIGIN: http://localhost:3000
           ALLOWED_HOSTS: localhost,127.0.0.1
           FILE_SCAN_PROVIDER: clamd
@@ -119,7 +130,9 @@ jobs:
           MARKETING_INBOX_ENABLED: "true"
           MARKETING_REVIEW_TENANT_SLUG: kalam
           OPENAI_API_KEY: test-only-ci-credential
-        run: .venv/bin/python -m pytest -q
+        run: |
+          export KALAM_QA_DEMO_PASSWORD="$CI_FIXTURE_PASSWORD"
+          .venv/bin/python -m pytest -q
 
   web:
     runs-on: ubuntu-latest
@@ -155,6 +168,7 @@ jobs:
           NEXT_PUBLIC_API_ORIGIN: https://lms.example.com/api
           INTERNAL_API_ORIGIN: http://api:8000
           ALLOWED_HOSTS: lms.example.com,api
+          OUTBOUND_HTTP_PROXY: http://egress-proxy.example.invalid:3128
         run: |
           docker compose -f infra/docker/docker-compose.app.yml config --quiet
           docker compose -f infra/docker/docker-compose.app.yml config --format json | python -c 'import json,sys; cfg=json.load(sys.stdin); port=cfg["services"]["gateway"]["ports"][0]; assert port["host_ip"] == "127.0.0.1" and port["published"] == "3100", f"Unsafe default gateway binding: {port}"; assert cfg["services"]["api"]["image"] == cfg["services"]["migrate"]["image"], "Migration service must use the exact API image"'
@@ -169,6 +183,7 @@ jobs:
           NEXT_PUBLIC_API_ORIGIN: https://lms.example.com/api
           INTERNAL_API_ORIGIN: http://api:8000
           ALLOWED_HOSTS: lms.example.com,api
+          OUTBOUND_HTTP_PROXY: http://egress-proxy.example.invalid:3128
         run: docker compose -f infra/docker/docker-compose.app.yml build api web worker
       - name: Smoke built production images
         shell: pwsh

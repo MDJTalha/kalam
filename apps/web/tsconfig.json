@@ -38,7 +38,11 @@
     ".next-phase8-preflight/types/**/*.ts",
     ".next-phase8-final/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    ".next-phase8-preflight/dev/types/**/*.ts"
+    ".next-phase8-preflight/dev/types/**/*.ts",
+    ".next-phase8-qa-20261030/types/**/*.ts",
+    ".next-phase8-qa-20261030/dev/types/**/*.ts",
+    ".next-owner-qa/types/**/*.ts",
+    ".next-owner-qa/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -6,8 +6,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_permission, user_has_permission
-from app.db.models import DevelopmentFeedback, DevelopmentMilestone, DevelopmentPlan, Role, User, UserRole
+from app.api.deps import get_current_user, user_has_permission
+from app.db.models import (
+    DevelopmentFeedback,
+    DevelopmentMilestone,
+    DevelopmentPlan,
+    User,
+)
 from app.db.session import get_db
 from app.services.audit import audit
 
@@ -117,26 +122,20 @@ async def update_plan(
 @router.get("/users/{user_id}")
 async def user_plans(
     user_id: UUID,
-    manager: User = Depends(require_permission("users.read")),
+    manager: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    can_read_team = await user_has_permission(manager, db, "development.team.read")
+    can_read_directory = await user_has_permission(manager, db, "users.read")
+    if not can_read_team and not can_read_directory:
+        raise HTTPException(status_code=403, detail="Development team access is not permitted")
     target = await db.scalar(
         select(User).where(User.id == user_id, User.tenant_id == manager.tenant_id)
     )
     if target is None:
         raise HTTPException(status_code=404, detail="User not found")
-    if target.manager_id != manager.id and manager.id != target.id:
-        admin_role = await db.scalar(
-            select(Role.id)
-            .join(UserRole, UserRole.role_id == Role.id)
-            .where(
-                UserRole.user_id == manager.id,
-                Role.tenant_id == manager.tenant_id,
-                Role.name == "Tenant Admin",
-            )
-        )
-        if admin_role is None:
-            raise HTTPException(status_code=403, detail="Manager scope does not include this user")
+    if target.manager_id != manager.id and manager.id != target.id and not can_read_directory:
+        raise HTTPException(status_code=403, detail="Manager scope does not include this user")
 
     result = await db.execute(
         select(DevelopmentPlan)
@@ -180,11 +179,20 @@ async def _manager_plan(plan_id: UUID, manager: User, db: AsyncSession) -> Devel
     target = await db.scalar(select(User).where(User.id == item.user_id, User.tenant_id == manager.tenant_id))
     if target is None:
         raise HTTPException(status_code=404, detail="Plan owner not found")
-    if target.manager_id != manager.id and manager.id != target.id:
-        admin_role = await db.scalar(select(Role.id).join(UserRole, UserRole.role_id == Role.id).where(UserRole.user_id == manager.id, Role.tenant_id == manager.tenant_id, Role.name == "Tenant Admin"))
-        if admin_role is None:
-            raise HTTPException(status_code=403, detail="Manager scope does not include this plan")
+    if (
+        target.manager_id != manager.id
+        and manager.id != target.id
+        and not await user_has_permission(manager, db, "users.read")
+    ):
+        raise HTTPException(status_code=403, detail="Manager scope does not include this plan")
     return item
+
+
+async def _require_development_team_manager(user: User, db: AsyncSession) -> None:
+    can_manage_team = await user_has_permission(user, db, "development.team.manage")
+    can_manage_tenant = await user_has_permission(user, db, "users.read")
+    if not can_manage_team and not can_manage_tenant:
+        raise HTTPException(status_code=403, detail="Development team management is not permitted")
 
 @router.get("/{plan_id}/progress")
 async def plan_progress(plan_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
@@ -192,7 +200,9 @@ async def plan_progress(plan_id: UUID, user: User = Depends(get_current_user), d
     if plan is None:
         raise HTTPException(status_code=404, detail="Development plan not found")
     if plan.user_id != user.id:
-        if not await user_has_permission(user, db, "users.read"):
+        can_read_team = await user_has_permission(user, db, "development.team.read")
+        can_read_directory = await user_has_permission(user, db, "users.read")
+        if not can_read_team and not can_read_directory:
             raise HTTPException(status_code=404, detail="Development plan not found")
         await _manager_plan(plan_id, user, db)
     milestones = (await db.execute(select(DevelopmentMilestone).where(DevelopmentMilestone.plan_id == plan.id).order_by(DevelopmentMilestone.due_at.asc().nulls_last()))).scalars().all()
@@ -200,7 +210,8 @@ async def plan_progress(plan_id: UUID, user: User = Depends(get_current_user), d
     return {"plan": {"id": str(plan.id), "title": plan.title, "status": plan.status}, "milestones": [{"id": str(x.id), "title": x.title, "description": x.description, "due_at": x.due_at, "status": x.status, "completed_at": x.completed_at} for x in milestones], "feedback": [{"id": str(x.id), "reviewer_id": str(x.reviewer_id), "rating": x.rating, "strengths": x.strengths, "feedback": x.feedback, "next_steps": x.next_steps, "created_at": x.created_at} for x in feedback]}
 
 @router.post("/{plan_id}/milestones", status_code=status.HTTP_201_CREATED)
-async def create_milestone(plan_id: UUID, payload: MilestoneCreate, manager: User = Depends(require_permission("users.read")), db: AsyncSession = Depends(get_db)):
+async def create_milestone(plan_id: UUID, payload: MilestoneCreate, manager: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    await _require_development_team_manager(manager, db)
     plan = await _manager_plan(plan_id, manager, db)
     item = DevelopmentMilestone(tenant_id=manager.tenant_id, plan_id=plan.id, owner_id=plan.user_id, title=payload.title, description=payload.description, due_at=payload.due_at)
     db.add(item)
@@ -210,7 +221,8 @@ async def create_milestone(plan_id: UUID, payload: MilestoneCreate, manager: Use
     return {"id": str(item.id), "title": item.title, "status": item.status}
 
 @router.patch("/{plan_id}/milestones/{milestone_id}")
-async def update_milestone(plan_id: UUID, milestone_id: UUID, payload: MilestoneUpdate, manager: User = Depends(require_permission("users.read")), db: AsyncSession = Depends(get_db)):
+async def update_milestone(plan_id: UUID, milestone_id: UUID, payload: MilestoneUpdate, manager: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    await _require_development_team_manager(manager, db)
     plan = await _manager_plan(plan_id, manager, db)
     item = await db.scalar(select(DevelopmentMilestone).where(DevelopmentMilestone.id == milestone_id, DevelopmentMilestone.plan_id == plan.id))
     if item is None:
@@ -220,7 +232,7 @@ async def update_milestone(plan_id: UUID, milestone_id: UUID, payload: Milestone
         if key in values:
             setattr(item, key, values[key])
     if values.get("status") == "completed":
-        item.completed_at = datetime.now(timezone.utc)
+        item.completed_at = datetime.now(UTC)
     elif "status" in values:
         item.completed_at = None
     await audit(db, tenant_id=manager.tenant_id, actor_id=manager.id, action="development.milestone.updated", entity_type="development_milestone", entity_id=str(item.id))
@@ -228,7 +240,8 @@ async def update_milestone(plan_id: UUID, milestone_id: UUID, payload: Milestone
     return {"id": str(item.id), "title": item.title, "status": item.status, "completed_at": item.completed_at}
 
 @router.post("/{plan_id}/feedback", status_code=status.HTTP_201_CREATED)
-async def add_feedback(plan_id: UUID, payload: FeedbackCreate, manager: User = Depends(require_permission("users.read")), db: AsyncSession = Depends(get_db)):
+async def add_feedback(plan_id: UUID, payload: FeedbackCreate, manager: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    await _require_development_team_manager(manager, db)
     plan = await _manager_plan(plan_id, manager, db)
     item = DevelopmentFeedback(tenant_id=manager.tenant_id, plan_id=plan.id, reviewer_id=manager.id, rating=payload.rating, strengths=payload.strengths, feedback=payload.feedback, next_steps=payload.next_steps)
     db.add(item)

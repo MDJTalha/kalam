@@ -1,4 +1,7 @@
-import asyncio,json,urllib.request,websockets
+import asyncio
+import json
+import urllib.request
+import websockets
 async def call(ws,i,m,p=None):
  i+=1; await ws.send(json.dumps({"id":i,"method":m,"params":p or {}}))
  while True:

@@ -1,13 +1,24 @@
 from collections.abc import Callable
 from copy import copy
+
 from fastapi import Cookie, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.security import session_token_hash, utcnow
-from app.db.models import DeveloperSupportSession, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
+from app.core.security import session_token_hash, support_context_token_hash, utcnow
+from app.db.models import (
+    DeveloperSupportSession,
+    Permission,
+    Role,
+    RolePermission,
+    SessionRecord,
+    Tenant,
+    User,
+    UserRole,
+)
 from app.db.session import get_db
+
 
 async def get_current_user(
     request: Request,
@@ -35,7 +46,8 @@ async def get_current_user(
         return user
     support = await db.scalar(
         select(DeveloperSupportSession).where(
-            DeveloperSupportSession.token_hash == session_token_hash(support_token),
+            DeveloperSupportSession.token_hash
+            == support_context_token_hash(support_token, session_token),
             DeveloperSupportSession.developer_user_id == user.id,
             DeveloperSupportSession.revoked_at.is_(None),
             DeveloperSupportSession.expires_at > utcnow(),
@@ -76,17 +88,47 @@ async def user_has_permission(
     db: AsyncSession,
     permission_key: str,
 ) -> bool:
-    # CRM is a Kalam-internal capability and must never be granted to a
-    # customer-tenant identity, even if a stale role-permission row exists.
-    platform_developer = await is_platform_developer(user, db)
-    if permission_key.startswith("saas.crm.") and not platform_developer:
+    # Resolve the persisted home tenant. During an active, audited support
+    # session get_current_user() returns a copy scoped to the customer tenant.
+    home_tenant_id = await db.scalar(select(User.tenant_id).where(User.id == user.id))
+    if home_tenant_id is None:
         return False
 
-    # Platform Developer is the internal product-development role. It must be
-    # able to exercise every product permission for support, QA and debugging.
-    # This is role-based (not tenant/customer-specific) and does not bypass the
-    # normal tenant/session boundary enforced by get_current_user().
-    if platform_developer:
+    platform_developer = await is_platform_developer(user, db)
+
+    # Platform permissions are explicit and are only granted to a Platform
+    # Developer whose persisted home identity belongs to Kalam's operations
+    # tenant. There is no blanket "developer can do everything" shortcut.
+    if permission_key.startswith("platform."):
+        if not platform_developer:
+            return False
+        result = await db.execute(
+            select(Permission.id)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .join(Role, Role.id == RolePermission.role_id)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user.id)
+            .where(Role.tenant_id == home_tenant_id)
+            .where(Role.role_kind == "platform")
+            .where(Role.name.ilike("platform developer"))
+            .where(Permission.key == permission_key)
+        )
+        return result.scalar_one_or_none() is not None
+
+    # Commercial CRM belongs to the Kalam operations tenant, never a customer
+    # tenant or a support context. Owner and sales roles receive explicit CRM
+    # permissions in the internal workspace only.
+    if permission_key.startswith("saas.crm."):
+        ops_tenant_id = await db.scalar(
+            select(Tenant.id).where(Tenant.slug == settings.saas_ops_tenant_slug)
+        )
+        if ops_tenant_id is None or home_tenant_id != ops_tenant_id or user.tenant_id != ops_tenant_id:
+            return False
+
+    # Customer workspace permissions are available to a Developer only while
+    # get_current_user() has resolved a valid, unexpired support context.
+    # The context is session-bound, reasoned, time-limited and audited.
+    if platform_developer and user.tenant_id != home_tenant_id:
         return True
 
     result = await db.execute(

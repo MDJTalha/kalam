@@ -118,7 +118,7 @@
   letter-spacing:.11em;
   text-transform:uppercase;
 }
-.k-auth .auth-card-heading h2{
+.k-auth .auth-card-heading h1{
   margin:13px 0 7px;
   color:var(--k-navy);
   font-size:clamp(29px,2.5vw,36px);

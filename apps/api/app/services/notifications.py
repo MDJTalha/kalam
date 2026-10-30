@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -78,7 +78,7 @@ async def create_notification(
                 subject=title,
                 text=f"{body}\n\nSign in to Kalam to review this notification.",
             )
-            item.email_sent_at = datetime.now(timezone.utc)
+            item.email_sent_at = datetime.now(UTC)
         except RuntimeError:
             pass
 

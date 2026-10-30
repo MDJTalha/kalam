@@ -1,6 +1,7 @@
 import hashlib
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
 
@@ -21,5 +22,11 @@ def new_session_token() -> str:
 def session_token_hash(raw_token: str) -> str:
     return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
+
+def support_context_token_hash(raw_support_token: str, raw_session_token: str) -> str:
+    """Bind a privileged support context to one exact authenticated session."""
+    return session_token_hash(f"{raw_support_token}\x00{raw_session_token}")
+
+
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)

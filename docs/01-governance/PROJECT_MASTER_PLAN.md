@@ -6,7 +6,7 @@ Date: 2026-09-24
 Product: Kalam — Enterprise Workforce Capability Platform
 Repository identifier: CorpLMS (retained for technical continuity)
 Project Director: Muhammad Talha
-Implementation root: C:\Projects\CorpLMS
+Implementation root: C:\Projects\Kalam
 
 ## 1. Executive mandate
 
@@ -500,124 +500,26 @@ System settings
 
 ## 12. Delivery phases
 
-### Phase 0 — Requirements and architecture baseline
-Deliver:
-- Master plan
-- Requirements baseline
-- Domain model
-- Architecture
-- Security baseline
-- Test strategy
-- ADRs
-- Initial repo skeleton
+The canonical phase numbering, scope and acceptance criteria are governed by
+`docs/06-delivery/DELIVERY_ROADMAP.md` and
+`docs/06-delivery/PHASE_NUMBERING_AND_ACCEPTANCE_RECONCILIATION_2026-10-27.md`.
+Those documents supersede the historical sequence below and any conflicting phase labels in older planning material.
 
-Exit gate:
-Requirements are traceable to modules and test cases.
+The current canonical sequence is:
 
-### Phase 1 — Foundation
-Deliver:
-- Repository
-- Environment configuration
-- Authentication
-- User management
-- Tenant model
-- Organization hierarchy
-- RBAC
-- Audit framework
-- Core UI shell
-- Navigation
-- Settings baseline
-- Database migration framework
+- **Phase 0:** Baseline and repository foundation.
+- **Phase 1:** Identity, tenancy and core platform.
+- **Phase 2:** Course and learner core.
+- **Phase 3:** Assessments and credentials.
+- **Phase 4:** Corporate L&D.
+- **Phase 5:** Core compliance and skills.
+- **Phase 5A:** Development Intelligence.
+- **Phase 5B:** Coaching, Mentoring and Experience.
+- **Phase 6:** Reporting, analytics and integrations.
+- **Phase 7:** Governed AI.
+- **Phase 8:** Commercial and production release readiness.
 
-Exit gate:
-A user can authenticate, receive correct permissions, and access only authorized tenant data.
-
-### Phase 2 — Learning core
-Deliver:
-- Catalog
-- Courses
-- Modules/lessons
-- Content
-- Programs
-- Enrollments
-- Learner dashboard
-- Course player
-- Progress
-- Completion rules
-
-Exit gate:
-End-to-end learning journey works with persistent records.
-
-### Phase 3 — Assessment and certification
-Deliver:
-- Question banks
-- Assessments
-- Attempts
-- Grading
-- Certificates
-- QR verification
-- Expiry/renewal
-- Evidence
-
-Exit gate:
-Assess -> pass -> certificate -> verification is fully traceable.
-
-### Phase 4 — Corporate L&D and compliance
-Deliver:
-- Mandatory learning
-- Assignment rules
-- Recurrence
-- Exceptions
-- Compliance dashboards
-- Manager/team learning
-- Skills
-- Competencies
-- Development plans
-
-Exit gate:
-HR can define requirements and produce audit-ready evidence.
-
-### Phase 5 — Analytics and integrations
-Deliver:
-- Executive analytics
-- L&D analytics
-- Manager analytics
-- Exports
-- API
-- Webhooks
-- HRIS/SSO integration framework
-- Standards adapters
-
-Exit gate:
-Data is consistent, permission-aware, exportable and integration-ready.
-
-### Phase 6 — AI learning layer
-Deliver:
-- AI content assistance
-- Search/Q&A
-- Recommendations
-- Summaries
-- Skill-gap assistance
-- Governance and traceability
-
-Exit gate:
-AI provides value without bypassing permissions or creating unsupported authoritative claims.
-
-### Phase 7 — Production hardening and commercialization
-Deliver:
-- Security verification
-- Accessibility verification
-- Performance testing
-- Backup/restore testing
-- Disaster recovery procedures
-- Monitoring
-- Deployment automation
-- Documentation
-- License/EULA/privacy/terms placeholders
-- Release checklist
-
-Exit gate:
-All release criteria passed and open critical defects = 0.
+Phase 5A and Phase 5B are subphases within Phase 5; they do not renumber Phases 6–8. A phase is implemented, locally accepted or release accepted only according to the evidence rules in the canonical roadmap. Historical planning notes are retained for traceability, not as current acceptance authority.
 
 ## 13. Quality gates
 

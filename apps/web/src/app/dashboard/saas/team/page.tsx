@@ -2,15 +2,16 @@ import { UserRoundCog, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type TeamMember={
   id:string;name:string;email:string;job_title?:string|null;is_active:boolean;roles:string[];
 };
 
 export default async function SaaSTeamPage(){
-  const team=await apiJson<TeamMember[]>("/api/v1/saas/crm/team");
-  if(!team)return <DashboardShell title="Sales Team" eyebrow="SaaS CRM"><EmptyState title="SaaS team access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
+  const result=await apiJsonResult<TeamMember[]>("/api/v1/saas/crm/team");
+  if(!result.ok || !result.data) return <DashboardShell title="Sales Team" eyebrow="SaaS CRM"><EmptyState title={result.status===403?"SaaS team access is restricted":result.status===0 || result.status>=500?"SaaS team service unavailable":"SaaS team data could not be loaded"} description={result.error || `The team request failed with HTTP ${result.status}. The failed response is not treated as an empty team.`}/></DashboardShell>;
+  const team=result.data;
 
   const active=team.filter(member=>member.is_active);
   const operators=team.filter(member=>member.roles.some(role=>["SaaS Administrator","Sales Operations","Sales Viewer"].includes(role)));

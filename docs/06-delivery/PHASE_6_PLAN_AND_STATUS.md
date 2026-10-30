@@ -1,11 +1,11 @@
-# Kalam Phase 6 — Development Intelligence
+# Kalam Phase 5A — Development Intelligence
 
-**Status:** Implementation complete; Phase 6 v2 enhancement, stale-state reconciliation, and focused regression QA passed locally.
+**Status:** Implementation complete; Phase 5A v2 enhancement, stale-state reconciliation, and focused regression QA passed locally.
 **Date:** 2026-10-01
 **Environment:** Local Kalam development environment on MDT.
 
 ## Objective
-Upgrade the existing Development Engine from the established Skill Gap → Published Course pathway into governed intervention intelligence. Phase 6 consumes Phase 4 capability gaps and Phase 5 capability risk and expands recommendations across multiple development modalities.
+Upgrade the existing Development Engine from the established Skill Gap → Published Course pathway into governed intervention intelligence. Phase 5A consumes Phase 5 core capability gaps and capability risk and expands recommendations across multiple development modalities.
 
 ## Implemented
 - Added persistent development_recommendations model.
@@ -57,4 +57,4 @@ Alembic upgrade to head: PASS.
 Runtime QA should verify: Skill Gap → Published Course continuity; course-fit scoring; prior-learning de-prioritization; critical/high-risk urgency; generation of all five intervention modalities; correct enrollment on learning acceptance; correct plan-goal creation for non-learning interventions; manager/user scope; recommendation provenance/rationale; and no recommendations when no governed capability gaps exist.
 
 ## Next phase
-Phase 7 — Coaching, Mentoring & Experience can build the operational execution layer around the multi-modal intervention engine: actual coach/mentor relationships, sessions, experiential assignments, progress reviews and evidence capture.
+Phase 5B — Coaching, Mentoring & Experience can build the operational execution layer around the multi-modal intervention engine: actual coach/mentor relationships, sessions, experiential assignments, progress reviews and evidence capture.

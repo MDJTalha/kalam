@@ -3,7 +3,7 @@ import styles from "@/app/landing.module.css";
 
 export function CapabilityCommandCenter() {
   return (
-    <div className={styles.commandVisual} aria-label="Illustrative Kalam capability command center">
+    <section className={styles.commandVisual} aria-label="Illustrative Kalam capability command center">
       <div className={styles.commandTop}>
         <div>
           <span className={styles.commandKicker}>KALAM COMMAND CENTER</span>
@@ -25,7 +25,7 @@ export function CapabilityCommandCenter() {
           <div className={styles.commandHeader}>
             <div>
               <span>EXECUTIVE VIEW</span>
-              <h3>Capability & readiness overview</h3>
+              <h2>Capability & readiness overview</h2>
               <p>Signals from learning, skills, evidence and compliance.</p>
             </div>
             <span className={styles.commandPeriod}>Q3 · GLOBAL</span>
@@ -71,6 +71,6 @@ export function CapabilityCommandCenter() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,4 +1,7 @@
-from app.services.ai_evaluation import detect_prompt_injection, evaluate_grounded_response
+from app.services.ai_evaluation import (
+    detect_prompt_injection,
+    evaluate_grounded_response,
+)
 
 
 def test_detect_prompt_injection_catches_common_override_attempts():

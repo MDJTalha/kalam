@@ -1,5 +1,5 @@
+from datetime import UTC, datetime, timedelta
 from secrets import token_urlsafe
-from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,7 +8,16 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission
-from app.db.models import Assessment, AssessmentAttempt, AuditLog, Certificate, Course, Enrollment, Question, User
+from app.db.models import (
+    Assessment,
+    AssessmentAttempt,
+    AuditLog,
+    Certificate,
+    Course,
+    Enrollment,
+    Question,
+    User,
+)
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.notifications import create_notification
@@ -272,13 +281,13 @@ async def submit_assessment(
             raise HTTPException(status_code=409, detail="Assessment attempt has already been submitted")
         if (
             assessment.time_limit_minutes
-            and attempt.started_at + timedelta(minutes=assessment.time_limit_minutes) < datetime.now(timezone.utc)
+            and attempt.started_at + timedelta(minutes=assessment.time_limit_minutes) < datetime.now(UTC)
         ):
             attempt.answers = payload.answers
             attempt.score = 0
             attempt.passed = False
             attempt.feedback = "Attempt exceeded the configured time limit."
-            attempt.submitted_at = datetime.now(timezone.utc)
+            attempt.submitted_at = datetime.now(UTC)
             await audit(
                 db,
                 tenant_id=user.tenant_id,
@@ -319,7 +328,7 @@ async def submit_assessment(
     attempt.answers = payload.answers
     attempt.score = score
     attempt.passed = passed
-    attempt.submitted_at = datetime.now(timezone.utc)
+    attempt.submitted_at = datetime.now(UTC)
 
     certificate_id = None
     if passed and assessment.course_id:
@@ -604,7 +613,7 @@ async def update_question(
     question, assessment = row
     await ensure_editable(db, assessment.id)
     changes = payload.model_dump(exclude_unset=True)
-    QuestionCreate(**{**{"question_type": question.question_type, "prompt": question.prompt, "options": question.options, "answer_key": question.answer_key, "points": question.points, "position": question.position}, **changes})
+    QuestionCreate(**{"question_type": question.question_type, "prompt": question.prompt, "options": question.options, "answer_key": question.answer_key, "points": question.points, "position": question.position, **changes})
     for key, value in changes.items():
         setattr(question, key, value)
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action='assessment.question.updated', entity_type='question', entity_id=str(question.id), metadata={'fields': sorted(changes.keys())})

@@ -1,8 +1,8 @@
 "use client";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, Target, UsersRound } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, Target, UsersRound } from "lucide-react";
 import { KalamBrand } from "@/components/kalam-brand";
 
 export function LoginClient({ initialOrganization = "", initialSsoError = "" }: { initialOrganization?: string; initialSsoError?: string }) {
@@ -17,17 +17,15 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
   const [passwordAvailable, setPasswordAvailable] = useState(true);
   const [organizationName, setOrganizationName] = useState("");
   const [ssoProviders, setSsoProviders] = useState<{ provider: string; label: string }[]>([]);
+  const discoveryRequestId = useRef(0);
+  const [discoveryState, setDiscoveryState] = useState<"idle" | "checking" | "recognized" | "unrecognized" | "unavailable">(
+    linkedOrganization.length >= 2 ? "checking" : "idle",
+  );
 
   useEffect(() => {
     const slug = tenantSlug.trim().toLowerCase();
-    if (slug.length < 2) {
-      const clearTimer = window.setTimeout(() => {
-        setOrganizationName("");
-        setSsoProviders([]);
-        setPasswordAvailable(true);
-      }, 0);
-      return () => window.clearTimeout(clearTimer);
-    }
+    if (slug.length < 2) return;
+    const requestId = ++discoveryRequestId.current;
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       try {
@@ -35,21 +33,28 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
           cache: "no-store",
           signal: controller.signal,
         });
-        if (!response.ok) return;
+        if (!response.ok) {
+          if (requestId !== discoveryRequestId.current) return;
+          setDiscoveryState("unavailable");
+          return;
+        }
         const payload = await response.json() as {
           recognized?: boolean;
           tenant_name?: string | null;
           sso_providers?: { provider: string; label: string }[];
           password_available?: boolean;
         };
+        if (requestId !== discoveryRequestId.current) return;
         setOrganizationName(payload.recognized ? String(payload.tenant_name || "") : "");
         setSsoProviders(payload.recognized ? (payload.sso_providers || []) : []);
         setPasswordAvailable(payload.recognized ? payload.password_available !== false : true);
+        setDiscoveryState(payload.recognized ? "recognized" : "unrecognized");
       } catch {
-        if (!controller.signal.aborted) {
+        if (!controller.signal.aborted && requestId === discoveryRequestId.current) {
           setOrganizationName("");
           setSsoProviders([]);
           setPasswordAvailable(true);
+          setDiscoveryState("unavailable");
         }
       }
     }, 350);
@@ -58,6 +63,15 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
       controller.abort();
     };
   }, [tenantSlug]);
+
+  function changeTenantSlug(value: string) {
+    discoveryRequestId.current += 1;
+    setTenantSlug(value);
+    setOrganizationName("");
+    setSsoProviders([]);
+    setPasswordAvailable(true);
+    setDiscoveryState(value.trim().length >= 2 ? "checking" : "idle");
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,8 +99,9 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
         setError(message);
         return;
       }
+      // The login response has already set the HttpOnly session cookie. Navigate
+      // without an immediate refresh so the App Router does not race its new session.
       router.replace("/dashboard");
-      router.refresh();
     } catch {
       setError("We couldn't reach Kalam. Check your connection and try again.");
     } finally {
@@ -101,7 +116,7 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
         <div className="auth-brand-copy">
           <h1>Build capability. <em>Prove readiness.</em></h1>
           <p>Access the role-aware workspace that connects learning, skills, compliance, assessments and development across your organization.</p>
-          <div className="k-proof" aria-label="Platform principles">
+          <div className="k-proof" role="group" aria-label="Platform principles">
             <span><ShieldCheck size={16} aria-hidden="true" /> Governed workflows</span>
             <span><Target size={16} aria-hidden="true" /> Connected evidence</span>
             <span><UsersRound size={16} aria-hidden="true" /> Role-aware access</span>
@@ -115,7 +130,7 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
           <KalamBrand descriptor="Enterprise Workforce Capability Platform" className="k-mobile-brand" />
           <div className="auth-card-heading">
             <span className="k-form-eyebrow"><LockKeyhole size={14} aria-hidden="true" /> Secure access</span>
-            <h2 id="login-title">Welcome back</h2>
+            <h1 id="login-title">Welcome back</h1>
             <p>Sign in securely to your organization&apos;s Kalam workspace.</p>
           </div>
 
@@ -123,8 +138,18 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
             <label htmlFor="login-organization">Organization ID</label>
             <input id="login-organization" name="organization" type="text" autoComplete="organization"
               autoCapitalize="none" spellCheck={false} required placeholder="your-organization"
-              value={tenantSlug} onChange={(event) => setTenantSlug(event.target.value)} aria-describedby="organization-hint" />
-            <p className="k-field-hint" id="organization-hint">{organizationName ? "Organization recognized: " + organizationName + "." : linkedOrganization ? "Organization detected from your company sign-in link. You can change it if needed." : "Use the Organization ID supplied by your administrator, or your company-specific Kalam sign-in link."}</p>
+              value={tenantSlug} onChange={(event) => changeTenantSlug(event.target.value)} aria-describedby="organization-hint" />
+            <p className="k-field-hint" id="organization-hint" aria-live="polite" aria-atomic="true">{discoveryState === "checking"
+              ? "Checking organization ID…"
+              : discoveryState === "recognized"
+                ? organizationName ? `Organization recognized: ${organizationName}.` : "Organization recognized."
+                : discoveryState === "unrecognized"
+                  ? "We couldn't confirm this Organization ID. Check it or contact your administrator."
+                  : discoveryState === "unavailable"
+                    ? "Organization lookup is temporarily unavailable. You can still try signing in."
+                    : linkedOrganization
+                      ? "Organization detected from your company sign-in link. You can change it if needed."
+                      : "Use the Organization ID supplied by your administrator, or your company-specific Kalam sign-in link."}</p>
             {error && <div id="login-error" className="form-error" role="alert">{error}</div>}
             {ssoProviders.length > 0 && <>
               <div className="k-sso-stack">
@@ -158,7 +183,9 @@ export function LoginClient({ initialOrganization = "", initialSsoError = "" }: 
                 <span>{busy ? "Signing in…" : "Sign in to Kalam"}</span>
                 {!busy && <ArrowRight size={18} aria-hidden="true" />}
               </button>
-            </> : <div className="k-auth-method-note"><ShieldCheck size={15} aria-hidden="true" /><span>Password sign-in is disabled for this organization. Use the approved enterprise SSO method above.</span></div>}
+            </> : <div className="k-auth-method-note" role="status"><ShieldCheck size={15} aria-hidden="true" /><span>{ssoProviders.length > 0
+              ? "Password sign-in is disabled for this organization. Use the approved enterprise SSO method above."
+              : "No sign-in method is currently available for this organization. Contact your organization administrator for access."}</span></div>}
           </form>
 
           <p className="k-support">Need access or your Organization ID? Contact your organization&apos;s Kalam administrator.</p>

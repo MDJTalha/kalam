@@ -1,9 +1,11 @@
-from uuid import UUID
 from datetime import datetime, timedelta
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field, ValidationError, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user, require_permission
 from app.core.security import utcnow
 from app.db.models import Certificate, Course, Tenant, User

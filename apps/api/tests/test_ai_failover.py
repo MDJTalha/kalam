@@ -1,4 +1,5 @@
 import asyncio
+import os
 from uuid import UUID, uuid4
 
 from fastapi import HTTPException
@@ -59,8 +60,8 @@ def test_governed_query_fails_over_to_next_ready_provider(monkeypatch):
 
     provider_ids: list[UUID] = []
     with TestClient(app, base_url="http://localhost") as client:
-        admin = {"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": "DemoOnly!1234"}
-        learner = {"tenant_slug": "demo-corporation", "email": "learner@demo.corp", "password": "DemoOnly!1234"}
+        admin = {"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
+        learner = {"tenant_slug": "demo-corporation", "email": "learner@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
         assert client.post("/api/v1/auth/login", json=admin).status_code == 200
         for index, priority in enumerate((0, 1), start=1):
             provider = client.post(

@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
 
@@ -8,10 +9,15 @@ from fastapi.testclient import TestClient
 
 from app.core.config import settings
 from app.main import app
-from app.services.integration_adapters import IntegrationCheckError, run_integration_check, validate_integration_config
+from app.services.integration_adapters import (
+    IntegrationCheckError,
+    _validate_smtp_destination,
+    run_integration_check,
+    validate_integration_config,
+)
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
+ADMIN = {"email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -112,6 +118,87 @@ def test_oidc_login_config_requires_environment_secret_reference():
             "client_id": "kognivon",
             "login_enabled": True,
         })
+
+
+def test_integration_secret_reference_cannot_read_application_secrets():
+    with pytest.raises(IntegrationCheckError, match="KALAM_INTEGRATION"):
+        validate_integration_config("hris", {
+            "health_url": "https://hris.example.com/health",
+            "token_env": "DATABASE_URL",
+        })
+
+    with pytest.raises(IntegrationCheckError, match="KALAM_INTEGRATION"):
+        validate_integration_config("oidc", {
+            "issuer": "https://idp.example.com",
+            "client_id": "kalam",
+            "client_secret_env": "AWS_SECRET_ACCESS_KEY",
+            "login_enabled": True,
+        })
+
+
+def test_integration_secret_reference_accepts_namespaced_secret():
+    validate_integration_config("hris", {
+        "health_url": "https://hris.example.com/health",
+        "token_env": "KALAM_INTEGRATION_HRIS_ACCESS_TOKEN",
+    })
+
+
+def test_smtp_integration_does_not_send_platform_credentials_to_tenant_host(monkeypatch):
+    import smtplib
+
+    login_calls = []
+
+    class FakeSMTP:
+        def __init__(self, host, port, timeout=None):
+            self.host = host
+            self.port = port
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            return False
+
+        def ehlo(self):
+            return None
+
+        def starttls(self):
+            return None
+
+        def login(self, username, password):
+            login_calls.append((username, password))
+
+    monkeypatch.setattr(smtplib, "SMTP", FakeSMTP)
+    monkeypatch.setattr(settings, "app_env", "test")
+    monkeypatch.setattr(settings, "integration_allow_private_urls", True)
+    monkeypatch.setattr(settings, "smtp_host", "trusted-mail.example.com")
+    monkeypatch.setattr(settings, "smtp_port", 587)
+    monkeypatch.setattr(settings, "smtp_username", "platform-user")
+    monkeypatch.setattr(settings, "smtp_password", "platform-secret")
+    monkeypatch.setattr(settings, "smtp_starttls", True)
+    monkeypatch.setattr(settings, "smtp_ssl", False)
+
+    result = asyncio.run(run_integration_check("email", {
+        "host": "tenant-controlled.example.com",
+        "port": 587,
+    }))
+
+    assert result["ok"] is True
+    assert login_calls == []
+
+
+def test_smtp_destination_rejects_link_local_metadata_address(monkeypatch):
+    import socket
+
+    def resolve_metadata(host, port, type):
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("169.254.169.254", port))]
+
+    monkeypatch.setattr(settings, "app_env", "production")
+    monkeypatch.setattr(settings, "integration_allow_private_urls", False)
+    monkeypatch.setattr(socket, "getaddrinfo", resolve_metadata)
+
+    with pytest.raises(IntegrationCheckError, match="Private or local SMTP"):
+        _validate_smtp_destination("smtp.attacker.example", 587)
 
 
 def test_integration_route_persists_connection_check_evidence(local_server):

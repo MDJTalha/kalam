@@ -3,11 +3,12 @@ from __future__ import annotations
 
 import asyncio
 import os
-from pathlib import Path
+import secrets
 import socket
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 from uuid import uuid4
 
@@ -17,7 +18,7 @@ from sqlalchemy.engine import make_url
 ROOT = Path(__file__).resolve().parents[2]
 API = ROOT / "apps" / "api"
 sys.path.insert(0, str(API))
-from app.core.config import settings  # noqa: E402
+from app.core.config import settings
 
 
 def scanner_ready(host: str, port: int) -> None:
@@ -40,7 +41,7 @@ async def verify() -> None:
     # parameter when opening the administrative connection. The application
     # session factory already supplies ssl=False for localhost connections.
     url = url.set(query={key: value for key, value in url.query.items() if key != "ssl"})
-    name = "phase8_verify_" + uuid4().hex[:12]
+    name = "corplms_demo_test_phase8_" + uuid4().hex[:12]
     admin_url = url.set(drivername="postgresql", database="postgres")
     candidate_url = url.set(database=name)
     scanner_host = "127.0.0.1"
@@ -53,17 +54,34 @@ async def verify() -> None:
         created = True
         with tempfile.TemporaryDirectory(prefix="phase8-uploads-") as uploads:
             env = os.environ.copy()
-            env.update(DATABASE_URL=candidate_url.render_as_string(hide_password=False),
-                       FILE_SCAN_PROVIDER="clamd", FILE_SCAN_HOST=scanner_host,
-                       FILE_SCAN_PORT=str(scanner_port), FILE_STORAGE_ROOT=uploads,
-                       STORAGE_ROOT=uploads, SAAS_OPS_TENANT_SLUG="kalam",
-                       ALLOWED_HOSTS="localhost,127.0.0.1")
+            isolated_url = candidate_url.render_as_string(hide_password=False)
+            fixture_password = secrets.token_urlsafe(32)
+            env.update(
+                APP_ENV="test",
+                DATABASE_URL=isolated_url,
+                KALAM_TEST_DATABASE_URL=isolated_url,
+                KALAM_REFERENCE_SEED_DB_NAME=name,
+                KALAM_ALLOW_DESTRUCTIVE_REFERENCE_SEED="true",
+                ENTERPRISE_ADMIN_PASSWORD=secrets.token_urlsafe(32),
+                CI_FIXTURE_PASSWORD=fixture_password,
+                SEED_ADMIN_PASSWORD=fixture_password,
+                ALLOW_LEGACY_DEMO_SEED="true",
+                LEGACY_DEMO_SEED_DATABASE=name,
+                FILE_SCAN_PROVIDER="clamd",
+                FILE_SCAN_HOST=scanner_host,
+                FILE_SCAN_PORT=str(scanner_port),
+                FILE_STORAGE_ROOT=uploads,
+                STORAGE_ROOT=uploads,
+                SAAS_OPS_TENANT_SLUG="kalam",
+                ALLOWED_HOSTS="localhost,127.0.0.1",
+            )
             redis = urlsplit(settings.redis_url)
             env["REDIS_URL"] = urlunsplit(redis._replace(path="/15"))
-            python = Path(sys.executable)
-            alembic = python.with_name("alembic.exe")
             print(f"Isolated database: {name}; scanner: {scanner_host}:{scanner_port}", flush=True)
-            subprocess.run([str(alembic), "upgrade", "head"], cwd=API, env=env, check=True)
+            # Invoke Alembic through the active interpreter. A sibling
+            # alembic.exe is not guaranteed to exist when packages are
+            # installed in the user's Python Scripts directory.
+            run_step("database migrations", ["-m", "alembic", "upgrade", "head"], env)
             run_step("enterprise seed", ["scripts/seed.py"], env)
             run_step("legacy demo compatibility seed", ["scripts/seed_legacy_demo.py"], env)
             run_step("SaaS operator bootstrap", ["scripts/bootstrap_saas_ops.py"], env)

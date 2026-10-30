@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 
 type SupportCase={id:string;case_number:string;category:string;severity:string;subject:string;status:string;route?:string|null;created_at:string;resolved_at?:string|null};
-type Props={user:{first_name:string;last_name:string;email:string;tenant_name?:string|null;job_title?:string|null;roles?:Array<{name:string}>;permissions?:string[];preferences?:{timezone?:string}};initialCases:SupportCase[]};
+type KnowledgeArticle={id:string;title:string;summary?:string|null;body?:string;category:string;tags:string[];status:string;published_at?:string|null;updated_at:string};
+type Props={user:{first_name:string;last_name:string;email:string;tenant_name?:string|null;job_title?:string|null;roles?:Array<{name:string}>;permissions?:string[];preferences?:{timezone?:string}};initialCases:SupportCase[];initialArticles:KnowledgeArticle[];knowledgeUnavailable?:boolean};
 
 const faqs=[
   ["I cannot access a screen or action. What should I check?","Access is role and tenant scoped. Confirm you are signed into the correct organization, then ask an authorized administrator to verify your role and permissions. Do not share another user's account to bypass missing access."],
@@ -19,13 +20,22 @@ const faqs=[
   ["Where should configuration or product-change requests go?","Role, permission, integration, compliance and organization configuration should go through the authorized tenant administrator. Product changes should enter the organization's change-control process with an owner, requirement and test evidence."],
 ] as const;
 
-export function HelpCenter({user,initialCases}:Props){
+export function HelpCenter({user,initialCases,initialArticles,knowledgeUnavailable=false}:Props){
   const [copied,setCopied]=useState(false);
   const [openFaq,setOpenFaq]=useState<number|null>(0);
   const [cases,setCases]=useState(initialCases);
   const [caseBusy,setCaseBusy]=useState(false);
   const [caseMessage,setCaseMessage]=useState("");
   const [caseError,setCaseError]=useState("");
+  const [articles,setArticles]=useState(initialArticles);
+  const [articleQuery,setArticleQuery]=useState("");
+  const [articleCategory,setArticleCategory]=useState("all");
+  const [articleMessage,setArticleMessage]=useState("");
+  const [articleError,setArticleError]=useState("");
+  const [articleBusy,setArticleBusy]=useState(false);
+  const [openArticle,setOpenArticle]=useState<string|null>(null);
+  const [articleLoading,setArticleLoading]=useState<string|null>(null);
+  const [editingArticle,setEditingArticle]=useState<KnowledgeArticle|null>(null);
   const permissions=user.permissions||[];
   const roles=useMemo(()=>user.roles?.map(item=>item.name)||[],[user.roles]);
   const canAdmin=permissions.includes("tenant.manage");
@@ -78,6 +88,51 @@ export function HelpCenter({user,initialCases}:Props){
     }catch(cause){setCaseError(cause instanceof Error?cause.message:"Support case could not be created.")}finally{setCaseBusy(false)}
   }
 
+  async function saveArticle(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();setArticleBusy(true);setArticleMessage("");setArticleError("");
+    const form=event.currentTarget;const data=new FormData(form);
+    const payload={title:String(data.get("title")||"").trim(),summary:String(data.get("summary")||"").trim()||null,body:String(data.get("body")||"").trim(),category:String(data.get("article-category")||"general").trim(),tags:String(data.get("tags")||"").split(",").map(tag=>tag.trim()).filter(Boolean),status:String(data.get("article-status")||"draft")};
+    try{
+      const response=await fetch(editingArticle?"/api/lms/support/admin/knowledge/"+encodeURIComponent(editingArticle.id):"/api/lms/support/admin/knowledge",{method:editingArticle?"PATCH":"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
+      const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(typeof body.detail==="string"?body.detail:"Article could not be saved.");
+      setArticles(current=>editingArticle?current.map(item=>item.id===editingArticle.id?body as KnowledgeArticle:item):[body as KnowledgeArticle,...current]);form.reset();setEditingArticle(null);setArticleMessage(editingArticle?"Knowledge article updated.":"Knowledge article created.");
+    }catch(cause){setArticleError(cause instanceof Error?cause.message:"Article could not be saved.")}finally{setArticleBusy(false)}
+  }
+
+  async function updateArticle(article:KnowledgeArticle,status:string){
+    setArticleBusy(true);setArticleMessage("");setArticleError("");
+    try{
+      const response=await fetch("/api/lms/support/admin/knowledge/"+encodeURIComponent(article.id),{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({status})});
+      const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(typeof body.detail==="string"?body.detail:"Article could not be updated.");
+      setArticles(current=>current.map(item=>item.id===article.id?body as KnowledgeArticle:item));setArticleMessage("Article status updated.");
+    }catch(cause){setArticleError(cause instanceof Error?cause.message:"Article could not be updated.")}finally{setArticleBusy(false)}
+  }
+
+  async function toggleArticle(article:KnowledgeArticle){
+    if(openArticle===article.id){setOpenArticle(null);return}
+    setOpenArticle(article.id);
+    if(article.body!==undefined)return;
+    setArticleError("");
+    setArticleLoading(article.id);
+    try{
+      const response=await fetch("/api/lms/support/knowledge/"+encodeURIComponent(article.id));
+      const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(typeof body.detail==="string"?body.detail:"Article content could not be loaded.");
+      setArticles(current=>current.map(item=>item.id===article.id?body as KnowledgeArticle:item));
+    }catch(cause){setArticleError(cause instanceof Error?cause.message:"Article content could not be loaded.")}finally{setArticleLoading(null)}
+  }
+
+  async function beginArticleEdit(article:KnowledgeArticle){
+    setArticleError("");setArticleMessage("");setArticleBusy(true);
+    try{
+      const response=await fetch("/api/lms/support/knowledge/"+encodeURIComponent(article.id));
+      const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(typeof body.detail==="string"?body.detail:"Article could not be loaded for editing.");
+      setEditingArticle(body as KnowledgeArticle);
+    }catch(cause){setArticleError(cause instanceof Error?cause.message:"Article could not be loaded for editing.")}finally{setArticleBusy(false)}
+  }
+
+  const categories=useMemo(()=>Array.from(new Set(articles.filter(item=>item.status!=="archived").map(item=>item.category))).sort(),[articles]);
+  const visibleArticles=useMemo(()=>articles.filter(item=>(canAdmin||item.status!=="archived")&&(articleCategory==="all"||item.category===articleCategory)&&(!articleQuery.trim()||[item.title,item.summary||"",item.category,...item.tags].join(" ").toLowerCase().includes(articleQuery.trim().toLowerCase()))),[articles,articleCategory,articleQuery,canAdmin]);
+
   return <div className="help-center">
     <section className="help-hero">
       <div>
@@ -87,6 +142,15 @@ export function HelpCenter({user,initialCases}:Props){
         <div className="help-hero-actions"><Link className="button button-primary" href="/dashboard/search"><Search size={15}/> Search Kalam</Link><Link className="button button-secondary" href="/dashboard/settings/sessions"><ShieldCheck size={15}/> Review active sessions</Link></div>
       </div>
       <div className="help-hero-status"><span>SUPPORT CONTEXT</span><strong>{user.tenant_name||"Your organization"}</strong><small>{roles.length?roles.join(" · "):"Workspace user"}</small><div><CheckCircle2 size={14}/> Signed-in workspace support</div></div>
+    </section>
+
+    <section className="help-section">
+      <div className="help-section-heading"><div><span className="eyebrow">Knowledge base</span><h2>Guides for your Kalam workspace</h2><p>Search published guidance for your organization. Articles are scoped to your tenant.</p></div><BookOpenCheck size={20}/></div>
+      {knowledgeUnavailable&&<div className="form-error" role="status">Knowledge articles are temporarily unavailable. Support history and case creation remain available; please retry later.</div>}
+      <div className="help-knowledge-filters"><label><span className="sr-only">Search knowledge articles</span><Search size={16}/><input value={articleQuery} onChange={event=>setArticleQuery(event.target.value)} placeholder="Search guides and topics" disabled={knowledgeUnavailable}/></label><label><span className="sr-only">Filter articles by category</span><select value={articleCategory} onChange={event=>setArticleCategory(event.target.value)} disabled={knowledgeUnavailable}><option value="all">All categories</option>{categories.map(category=><option key={category} value={category}>{category}</option>)}</select></label></div>
+      <div className="help-knowledge-list">{visibleArticles.length?visibleArticles.map(article=><article key={article.id}><button type="button" className="help-knowledge-toggle" aria-expanded={openArticle===article.id} onClick={()=>void toggleArticle(article)}><span><strong>{article.title}</strong><small>{article.category}{article.tags.length?" · "+article.tags.join(", "):""}{article.status!=="published"?" · "+article.status:""}</small>{article.summary&&<span>{article.summary}</span>}</span><ChevronDown size={16}/></button>{openArticle===article.id&&<div className="help-knowledge-body">{articleLoading===article.id?"Loading article…":article.body||articleError||"Article content is unavailable."}</div>}{canAdmin&&<div className="help-knowledge-admin"><span>{article.status}</span><button type="button" disabled={articleBusy} onClick={()=>void beginArticleEdit(article)}>Edit</button>{article.status==="draft"?<button type="button" disabled={articleBusy} onClick={()=>void updateArticle(article,"published")}>Publish</button>:article.status==="published"?<button type="button" disabled={articleBusy} onClick={()=>void updateArticle(article,"archived")}>Archive</button>:<button type="button" disabled={articleBusy} onClick={()=>void updateArticle(article,"draft")}>Restore as draft</button>}</div>}</article>):<div className="help-empty">No matching guidance is available.</div>}</div>
+      {(articleMessage||articleError)&&<div className={articleError?"form-error":"form-success"} role={articleError?"alert":"status"}>{articleError||articleMessage}</div>}
+      {canAdmin&&<details className="help-knowledge-create" open={Boolean(editingArticle)}><summary>{editingArticle?"Edit knowledge article":"Create a knowledge article"}</summary><form key={editingArticle?.id||"new-article"} className="help-case-form" onSubmit={event=>void saveArticle(event)}><label className="wide"><span>Title</span><input name="title" minLength={3} maxLength={240} defaultValue={editingArticle?.title||""} required/></label><label><span>Category</span><input name="article-category" maxLength={80} defaultValue={editingArticle?.category||"general"} required/></label><label><span>Tags (comma separated)</span><input name="tags" maxLength={500} defaultValue={editingArticle?.tags.join(", ")||""}/></label><label className="wide"><span>Summary</span><input name="summary" maxLength={500} defaultValue={editingArticle?.summary||""}/></label><label><span>Status</span><select name="article-status" defaultValue={editingArticle?.status==="published"?"published":"draft"}><option value="draft">Draft</option><option value="published">Published</option></select></label><label className="wide"><span>Article body</span><textarea name="body" minLength={1} maxLength={50000} defaultValue={editingArticle?.body||""} required rows={7}/></label><div className="help-case-actions"><button className="button button-primary" disabled={articleBusy} type="submit">{articleBusy?"Saving…":editingArticle?"Save article":"Create article"}</button>{editingArticle&&<button className="button button-secondary" type="button" disabled={articleBusy} onClick={()=>setEditingArticle(null)}>Cancel edit</button>}<span>Content is plain text and visible only inside this tenant.</span></div></form></details>}
     </section>
 
     <section className="help-section">

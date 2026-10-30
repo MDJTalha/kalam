@@ -1,6 +1,4 @@
 import asyncio
-import hmac
-import hashlib
 import json
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer

@@ -1,4 +1,7 @@
 import asyncio
+import os
+
+from fastapi import HTTPException
 
 from app.api.routes.ai import _generate, _lesson_text
 from app.db.models import Lesson
@@ -35,7 +38,7 @@ def test_ai_provider_fails_closed_when_disabled():
     async def run():
         try:
             await _generate("test", "disabled", "http://127.0.0.1:11434", "")
-        except Exception as exc:
+        except HTTPException as exc:
             return getattr(exc, "status_code", None)
         return None
 
@@ -70,20 +73,22 @@ def test_lesson_context_extraction_is_bounded_to_supported_fields():
 
 
 
-def test_ai_registry_is_admin_only_and_persists_governance_contract(monkeypatch, client=None):
-    from fastapi.testclient import TestClient
-    from app.main import app
-    from app.api.routes import ai as ai_route
+def test_ai_registry_is_admin_only_and_persists_governance_contract(monkeypatch):
     from uuid import uuid4
+
+    from fastapi.testclient import TestClient
+
+    from app.api.routes import ai as ai_route
+    from app.main import app
 
     monkeypatch.setattr(ai_route.httpx, "AsyncClient", lambda *args, **kwargs: _FakeProviderClient())
     with TestClient(app, base_url="http://localhost") as client:
-        login_payload = {"tenant_slug": "demo-corporation", "email": "learner@demo.corp", "password": "DemoOnly!1234"}
+        login_payload = {"tenant_slug": "demo-corporation", "email": "learner@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
         assert client.post("/api/v1/auth/login", json=login_payload).status_code == 200
         assert client.get("/api/v1/ai/admin/providers").status_code == 403
         assert client.get("/api/v1/ai/admin/policy").status_code == 403
 
-        admin = {"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": "DemoOnly!1234"}
+        admin = {"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
         assert client.post("/api/v1/auth/login", json=admin).status_code == 200
         token = uuid4().hex[:8]
         provider = client.post("/api/v1/ai/admin/providers", json={
@@ -160,11 +165,12 @@ def test_ai_registry_is_admin_only_and_persists_governance_contract(monkeypatch,
         assert disabled_provider.status_code == 200
 
 
-def test_ai_provider_validation_rejects_invalid_secret_reference(client=None):
+def test_ai_provider_validation_rejects_invalid_secret_reference():
     from fastapi.testclient import TestClient
+
     from app.main import app
     with TestClient(app, base_url="http://localhost") as client:
-        assert client.post("/api/v1/auth/login", json={"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": "DemoOnly!1234"}).status_code == 200
+        assert client.post("/api/v1/auth/login", json={"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}).status_code == 200
         response = client.post("/api/v1/ai/admin/providers", json={
             "name": "Invalid Secret Provider",
             "provider_type": "ollama",
@@ -177,10 +183,12 @@ def test_ai_provider_validation_rejects_invalid_secret_reference(client=None):
 
 
 def test_ai_query_returns_citations_for_authorized_evidence(monkeypatch):
-    from fastapi.testclient import TestClient
-    from app.main import app
-    from app.api.routes import ai as ai_route
     from uuid import uuid4
+
+    from fastapi.testclient import TestClient
+
+    from app.api.routes import ai as ai_route
+    from app.main import app
 
     captured = {}
 
@@ -214,8 +222,8 @@ def test_ai_query_returns_citations_for_authorized_evidence(monkeypatch):
     monkeypatch.setattr(ai_route, "retrieve_capability_sources", fake_capability_sources)
     monkeypatch.setattr(ai_route.httpx, "AsyncClient", lambda *args, **kwargs: _FakeProviderClient())
     with TestClient(app, base_url="http://localhost") as client:
-        admin = {"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": "DemoOnly!1234"}
-        learner = {"tenant_slug": "demo-corporation", "email": "learner@demo.corp", "password": "DemoOnly!1234"}
+        admin = {"tenant_slug": "demo-corporation", "email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
+        learner = {"tenant_slug": "demo-corporation", "email": "learner@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
         assert client.post("/api/v1/auth/login", json=admin).status_code == 200
         token = uuid4().hex[:8]
         provider = client.post("/api/v1/ai/admin/providers", json={
@@ -338,21 +346,21 @@ def test_grounded_answer_gate_accepts_valid_and_rejects_invalid_citations():
     validate_grounded_answer("Evidence supports this [S1].", {"S1", "S2"})
     try:
         validate_grounded_answer("Evidence supports this.", {"S1"})
-    except Exception as exc:
+    except HTTPException as exc:
         assert getattr(exc, "status_code", None) == 502
     else:
         raise AssertionError("Uncited AI output was not rejected.")
 
     try:
         validate_grounded_answer("Evidence [S9].", {"S1"})
-    except Exception as exc:
+    except HTTPException as exc:
         assert getattr(exc, "status_code", None) == 502
     else:
         raise AssertionError("Invalid AI citation was not rejected.")
 
     try:
         validate_grounded_answer("Evidence [S4].", {"S1", "S2", "S3", "S4"}, {"S1", "S2", "S3"})
-    except Exception as exc:
+    except HTTPException as exc:
         assert getattr(exc, "status_code", None) == 502
     else:
         raise AssertionError("Low-relevance AI citation was not rejected.")

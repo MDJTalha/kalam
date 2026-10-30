@@ -51,10 +51,21 @@ services:
       WEB_ORIGIN: ${WEB_ORIGIN:?WEB_ORIGIN is required}
       API_ORIGIN: ${API_ORIGIN:?API_ORIGIN is required}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:?ALLOWED_HOSTS is required}
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-s3}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+      FILE_SCAN_PROVIDER: clamd
+      FILE_SCAN_HOST: clamav
+      FILE_SCAN_PORT: 3310
+      FILE_SCAN_TIMEOUT_SECONDS: ${FILE_SCAN_TIMEOUT_SECONDS:-30}
       COOKIE_SECURE: "true"
       API_DOCS_ENABLED: "false"
       DEV_EMAIL_SINK: "false"
       INTEGRATION_ALLOW_PRIVATE_URLS: "false"
+      OUTBOUND_HTTP_PROXY: ${OUTBOUND_HTTP_PROXY:?OUTBOUND_HTTP_PROXY is required; configure an egress-filtering proxy}
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,8 +94,13 @@ services:
       RESET_TOKEN_MINUTES: ${RESET_TOKEN_MINUTES:-30}
       MAX_FAILED_LOGIN_ATTEMPTS: ${MAX_FAILED_LOGIN_ATTEMPTS:-5}
       LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-15}
-      STORAGE_BACKEND: local
-      STORAGE_ROOT: /data/uploads
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-s3}
+      FILE_STORAGE_ROOT: /data/uploads
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
       FILE_SCAN_PROVIDER: clamd
       FILE_SCAN_HOST: clamav
       FILE_SCAN_PORT: 3310
@@ -104,6 +120,7 @@ services:
       SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
       DEV_EMAIL_SINK: "false"
       INTEGRATION_ALLOW_PRIVATE_URLS: "false"
+      OUTBOUND_HTTP_PROXY: ${OUTBOUND_HTTP_PROXY:?OUTBOUND_HTTP_PROXY is required; configure an egress-filtering proxy}
       WEBHOOK_ENCRYPTION_KEYS: ${WEBHOOK_ENCRYPTION_KEYS:-}
       WEBHOOK_ACTIVE_KEY_ID: ${WEBHOOK_ACTIVE_KEY_ID:-primary}
     volumes:
@@ -142,8 +159,14 @@ services:
       COOKIE_SECURE: "true"
       API_DOCS_ENABLED: "false"
       INTEGRATION_ALLOW_PRIVATE_URLS: "false"
-      STORAGE_BACKEND: local
-      STORAGE_ROOT: /data/uploads
+      OUTBOUND_HTTP_PROXY: ${OUTBOUND_HTTP_PROXY:?OUTBOUND_HTTP_PROXY is required; configure an egress-filtering proxy}
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-s3}
+      FILE_STORAGE_ROOT: /data/uploads
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
       FILE_SCAN_PROVIDER: clamd
       FILE_SCAN_HOST: clamav
       FILE_SCAN_PORT: 3310

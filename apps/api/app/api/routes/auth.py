@@ -10,25 +10,49 @@ from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import httpx
+from cryptography.fernet import Fernet, InvalidToken
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.responses import RedirectResponse
 from joserfc import jwt
 from joserfc.errors import JoseError
 from joserfc.jwk import KeySet
 from joserfc.jwt import JWTClaimsRegistry
-from cryptography.fernet import Fernet, InvalidToken
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, is_platform_developer
 from app.core.config import settings
-from app.core.security import hash_password, new_session_token, session_token_hash, utcnow, verify_password
-from app.db.models import Integration, Invitation, OrgUnit, PasswordResetToken, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
+from app.core.security import (
+    hash_password,
+    new_session_token,
+    session_token_hash,
+    support_context_token_hash,
+    utcnow,
+    verify_password,
+)
+from app.db.models import (
+    DeveloperSupportSession,
+    Integration,
+    Invitation,
+    OrgUnit,
+    PasswordResetToken,
+    Permission,
+    Role,
+    RolePermission,
+    SessionRecord,
+    Tenant,
+    User,
+    UserRole,
+)
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.email import send_email
-from app.services.integration_adapters import IntegrationCheckError, get_oidc_discovery
+from app.services.integration_adapters import (
+    IntegrationCheckError,
+    get_oidc_discovery,
+    validate_secret_environment_reference,
+)
 
 router = APIRouter()
 
@@ -180,6 +204,68 @@ async def _oidc_login_integration(
     return tenant, integration
 
 
+def _oidc_client_credentials(config: dict) -> tuple[str, str]:
+    client_id = str(config.get("client_id") or "").strip()
+    secret_env = str(config.get("client_secret_env") or "").strip()
+    try:
+        secret_env = validate_secret_environment_reference(
+            secret_env,
+            provider="oidc",
+            key="client_secret_env",
+        )
+    except IntegrationCheckError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Enterprise SSO client credentials are not configured",
+        ) from exc
+    secret = os.getenv(secret_env)
+    if not client_id or not secret:
+        raise HTTPException(
+            status_code=503,
+            detail="Enterprise SSO client credentials are not configured",
+        )
+    return client_id, secret
+
+
+async def _revoke_request_bound_support_context(
+    request: Request,
+    db: AsyncSession,
+    *,
+    developer_user_id: UUID | None = None,
+) -> bool:
+    raw_support_token = request.cookies.get("kalam_support_context")
+    raw_session_token = request.cookies.get(settings.session_cookie_name)
+    if not raw_support_token or not raw_session_token:
+        return False
+
+    query = select(DeveloperSupportSession).where(
+        DeveloperSupportSession.token_hash
+        == support_context_token_hash(raw_support_token, raw_session_token),
+        DeveloperSupportSession.revoked_at.is_(None),
+    )
+    if developer_user_id is not None:
+        query = query.where(DeveloperSupportSession.developer_user_id == developer_user_id)
+
+    support_session = await db.scalar(query)
+    if support_session is None:
+        return False
+    support_session.revoked_at = utcnow()
+    developer = await db.scalar(
+        select(User).where(User.id == support_session.developer_user_id)
+    )
+    if developer is not None:
+        await audit(
+            db,
+            tenant_id=developer.tenant_id,
+            actor_id=developer.id,
+            action="developer.support.revoked_by_auth_change",
+            entity_type="tenant",
+            entity_id=str(support_session.target_tenant_id),
+            metadata={"reason": support_session.reason},
+        )
+    return True
+
+
 def _oidc_redirect_uri() -> str:
     return settings.web_origin.rstrip("/") + "/api/auth/sso/oidc/callback"
 
@@ -210,8 +296,29 @@ def _validate_oidc_id_token(
         iss={"essential": True, "value": issuer},
         aud={"essential": True, "value": client_id},
         exp={"essential": True},
+        iat={"essential": True},
         nonce={"essential": True, "value": nonce},
     ).validate(claims)
+
+    issued_at = claims.get("iat")
+    if isinstance(issued_at, bool) or not isinstance(issued_at, (int, float)):
+        raise JoseError("OIDC ID token must contain a numeric iat claim")
+    if float(issued_at) > utcnow().timestamp() + 60:
+        raise JoseError("OIDC ID token iat is unacceptably far in the future")
+
+    audience_claim = claims.get("aud")
+    if isinstance(audience_claim, str):
+        audiences = [audience_claim]
+    elif isinstance(audience_claim, list) and all(isinstance(item, str) for item in audience_claim):
+        audiences = audience_claim
+    else:
+        raise JoseError("OIDC ID token has an invalid aud claim")
+
+    authorized_party = claims.get("azp")
+    if len(audiences) > 1 and not isinstance(authorized_party, str):
+        raise JoseError("OIDC ID token with multiple audiences must contain azp")
+    if authorized_party is not None and authorized_party != client_id:
+        raise JoseError("OIDC ID token azp does not match the client_id")
     return claims
 
 
@@ -262,10 +369,7 @@ async def oidc_start(tenant_slug: str, db: AsyncSession = Depends(get_db)):
     except IntegrationCheckError as exc:
         raise HTTPException(status_code=503, detail="Enterprise SSO discovery failed") from exc
 
-    client_id = str(config.get("client_id") or "").strip()
-    secret_env = str(config.get("client_secret_env") or "").strip()
-    if not client_id or not secret_env or not os.getenv(secret_env):
-        raise HTTPException(status_code=503, detail="Enterprise SSO client credentials are not configured")
+    client_id, _client_secret = _oidc_client_credentials(config)
 
     state = secrets.token_urlsafe(32)
     nonce = secrets.token_urlsafe(32)
@@ -333,11 +437,7 @@ async def oidc_callback(
     except IntegrationCheckError as exc:
         raise HTTPException(status_code=503, detail="Enterprise SSO discovery failed") from exc
 
-    client_id = str(config.get("client_id") or "").strip()
-    secret_env = str(config.get("client_secret_env") or "").strip()
-    client_secret = os.getenv(secret_env) if secret_env else None
-    if not client_id or not client_secret:
-        raise HTTPException(status_code=503, detail="Enterprise SSO client credentials are not configured")
+    client_id, client_secret = _oidc_client_credentials(config)
 
     token_payload = {
         "grant_type": "authorization_code",
@@ -347,7 +447,12 @@ async def oidc_callback(
         "client_secret": client_secret,
         "code_verifier": str(transaction.get("code_verifier") or ""),
     }
-    async with httpx.AsyncClient(timeout=15.0, follow_redirects=False) as client:
+    async with httpx.AsyncClient(
+        timeout=15.0,
+        follow_redirects=False,
+        trust_env=False,
+        proxy=settings.outbound_http_proxy,
+    ) as client:
         token_response = await client.post(str(metadata["token_endpoint"]), data=token_payload)
         if token_response.status_code >= 400:
             raise HTTPException(status_code=401, detail="Enterprise SSO token exchange failed")
@@ -372,8 +477,10 @@ async def oidc_callback(
         raise HTTPException(status_code=401, detail="Enterprise SSO identity token validation failed") from exc
 
     email = str(claims.get("email") or "").strip().lower()
-    if not email or claims.get("email_verified") is False:
+    if not email or claims.get("email_verified") is not True:
         raise HTTPException(status_code=401, detail="Enterprise SSO requires a verified email address")
+    if not isinstance(claims.get("sub"), str) or not claims["sub"].strip():
+        raise HTTPException(status_code=401, detail="Enterprise SSO identity is missing a subject")
     user = await db.scalar(
         select(User).where(
             User.tenant_id == tenant.id,
@@ -414,14 +521,20 @@ async def _request_password_reset(payload: ForgotPasswordRequest, db: AsyncSessi
     ))
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id,
                 action="auth.password_reset.requested", entity_type="user", entity_id=str(user.id))
-    await db.commit()
     reset_url = f"{settings.web_origin}/reset-password?token={raw_token}"
-    send_email(
-        recipient=user.email,
-        subject="Corporate LMS password reset",
-        text=("Use this secure link to reset your password. "
-              f"It expires in {settings.reset_token_minutes} minutes.\n\n{reset_url}"),
-    )
+    # Persist the one-time token before sending mail. Sending first can deliver a
+    # link whose token is rolled back if the subsequent database commit fails.
+    await db.commit()
+    try:
+        send_email(
+            recipient=user.email,
+            subject="Corporate LMS password reset",
+            text=("Use this secure link to reset your password. "
+                  f"It expires in {settings.reset_token_minutes} minutes.\n\n{reset_url}"),
+        )
+    except RuntimeError:
+        # Keep the response indistinguishable for unknown users and mail failures.
+        return {"status": "accepted"}
     return {"status": "accepted"}
 
 @router.post("/login")
@@ -481,7 +594,12 @@ async def forgot_password(payload: ForgotPasswordRequest, db: AsyncSession = Dep
 
 @router.post("/reset-password")
 @router.post("/password-reset/confirm")
-async def reset_password(payload: ResetPasswordRequest, response: Response, db: AsyncSession = Depends(get_db)):
+async def reset_password(
+    payload: ResetPasswordRequest,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
     result = await db.execute(
         select(PasswordResetToken, User).join(User, User.id == PasswordResetToken.user_id)
         .where(PasswordResetToken.token_hash == session_token_hash(payload.token))
@@ -495,6 +613,7 @@ async def reset_password(payload: ResetPasswordRequest, response: Response, db: 
     token_record, user = row
     user.password_hash = hash_password(payload.new_password)
     token_record.used_at = utcnow()
+    await _revoke_request_bound_support_context(request, db, developer_user_id=user.id)
     await db.execute(
         update(SessionRecord)
         .where(SessionRecord.user_id == user.id, SessionRecord.revoked_at.is_(None))
@@ -504,6 +623,7 @@ async def reset_password(payload: ResetPasswordRequest, response: Response, db: 
                 action="auth.password_reset.completed", entity_type="user", entity_id=str(user.id))
     await db.commit()
     response.delete_cookie(settings.session_cookie_name, path="/")
+    response.delete_cookie("kalam_support_context", path="/")
     return {"status": "password_updated"}
 
 @router.post("/invitations/accept")
@@ -540,12 +660,19 @@ async def accept_invitation(payload: InvitationAccept, db: AsyncSession = Depend
     return {"status": "accepted", "user_id": str(user.id)}
 
 @router.post("/change-password")
-async def change_password(payload: ChangePasswordRequest, request: Request, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def change_password(
+    payload: ChangePasswordRequest,
+    request: Request,
+    response: Response,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     if not verify_password(payload.current_password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is incorrect")
     if verify_password(payload.new_password, user.password_hash):
         raise HTTPException(status_code=422, detail="New password must be different from the current password")
     user.password_hash = hash_password(payload.new_password)
+    await _revoke_request_bound_support_context(request, db, developer_user_id=user.id)
     raw_token = request.cookies.get(settings.session_cookie_name)
     current_hash = session_token_hash(raw_token) if raw_token else None
     result = await db.execute(select(SessionRecord).where(SessionRecord.user_id == user.id, SessionRecord.revoked_at.is_(None)))
@@ -557,6 +684,7 @@ async def change_password(payload: ChangePasswordRequest, request: Request, user
         revoked += 1
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="auth.password.changed", entity_type="user", entity_id=str(user.id), metadata={"revoked_other_sessions": revoked})
     await db.commit()
+    response.delete_cookie("kalam_support_context", path="/")
     return {"status": "password_updated", "revoked_other_sessions": revoked}
 
 @router.get("/sessions")
@@ -638,23 +766,52 @@ async def me(user: User = Depends(get_current_user), db: AsyncSession = Depends(
             manager_name = f"{manager.first_name} {manager.last_name}".strip()
     roles = list(role_map.values())
     platform_developer = await is_platform_developer(user, db)
+    home_tenant_id = await db.scalar(select(User.tenant_id).where(User.id == user.id))
+    ops_tenant_id = await db.scalar(
+        select(Tenant.id).where(Tenant.slug == settings.saas_ops_tenant_slug)
+    )
     if platform_developer and not any(item["name"].strip().lower() == "platform developer" for item in roles):
         platform_role_id = await db.scalar(select(Role.id).join(Tenant, Tenant.id == Role.tenant_id).where(
             Tenant.slug == settings.saas_ops_tenant_slug, Role.name.ilike("platform developer"), Role.role_kind == "platform"
         ))
         if platform_role_id is not None:
             roles.append({"id": str(platform_role_id), "name": "Platform Developer"})
-    if platform_developer:
-        # Platform Developer is the internal product-development role. Expose
-        # the complete permission catalog so the web application can render
-        # every authorized platform screen; endpoint authorization remains
-        # enforced by user_has_permission().
+    if platform_developer and user.tenant_id != home_tenant_id:
+        # A support context is the only time a Developer gets the target
+        # tenant's product permissions in the UI. The API independently
+        # confirms the active session before honoring those permissions.
         all_permission_keys = (
-            await db.execute(select(Permission.key).order_by(Permission.key))
+            await db.execute(select(Permission.key).where(
+                ~Permission.key.like("saas.crm.%"),
+                ~Permission.key.like("platform.%"),
+            ).order_by(Permission.key))
         ).scalars().all()
         permissions = sorted(set(all_permission_keys))
+    elif platform_developer:
+        # On the Developer's home workspace expose only explicit platform
+        # permissions assigned to the Platform Developer role.
+        platform_permission_keys = (
+            await db.execute(
+                select(Permission.key)
+                .join(RolePermission, RolePermission.permission_id == Permission.id)
+                .join(Role, Role.id == RolePermission.role_id)
+                .join(UserRole, UserRole.role_id == Role.id)
+                .where(UserRole.user_id == user.id)
+                .where(Role.tenant_id == home_tenant_id)
+                .where(Role.role_kind == "platform")
+                .where(Role.name.ilike("platform developer"))
+                .order_by(Permission.key)
+            )
+        ).scalars().all()
+        permissions = sorted(set(platform_permission_keys))
+    elif ops_tenant_id is not None and user.tenant_id == ops_tenant_id:
+        # Internal commercial users receive only their assigned CRM permissions.
+        permissions = sorted(permission_keys)
     else:
-        permissions = sorted(key for key in permission_keys if not key.startswith("saas.crm."))
+        permissions = sorted(
+            key for key in permission_keys
+            if not key.startswith(("saas.crm.", "platform."))
+        )
     return {
         "id": str(user.id),
         "tenant_id": str(user.tenant_id),
@@ -715,8 +872,10 @@ async def logout(request: Request, response: Response, db: AsyncSession = Depend
         if row:
             session, user = row
             session.revoked_at = utcnow()
+            await _revoke_request_bound_support_context(request, db, developer_user_id=user.id)
             await audit(db, tenant_id=user.tenant_id, actor_id=user.id,
                         action="auth.logout", entity_type="session", entity_id=str(session.id))
             await db.commit()
     response.delete_cookie(settings.session_cookie_name, path="/")
+    response.delete_cookie("kalam_support_context", path="/")
     return {"status": "logged_out"}

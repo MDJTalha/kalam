@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 import csv
 import io
 import re
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, Field
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, require_permission
+from app.api.deps import is_platform_developer, require_permission, user_has_permission
 from app.core.config import settings
 from app.db.models import (
     CRMAccount,
@@ -20,21 +20,21 @@ from app.db.models import (
     CRMContract,
     CRMInvoice,
     CRMOnboardingItem,
-    CRMPayment,
     CRMOpportunity,
+    CRMPayment,
     CRMSalesActivity,
     CRMSubscription,
     CRMTask,
     CRMTrial,
     MarketingInquiry,
-    SaaSCertification,
-    SessionRecord,
-    SaaSOffer,
-    SaaSPlan,
-    Tenant,
+    Permission,
     Role,
     RolePermission,
-    Permission,
+    SaaSCertification,
+    SaaSOffer,
+    SaaSPlan,
+    SessionRecord,
+    Tenant,
     User,
     UserRole,
 )
@@ -45,13 +45,51 @@ from app.services.saas_renewals import reconcile_renewal_tasks
 router = APIRouter()
 
 PREDEFINED_TENANT_ROLES = {
-    "Tenant Owner": ["tenant.read","reports.read","audit.read"],
-    "Tenant Administrator": ["tenant.read","tenant.manage","users.read","users.manage","reports.read","audit.read","integrations.manage"],
-    "HR / People Administrator": ["users.read","users.manage","reports.read","compliance.manage"],
-    "L&D Administrator": ["courses.read","courses.manage","learning.access","assessments.manage","certificates.manage","reports.read","skills.manage","development.manage","users.read"],
-    "Manager": ["users.read","courses.read","learning.access","reports.read","development.manage"],
-    "Instructor": ["courses.read","learning.access","assessments.manage"],
-    "Learner / Employee": ["courses.read","learning.access","development.manage"],
+    "Tenant Owner": ["tenant.read", "reports.read", "audit.read"],
+    "Tenant Administrator": [
+        "tenant.read", "tenant.manage", "users.read", "users.manage", "reports.read",
+        "audit.read", "integrations.manage", "roles.manage",
+    ],
+    "HR / People Administrator": ["users.read", "users.manage", "reports.read", "compliance.manage"],
+    "L&D Administrator": [
+        "courses.read", "courses.manage", "learning.access", "assessments.manage",
+        "certificates.manage", "reports.read", "skills.manage", "capabilities.read",
+        "capabilities.manage", "competencies.read", "competencies.manage",
+        "role_requirements.read", "role_requirements.manage", "development.manage",
+        "users.read", "users.invite.learning_roles",
+    ],
+    "Manager": [
+        "users.team.read", "courses.read", "courses.assign_team", "learning.access",
+        "reports.team.read", "development.manage", "development.team.read",
+        "development.team.manage",
+    ],
+    "Trainer": ["courses.read", "learning.access", "assessments.manage"],
+    "Instructor": ["courses.read", "learning.access", "assessments.manage"],
+    "L&D Analyst": [
+        "courses.read", "reports.read", "capabilities.read", "competencies.read",
+        "capability_assessments.read", "role_requirements.read",
+    ],
+    "Assessor": [
+        "capability_assessments.read", "capability_assessments.execute",
+        "competencies.read",
+    ],
+    # These roles must stay non-sensitive until organization-unit row-level
+    # authorization is implemented across people, reporting and capability APIs.
+    # Keep this in sync with CUSTOMER_ROLE_DEFINITIONS in the role-boundaries migration.
+    "HR Business Partner": ["courses.read", "learning.access", "development.manage"],
+    "Quality & Compliance": [
+        "users.read", "courses.read", "learning.access", "compliance.manage",
+        "reports.read", "audit.read", "files.read", "evidence.read", "evidence.verify",
+    ],
+    "Auditor": ["reports.read", "audit.read", "files.read", "evidence.read"],
+    "Regional Executive": ["tenant.read", "courses.read", "learning.access"],
+    "Global Executive": [
+        "tenant.read", "users.read", "courses.read", "learning.access",
+        "reports.read", "audit.read", "compliance.manage", "skills.manage",
+        "capabilities.read", "development.manage", "capability_gaps.read",
+        "capability_risk.read",
+    ],
+    "Learner / Employee": ["courses.read", "learning.access", "development.manage"],
 }
 
 async def _ensure_tenant_roles(db: AsyncSession, tenant_id: UUID) -> None:
@@ -123,6 +161,24 @@ async def _require_ops_user(
     if await _is_demo_crm_user(user, db):
         return user
     raise HTTPException(status_code=403, detail="SaaS CRM is restricted to authorized operations or demo administration")
+
+
+async def _require_platform_tenant_operator(
+    user: User,
+    db: AsyncSession,
+    permission_key: str,
+) -> Tenant:
+    ops = await _ops_tenant(db)
+    home_tenant_id = await db.scalar(select(User.tenant_id).where(User.id == user.id))
+    if (
+        ops is None
+        or home_tenant_id != ops.id
+        or user.tenant_id != ops.id
+        or not await _is_platform_developer(user, db)
+        or not await user_has_permission(user, db, permission_key)
+    ):
+        raise HTTPException(status_code=403, detail="Platform tenant operations permission required")
+    return ops
 
 
 async def _require_managed_tenant_link(db: AsyncSession, user: User, tenant_id: UUID, account_id: UUID | None = None) -> Tenant:
@@ -228,9 +284,11 @@ def _validate_plan_bounds(minimum_seats: int, maximum_seats: int | None) -> None
         raise HTTPException(status_code=422, detail="Maximum seats cannot be lower than minimum seats")
 
 
-def _validate_trial_seats(plan: SaaSPlan | None, seats: int) -> None:
+def _validate_trial_seats(plan: SaaSPlan | None, seats: int | None) -> None:
     if plan is None:
         return
+    if seats is None:
+        raise HTTPException(status_code=422, detail="Trial seats are required when a plan is selected")
     if seats < plan.minimum_seats:
         raise HTTPException(status_code=422, detail="Trial seats are below the plan minimum")
     if plan.maximum_seats is not None and seats > plan.maximum_seats:
@@ -240,9 +298,9 @@ def _validate_trial_seats(plan: SaaSPlan | None, seats: int) -> None:
 async def _validate_active_trial(db: AsyncSession, account: CRMAccount, starts_at: datetime | None, ends_at: datetime | None) -> None:
     if starts_at is None or ends_at is None:
         raise HTTPException(status_code=422, detail="Active trial requires start and end dates")
-    start = starts_at if starts_at.tzinfo else starts_at.replace(tzinfo=timezone.utc)
-    end = ends_at if ends_at.tzinfo else ends_at.replace(tzinfo=timezone.utc)
-    now = datetime.now(timezone.utc)
+    start = starts_at if starts_at.tzinfo else starts_at.replace(tzinfo=UTC)
+    end = ends_at if ends_at.tzinfo else ends_at.replace(tzinfo=UTC)
+    now = datetime.now(UTC)
     if not start <= now < end:
         raise HTTPException(status_code=422, detail="Active trial dates must include the current time")
     tenant = await db.get(Tenant, account.managed_tenant_id) if account.managed_tenant_id else None
@@ -255,9 +313,7 @@ def _offer_is_current(offer: SaaSOffer, now: datetime) -> bool:
         return False
     if offer.starts_at is not None and offer.starts_at > now:
         return False
-    if offer.ends_at is not None and offer.ends_at <= now:
-        return False
-    return True
+    return not (offer.ends_at is not None and offer.ends_at <= now)
 
 class PlanCreate(BaseModel):
     code: str = Field(min_length=2, max_length=80)
@@ -588,7 +644,7 @@ class TenantProvisionCreate(BaseModel):
 
 
 class TenantCommercialUpdate(BaseModel):
-    status: str = Field(pattern="^(active|inactive)$")
+    status: str = Field(pattern="^(active|inactive|suspended)$")
 
 class CertificationCreate(BaseModel):
     title: str = Field(min_length=2, max_length=180)
@@ -627,7 +683,7 @@ async def public_catalog(db: AsyncSession = Depends(get_db)):
             SaaSPlan.currency == "USD",
         ).order_by(SaaSPlan.sort_order, SaaSPlan.name)
     )).scalars().all()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     offers = (await db.execute(
         select(SaaSOffer).where(
             SaaSOffer.ops_tenant_id == tenant.id,
@@ -707,7 +763,7 @@ async def crm_overview(
             CRMSubscription.status == "active",
         )
     )
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     open_tasks = await db.scalar(
         select(func.count()).select_from(CRMTask).where(
             CRMTask.ops_tenant_id == user.tenant_id,
@@ -849,7 +905,7 @@ async def crm_lookup(
         invoice_rows = (await db.execute(invoice_stmt.order_by(CRMInvoice.due_at.asc().nullslast(), CRMInvoice.created_at.desc()).limit(limit))).all()
         items = []
         for invoice, account in invoice_rows:
-            paid_minor, outstanding_minor = await _reconcile_invoice(db, invoice)
+            _paid_minor, outstanding_minor = await _reconcile_invoice(db, invoice)
             if outstanding_minor <= 0:
                 continue
             items.append({"id": str(invoice.id), "label": f"{invoice.invoice_number} · {account.name}", "meta": f"{outstanding_minor} {invoice.currency} outstanding", "account_id": str(account.id), "currency": invoice.currency, "outstanding_minor": outstanding_minor})
@@ -1067,7 +1123,7 @@ async def create_subscription(payload: SubscriptionCreate, user: User = Depends(
     if offer is not None:
         if offer.plan_id is not None and (plan is None or offer.plan_id != plan.id):
             raise HTTPException(status_code=422, detail="Offer does not belong to the selected plan")
-        if not _offer_is_current(offer, datetime.now(timezone.utc)):
+        if not _offer_is_current(offer, datetime.now(UTC)):
             raise HTTPException(status_code=422, detail="Offer is not currently active")
     discount = payload.discount_minor
     if offer is not None:
@@ -1316,11 +1372,11 @@ async def update_subscription(subscription_id: UUID, payload: SubscriptionUpdate
         raise HTTPException(status_code=422, detail="Discount is derived from the selected offer")
     plan = await _require_plan(db, user.tenant_id, item.plan_id)
     if plan is not None and "seats" in payload.model_fields_set:
-        assert payload.seats is not None
         _validate_trial_seats(plan, payload.seats)
     if item.offer_id is not None and "list_price_minor" in payload.model_fields_set:
         offer = await _require_offer(db, user.tenant_id, item.offer_id)
-        assert offer is not None and prospective_list is not None
+        if offer is None or prospective_list is None:
+            raise HTTPException(status_code=422, detail="An offer and list price are required to calculate the subscription discount")
         prospective_discount = (prospective_list * offer.discount_value + 50) // 100 if offer.discount_type == "percent" else offer.discount_value
     if prospective_discount is not None and prospective_list is not None and prospective_discount > prospective_list:
         raise HTTPException(status_code=422, detail="Discount cannot exceed list price")
@@ -1532,7 +1588,7 @@ async def convert_inquiry(
     inquiry.status = "contacted"
     inquiry.reviewed_by = user.id
     inquiry.crm_account_id = account.id
-    inquiry.converted_at = datetime.now(timezone.utc)
+    inquiry.converted_at = datetime.now(UTC)
     await audit(
         db,
         tenant_id=user.tenant_id,
@@ -1612,12 +1668,10 @@ class ManagedUserUpdate(BaseModel):
 @router.get("/crm/tenants/{tenant_id}/users")
 async def list_managed_tenant_users(
     tenant_id: UUID,
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(require_permission("platform.tenants.read")),
     db: AsyncSession = Depends(get_db),
 ):
-    ops = await _ops_tenant(db)
-    if ops is None or not await _is_platform_developer(user, db):
-        raise HTTPException(status_code=403, detail="Developer access is required for tenant identity administration")
+    ops = await _require_platform_tenant_operator(user, db, "platform.tenants.read")
     account = await db.scalar(select(CRMAccount).where(
         CRMAccount.ops_tenant_id == ops.id,
         CRMAccount.managed_tenant_id == tenant_id,
@@ -1634,7 +1688,7 @@ async def list_managed_tenant_users(
         "last_name": item.last_name,
         "job_title": item.job_title,
         "is_active": item.is_active,
-        "locked": bool(item.locked_until and item.locked_until > datetime.now(timezone.utc)),
+        "locked": bool(item.locked_until and item.locked_until > datetime.now(UTC)),
         "last_login_at": item.last_login_at,
     } for item in rows]
 
@@ -1644,12 +1698,10 @@ async def update_managed_tenant_user(
     tenant_id: UUID,
     user_id: UUID,
     payload: ManagedUserUpdate,
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(require_permission("platform.tenants.manage")),
     db: AsyncSession = Depends(get_db),
 ):
-    ops = await _ops_tenant(db)
-    if ops is None or not await _is_platform_developer(user, db):
-        raise HTTPException(status_code=403, detail="Developer access is required for tenant identity administration")
+    ops = await _require_platform_tenant_operator(user, db, "platform.tenants.manage")
     account = await db.scalar(select(CRMAccount).where(
         CRMAccount.ops_tenant_id == ops.id,
         CRMAccount.managed_tenant_id == tenant_id,
@@ -1665,7 +1717,7 @@ async def update_managed_tenant_user(
             sessions = (await db.execute(
                 select(SessionRecord).where(SessionRecord.user_id == target.id, SessionRecord.revoked_at.is_(None))
             )).scalars().all()
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             for session in sessions:
                 session.revoked_at = now
     for field in ("first_name", "last_name", "job_title"):
@@ -1680,7 +1732,7 @@ async def update_managed_tenant_user(
     await db.commit()
     return {
         "id": str(target.id), "email": target.email, "is_active": target.is_active,
-        "locked": bool(target.locked_until and target.locked_until > datetime.now(timezone.utc)),
+        "locked": bool(target.locked_until and target.locked_until > datetime.now(UTC)),
     }
 
 
@@ -1688,10 +1740,10 @@ async def update_managed_tenant_user(
 async def provision_tenant(
     account_id: UUID,
     payload: TenantProvisionCreate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(require_permission("platform.tenants.manage")),
     db: AsyncSession = Depends(get_db),
 ):
-    await _require_ops_user(user, db)
+    await _require_platform_tenant_operator(user, db, "platform.tenants.manage")
     if await _is_demo_crm_user(user, db):
         raise HTTPException(status_code=403, detail="Demo CRM cannot provision customer tenants")
     account = await db.scalar(
@@ -1759,10 +1811,10 @@ async def provision_tenant(
 async def update_managed_tenant(
     tenant_id: UUID,
     payload: TenantCommercialUpdate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(require_permission("platform.tenants.manage")),
     db: AsyncSession = Depends(get_db),
 ):
-    await _require_ops_user(user, db)
+    ops = await _require_platform_tenant_operator(user, db, "platform.tenants.manage")
     if await _is_demo_crm_user(user, db):
         raise HTTPException(status_code=403, detail="Demo CRM cannot change customer tenant status")
     account = await db.scalar(select(CRMAccount).where(
@@ -1777,18 +1829,41 @@ async def update_managed_tenant(
     if tenant is None:
         raise HTTPException(status_code=404, detail="Tenant not found")
     previous_status = tenant.status
-    tenant.status = payload.status
+    # Commercial "inactive" is normalized to a security suspension. Both
+    # states block authentication, and suspension revokes existing sessions.
+    tenant.status = "active" if payload.status == "active" else "suspended"
+    revoked_sessions = 0
+    if tenant.status != "active":
+        result = await db.execute(
+            update(SessionRecord)
+            .where(
+                SessionRecord.user_id.in_(
+                    select(User.id).where(User.tenant_id == tenant.id)
+                ),
+                SessionRecord.revoked_at.is_(None),
+            )
+            .values(revoked_at=datetime.now(UTC))
+        )
+        revoked_sessions = int(getattr(result, "rowcount", 0) or 0)
     await audit(
         db,
-        tenant_id=user.tenant_id,
+        tenant_id=ops.id,
         actor_id=user.id,
         action="saas.tenant.status_changed",
         entity_type="tenant",
         entity_id=str(tenant.id),
-        metadata={"from": previous_status, "to": tenant.status},
+        metadata={
+            "from": previous_status,
+            "to": tenant.status,
+            "revoked_sessions": revoked_sessions,
+        },
     )
     await db.commit()
-    return {"id": str(tenant.id), "status": tenant.status}
+    return {
+        "id": str(tenant.id),
+        "status": tenant.status,
+        "revoked_sessions": revoked_sessions,
+    }
 
 
 @router.get("/crm/accounts/{account_id}")
@@ -2022,7 +2097,7 @@ async def create_onboarding_item(
         raise HTTPException(status_code=422, detail="Onboarding tenant must belong to the CRM account")
     values = payload.model_dump()
     if payload.status == "completed":
-        values["completed_at"] = datetime.now(timezone.utc)
+        values["completed_at"] = datetime.now(UTC)
     item = CRMOnboardingItem(ops_tenant_id=user.tenant_id, **values)
     db.add(item)
     await db.flush()
@@ -2062,7 +2137,7 @@ async def update_onboarding_item(
     changed = _apply_patch(item, payload)
     if "status" in payload.model_fields_set:
         if item.status == "completed" and item.completed_at is None:
-            item.completed_at = datetime.now(timezone.utc)
+            item.completed_at = datetime.now(UTC)
             if "completed_at" not in changed:
                 changed.append("completed_at")
         elif item.status != "completed" and "completed_at" not in payload.model_fields_set:
@@ -2144,7 +2219,7 @@ async def list_renewals(
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     horizon = now + timedelta(days=days)
     rows = (await db.execute(
         select(CRMSubscription, CRMAccount, SaaSPlan)
@@ -2248,7 +2323,7 @@ async def export_accounts_csv(
             item.created_at.isoformat() if item.created_at else "",
             item.updated_at.isoformat() if item.updated_at else "",
         ])
-    filename = f"kognivon-crm-accounts-{datetime.now(timezone.utc).date().isoformat()}.csv"
+    filename = f"kognivon-crm-accounts-{datetime.now(UTC).date().isoformat()}.csv"
     return Response(
         content=buffer.getvalue(),
         media_type="text/csv; charset=utf-8",
@@ -2304,7 +2379,7 @@ async def _reconcile_invoice(db: AsyncSession, invoice: CRMInvoice) -> tuple[int
     )
     paid_minor = int(received or 0)
     outstanding = max(0, invoice.total_minor - paid_minor)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     if invoice.status == "void":
         return paid_minor, outstanding
@@ -2332,7 +2407,10 @@ async def list_contracts(
     stmt = (
         select(CRMContract, CRMAccount)
         .join(CRMAccount, CRMAccount.id == CRMContract.account_id)
-        .where(CRMContract.ops_tenant_id == user.tenant_id)
+        .where(
+            CRMContract.ops_tenant_id == user.tenant_id,
+            CRMAccount.ops_tenant_id == user.tenant_id,
+        )
     )
     if account_id is not None:
         stmt = stmt.where(CRMContract.account_id == account_id)
@@ -2368,16 +2446,24 @@ async def paged_contracts(
         filters.append(CRMContract.account_id == account_id)
     if status:
         filters.append(CRMContract.status == status)
-    now = datetime.now(timezone.utc)
-    stats = (await db.execute(select(
-        func.count(CRMContract.id),
-        func.count(CRMContract.id).filter(CRMContract.status.in_(["signed", "active"])),
-        func.count(CRMContract.id).filter(
-            CRMContract.ends_at > now,
-            CRMContract.ends_at <= now + timedelta(days=90),
-        ),
-        func.count(CRMContract.id).filter(CRMContract.status.in_(["draft", "review"])),
-    ).where(*filters))).one()
+    now = datetime.now(UTC)
+    stats = (await db.execute(
+        select(
+            func.count(CRMContract.id),
+            func.count(CRMContract.id).filter(CRMContract.status.in_(["signed", "active"])),
+            func.count(CRMContract.id).filter(
+                CRMContract.ends_at > now,
+                CRMContract.ends_at <= now + timedelta(days=90),
+            ),
+            func.count(CRMContract.id).filter(CRMContract.status.in_(["draft", "review"])),
+        )
+        .select_from(CRMContract)
+        .join(CRMAccount, and_(
+            CRMAccount.id == CRMContract.account_id,
+            CRMAccount.ops_tenant_id == user.tenant_id,
+        ))
+        .where(*filters)
+    )).one()
     rows = (await db.execute(
         select(CRMContract, CRMAccount)
         .join(CRMAccount, and_(
@@ -2446,7 +2532,8 @@ async def update_contract(
 ):
     await _require_ops_user(user, db)
     item = await _require_contract(db, user.tenant_id, contract_id)
-    assert item is not None
+    if item is None:
+        raise HTTPException(status_code=404, detail="Contract not found")
     future_start = payload.starts_at if "starts_at" in payload.model_fields_set else item.starts_at
     future_end = payload.ends_at if "ends_at" in payload.model_fields_set else item.ends_at
     _validate_window(future_start, future_end, "Contract")
@@ -2470,7 +2557,10 @@ async def list_invoices(
     stmt = (
         select(CRMInvoice, CRMAccount)
         .join(CRMAccount, CRMAccount.id == CRMInvoice.account_id)
-        .where(CRMInvoice.ops_tenant_id == user.tenant_id)
+        .where(
+            CRMInvoice.ops_tenant_id == user.tenant_id,
+            CRMAccount.ops_tenant_id == user.tenant_id,
+        )
     )
     if status:
         stmt = stmt.where(CRMInvoice.status == status)
@@ -2600,8 +2690,18 @@ async def list_payments(
     stmt = (
         select(CRMPayment, CRMAccount, CRMInvoice)
         .join(CRMAccount, CRMAccount.id == CRMPayment.account_id)
-        .join(CRMInvoice, CRMInvoice.id == CRMPayment.invoice_id)
-        .where(CRMPayment.ops_tenant_id == user.tenant_id)
+        .join(
+            CRMInvoice,
+            and_(
+                CRMInvoice.id == CRMPayment.invoice_id,
+                CRMInvoice.account_id == CRMPayment.account_id,
+                CRMInvoice.ops_tenant_id == user.tenant_id,
+            ),
+        )
+        .where(
+            CRMPayment.ops_tenant_id == user.tenant_id,
+            CRMAccount.ops_tenant_id == user.tenant_id,
+        )
     )
     if invoice_id is not None:
         stmt = stmt.where(CRMPayment.invoice_id == invoice_id)
@@ -2647,7 +2747,7 @@ async def create_payment(
         ops_tenant_id=user.tenant_id,
         account_id=invoice.account_id,
         invoice_id=invoice.id,
-        received_at=payload.received_at or datetime.now(timezone.utc),
+        received_at=payload.received_at or datetime.now(UTC),
         **payload.model_dump(exclude={"received_at", "invoice_id"}),
     )
     db.add(item)
@@ -2844,7 +2944,7 @@ async def paged_crm_tasks(
         filters.append(CRMTask.owner_user_id == owner_user_id)
     if account_id is not None:
         filters.append(CRMTask.account_id == account_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     open_status = CRMTask.status.in_(["open", "in_progress", "blocked"])
     stats = (await db.execute(select(
         func.count(CRMTask.id),
@@ -2910,7 +3010,7 @@ async def create_crm_task(
     values = payload.model_dump()
     values["account_id"] = account.id if account else None
     if payload.status == "completed":
-        values["completed_at"] = datetime.now(timezone.utc)
+        values["completed_at"] = datetime.now(UTC)
     item = CRMTask(ops_tenant_id=user.tenant_id, **values)
     db.add(item)
     await db.flush()
@@ -2942,7 +3042,7 @@ async def update_crm_task(
     changed = _apply_patch(item, payload)
     if "status" in payload.model_fields_set:
         if item.status == "completed" and item.completed_at is None:
-            item.completed_at = datetime.now(timezone.utc)
+            item.completed_at = datetime.now(UTC)
             if "completed_at" not in changed:
                 changed.append("completed_at")
         elif item.status != "completed" and "completed_at" not in payload.model_fields_set:

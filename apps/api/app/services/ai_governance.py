@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from urllib.parse import urlparse
 
@@ -15,11 +16,22 @@ def validate_provider_config(provider_type: str, endpoint_url: str | None, secre
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unsupported AI provider type.")
     if secret_ref and not SECRET_REF_PATTERN.fullmatch(secret_ref):
         raise HTTPException(status_code=422, detail="secret_ref must be an environment-variable style reference.")
+    expected_secret = {
+        "openai_compatible": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+    }.get(normalized)
+    if secret_ref and secret_ref != expected_secret:
+        raise HTTPException(status_code=422, detail="Use only the fixed provider-specific credential reference.")
     if endpoint_url:
         parsed = urlparse(endpoint_url)
         if parsed.scheme not in {"https", "http"} or not parsed.netloc:
             raise HTTPException(status_code=422, detail="AI provider endpoint must be a valid HTTP(S) URL.")
-        if not development and parsed.scheme != "https":
+        test_loopback_http = (
+            os.getenv("APP_ENV", "").strip().lower() in {"test", "ci"}
+            and parsed.scheme == "http"
+            and parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+        )
+        if not development and parsed.scheme != "https" and not test_loopback_http:
             raise HTTPException(status_code=422, detail="AI provider endpoints must use HTTPS outside development.")
     if normalized != "ollama" and not endpoint_url:
         raise HTTPException(status_code=422, detail="endpoint_url is required for this AI provider type.")

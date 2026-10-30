@@ -1,8 +1,17 @@
 import pytest
 from fastapi import HTTPException
 
-from app.api.routes.ai import AIContentAssistRequest, AIQueryRequest, _generate, governed_ai_query, governed_content_assist
-from app.services.ai_governance import validate_model_activation, validate_provider_activation
+from app.api.routes.ai import (
+    AIContentAssistRequest,
+    AIQueryRequest,
+    _generate,
+    governed_ai_query,
+    governed_content_assist,
+)
+from app.services.ai_governance import (
+    validate_model_activation,
+    validate_provider_activation,
+)
 
 
 @pytest.mark.asyncio
@@ -74,50 +83,17 @@ async def test_openai_compatible_requires_secret_reference(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_openai_compatible_contract_and_usage_mapping(monkeypatch):
-    monkeypatch.setenv("TEST_AI_KEY", "test-secret")
-    captured = {}
-
-    class FakeResponse:
-        def raise_for_status(self):
-            return None
-
-        def json(self):
-            return {
-                "choices": [{"message": {"content": "Grounded adapter response [S1]"}}],
-                "usage": {"prompt_tokens": 42, "completion_tokens": 17},
-            }
-
-    class FakeClient:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        async def __aenter__(self):
-            return self
-
-        async def __aexit__(self, *args):
-            return None
-
-        async def post(self, url, **kwargs):
-            captured["url"] = url
-            captured.update(kwargs)
-            return FakeResponse()
-
-    monkeypatch.setattr("app.api.routes.ai.httpx.AsyncClient", FakeClient)
-    result = await _generate(
-        "Mode: qa\nUser question/request: Explain policy.\nAUTHORIZED EVIDENCE:\n[S1] Policy evidence",
-        "openai_compatible",
-        "https://provider.example",
-        "enterprise-model",
-        max_output_tokens=256,
-        secret_ref="TEST_AI_KEY",
-    )
-    assert result.answer == "Grounded adapter response [S1]"
-    assert result.input_tokens == 42
-    assert result.output_tokens == 17
-    assert captured["url"] == "https://provider.example/v1/chat/completions"
-    assert captured["headers"]["Authorization"] == "Bearer test-secret"
-    assert captured["json"]["model"] == "enterprise-model"
-    assert captured["json"]["max_tokens"] == 256
+    monkeypatch.setenv("TEST_AI_KEY", "must-not-be-readable")
+    with pytest.raises(HTTPException) as exc:
+        await _generate(
+            "Mode: qa\nUser question/request: Explain policy.\nAUTHORIZED EVIDENCE:\n[S1] Policy evidence",
+            "openai_compatible",
+            "https://api.openai.com",
+            "enterprise-model",
+            max_output_tokens=256,
+            secret_ref="TEST_AI_KEY",
+        )
+    assert exc.value.status_code == 503
 
 
 @pytest.mark.asyncio

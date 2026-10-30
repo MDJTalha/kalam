@@ -53,23 +53,48 @@ export function PublicHeader({ landing = false }: { landing?: boolean }) {
       <nav className={styles.nav} aria-label="Main navigation">
         <KalamBrand compact className={styles.brand}/>
         <div className={styles.links}>
-          {publicLinks.map(item => <div key={item.label} className={styles.navGroup} onMouseEnter={() => setActiveMenu(item.label)} onMouseLeave={() => setActiveMenu(null)}>
-            <a className={styles.navTrigger} href={link(item.anchor)} aria-haspopup="true" aria-expanded={activeMenu === item.label}>
+          {publicLinks.map(item => <div
+            key={item.label}
+            className={styles.navGroup}
+            onMouseEnter={() => setActiveMenu(item.label)}
+            onMouseLeave={() => setActiveMenu(null)}
+            onFocus={() => setActiveMenu(item.label)}
+            onBlur={event => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setActiveMenu(null);
+            }}
+            onKeyDown={event => {
+              if (event.key === "Escape") {
+                setActiveMenu(null);
+                event.currentTarget.querySelector<HTMLButtonElement>(".public-nav-trigger")?.focus();
+              }
+            }}
+          >
+            <button
+              className={`${styles.navTrigger} public-nav-trigger`}
+              type="button"
+              aria-expanded={activeMenu === item.label}
+              aria-controls={`public-menu-${item.label.toLowerCase()}`}
+              onClick={() => setActiveMenu(activeMenu === item.label ? null : item.label)}
+            >
               {item.label}<ArrowDown size={12} aria-hidden="true"/>
-            </a>
-            {activeMenu === item.label && <div className={styles.megaMenu}>
+            </button>
+            <div
+              id={`public-menu-${item.label.toLowerCase()}`}
+              className={styles.megaMenu}
+              hidden={activeMenu !== item.label}
+            >
               <div className={styles.megaIntro}>
                 <span>EXPLORE KALAM</span>
                 <strong>{item.label}</strong>
                 <p>{item.label === "Platform" ? "The connected operating layer for learning, skills, evidence and workforce readiness." : item.label === "Solutions" ? "Role-relevant views that turn capability signals into accountable action." : "The controls, integrations and rollout foundations behind enterprise adoption."}</p>
-                <a href={link(item.anchor)} className={styles.megaView}>Explore {item.label} <ArrowRight size={14} aria-hidden="true"/></a>
+                <a href={link(item.anchor)} className={styles.megaView} onClick={() => setActiveMenu(null)}>Explore {item.label} <ArrowRight size={14} aria-hidden="true"/></a>
               </div>
               <div className={styles.megaItems}>
                 {item.items.map(([title, description]) => <a key={title} href={title === "Security & Trust" ? "/trust" : title === "Integrations" ? "/integrations" : title === "Implementation" ? "/implementation" : link(item.anchor)} onClick={() => setActiveMenu(null)}>
                   <span><strong>{title}</strong><small>{description}</small></span><ArrowRight size={14} aria-hidden="true"/>
                 </a>)}
               </div>
-            </div>}
+            </div>
           </div>)}
           <Link href="/pricing" aria-current={routeActive("/pricing") ? "page" : undefined}>Pricing</Link>
         </div>
@@ -82,7 +107,6 @@ export function PublicHeader({ landing = false }: { landing?: boolean }) {
             type="button"
             aria-label={open ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={open}
-            aria-controls="public-mobile-menu"
             onClick={() => setOpen(value => !value)}
           >
             {open ? <X size={19} aria-hidden="true"/> : <Menu size={19} aria-hidden="true"/>}

@@ -16,6 +16,8 @@ export function NotificationCenter({initialItems,timezone="UTC"}:{initialItems:N
   const [category,setCategory]=useState("all");
   const [readState,setReadState]=useState("all");
   const [busy,setBusy]=useState(false);
+  const [busyReadId,setBusyReadId]=useState<string|null>(null);
+  const [actionError,setActionError]=useState("");
 
   const categories=useMemo(()=>Array.from(new Set(items.map(item=>item.category))).sort(),[items]);
   const filtered=useMemo(()=>items.filter(item=>{
@@ -30,15 +32,31 @@ export function NotificationCenter({initialItems,timezone="UTC"}:{initialItems:N
   const important=items.filter(item=>["high","critical"].includes(item.priority)&&!item.read_at).length;
 
   async function markRead(id:string){
-    const response=await fetch("/api/lms/notifications/"+id+"/read",{method:"POST"});
-    if(response.ok)setItems(current=>current.map(item=>item.id===id?{...item,read_at:new Date().toISOString()}:item));
+    if(busy||busyReadId)return;
+    setBusyReadId(id);setActionError("");
+    try{
+      const response=await fetch("/api/lms/notifications/"+encodeURIComponent(id)+"/read",{method:"POST"});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(typeof data.detail==="string"?data.detail:"This notification could not be marked as read.");
+      setItems(current=>current.map(item=>item.id===id?{...item,read_at:new Date().toISOString()}:item));
+    }catch(error){setActionError(error instanceof Error?error.message:"This notification could not be marked as read.");}
+    finally{setBusyReadId(null)}
   }
   async function markAll(){
-    setBusy(true);
+    if(busy||busyReadId)return;
+    setBusy(true);setActionError("");
     try{
       const response=await fetch("/api/lms/notifications/read-all",{method:"POST"});
-      if(response.ok){const now=new Date().toISOString();setItems(current=>current.map(item=>({...item,read_at:item.read_at||now})))}
-    }finally{setBusy(false)}
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(typeof data.detail==="string"?data.detail:"Notifications could not be marked as read.");
+      const now=new Date().toISOString();setItems(current=>current.map(item=>({...item,read_at:item.read_at||now})));
+    }catch(error){setActionError(error instanceof Error?error.message:"Notifications could not be marked as read.");}
+    finally{setBusy(false)}
+  }
+
+  function safeActionHref(value?:string|null){
+    if(!value||!value.startsWith("/")||value.startsWith("//")||value.includes("\\"))return null;
+    return value;
   }
 
   return <div className="notification-center">
@@ -46,8 +64,10 @@ export function NotificationCenter({initialItems,timezone="UTC"}:{initialItems:N
       <article><Bell size={18}/><span>Unread</span><strong>{unread}</strong><small>Notifications requiring review</small></article>
       <article><ShieldAlert size={18}/><span>High priority</span><strong>{important}</strong><small>Unread high/critical notifications</small></article>
       <article><CheckCheck size={18}/><span>Total</span><strong>{items.length}</strong><small>Recent notifications loaded</small></article>
-      <div className="notification-overview-action"><button className="button notification-bulk-action" type="button" onClick={()=>void markAll()} disabled={busy||unread===0}><CheckCheck size={14}/>{busy?"Updating…":"Mark all as read"}</button><Link className="notification-preferences-link" href="/dashboard/settings#notifications">Notification preferences <ChevronRight size={13}/></Link></div>
+      <div className="notification-overview-action"><button className="button notification-bulk-action" type="button" onClick={()=>void markAll()} disabled={busy||Boolean(busyReadId)||unread===0}><CheckCheck size={14}/>{busy?"Updating…":"Mark all as read"}</button><Link className="notification-preferences-link" href="/dashboard/settings#notifications">Notification preferences <ChevronRight size={13}/></Link></div>
     </section>
+
+    {actionError&&<p className="form-error" role="alert">{actionError}</p>}
 
     <section className="notification-toolbar">
       <label><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search notifications"/></label>
@@ -63,8 +83,8 @@ export function NotificationCenter({initialItems,timezone="UTC"}:{initialItems:N
           <small>{new Date(item.created_at).toLocaleString(undefined,{timeZone:timezone})}{item.email_sent_at?" · Email sent":""}</small>
         </div>
         <div className="notification-card-actions">
-          {item.action_href&&<Link className="button button-secondary" href={item.action_href}>Open <ChevronRight size={14}/></Link>}
-          {!item.read_at&&<button className="button button-secondary" type="button" onClick={()=>void markRead(item.id)}>Mark read</button>}
+          {safeActionHref(item.action_href)&&<Link className="button button-secondary" href={safeActionHref(item.action_href)!}>Open <ChevronRight size={14}/></Link>}
+          {!item.read_at&&<button className="button button-secondary" type="button" disabled={busy||busyReadId!==null} onClick={()=>void markRead(item.id)}>{busyReadId===item.id?"Updating…":"Mark read"}</button>}
         </div>
       </article>)}
     </section>

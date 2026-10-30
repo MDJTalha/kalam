@@ -15,6 +15,9 @@ try {
     -e APP_ENV=production -e DATABASE_URL=postgresql+asyncpg://fixture:unused@127.0.0.1:5432/fixture `
     -e REDIS_URL=redis://127.0.0.1:6379/0 -e WEB_ORIGIN=http://127.0.0.1:3000 `
     -e API_ORIGIN=http://127.0.0.1:8000 -e ALLOWED_HOSTS=127.0.0.1,localhost `
+    -e STORAGE_BACKEND=s3 -e S3_BUCKET=phase8-smoke-fixture `
+    -e FILE_SCAN_PROVIDER=clamd -e FILE_SCAN_HOST=127.0.0.1 -e FILE_SCAN_PORT=3310 `
+    -e OUTBOUND_HTTP_PROXY=http://egress-proxy.invalid:3128 `
     -e API_DOCS_ENABLED=false -e COOKIE_SECURE=true -e DEV_EMAIL_SINK=false `
     -e INTEGRATION_ALLOW_PRIVATE_URLS=false -e UVICORN_WORKERS=1 $ApiImage | Out-Null
   if ($LASTEXITCODE -ne 0) { throw "Candidate API container failed to start." }
@@ -50,6 +53,9 @@ try {
     -e APP_ENV=production -e DATABASE_URL=postgresql+asyncpg://fixture:unused@127.0.0.1:5432/fixture `
     -e REDIS_URL=redis://127.0.0.1:6379/0 -e WEB_ORIGIN=http://127.0.0.1:3000 `
     -e API_ORIGIN=http://127.0.0.1:8000 -e ALLOWED_HOSTS=127.0.0.1,localhost `
+    -e STORAGE_BACKEND=s3 -e S3_BUCKET=phase8-smoke-fixture `
+    -e FILE_SCAN_PROVIDER=clamd -e FILE_SCAN_HOST=127.0.0.1 -e FILE_SCAN_PORT=3310 `
+    -e OUTBOUND_HTTP_PROXY=http://egress-proxy.invalid:3128 `
     -e API_DOCS_ENABLED=false -e COOKIE_SECURE=true `
     -e DEV_EMAIL_SINK=false -e INTEGRATION_ALLOW_PRIVATE_URLS=false `
     $WorkerImage python -c "import sys; sys.path.insert(0, '/app/worker'); import run; assert callable(run.run_once) and callable(run.process_notification_webhooks) and callable(run.process_scheduled_reports)" | Out-Null
@@ -71,6 +77,16 @@ try {
     web_routes = "200: /, /login, /dashboard"
     integrated_deployment_certified = $false
   } | ConvertTo-Json -Depth 3
+} catch {
+  if ($startedWeb) {
+    Write-Output "--- Candidate web container logs ---"
+    docker logs $webName 2>&1
+  }
+  if ($startedApi) {
+    Write-Output "--- Candidate API container logs ---"
+    docker logs $apiName 2>&1
+  }
+  throw
 } finally {
   if ($startedWeb) { docker rm -f $webName 2>&1 | Out-Null }
   if ($startedApi) { docker rm -f $apiName 2>&1 | Out-Null }

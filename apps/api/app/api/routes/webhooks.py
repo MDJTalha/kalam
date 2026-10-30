@@ -10,6 +10,7 @@ from app.api.deps import require_permission
 from app.db.models import User, WebhookEndpoint
 from app.db.session import get_db
 from app.services.audit import audit
+from app.services.integration_adapters import IntegrationCheckError, _url_allowed
 from app.services.webhook_secrets import (
     WebhookSecretConfigurationError,
     encrypt_webhook_secret,
@@ -52,6 +53,10 @@ async def create_webhook(
     user: User = Depends(require_permission("integrations.manage")),
     db: AsyncSession = Depends(get_db),
 ):
+    try:
+        _url_allowed(str(payload.url))
+    except IntegrationCheckError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
     raw_secret = secrets.token_urlsafe(36)
     try:
         encrypted_secret, key_id = encrypt_webhook_secret(raw_secret)

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.request_context import request_id_context
 from app.db.models import AuditLog
 
+
 async def audit(
     db: AsyncSession,
     *,

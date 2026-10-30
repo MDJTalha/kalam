@@ -6,9 +6,24 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint, func, text
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+    text,
+)
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
 
 class Base(DeclarativeBase):
     pass
@@ -24,8 +39,8 @@ class Tenant(Base, TimestampMixin):
     slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     status: Mapped[str] = mapped_column(String(30), default="active", nullable=False)
     settings: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
-    users: Mapped[list["User"]] = relationship(back_populates="tenant")
-    org_units: Mapped[list["OrgUnit"]] = relationship(back_populates="tenant")
+    users: Mapped[list[User]] = relationship(back_populates="tenant")
+    org_units: Mapped[list[OrgUnit]] = relationship(back_populates="tenant")
 
 class User(Base, TimestampMixin):
     __tablename__ = "users"
@@ -43,10 +58,10 @@ class User(Base, TimestampMixin):
     failed_login_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    tenant: Mapped["Tenant"] = relationship(back_populates="users")
+    tenant: Mapped[Tenant] = relationship(back_populates="users")
     org_unit_id: Mapped[UUID | None] = mapped_column(ForeignKey("org_units.id", ondelete="SET NULL"), index=True)
     manager_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), index=True)
-    roles: Mapped[list["UserRole"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    roles: Mapped[list[UserRole]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
     def session_ttl(self) -> timedelta:
         return timedelta(hours=8)
@@ -106,6 +121,25 @@ class SupportCaseMessage(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
+class KnowledgeArticle(Base, TimestampMixin):
+    __tablename__ = "knowledge_articles"
+    __table_args__ = (
+        CheckConstraint("status IN ('draft', 'published', 'archived')", name="ck_knowledge_articles_status"),
+        Index("ix_knowledge_articles_tenant_status_updated", "tenant_id", "status", "updated_at"),
+    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    tenant_id: Mapped[UUID] = mapped_column(ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(240), nullable=False)
+    summary: Mapped[str | None] = mapped_column(String(500))
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    category: Mapped[str] = mapped_column(String(80), default="general", nullable=False)
+    tags: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default=text("'[]'::jsonb"), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="draft", server_default="draft", nullable=False)
+    created_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    updated_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class Role(Base):
     __tablename__ = "roles"
     __table_args__ = (UniqueConstraint("tenant_id", "name", name="uq_roles_tenant_name"),)
@@ -114,29 +148,29 @@ class Role(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     role_kind: Mapped[str] = mapped_column(String(20), default="custom", nullable=False)
-    user_roles: Mapped[list["UserRole"]] = relationship(back_populates="role", cascade="all, delete-orphan")
-    permissions: Mapped[list["RolePermission"]] = relationship(back_populates="role", cascade="all, delete-orphan")
+    user_roles: Mapped[list[UserRole]] = relationship(back_populates="role", cascade="all, delete-orphan")
+    permissions: Mapped[list[RolePermission]] = relationship(back_populates="role", cascade="all, delete-orphan")
 
 class Permission(Base):
     __tablename__ = "permissions"
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     key: Mapped[str] = mapped_column(String(160), unique=True, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    roles: Mapped[list["RolePermission"]] = relationship(back_populates="permission")
+    roles: Mapped[list[RolePermission]] = relationship(back_populates="permission")
 
 class UserRole(Base):
     __tablename__ = "user_roles"
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     role_id: Mapped[UUID] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True)
-    user: Mapped["User"] = relationship(back_populates="roles")
-    role: Mapped["Role"] = relationship(back_populates="user_roles")
+    user: Mapped[User] = relationship(back_populates="roles")
+    role: Mapped[Role] = relationship(back_populates="user_roles")
 
 class RolePermission(Base):
     __tablename__ = "role_permissions"
     role_id: Mapped[UUID] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True)
     permission_id: Mapped[UUID] = mapped_column(ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True)
-    role: Mapped["Role"] = relationship(back_populates="permissions")
-    permission: Mapped["Permission"] = relationship(back_populates="roles")
+    role: Mapped[Role] = relationship(back_populates="permissions")
+    permission: Mapped[Permission] = relationship(back_populates="roles")
 
 class OrgUnit(Base, TimestampMixin):
     __tablename__ = "org_units"
@@ -147,8 +181,8 @@ class OrgUnit(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String(160), nullable=False)
     unit_type: Mapped[str] = mapped_column(String(40), default="department", nullable=False)
     code: Mapped[str | None] = mapped_column(String(80))
-    tenant: Mapped["Tenant"] = relationship(back_populates="org_units")
-    parent: Mapped["OrgUnit | None"] = relationship(remote_side=[id])
+    tenant: Mapped[Tenant] = relationship(back_populates="org_units")
+    parent: Mapped[OrgUnit | None] = relationship(remote_side=[id])
 class CourseVisibility(StrEnum):
     TENANT = "tenant"
     PRIVATE = "private"
@@ -188,7 +222,7 @@ class Course(Base, TimestampMixin):
     prerequisites: Mapped[list[Any]] = mapped_column(JSONB, default=list, nullable=False)
     is_mandatory_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     record_metadata: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
-    modules: Mapped[list["CourseModule"]] = relationship(back_populates="course", cascade="all, delete-orphan")
+    modules: Mapped[list[CourseModule]] = relationship(back_populates="course", cascade="all, delete-orphan")
 
 class CourseModule(Base, TimestampMixin):
     __tablename__ = "course_modules"
@@ -197,8 +231,8 @@ class CourseModule(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(String(240), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     position: Mapped[int] = mapped_column(Integer, nullable=False)
-    course: Mapped["Course"] = relationship(back_populates="modules")
-    lessons: Mapped[list["Lesson"]] = relationship(back_populates="module", cascade="all, delete-orphan")
+    course: Mapped[Course] = relationship(back_populates="modules")
+    lessons: Mapped[list[Lesson]] = relationship(back_populates="module", cascade="all, delete-orphan")
 
 class Lesson(Base, TimestampMixin):
     __tablename__ = "lessons"
@@ -208,7 +242,7 @@ class Lesson(Base, TimestampMixin):
     content_type: Mapped[str] = mapped_column(String(40), default="rich_text", nullable=False)
     content: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
     position: Mapped[int] = mapped_column(Integer, nullable=False)
-    module: Mapped["CourseModule"] = relationship(back_populates="lessons")
+    module: Mapped[CourseModule] = relationship(back_populates="lessons")
 
 class CourseContentVersion(Base):
     __tablename__ = "course_content_versions"
@@ -601,7 +635,7 @@ class CapabilityLevel(Base):
 
 class CapabilitySkill(Base):
     __tablename__ = "capability_skills"
-    __table_args__ = (UniqueConstraint("capability_id", "skill_id", name="uq_capability_skill"),)
+    # The composite primary key already enforces uniqueness for this pair.
     capability_id: Mapped[UUID] = mapped_column(ForeignKey("capabilities.id", ondelete="CASCADE"), primary_key=True)
     skill_id: Mapped[UUID] = mapped_column(ForeignKey("skills.id", ondelete="CASCADE"), primary_key=True)
     weight: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
@@ -675,8 +709,8 @@ class CapabilityGap(Base, TimestampMixin):
 
 class AssessmentCompetency(Base):
     __tablename__ = "assessment_competencies"
+    # The composite primary key already enforces uniqueness for this pair.
     __table_args__ = (
-        UniqueConstraint("assessment_id", "competency_id", name="uq_assessment_competency"),
         CheckConstraint("target_level >= 1 AND target_level <= 5", name="ck_assessment_competency_target_level"),
     )
     assessment_id: Mapped[UUID] = mapped_column(ForeignKey("assessments.id", ondelete="CASCADE"), primary_key=True)
@@ -786,8 +820,31 @@ class Notification(Base):
     body: Mapped[str] = mapped_column(Text, nullable=False)
     dedupe_key: Mapped[str | None] = mapped_column(String(240))
     email_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    email_suppressed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    email_failed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
+    email_attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0", nullable=False)
+    email_next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), index=True)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+class PlatformIncident(Base, TimestampMixin):
+    __tablename__ = "platform_incidents"
+    __table_args__ = (
+        Index("ix_platform_incidents_status_severity", "status", "severity"),
+        CheckConstraint("severity IN ('sev1', 'sev2', 'sev3', 'sev4')", name="ck_platform_incidents_severity"),
+        CheckConstraint("status IN ('open', 'investigating', 'mitigated', 'resolved')", name="ck_platform_incidents_status"),
+    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    incident_number: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(180), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    severity: Mapped[str] = mapped_column(String(10), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), default="open", nullable=False)
+    impact: Mapped[str | None] = mapped_column(String(500))
+    owner_user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    detected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -1061,6 +1118,25 @@ class WebhookEndpoint(Base, TimestampMixin):
     secret_key_id: Mapped[str | None] = mapped_column(String(80))
     event_types: Mapped[list[Any]] = mapped_column(JSONB, default=list, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+class WebhookDelivery(Base):
+    __tablename__ = "webhook_deliveries"
+    __table_args__ = (
+        UniqueConstraint("webhook_id", "notification_id", name="uq_webhook_delivery_notification"),
+        Index("ix_webhook_deliveries_status_next", "status", "next_attempt_at"),
+    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    webhook_id: Mapped[UUID] = mapped_column(ForeignKey("webhook_endpoints.id", ondelete="CASCADE"), nullable=False)
+    notification_id: Mapped[UUID] = mapped_column(ForeignKey("notifications.id", ondelete="CASCADE"), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(String(30), default="pending", server_default="pending", nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0", nullable=False)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
 
 class LearningStatement(Base):
     __tablename__ = "learning_statements"
@@ -1415,3 +1491,25 @@ class DevelopmentRecommendation(Base, TimestampMixin):
     status: Mapped[str] = mapped_column(String(30), default="recommended", nullable=False)
     recommendation_version: Mapped[str] = mapped_column(String(30), default="phase6.v1", nullable=False)
     metadata_json: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
+# Keep the established composite/association indexes represented in ORM metadata.
+# These indexes exist in historical migrations and remain useful alongside the
+# explicit single-column indexes declared by the models.
+Index("ix_assessment_cycles_baseline_attempt", Base.metadata.tables["assessment_cycles"].c.baseline_attempt_id)
+Index("ix_assessment_cycles_development_plan", Base.metadata.tables["assessment_cycles"].c.development_plan_id)
+Index("ix_assessment_cycles_latest_attempt", Base.metadata.tables["assessment_cycles"].c.latest_attempt_id)
+Index("ix_assessment_cycles_status_due", Base.metadata.tables["assessment_cycles"].c.tenant_id, Base.metadata.tables["assessment_cycles"].c.status, Base.metadata.tables["assessment_cycles"].c.next_reassessment_due_at)
+Index("ix_assessment_cycles_target", Base.metadata.tables["assessment_cycles"].c.tenant_id, Base.metadata.tables["assessment_cycles"].c.target_type, Base.metadata.tables["assessment_cycles"].c.target_id)
+Index("ix_assessment_cycles_tenant_user", Base.metadata.tables["assessment_cycles"].c.tenant_id, Base.metadata.tables["assessment_cycles"].c.user_id)
+Index("ix_assessment_outcomes_tenant_target", Base.metadata.tables["assessment_outcomes"].c.tenant_id, Base.metadata.tables["assessment_outcomes"].c.target_type, Base.metadata.tables["assessment_outcomes"].c.target_id)
+Index("ix_assessment_reviewer_assignments_tenant_cycle", Base.metadata.tables["assessment_reviewer_assignments"].c.tenant_id, Base.metadata.tables["assessment_reviewer_assignments"].c.cycle_id)
+Index("ix_assessment_targets_target", Base.metadata.tables["assessment_targets"].c.tenant_id, Base.metadata.tables["assessment_targets"].c.target_type, Base.metadata.tables["assessment_targets"].c.target_id)
+Index("ix_assessment_targets_tenant_assessment", Base.metadata.tables["assessment_targets"].c.tenant_id, Base.metadata.tables["assessment_targets"].c.assessment_id)
+Index("ix_capability_competencies_competency_id", Base.metadata.tables["capability_competencies"].c.competency_id)
+Index("ix_capability_gaps_requirement", Base.metadata.tables["capability_gaps"].c.role_requirement_id)
+Index("ix_capability_gaps_tenant_severity", Base.metadata.tables["capability_gaps"].c.tenant_id, Base.metadata.tables["capability_gaps"].c.severity)
+Index("ix_capability_gaps_tenant_target", Base.metadata.tables["capability_gaps"].c.tenant_id, Base.metadata.tables["capability_gaps"].c.target_type, Base.metadata.tables["capability_gaps"].c.target_id)
+Index("ix_capability_gaps_tenant_user", Base.metadata.tables["capability_gaps"].c.tenant_id, Base.metadata.tables["capability_gaps"].c.user_id)
+Index("ix_capability_risks_tenant_level", Base.metadata.tables["capability_risks"].c.tenant_id, Base.metadata.tables["capability_risks"].c.risk_level)
+Index("ix_capability_risks_tenant_score", Base.metadata.tables["capability_risks"].c.tenant_id, Base.metadata.tables["capability_risks"].c.risk_score)
+Index("ix_capability_skills_skill_id", Base.metadata.tables["capability_skills"].c.skill_id)
+Index("ix_objective_capabilities_capability_id", Base.metadata.tables["strategic_objective_capabilities"].c.capability_id)

@@ -18,7 +18,21 @@ export function AssessmentRunner({assessment}:{assessment:Assessment}){
   const [error,setError]=useState("");
   const [started,setStarted]=useState(false);
   const [history,setHistory]=useState<Attempt[]>([]);const [remaining,setRemaining]=useState<number|null>(null);
-  useEffect(()=>{let valid=true;fetch(`/api/lms/assessments/${assessment.id}/my-attempts`).then(async response=>{if(!response.ok)throw new Error("Unable to load attempt history");const data=await response.json();if(valid)setHistory(data)}).catch(()=>{});return()=>{valid=false}},[assessment.id]);
+  const [historyLoading,setHistoryLoading]=useState(true);const [historyError,setHistoryError]=useState("");const [historyRequest,setHistoryRequest]=useState(0);
+  useEffect(()=>{
+    const controller=new AbortController();
+    fetch(`/api/lms/assessments/${assessment.id}/my-attempts`,{cache:"no-store",signal:controller.signal})
+      .then(async response=>{
+        const data:unknown=await response.json().catch(()=>null);
+        if(!response.ok)throw new Error(data&&typeof data==="object"&&"detail" in data&&typeof data.detail==="string"?data.detail:"Unable to load attempt history.");
+        if(!Array.isArray(data))throw new Error("Attempt history returned an invalid response.");
+        setHistory(data as Attempt[]);setHistoryLoading(false);
+      })
+      .catch(error=>{
+        if(!controller.signal.aborted){setHistoryError(error instanceof Error?error.message:"Unable to load attempt history.");setHistoryLoading(false);}
+      })
+    return()=>controller.abort();
+  },[assessment.id,historyRequest]);
   useEffect(()=>{if(!startedAt||!assessment.time_limit_minutes||result)return;const update=()=>setRemaining(Math.max(0,Math.ceil((new Date(startedAt).getTime()+assessment.time_limit_minutes!*60000-Date.now())/1000)));const timer=window.setInterval(update,1000);update();return()=>window.clearInterval(timer)},[startedAt,assessment.time_limit_minutes,result]);
   const answeredCount=useMemo(()=>assessment.questions.filter(q=>{
     const answer=answers[q.id];
@@ -27,6 +41,10 @@ export function AssessmentRunner({assessment}:{assessment:Assessment}){
   const unanswered=Math.max(assessment.questions.length-answeredCount,0);
   const pending=history.find(item=>!item.submitted_at);
   const remainingAttempts=assessment.max_attempts===null||assessment.max_attempts===undefined?null:Math.max(0,assessment.max_attempts-history.length);
+
+  function retryHistory(){
+    setHistoryLoading(true);setHistoryError("");setHistoryRequest(value=>value+1);
+  }
 
   function setSingle(id:string,value:string){setAnswers(current=>{const next={...current,[id]:value};if(attemptId)localStorage.setItem(`assessment-answers-${attemptId}`,JSON.stringify(next));return next});}
   function setMultiple(id:string,value:string,checked:boolean){
@@ -78,7 +96,7 @@ export function AssessmentRunner({assessment}:{assessment:Assessment}){
     !started?<div className="assessment-start">
       <div className="assessment-start-icon"><Clock3 size={24}/></div>
       <div><h3>Ready to begin?</h3><p>The attempt starts when you select Begin assessment. Any configured time limit is measured from that point.</p><div className="assessment-start-meta"><span>{assessment.questions.length} questions</span><span>{assessment.max_attempts?`${remainingAttempts} of ${assessment.max_attempts} attempts remaining`:"Unlimited attempts"}</span>{assessment.time_limit_minutes&&<span>{assessment.time_limit_minutes} minutes</span>}</div></div>
-      <button className="button button-primary button-large" type="button" onClick={()=>void start()} disabled={busy||!assessment.questions.length||(!pending&&remainingAttempts===0)}>{busy?"Starting…":pending?"Resume attempt":remainingAttempts===0?"No attempts remaining":"Begin assessment"}</button>
+      <button className="button button-primary button-large" type="button" onClick={()=>void start()} disabled={busy||historyLoading||Boolean(historyError)||!assessment.questions.length||(!pending&&remainingAttempts===0)}>{busy?"Starting…":historyLoading?"Checking attempts…":pending?"Resume attempt":remainingAttempts===0?"No attempts remaining":"Begin assessment"}</button>
     </div>:
     <form className="assessment-form" onSubmit={submit}>
       {remaining!==null&&<div className={remaining===0?"form-error":"status-pill"} role="timer" aria-live="off"><Clock3 size={15}/>{remaining===0?"Time expired. Submit to record this attempt.":`Time remaining: ${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,"0")}`}</div>}
@@ -95,6 +113,8 @@ export function AssessmentRunner({assessment}:{assessment:Assessment}){
       </fieldset>)}
       <div className="assessment-submit-bar"><div><strong>Ready to submit?</strong><small>{unanswered?unanswered+" question(s) remain unanswered.":"All questions have an answer."}</small></div><button className="button button-primary button-large" type="submit" disabled={busy}><Send size={16}/>{busy?"Submitting…":remaining===0?"Record expired attempt":"Submit assessment"}</button></div>
     </form>}
+    {historyError&&<div className="form-error" role="alert"><span>Previous attempts could not be checked, so a new attempt cannot be started safely. {historyError}</span><button className="button button-secondary" type="button" onClick={retryHistory} disabled={historyLoading}>{historyLoading?"Checking…":"Retry"}</button></div>}
+    {historyLoading&&!started&&<p className="section-meta" role="status">Checking your previous attempts…</p>}
     {!!history.length&&<div className="compact-list" aria-label="My attempt history"><h3>My attempts</h3>{history.map(item=><div className="compact-row" key={item.id}><div><strong>Attempt {item.attempt_number}</strong><small>{item.submitted_at?new Date(item.submitted_at).toLocaleDateString():"In progress"} · {item.score===null||item.score===undefined?"Awaiting submission":`${item.score}%`}</small></div><span className={`status-badge ${item.submitted_at?(item.passed?"success":"warning"):"muted"}`}>{item.submitted_at?(item.passed?"Passed":"Not passed"):"In progress"}</span></div>)}</div>}
   </section>;
 }

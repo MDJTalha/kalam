@@ -39,6 +39,10 @@ const nextConfig: NextConfig = {
   experimental: { cpus: 1 },
   poweredByHeader: false,
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  async rewrites() {
+    // Client-side features use /api/v1; route them through the existing cookie-preserving API proxy.
+    return [{ source: "/api/v1/:path*", destination: "/api/lms/:path*" }];
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

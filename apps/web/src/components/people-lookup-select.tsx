@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 
 export type LookupPerson = {
   id: string;
@@ -25,6 +25,7 @@ const displayName = (person: LookupPerson) =>
   `${[person.first_name, person.last_name].filter(Boolean).join(" ") || person.email} · ${person.job_title || person.email}`;
 
 export function PeopleLookupSelect({ value, onChange, initialPeople, label, disabled = false, activeOnly = true, optional = false, excludeIds = [] }: Props) {
+  const id = useId();
   const [query, setQuery] = useState("");
   const [matches, setMatches] = useState(initialPeople);
   const [loading, setLoading] = useState(false);
@@ -58,9 +59,9 @@ export function PeopleLookupSelect({ value, onChange, initialPeople, label, disa
   }, [query, activeOnly]);
 
   return <div className="form-field">
-    <span>{label}</span>
-    <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search name, email, employee ID…" aria-label={`${label} search`} disabled={disabled} />
-    <select value={value} onChange={event => onChange(event.target.value)} required={!optional} disabled={disabled || loading}>
+    <label htmlFor={id + "-select"}>{label}</label>
+    <input id={id + "-search"} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search name, email, employee ID…" aria-label={`${label} search`} disabled={disabled} />
+    <select id={id + "-select"} value={value} onChange={event => onChange(event.target.value)} required={!optional} disabled={disabled || loading}>
       <option value="">{loading ? "Loading people…" : optional ? "All people" : people.length ? "Select a person" : "No matching people"}</option>
       {people.map(person => <option key={person.id} value={person.id}>{displayName(person)}</option>)}
     </select>

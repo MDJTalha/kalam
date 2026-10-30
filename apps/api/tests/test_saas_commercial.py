@@ -1,12 +1,27 @@
 import asyncio
-from datetime import datetime, timedelta, timezone
+import os
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
 from sqlalchemy import delete, select
 
 from app.core.security import hash_password
-from app.db.models import CRMAccount, Role, SaaSOffer, SaaSPlan, SessionRecord, Tenant, User, UserRole
+from app.db.models import (
+    CRMAccount,
+    CRMContract,
+    CRMInvoice,
+    CRMPayment,
+    Permission,
+    Role,
+    RolePermission,
+    SaaSOffer,
+    SaaSPlan,
+    SessionRecord,
+    Tenant,
+    User,
+    UserRole,
+)
 from app.db.session import SessionLocal
 from app.main import app
 
@@ -14,30 +29,83 @@ OPS_SLUG = "kalam"
 PASSWORD = "SaaSCRMTest!2026"
 
 
-async def _create_ops_user(email: str) -> None:
+async def _create_ops_user(email: str, role_name: str = "Sales Operations") -> None:
     async with SessionLocal() as db:
+        # Keep test identities separated: commercial staff never receive
+        # platform support or tenant lifecycle privileges by implication.
         tenant = await db.scalar(select(Tenant).where(Tenant.slug == OPS_SLUG))
-        assert tenant is not None
-        role = await db.scalar(select(Role).where(Role.tenant_id == tenant.id, Role.name == "SaaS Administrator"))
-        assert role is not None
-        developer_role = await db.scalar(select(Role).where(Role.tenant_id == tenant.id, Role.name.ilike("platform developer")))
-        if developer_role is None:
-            developer_role = Role(tenant_id=tenant.id, name="Platform Developer", description="Test-only internal platform role", role_kind="platform")
-            db.add(developer_role)
+        if tenant is None:
+            tenant = Tenant(
+                name="Kalam",
+                slug=OPS_SLUG,
+                status="active",
+                settings={"workspace_type": "saas_operations"},
+            )
+            db.add(tenant)
             await db.flush()
+
+        permission_definitions = {
+            "saas.crm.read": "View Kalam SaaS commercial CRM",
+            "saas.crm.manage": "Manage Kalam SaaS commercial CRM",
+            "platform.tenants.read": "View platform tenant registry",
+            "platform.tenants.manage": "Manage customer tenant lifecycle",
+            "platform.health.read": "View platform health",
+            "platform.incidents.manage": "Manage platform incidents",
+            "platform.support.access": "Use audited support access",
+            "platform.audit.read": "View platform audit records",
+        }
+        permissions: dict[str, Permission] = {}
+        for key, description in permission_definitions.items():
+            permission = await db.scalar(select(Permission).where(Permission.key == key))
+            if permission is None:
+                permission = Permission(key=key, description=description)
+                db.add(permission)
+                await db.flush()
+            permissions[key] = permission
+
+        role_permissions = {
+            "SaaS Owner": ["saas.crm.read"],
+            "Sales Operations": ["saas.crm.read", "saas.crm.manage"],
+            "Platform Developer": [
+                "platform.tenants.read", "platform.tenants.manage", "platform.health.read",
+                "platform.incidents.manage", "platform.support.access", "platform.audit.read",
+            ],
+        }
+        if role_name not in role_permissions:
+            raise ValueError(f"Unsupported test role: {role_name}")
+        roles: dict[str, Role] = {}
+        for name, keys in role_permissions.items():
+            role = await db.scalar(select(Role).where(Role.tenant_id == tenant.id, Role.name == name))
+            if role is None:
+                role = Role(
+                    tenant_id=tenant.id, name=name,
+                    description=f"Test-only {name} role", role_kind="platform",
+                )
+                db.add(role)
+                await db.flush()
+            roles[name] = role
+            for key in keys:
+                membership = await db.scalar(select(RolePermission).where(
+                    RolePermission.role_id == role.id,
+                    RolePermission.permission_id == permissions[key].id,
+                ))
+                if membership is None:
+                    db.add(RolePermission(
+                        role_id=role.id, permission_id=permissions[key].id
+                    ))
+
         user = User(
             tenant_id=tenant.id,
             email=email,
             password_hash=hash_password(PASSWORD),
-            first_name="CRM",
-            last_name="Test",
-            job_title="SaaS Administrator",
+            first_name="Kalam",
+            last_name="Role Test",
+            job_title=role_name,
             is_active=True,
         )
         db.add(user)
         await db.flush()
-        db.add(UserRole(user_id=user.id, role_id=role.id))
-        db.add(UserRole(user_id=user.id, role_id=developer_role.id))
+        db.add(UserRole(user_id=user.id, role_id=roles[role_name].id))
         await db.commit()
 
 
@@ -112,7 +180,7 @@ def test_demo_admin_can_open_isolated_crm_sandbox():
         login = client.post("/api/v1/auth/login", json={
             "tenant_slug": "demo-corporation",
             "email": "admin@demo.corp",
-            "password": "DemoOnly!1234",
+            "password": os.environ["CI_FIXTURE_PASSWORD"],
         })
         assert login.status_code == 200, login.text
 
@@ -197,7 +265,9 @@ def test_finance_invoice_payment_reconciliation_and_guards():
             assert page.json()["items"][0]["id"] == account_id
             next_page = client.get("/api/v1/saas/crm/page/accounts", params={"q": account_slug, "limit": 1, "offset": 1})
             assert next_page.status_code == 200 and next_page.json()["items"] == []
-            assert client.patch(f"/api/v1/saas/crm/tenants/{uuid4()}", json={"status": "inactive"}).status_code == 404
+            # Tenant lifecycle is not a commercial write; Sales Operations
+            # must be rejected before target-tenant existence is disclosed.
+            assert client.patch(f"/api/v1/saas/crm/tenants/{uuid4()}", json={"status": "inactive"}).status_code == 403
             export = client.get("/api/v1/saas/crm/export/accounts.csv", params={"q": account_slug, "stage": "customer"})
             assert export.status_code == 200, export.text
             assert account_slug in export.text
@@ -205,7 +275,7 @@ def test_finance_invoice_payment_reconciliation_and_guards():
             contract = client.post("/api/v1/saas/crm/contracts", json={
                 "account_id": account_id, "reference": f"CON-{suffix}",
                 "status": "draft", "currency": "USD",
-                "ends_at": (datetime.now(timezone.utc) + timedelta(days=20)).isoformat(),
+                "ends_at": (datetime.now(UTC) + timedelta(days=20)).isoformat(),
             })
             assert contract.status_code == 201, contract.text
             contract_page = client.get("/api/v1/saas/crm/page/contracts", params={
@@ -293,6 +363,15 @@ def test_finance_invoice_payment_reconciliation_and_guards():
             assert invoice["outstanding_minor"] == 0
             assert invoice["status"] == "paid"
             assert invoice["account_name"] == "Finance Test Account"
+            finance_overview = client.get("/api/v1/saas/crm/finance/overview")
+            assert finance_overview.status_code == 200, finance_overview.text
+            summary = finance_overview.json()
+            assert summary["invoice_counts"]["paid"] >= 1
+            assert summary["payment_count"] >= 2
+            assert any(
+                row["currency"] == "USD" and row["amount_minor"] >= 11000
+                for row in summary["received_by_currency"]
+            )
             assert client.patch(f"/api/v1/saas/crm/invoices/{invoice_id}", json={"amount_minor": 1}).status_code == 422
             assert client.patch(f"/api/v1/saas/crm/invoices/{invoice_id}", json={"status": "draft"}).status_code == 422
             payments = client.get("/api/v1/saas/crm/payments").json()
@@ -349,7 +428,7 @@ def test_renewal_task_generation_is_deduplicated():
             assert account_response.status_code == 201, account_response.text
             account_id = account_response.json()["id"]
 
-            renews_at = datetime.now(timezone.utc) + timedelta(days=100)
+            renews_at = datetime.now(UTC) + timedelta(days=100)
             subscription = client.post("/api/v1/saas/crm/subscriptions", json={
                 "account_id": account_id,
                 "status": "active",
@@ -408,10 +487,12 @@ def test_renewal_task_generation_is_deduplicated():
 def test_plan_offer_subscription_and_trial_guards():
     suffix = uuid4().hex[:8]
     email = f"terms-test-{suffix}@example.com"
+    developer_email = f"terms-developer-{suffix}@example.com"
     code = f"terms-plan-{suffix}"
     slug = f"terms-account-{suffix}"
     offer_code = f"terms-offer-{suffix}"
-    asyncio.run(_create_ops_user(email))
+    asyncio.run(_create_ops_user(email, "Sales Operations"))
+    asyncio.run(_create_ops_user(developer_email, "Platform Developer"))
     demo_tenant_id = str(asyncio.run(_tenant_id("demo-corporation")))
     try:
         with TestClient(app, base_url="http://127.0.0.1") as client:
@@ -491,15 +572,53 @@ def test_plan_offer_subscription_and_trial_guards():
             assert client.patch(f"/api/v1/saas/crm/trials/{scheduled.json()['id']}", json={
                 "status": "active",
             }).status_code == 422
-            provisioned = client.post(f"/api/v1/saas/crm/accounts/{account_id}/provision-tenant", json={})
+            # Sales Operations can manage the CRM opportunity/account but
+            # cannot provision or suspend a customer workspace.
+            denied_provision = client.post(
+                f"/api/v1/saas/crm/accounts/{account_id}/provision-tenant", json={}
+            )
+            assert denied_provision.status_code == 403
+
+            developer_login = client.post("/api/v1/auth/login", json={
+                "tenant_slug": OPS_SLUG,
+                "email": developer_email,
+                "password": PASSWORD,
+            })
+            assert developer_login.status_code == 200, developer_login.text
+            developer_profile = client.get("/api/v1/auth/me").json()
+            assert [role["name"] for role in developer_profile["roles"]] == ["Platform Developer"]
+            assert "platform.tenants.manage" in developer_profile["permissions"]
+            assert "saas.crm.manage" not in developer_profile["permissions"]
+            provisioned = client.post(
+                f"/api/v1/saas/crm/accounts/{account_id}/provision-tenant", json={}
+            )
             assert provisioned.status_code == 201, provisioned.text
+            tenant_id = provisioned.json()["id"]
+            # The Developer can operate tenants, not the commercial CRM register.
+            assert client.get("/api/v1/saas/crm/tenants").status_code == 403
+            assert client.get(f"/api/v1/saas/crm/tenants/{tenant_id}/users").status_code == 200
+
+            # Tenant suspension is a platform operation; reactivation restores
+            # login eligibility without reviving revoked sessions.
+            suspended = client.patch(
+                f"/api/v1/saas/crm/tenants/{tenant_id}", json={"status": "suspended"}
+            )
+            assert suspended.status_code == 200, suspended.text
+            assert suspended.json()["status"] == "suspended"
+            assert client.patch(
+                f"/api/v1/saas/crm/tenants/{tenant_id}", json={"status": "active"}
+            ).status_code == 200
+
+            sales_login = client.post("/api/v1/auth/login", json={
+                "tenant_slug": OPS_SLUG,
+                "email": email,
+                "password": PASSWORD,
+            })
+            assert sales_login.status_code == 200
             linked = client.get("/api/v1/saas/crm/tenants")
             assert linked.status_code == 200
             assert any(row["crm_account_id"] == account_id for row in linked.json())
-            tenant_id = provisioned.json()["id"]
-            assert client.patch(f"/api/v1/saas/crm/tenants/{tenant_id}", json={"status": "inactive"}).status_code == 200
-            assert client.patch(f"/api/v1/saas/crm/tenants/{tenant_id}", json={"status": "active"}).status_code == 200
-            started = datetime.now(timezone.utc) - timedelta(days=1)
+            started = datetime.now(UTC) - timedelta(days=1)
             ends = started + timedelta(days=14)
             active = client.patch(f"/api/v1/saas/crm/trials/{scheduled.json()['id']}", json={
                 "status": "active", "starts_at": started.isoformat(), "ends_at": ends.isoformat(),
@@ -507,3 +626,128 @@ def test_plan_offer_subscription_and_trial_guards():
             assert active.status_code == 200, active.text
     finally:
         asyncio.run(_cleanup(email, code, slug, offer_code, slug))
+        asyncio.run(_cleanup(developer_email, code))
+
+
+
+async def _seed_cross_tenant_finance_rows(suffix: str) -> tuple[str, str, str, str]:
+    async with SessionLocal() as db:
+        ops_tenant = await db.scalar(select(Tenant).where(Tenant.slug == OPS_SLUG))
+        assert ops_tenant is not None
+        foreign_tenant = Tenant(
+            name=f"Finance Isolation {suffix}",
+            slug=f"finance-isolation-{suffix}",
+            status="active",
+        )
+        db.add(foreign_tenant)
+        await db.flush()
+
+        account = CRMAccount(
+            ops_tenant_id=foreign_tenant.id,
+            name=f"Foreign Finance Account {suffix}",
+            slug=f"foreign-finance-{suffix}",
+            account_type="client",
+            lifecycle_stage="customer",
+        )
+        db.add(account)
+        await db.flush()
+
+        contract_reference = f"FOREIGN-CON-{suffix}"
+        invoice_number = f"FOREIGN-INV-{suffix}"
+        contract = CRMContract(
+            ops_tenant_id=ops_tenant.id,
+            account_id=account.id,
+            reference=contract_reference,
+            status="active",
+            currency="USD",
+            total_value_minor=100,
+        )
+        invoice = CRMInvoice(
+            ops_tenant_id=ops_tenant.id,
+            account_id=account.id,
+            invoice_number=invoice_number,
+            status="issued",
+            currency="USD",
+            amount_minor=100,
+            total_minor=100,
+        )
+        db.add_all([contract, invoice])
+        await db.flush()
+        db.add(CRMPayment(
+            ops_tenant_id=ops_tenant.id,
+            account_id=account.id,
+            invoice_id=invoice.id,
+            amount_minor=25,
+            currency="USD",
+            status="received",
+            reference=f"FOREIGN-PAY-{suffix}",
+        ))
+        await db.commit()
+        return foreign_tenant.slug, str(account.id), contract_reference, invoice_number
+
+
+async def _delete_cross_tenant_finance_tenant(slug: str) -> None:
+    async with SessionLocal() as db:
+        await db.execute(delete(Tenant).where(Tenant.slug == slug))
+        await db.commit()
+
+
+def test_finance_read_models_exclude_cross_tenant_relationships():
+    suffix = uuid4().hex[:8]
+    email = f"finance-isolation-{suffix}@example.com"
+    foreign_slug = None
+    try:
+        asyncio.run(_create_ops_user(email))
+        foreign_slug, account_id, contract_reference, invoice_number = asyncio.run(
+            _seed_cross_tenant_finance_rows(suffix)
+        )
+        with TestClient(app, base_url="http://127.0.0.1") as client:
+            login = client.post("/api/v1/auth/login", json={
+                "tenant_slug": OPS_SLUG,
+                "email": email,
+                "password": PASSWORD,
+            })
+            assert login.status_code == 200, login.text
+
+            contracts = client.get("/api/v1/saas/crm/contracts")
+            assert contracts.status_code == 200, contracts.text
+            assert all(row["reference"] != contract_reference for row in contracts.json())
+
+            contract_page = client.get(
+                "/api/v1/saas/crm/page/contracts",
+                params={"account_id": account_id},
+            )
+            assert contract_page.status_code == 200, contract_page.text
+            assert contract_page.json()["total"] == 0
+            assert contract_page.json()["items"] == []
+
+            invoices = client.get("/api/v1/saas/crm/invoices")
+            assert invoices.status_code == 200, invoices.text
+            assert all(row["invoice_number"] != invoice_number for row in invoices.json())
+
+            invoice_page = client.get(
+                "/api/v1/saas/crm/page/invoices",
+                params={"account_id": account_id},
+            )
+            assert invoice_page.status_code == 200, invoice_page.text
+            assert invoice_page.json()["total"] == 0
+            assert invoice_page.json()["items"] == []
+
+            payments = client.get(
+                "/api/v1/saas/crm/payments",
+                params={"account_id": account_id},
+            )
+            assert payments.status_code == 200, payments.text
+            assert all(row["reference"] != f"FOREIGN-PAY-{suffix}" for row in payments.json())
+
+            payment_page = client.get(
+                "/api/v1/saas/crm/page/payments",
+                params={"account_id": account_id},
+            )
+            assert payment_page.status_code == 200, payment_page.text
+            assert payment_page.json()["total"] == 0
+            assert payment_page.json()["items"] == []
+    finally:
+        if foreign_slug is not None:
+            asyncio.run(_delete_cross_tenant_finance_tenant(foreign_slug))
+        asyncio.run(_cleanup(email, f"unused-plan-{suffix}"))

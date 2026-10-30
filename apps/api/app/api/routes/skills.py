@@ -1,10 +1,20 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user, require_permission
-from app.db.models import Course, CourseSkill, Role, RoleSkillRequirement, Skill, User, UserSkill
+from app.db.models import (
+    Course,
+    CourseSkill,
+    Role,
+    RoleSkillRequirement,
+    Skill,
+    User,
+    UserSkill,
+)
 from app.db.session import get_db
 from app.services.audit import audit
 

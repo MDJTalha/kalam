@@ -44,7 +44,7 @@ def send_email(*, recipient: str, subject: str, text: str) -> None:
             raise RuntimeError("SMTP delivery failed") from exc
         return
 
-    if settings.app_env == "development" and settings.dev_email_sink:
+    if settings.app_env in {"development", "test", "ci"} and settings.dev_email_sink:
         logger.warning(
             "DEV_EMAIL_SINK recipient=%s subject=%s body=%s",
             recipient,

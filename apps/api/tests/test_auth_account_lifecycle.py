@@ -11,7 +11,6 @@ from app.db.models import Invitation, Role, Tenant, User
 from app.db.session import SessionLocal
 from app.main import app
 
-
 PASSWORD = "AuthRegression!2026"
 
 

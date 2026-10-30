@@ -1,0 +1,20 @@
+# Application build context: do not send developer state or secrets to the daemon.
+.venv/
+venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+*.bak
+*.backup
+*.dump
+*.sql
+tests/
+scripts/
+coverage/
+htmlcov/

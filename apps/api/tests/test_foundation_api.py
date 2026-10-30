@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+import os
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -9,9 +10,9 @@ from app.core.config import settings
 from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
-MANAGER = {"email": "manager@demo.corp", "password": "DemoOnly!1234"}
-LEARNER = {"email": "learner@demo.corp", "password": "DemoOnly!1234"}
+ADMIN = {"email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
+MANAGER = {"email": "manager@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
+LEARNER = {"email": "learner@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
 DEMO_COURSE_SLUG = "workplace-ethics-2026"
 
 
@@ -117,6 +118,20 @@ def test_people_directory_page_is_bounded_and_permissioned(client: TestClient) -
     assert client.get("/api/v1/people/page", params={"page_size": 101}).status_code == 422
 
 
+def test_invitation_role_catalog_is_permissioned_and_tenant_scoped(client: TestClient) -> None:
+    login(client, LEARNER)
+    forbidden = client.get("/api/v1/admin/invitations/roles")
+    assert forbidden.status_code == 403
+
+    login(client, ADMIN)
+    response = client.get("/api/v1/admin/invitations/roles")
+    assert response.status_code == 200, response.text
+    roles = response.json()
+    assert roles
+    assert all(set(role) == {"id", "name"} for role in roles)
+    assert any(role["name"] == "Tenant Administrator" for role in roles)
+
+
 def test_authenticated_profile_is_available(client: TestClient) -> None:
     login(client, LEARNER)
     response = client.get("/api/v1/auth/me")
@@ -213,6 +228,16 @@ def test_learner_can_complete_seeded_course_and_earn_credential(client: TestClie
     )
     assert completed.status_code == 200
     assert completed.json()["status"] == "completed"
+
+    # Read the course again through the learner API to prove the completion
+    # survived the write request and is not only reflected in its response.
+    persisted = client.get(f"/api/v1/courses/{course['id']}")
+    assert persisted.status_code == 200, persisted.text
+    persisted_payload = persisted.json()
+    assert lesson["id"] in persisted_payload["completed_lesson_ids"]
+    assert persisted_payload["progress_percent"] == 100
+    assert persisted_payload["enrollment"]["id"] == enrollment_id
+    assert persisted_payload["enrollment"]["status"] == "completed"
 
     assessments = client.get("/api/v1/assessments").json()
     assessment = next(item for item in assessments if item["title"] == "Ethics Knowledge Check")
@@ -324,7 +349,7 @@ def test_cross_tenant_data_isolation(client: TestClient) -> None:
         json={
             "tenant_slug": "isolation-corporation",
             "email": "isolated@other.corp",
-            "password": "DemoOnly!1234",
+            "password": os.environ["CI_FIXTURE_PASSWORD"],
         },
     )
     assert other.status_code == 200
@@ -454,7 +479,7 @@ def test_phase1_cross_tenant_resource_ids_are_not_resolvable(client: TestClient)
         json={
             "tenant_slug": "isolation-corporation",
             "email": "isolated@other.corp",
-            "password": "DemoOnly!1234",
+            "password": os.environ["CI_FIXTURE_PASSWORD"],
         },
     )
     assert isolated.status_code == 200
@@ -502,7 +527,13 @@ def test_phase1_privileged_endpoint_matrix_denies_learner(client: TestClient) ->
         ("POST", "/api/v1/webhooks"),
     ]
     for method, path in privileged:
-        response = client.request(method, path, json={})
+        payload = {}
+        if path == "/api/v1/admin/invitations":
+            payload = {
+                "email": "forbidden-invite@example.com",
+                "role_id": "00000000-0000-0000-0000-000000000000",
+            }
+        response = client.request(method, path, json=payload)
         assert response.status_code == 403, f"{method} {path}: {response.status_code} {response.text}"
 
 
@@ -1005,7 +1036,7 @@ def test_phase2_due_date_reminders_are_idempotent_and_tenant_scoped(client: Test
     )
     assert lesson.status_code == 200
     assert client.post(f"/api/v1/courses/{course_id}/publish").status_code == 200
-    due_at = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+    due_at = (datetime.now(UTC) + timedelta(days=1)).isoformat()
     assigned = client.post(
         f"/api/v1/courses/{course_id}/enrollments/bulk",
         json={"user_ids": [learner_id], "due_at": due_at},
@@ -1406,7 +1437,7 @@ def test_phase3_certificate_admin_lifecycle(client: TestClient) -> None:
     if not certificates.json():
         pytest.skip('No certificate available in seeded database')
     certificate = certificates.json()[0]
-    expiry = (datetime.now(timezone.utc) + timedelta(days=365)).isoformat()
+    expiry = (datetime.now(UTC) + timedelta(days=365)).isoformat()
     renewed = client.patch(
         f"/api/v1/certificates/{certificate['id']}/lifecycle",
         json={'action': 'renew', 'expires_at': expiry, 'reason': 'Phase 3 lifecycle regression verification.'},
@@ -1640,10 +1671,24 @@ def test_phase4_facilitator_session_analytics_is_scoped_and_accurate(client: Tes
         json={"title": f"Phase 4 Facilitator {uuid4().hex[:8]}", "slug": f"phase4-facilitator-{uuid4().hex[:8]}"},
     )
     assert course.status_code == 201
+    course_id = course.json()["id"]
+    module = client.post(
+        f"/api/v1/courses/{course_id}/modules",
+        json={"title": "Facilitator module", "position": 1},
+    )
+    assert module.status_code == 200, module.text
+    lesson = client.post(
+        f"/api/v1/courses/{course_id}/modules/{module.json()['id']}/lessons",
+        json={"title": "Facilitator lesson", "position": 1, "content_type": "rich_text", "content": {"body": "Attendance workflow"}},
+    )
+    assert lesson.status_code == 200, lesson.text
+    published = client.post(f"/api/v1/courses/{course_id}/publish")
+    assert published.status_code == 200, published.text
+
     session = client.post(
         "/api/v1/sessions",
         json={
-            "course_id": course.json()["id"],
+            "course_id": course_id,
             "instructor_id": admin_id,
             "title": "Facilitator analytics session",
             "starts_at": "2030-07-01T10:00:00Z",
@@ -1652,6 +1697,11 @@ def test_phase4_facilitator_session_analytics_is_scoped_and_accurate(client: Tes
     )
     assert session.status_code == 201
     session_id = session.json()["id"]
+    login(client, LEARNER)
+    enrolled = client.post(f"/api/v1/courses/{course_id}/enroll")
+    assert enrolled.status_code == 200, enrolled.text
+
+    login(client, ADMIN)
     marked = client.post(
         f"/api/v1/sessions/{session_id}/attendance",
         json={"user_id": learner_id, "status": "present"},
@@ -1672,6 +1722,85 @@ def test_phase4_facilitator_session_analytics_is_scoped_and_accurate(client: Tes
     login(client, ADMIN)
     missing = client.get(f"/api/v1/sessions/{uuid4()}/analytics")
     assert missing.status_code == 404
+
+
+def test_live_session_schedule_is_visible_to_enrolled_learners_only(client: TestClient) -> None:
+    login(client, ADMIN)
+    people = client.get("/api/v1/people").json()
+    admin_id = next(item["id"] for item in people if item["email"] == ADMIN["email"])
+    token = uuid4().hex[:8]
+    course = client.post(
+        "/api/v1/courses",
+        json={"title": f"Session calendar {token}", "slug": f"session-calendar-{token}"},
+    )
+    assert course.status_code == 201, course.text
+    course_id = course.json()["id"]
+    module = client.post(
+        f"/api/v1/courses/{course_id}/modules",
+        json={"title": "Calendar module", "position": 1},
+    )
+    assert module.status_code == 200, module.text
+    lesson = client.post(
+        f"/api/v1/courses/{course_id}/modules/{module.json()['id']}/lessons",
+        json={"title": "Calendar lesson", "position": 1, "content_type": "rich_text", "content": {"body": "Session details"}},
+    )
+    assert lesson.status_code == 200, lesson.text
+    assert client.post(f"/api/v1/courses/{course_id}/publish").status_code == 200
+    isolation_login = client.post(
+        "/api/v1/auth/login",
+        json={"tenant_slug": "isolation-corporation", "email": "isolated@other.corp", "password": LEARNER["password"]},
+    )
+    assert isolation_login.status_code == 200, isolation_login.text
+    foreign_instructor_id = client.get("/api/v1/people/me").json()["id"]
+
+    login(client, ADMIN)
+    foreign_assignment = client.post(
+        "/api/v1/sessions",
+        json={
+            "course_id": course_id,
+            "instructor_id": foreign_instructor_id,
+            "title": "Cross-tenant instructor rejection",
+            "starts_at": "2031-07-01T10:00:00Z",
+            "ends_at": "2031-07-01T11:00:00Z",
+        },
+    )
+    assert foreign_assignment.status_code == 404
+    invalid_window = client.post(
+        "/api/v1/sessions",
+        json={
+            "course_id": course_id,
+            "title": "Invalid session time window",
+            "starts_at": "2031-07-01T11:00:00Z",
+            "ends_at": "2031-07-01T10:00:00Z",
+        },
+    )
+    assert invalid_window.status_code == 422
+    session = client.post(
+        "/api/v1/sessions",
+        json={
+            "course_id": course_id,
+            "instructor_id": admin_id,
+            "title": "Enrolled learner session",
+            "starts_at": "2031-07-01T10:00:00Z",
+            "ends_at": "2031-07-01T11:00:00Z",
+        },
+    )
+    assert session.status_code == 201, session.text
+    session_id = session.json()["id"]
+
+    login(client, LEARNER)
+    enrolled = client.post(f"/api/v1/courses/{course_id}/enroll")
+    assert enrolled.status_code == 200, enrolled.text
+    learner_sessions = client.get("/api/v1/sessions")
+    assert learner_sessions.status_code == 200, learner_sessions.text
+    assert session_id in {item["id"] for item in learner_sessions.json()}
+
+    isolation_login = client.post(
+        "/api/v1/auth/login",
+        json={"tenant_slug": "isolation-corporation", "email": "isolated@other.corp", "password": LEARNER["password"]},
+    )
+    assert isolation_login.status_code == 200, isolation_login.text
+    assert client.get("/api/v1/sessions").json() == []
 
 
 def test_phase5_manager_development_workflow_authorization(client: TestClient) -> None:
@@ -1698,6 +1827,12 @@ def test_phase5_manager_development_workflow_authorization(client: TestClient) -
     assert progress.json()["plan"]["id"] == learner_plan_id
 
     login(client, MANAGER)
+    # The manager detail screen loads the learner's plan collection directly,
+    # not only the individual progress endpoint.
+    visible_plans = client.get(f"/api/v1/development/users/{learner['id']}")
+    assert visible_plans.status_code == 200, visible_plans.text
+    assert any(item["id"] == learner_plan_id for item in visible_plans.json())
+
     manager_progress = client.get(f"/api/v1/development/{learner_plan_id}/progress")
     assert manager_progress.status_code == 200
     assert manager_progress.json()["plan"]["id"] == learner_plan_id

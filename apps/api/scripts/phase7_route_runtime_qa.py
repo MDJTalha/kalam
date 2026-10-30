@@ -1,5 +1,8 @@
-import asyncio, json, urllib.request
-import httpx, websockets
+import asyncio
+import json
+import urllib.request
+import httpx
+import websockets
 
 TENANT = "demo-corporation"
 ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}

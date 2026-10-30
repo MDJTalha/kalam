@@ -1,9 +1,12 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
+DEMO_PASSWORD = os.environ.get("KALAM_QA_DEMO_PASSWORD", os.environ["CI_FIXTURE_PASSWORD"])
+ADMIN = {"email": "admin@demo.corp", "password": DEMO_PASSWORD}
 
 
 def login(client):

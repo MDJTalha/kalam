@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { EmptyState, Section, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { Activity, ArrowRight, CalendarDays, CheckCircle2, Cloud, Mail, Network, RefreshCw, ShieldCheck, Webhook, UsersRound } from "lucide-react";
 import { IntegrationConsole } from "@/components/integration-console";
 
@@ -20,9 +20,10 @@ const providerMeta:Record<string,{name:string;purpose:string;icon:typeof Network
 
 export default async function IntegrationsPage(){
   const user=await requireUser<{permissions?:string[]}>();
-  const rows=await apiJson<Integration[]>("/api/v1/integrations");
+  const rowsResult=await apiJsonResult<Integration[]>("/api/v1/integrations");
   const canManage=user.permissions?.includes("integrations.manage")??false;
-  if (rows === null) return <DashboardShell title="Integrations" eyebrow="Enterprise connectivity"><section className="data-panel" role="alert"><h2>Integration registry unavailable</h2><p>The integration registry could not be loaded. Refresh or try again later.</p></section></DashboardShell>;
+  if (!rowsResult.ok || rowsResult.data === null) return <DashboardShell title="Integrations" eyebrow="Enterprise connectivity"><section className="data-panel" role="alert"><h2>{rowsResult.status===403?"Integration access is restricted":"Integration registry unavailable"}</h2><p>{rowsResult.status===403?"Your role does not have permission to view integration records.":rowsResult.status===0?"The API service could not be reached. Check that it is running and try again.":`The integration registry could not be loaded (HTTP ${rowsResult.status}). Refresh or try again later.`}</p></section></DashboardShell>;
+  const rows=rowsResult.data;
   const connected=rows.filter(x=>x.status==="connected").length;
   const healthy=rows.filter(x=>x.last_check_status==="passed").length;
   const attention=rows.filter(x=>x.last_check_status==="failed"||x.status==="disabled").length;
@@ -33,21 +34,21 @@ export default async function IntegrationsPage(){
         <p>One controlled workspace for identity, workforce data, learning interoperability and event delivery.</p>
       </div>
       <div className="kalam-integration-hero-side">
-        <div className="kalam-live-status"><i/> Registry operational</div>
+        <div className="kalam-live-status"><i/> Registry response received</div>
         <div className="kalam-hero-rule"/>
         <small>Connection evidence is sourced from the integration registry.</small>
-        <span className="kalam-registry-badge"><RefreshCw size={13}/> Registry synced on page load</span>
+        <span className="kalam-registry-badge"><RefreshCw size={13}/> Snapshot loaded for this request</span>
       </div>
     </div>
     <div className="kalam-integration-metrics">
-      <article><CheckCircle2 size={16}/><span>Connected</span><strong>{connected}</strong><small>Configured providers</small></article>
+      <article><CheckCircle2 size={16}/><span>Connected</span><strong>{connected}</strong><small>Providers with connected status</small></article>
       <article><ShieldCheck size={16}/><span>Healthy</span><strong>{healthy}</strong><small>Passed checks</small></article>
       <article><Activity size={16}/><span>Attention</span><strong>{attention}</strong><small>Requires review</small></article>
-      <article><Webhook size={16}/><span>Event layer</span><strong>Ready</strong><small>Webhook delivery</small></article>
+      <article><Webhook size={16}/><span>Event layer</span><strong>Separate</strong><small>Managed in Webhooks</small></article>
     </div>
     <Section eyebrow="Connection landscape" title="Enterprise integration fabric">
       <div className="kalam-provider-grid">
-        {providers.map(name=>{const item=rows.find(x=>x.provider===name);const meta=providerMeta[name];const Icon=meta.icon;return <article className={"kalam-provider-card "+(item?.status==="configured"?"is-connected":"")} key={name}>
+        {providers.map(name=>{const item=rows.find(x=>x.provider===name);const meta=providerMeta[name];const Icon=meta.icon;return <article className={"kalam-provider-card "+(item?.status==="connected"?"is-connected":"")} key={name}>
           <div className="kalam-provider-top"><span className="kalam-provider-icon"><Icon size={17}/></span><StatusBadge status={item?.status||"not configured"}/></div>
           <h3>{meta.name}</h3><p>{meta.purpose}</p>
           <div className="kalam-provider-evidence"><span>{item?.last_checked_at?"Last checked":"Status"}</span><strong>{item?.last_checked_at?new Date(item.last_checked_at).toLocaleString():"Not tested"}</strong></div>

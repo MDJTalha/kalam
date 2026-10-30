@@ -1,16 +1,17 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_permission
+from app.core.config import settings
 from app.db.models import FileObject, User
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.file_scanner import FileScanError, scan_file
-from app.services.storage import get_storage
+from app.services.storage import download_headers, get_storage
 
 router = APIRouter()
 
@@ -53,6 +54,11 @@ async def upload_file(
     if not clean:
         storage.delete(object_key)
         raise HTTPException(status_code=422, detail="File rejected by malware scanner")
+    try:
+        storage.finalize_upload(object_key, upload.content_type)
+    except Exception as exc:
+        storage.delete(object_key)
+        raise HTTPException(status_code=503, detail="File storage is unavailable") from exc
 
     item = FileObject(
         tenant_id=user.tenant_id,
@@ -125,10 +131,18 @@ async def download_file(
     )
     if item is None:
         raise HTTPException(status_code=404, detail="File not found or not yet cleared")
-    path = get_storage().path_for(item.object_key)
-    if not path.is_file():
+    storage = get_storage()
+    try:
+        exists = storage.exists(item.object_key)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="File storage is unavailable") from exc
+    if not exists:
         raise HTTPException(status_code=404, detail="File content not found")
-    return FileResponse(path=path, media_type=item.mime_type, filename=item.original_name)
+    return StreamingResponse(
+        storage.iter_bytes(item.object_key),
+        media_type=item.mime_type,
+        headers=download_headers(item.original_name),
+    )
 
 
 @router.patch("/{file_id}/scan-result")
@@ -138,6 +152,14 @@ async def set_scan_result(
     user: User = Depends(require_permission("files.manage")),
     db: AsyncSession = Depends(get_db),
 ):
+    # This endpoint is a development-only manual override, not a malware scanner.
+    # Production/staging must use the configured scanner at upload time.
+    if settings.app_env.lower() != "development":
+        raise HTTPException(
+            status_code=409,
+            detail="Manual scan-result overrides are disabled outside development",
+        )
+
     item = await db.scalar(
         select(FileObject).where(
             FileObject.id == file_id,
@@ -146,6 +168,11 @@ async def set_scan_result(
     )
     if item is None:
         raise HTTPException(status_code=404, detail="File not found")
+    if item.status != "pending_scan":
+        raise HTTPException(
+            status_code=409,
+            detail="Only files awaiting a security scan can receive a manual result",
+        )
 
     item.status = "available" if clean else "rejected"
     item.record_metadata = {

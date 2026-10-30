@@ -227,6 +227,20 @@ export function TenantStatusControl({id,status}:{id:string;status:string}){
   return <select aria-label="Tenant status" defaultValue={status} onChange={e=>void state.run(()=>patchJson("/api/lms/saas/crm/tenants/"+id,{status:e.target.value}))}><option value="active">Active</option><option value="inactive">Inactive</option></select>;
 }
 
+export function DeveloperTenantStatusControl({id,status}:{id:string;status:string}){
+  const state=useSubmit();
+  const normalized = status === "active" ? "active" : "suspended";
+  return <select
+    aria-label="Tenant access status"
+    defaultValue={normalized}
+    disabled={state.busy}
+    onChange={e=>void state.run(()=>patchJson("/api/lms/support/developer/tenants/"+id+"/status",{status:e.target.value}))}
+  >
+    <option value="active">Active</option>
+    <option value="suspended">Suspended</option>
+  </select>;
+}
+
 export function InquiryConvertButton({id,accountId,requestType}:{id:string;accountId?:string|null;requestType?:"demo"|"sales"|"trial"}){
   const state=useSubmit();
   if(accountId)return <Link className="button button-secondary" href={"/dashboard/saas/clients/"+accountId}>Open CRM account</Link>;

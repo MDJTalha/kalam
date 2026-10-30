@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -10,8 +10,8 @@ from app.db.models import Integration, User
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.integration_adapters import (
-    IntegrationCheckError,
     SUPPORTED,
+    IntegrationCheckError,
     run_integration_check,
     validate_integration_config,
 )
@@ -23,7 +23,6 @@ SUPPORTED_PROVIDERS = set(SUPPORTED)
 
 class IntegrationUpsert(BaseModel):
     provider: str = Field(min_length=2, max_length=80)
-    status: str = Field(default="configured", pattern=r"^(configured|connected|disabled|error)$")
     config: dict = Field(default_factory=dict)
 
 
@@ -75,7 +74,8 @@ async def upsert_integration(
         item = Integration(tenant_id=user.tenant_id, provider=provider)
         db.add(item)
 
-    item.status = payload.status
+    # Configuration submitted by a caller is never proof of a successful handshake.
+    item.status = "configured"
     item.config = payload.config
     await db.flush()
     await audit(
@@ -85,7 +85,7 @@ async def upsert_integration(
         action="integration.updated",
         entity_type="integration",
         entity_id=str(item.id),
-        metadata={"provider": provider, "status": payload.status},
+        metadata={"provider": provider, "status": item.status},
     )
     await db.commit()
     return {
@@ -115,7 +115,7 @@ async def test_connection(
     )
     if item is None:
         raise HTTPException(status_code=404, detail="Integration not configured")
-    item.last_checked_at = datetime.now(timezone.utc)
+    item.last_checked_at = datetime.now(UTC)
     try:
         result = await run_integration_check(provider, item.config or {})
     except IntegrationCheckError as exc:

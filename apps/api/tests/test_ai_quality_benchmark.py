@@ -1,4 +1,8 @@
-from app.services.ai_benchmark import RetrievalCase, meets_quality_gate, score_ranked_ids
+from app.services.ai_benchmark import (
+    RetrievalCase,
+    meets_quality_gate,
+    score_ranked_ids,
+)
 from app.services.ai_evaluation import detect_prompt_injection
 from app.services.ai_retrieval import _expanded_terms, _score
 

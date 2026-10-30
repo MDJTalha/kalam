@@ -21,7 +21,7 @@ export default async function CatalogPage() {
   const catalog = await apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=24&scope=all");
   if (!catalog.ok || !catalog.data) {
     return <DashboardShell title="Learning catalog" eyebrow="Learning operations">
-      <section className="data-panel" role="alert"><h2>Catalog unavailable</h2><p>HTTP {catalog.status}: {catalog.error || "Course information could not be loaded. Please try again."}</p></section>
+      <section className="data-panel" role="alert"><h2>{catalog.status===403?"Catalog access restricted":"Catalog unavailable"}</h2><p>{catalog.status===403?"Your role does not have permission to view this course catalog.":catalog.status===0?"The API service could not be reached. Check that it is running and try again.":`HTTP ${catalog.status}: ${catalog.error || "Course information could not be loaded. Please try again."}`}</p></section>
     </DashboardShell>;
   }
 

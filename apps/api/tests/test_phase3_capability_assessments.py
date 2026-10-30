@@ -1,3 +1,4 @@
+import os
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -5,10 +6,11 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
-LEARNER = {"email": "learner@demo.corp", "password": "DemoOnly!1234"}
+DEMO_PASSWORD = os.environ.get("KALAM_QA_DEMO_PASSWORD", os.environ["CI_FIXTURE_PASSWORD"])
+ADMIN = {"email": "admin@demo.corp", "password": DEMO_PASSWORD}
+LEARNER = {"email": "learner@demo.corp", "password": DEMO_PASSWORD}
 OTHER_TENANT = "isolation-corporation"
-OTHER_USER = {"email": "isolated@other.corp", "password": "DemoOnly!1234"}
+OTHER_USER = {"email": "isolated@other.corp", "password": DEMO_PASSWORD}
 
 
 def login(client: TestClient, tenant: str, credentials: dict[str, str]) -> None:
@@ -33,7 +35,7 @@ def create_engine(client: TestClient, kind: str = "self") -> tuple[str, str]:
     response = client.post("/api/v1/assessments", json={
         "title": "Phase 3 " + kind + " assessment " + uuid4().hex[:8],
         "passing_score": 70, "assessment_type": kind,
-        "measurement_method": "level_based" if kind == "self" else "360_aggregate",
+        "measurement_method": "360_aggregate" if kind == "360" else "level_based",
         "validity_days": 30,
     })
     assert response.status_code == 201, response.text
@@ -118,6 +120,19 @@ def test_360_cycle_aggregates_completed_reviewer_outcomes():
         assert cycle.status_code == 201, cycle.text
         cycle_id = cycle.json()["id"]
         admin_id = client.get("/api/v1/people/me").json()["id"]
+
+        invalid_self_assignment = client.post(
+            "/api/v1/capability-assessments/cycles/" + cycle_id + "/reviewers",
+            json={"reviewer_id": admin_id, "reviewer_type": "self"},
+        )
+        assert invalid_self_assignment.status_code == 422, invalid_self_assignment.text
+
+        invalid_manager_assignment = client.post(
+            "/api/v1/capability-assessments/cycles/" + cycle_id + "/reviewers",
+            json={"reviewer_id": admin_id, "reviewer_type": "manager"},
+        )
+        assert invalid_manager_assignment.status_code == 422, invalid_manager_assignment.text
+
         reviewer = client.post("/api/v1/capability-assessments/cycles/" + cycle_id + "/reviewers", json={
             "reviewer_id": admin_id, "reviewer_type": "assessor",
         })
@@ -148,6 +163,25 @@ def test_360_cycle_aggregates_completed_reviewer_outcomes():
         completed_learner = client.post("/api/v1/capability-assessments/attempts/" + learner_attempt_id + "/complete")
         assert completed_learner.status_code == 200, completed_learner.text
         assert completed_learner.json()["cycle"]["baseline_level"] == 3.5
+
+
+def test_learner_cannot_self_execute_manager_only_assessment():
+    with TestClient(app, base_url="http://localhost") as client:
+        login(client, TENANT, ADMIN)
+        assessment_id, target_id = create_engine(client, "manager")
+        learner_id = person_id(client)
+        cycle = client.post("/api/v1/capability-assessments/assessments/" + assessment_id + "/cycles", json={
+            "user_id": learner_id, "target_type": "competency",
+            "target_id": target_id, "required_level": 4.0,
+        })
+        assert cycle.status_code == 201, cycle.text
+        cycle_id = cycle.json()["id"]
+
+        login(client, TENANT, LEARNER)
+        started = client.post(
+            "/api/v1/capability-assessments/cycles/" + cycle_id + "/attempts?stage=baseline"
+        )
+        assert started.status_code == 403, started.text
 
 
 def test_capability_assessment_cycles_are_tenant_scoped():

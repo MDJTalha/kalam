@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+import os
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -6,8 +7,8 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
-LEARNER = {"email": "learner@demo.corp", "password": "DemoOnly!1234"}
+ADMIN = {"email": "admin@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
+LEARNER = {"email": "learner@demo.corp", "password": os.environ["CI_FIXTURE_PASSWORD"]}
 
 
 def login(client: TestClient, credentials: dict[str, str]) -> None:
@@ -56,8 +57,8 @@ def test_expired_verified_evidence_is_excluded_from_current_state():
         people = client.get("/api/v1/people").json()
         learner_id = next(item["id"] for item in people if item["email"] == LEARNER["email"])
         competency_id = make_competency(client)
-        observed = datetime.now(timezone.utc) - timedelta(days=2)
-        expires = datetime.now(timezone.utc) - timedelta(days=1)
+        observed = datetime.now(UTC) - timedelta(days=2)
+        expires = datetime.now(UTC) - timedelta(days=1)
         created = client.post("/api/v1/evidence", json={
             "user_id": learner_id, "target_type": "competency", "target_id": competency_id,
             "evidence_type": "observation", "source_type": "manual_observation",
@@ -115,7 +116,7 @@ def test_assessment_evidence_is_idempotent_and_tenant_scoped():
         assert summary.status_code == 200
         assert any(item["target_id"] == competency_id for item in summary.json()["verified_current_evidence"])
         other = client.post("/api/v1/auth/login", json={
-            "tenant_slug": "isolation-corporation", "email": "isolated@other.corp", "password": "DemoOnly!1234",
+            "tenant_slug": "isolation-corporation", "email": "isolated@other.corp", "password": os.environ["CI_FIXTURE_PASSWORD"],
         })
         assert other.status_code == 200
         assert client.post(f"/api/v1/evidence/from-assessment/{attempt_id}").status_code in {403, 404}

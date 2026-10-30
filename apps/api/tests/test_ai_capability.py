@@ -3,7 +3,17 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import delete, select
 
-from app.db.models import Course, CourseSkill, Role, RoleSkillRequirement, Skill, Tenant, User, UserRole, UserSkill
+from app.db.models import (
+    Course,
+    CourseSkill,
+    Role,
+    RoleSkillRequirement,
+    Skill,
+    Tenant,
+    User,
+    UserRole,
+    UserSkill,
+)
 from app.db.session import SessionLocal
 from app.services.ai_retrieval import retrieve_capability_sources
 

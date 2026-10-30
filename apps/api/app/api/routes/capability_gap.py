@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta, timezone
-from decimal import Decimal, ROUND_HALF_UP
-from uuid import UUID
+from datetime import UTC, datetime, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 from types import SimpleNamespace
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.deps import get_current_user, require_permission, user_has_permission
 from app.db.models import (
     Capability,
@@ -39,7 +41,7 @@ VERSION = "phase4.v1"
 def _severity(required, demonstrated):
     if demonstrated is None:
         return "insufficient_evidence"
-    gap = max(Decimal("0"), required - demonstrated)
+    gap = max(Decimal(0), required - demonstrated)
     if gap <= 0:
         return "met"
     if gap <= Decimal(".50"):
@@ -110,7 +112,7 @@ async def _evidence_map(db, tenant_id, user_ids):
     if user_ids:
         stmt = stmt.where(CapabilityEvidence.user_id.in_(user_ids))
     rows = (await db.execute(stmt)).scalars().all()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     out = {}
     for e in rows:
         if e.expires_at and e.expires_at <= now:
@@ -159,7 +161,7 @@ async def _competency_fallback(
     )
     newest = max(
         (e for _, _, e in vals),
-        key=lambda x: x.observed_at or datetime.min.replace(tzinfo=timezone.utc),
+        key=lambda x: x.observed_at or datetime.min.replace(tzinfo=UTC),
     )
     return _round(level), confidence, len(vals), newest
 
@@ -195,7 +197,7 @@ async def _compute(
         if not roles:
             raise HTTPException(404, "Role not found")
     role_map = {r.id: r for r in roles}
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     assignments = (
         (
             await db.execute(
@@ -331,7 +333,7 @@ async def _compute(
             )
             gap = (
                 max(
-                    Decimal("0"), Decimal(str(req.required_level)) - Decimal(str(level))
+                    Decimal(0), Decimal(str(req.required_level)) - Decimal(str(level))
                 )
                 if level is not None
                 else None
@@ -463,27 +465,10 @@ async def gap_summary(
         changed = True
         while changed:
             changed = False
-            for x in units:
-                if x.parent_id in descendants and x.id not in descendants:
-                    descendants.add(x.id)
+            for unit in units:
+                if unit.parent_id in descendants and unit.id not in descendants:
+                    descendants.add(unit.id)
                     changed = True
-        rows = (
-            [
-                x
-                for x in rows
-                if next(
-                    (
-                        u
-                        for u in unit_map.values()
-                        if u.id == next((z.org_unit_id for z in []), None)
-                    ),
-                    None,
-                )
-                is not None
-            ]
-            if False
-            else rows
-        )
         user_ids = {
             u.id
             for u in (
@@ -534,7 +519,7 @@ async def _recalculate_user_internal(
     """
     actor = SimpleNamespace(id=actor_id or user_id, tenant_id=tenant_id)
     rows = await _compute(db, actor, user_id, bypass_authorization=True)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     seen = {(x["user_id"], x["requirement"].id) for x in rows}
     for x in rows:
         req = x["requirement"]
@@ -608,7 +593,7 @@ async def recalculate(
     db: AsyncSession = Depends(get_db),
 ):
     rows = await _compute(db, user, user_id, role_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     created = 0
     seen = {(x["user_id"], x["requirement"].id) for x in rows}
     for x in rows:
@@ -726,16 +711,84 @@ async def list_snapshots(
     rows = (
         await db.execute(stmt.order_by(CapabilityGap.computed_at.desc()).limit(250))
     ).all()
-    return [
-        _gap_json(
-            g,
-            role.name,
-            None,
-            "fresh"
-            if not g.evidence_observed_at
-            or (datetime.now(timezone.utc) - g.evidence_observed_at).days
-            <= FRESHNESS_DAYS
-            else "stale",
+    # Resolve labels from the tenant-scoped role requirement targets.
+    # Snapshot rows intentionally store target IDs, not denormalized labels.
+    capability_ids = {
+        requirement.capability_id
+        for _, requirement, _ in rows
+        if requirement.capability_id is not None
+    }
+    competency_ids = {
+        requirement.competency_id
+        for _, requirement, _ in rows
+        if requirement.competency_id is not None
+    }
+    skill_ids = {
+        requirement.skill_id
+        for _, requirement, _ in rows
+        if requirement.skill_id is not None
+    }
+    target_names: dict[tuple[str, UUID], str] = {}
+    if capability_ids:
+        targets = (
+            await db.execute(
+                select(Capability.id, Capability.name).where(
+                    Capability.tenant_id == user.tenant_id,
+                    Capability.id.in_(capability_ids),
+                )
+            )
+        ).all()
+        target_names.update({("capability", row.id): row.name for row in targets})
+    if competency_ids:
+        targets = (
+            await db.execute(
+                select(Competency.id, Competency.name).where(
+                    Competency.tenant_id == user.tenant_id,
+                    Competency.id.in_(competency_ids),
+                )
+            )
+        ).all()
+        target_names.update({("competency", row.id): row.name for row in targets})
+    if skill_ids:
+        targets = (
+            await db.execute(
+                select(Skill.id, Skill.name).where(
+                    Skill.tenant_id == user.tenant_id,
+                    Skill.id.in_(skill_ids),
+                )
+            )
+        ).all()
+        target_names.update({("skill", row.id): row.name for row in targets})
+
+    snapshots = []
+    for gap, requirement, role in rows:
+        target_type = (
+            "capability"
+            if requirement.capability_id is not None
+            else "competency"
+            if requirement.competency_id is not None
+            else "skill"
         )
-        for g, _, role in rows
-    ]
+        target_id = (
+            requirement.capability_id
+            or requirement.competency_id
+            or requirement.skill_id
+        )
+        target_name = (
+            target_names.get((target_type, target_id))
+            if target_id is not None
+            else None
+        )
+        snapshots.append(
+            _gap_json(
+                gap,
+                role.name,
+                target_name,
+                "fresh"
+                if not gap.evidence_observed_at
+                or (datetime.now(UTC) - gap.evidence_observed_at).days
+                <= FRESHNESS_DAYS
+                else "stale",
+            )
+        )
+    return snapshots

@@ -1,16 +1,16 @@
 import csv
 import io
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 
-from app.api.deps import require_permission
+from app.api.deps import get_current_user, require_permission, user_has_permission
 from app.db.models import (
     Assessment,
     AssessmentAttempt,
@@ -48,7 +48,7 @@ async def summary(
     db: AsyncSession = Depends(get_db),
 ):
     def base(model):
-        return select(func.count()).select_from(model).where(getattr(model, "tenant_id") == user.tenant_id)
+        return select(func.count()).select_from(model).where(model.tenant_id == user.tenant_id)
 
     users = await db.scalar(base(User))
     courses = await db.scalar(base(Course))
@@ -70,6 +70,82 @@ async def summary(
     }
 
 
+@router.get("/my-team")
+async def my_team_report(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    can_read_team = await user_has_permission(user, db, "reports.team.read")
+    can_read_all = await user_has_permission(user, db, "reports.read")
+    if not can_read_team and not can_read_all:
+        raise HTTPException(status_code=403, detail="Team reporting access is not permitted")
+
+    direct_report_ids = (
+        select(User.id)
+        .where(
+            User.tenant_id == user.tenant_id,
+            User.manager_id == user.id,
+            User.is_active.is_(True),
+        )
+    )
+    team_members = int(await db.scalar(
+        select(func.count(User.id)).where(
+            User.tenant_id == user.tenant_id,
+            User.manager_id == user.id,
+            User.is_active.is_(True),
+        )
+    ) or 0)
+    now = datetime.now(UTC)
+    learning = await db.execute(
+        select(
+            func.count(Enrollment.id),
+            func.count(Enrollment.id).filter(Enrollment.status == "completed"),
+            func.count(Enrollment.id).filter(
+                Enrollment.due_at < now,
+                Enrollment.status.notin_(["completed", "declined"]),
+            ),
+        ).where(
+            Enrollment.tenant_id == user.tenant_id,
+            Enrollment.user_id.in_(direct_report_ids),
+        )
+    )
+    enrollment_count, completion_count, overdue_learning = learning.one()
+    compliance = await db.execute(
+        select(
+            func.count(ComplianceAssignment.id).filter(
+                ComplianceAssignment.status.in_([
+                    "assigned", "due_soon", "overdue",
+                    "evidence_submitted", "exception_requested",
+                ])
+            ),
+            func.count(ComplianceAssignment.id).filter(
+                ComplianceAssignment.due_at < now,
+                ComplianceAssignment.status.in_([
+                    "assigned", "due_soon", "overdue",
+                    "evidence_submitted", "exception_requested",
+                ]),
+            ),
+        ).where(
+            ComplianceAssignment.tenant_id == user.tenant_id,
+            ComplianceAssignment.user_id.in_(direct_report_ids),
+        )
+    )
+    open_compliance, overdue_compliance = compliance.one()
+    enrollment_count = int(enrollment_count or 0)
+    completion_count = int(completion_count or 0)
+    return {
+        "team_members": team_members,
+        "enrollments": enrollment_count,
+        "completions": completion_count,
+        "completion_rate": round(completion_count / enrollment_count * 100, 1)
+        if enrollment_count else 0,
+        "overdue_learning": int(overdue_learning or 0),
+        "open_compliance": int(open_compliance or 0),
+        "overdue_compliance": int(overdue_compliance or 0),
+        "scope": "direct_reports",
+    }
+
+
 @router.get("/learning-trends")
 async def learning_trends(
     days: int = 30,
@@ -77,7 +153,7 @@ async def learning_trends(
     db: AsyncSession = Depends(get_db),
 ):
     days = max(7, min(days, 365))
-    start = datetime.now(timezone.utc) - timedelta(days=days - 1)
+    start = datetime.now(UTC) - timedelta(days=days - 1)
     result = await db.execute(
         select(Enrollment.created_at, Enrollment.completed_at)
         .where(Enrollment.tenant_id == user.tenant_id, Enrollment.created_at >= start)
@@ -667,7 +743,7 @@ async def compliance_risk(
     user: User = Depends(require_permission("reports.read")),
     db: AsyncSession = Depends(get_db),
 ):
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     result = await db.execute(
         select(
             func.count(ComplianceAssignment.id),

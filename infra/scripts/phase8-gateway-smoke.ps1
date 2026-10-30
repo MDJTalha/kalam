@@ -16,6 +16,14 @@ $webResponse = Invoke-WebRequest "$base/" -UseBasicParsing -TimeoutSec 15
 if ($webResponse.StatusCode -ne 200 -or $webResponse.Content -notmatch "<title>") {
   throw "Web homepage failed."
 }
+$versionedApiResponse = Invoke-WebRequest "$base/api/v1/health/live" -UseBasicParsing -TimeoutSec 10
+if ($versionedApiResponse.StatusCode -ne 200 -or $versionedApiResponse.Content -notmatch '"status"\s*:\s*"alive"') {
+  throw "Gateway did not route the versioned API path to FastAPI."
+}
+$lmsApiResponse = Invoke-WebRequest "$base/api/lms/health/live" -UseBasicParsing -TimeoutSec 10
+if ($lmsApiResponse.StatusCode -ne 200 -or $lmsApiResponse.Content -notmatch '"status"\s*:\s*"alive"') {
+  throw "Gateway did not preserve the /api/lms compatibility path."
+}
 
 $expectedHeaders = @{
   "X-Content-Type-Options" = "nosniff"
@@ -60,6 +68,8 @@ if ($ExpectedWorkerImage -and $workerImage.Trim() -ne $ExpectedWorkerImage) { th
   gateway_url = $base
   gateway_health = $health.StatusCode
   web_status = $webResponse.StatusCode
+  versioned_api_status = $versionedApiResponse.StatusCode
+  lms_compatibility_api_status = $lmsApiResponse.StatusCode
   security_headers = "pass"
   api_readiness = "ready"
   database = $ready.database

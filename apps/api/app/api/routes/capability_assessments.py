@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta, timezone
-from decimal import Decimal, ROUND_HALF_UP
+from datetime import UTC, datetime, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,14 +8,22 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
+from app.api.routes.capability_gap import _recalculate_user_internal
 from app.db.models import (
-    Assessment, AssessmentAttempt, AssessmentCycle, AssessmentOutcome,
-    AssessmentReviewerAssignment, AssessmentTarget, Capability, CapabilityEvidence,
-    Competency, Skill, User,
+    Assessment,
+    AssessmentAttempt,
+    AssessmentCycle,
+    AssessmentOutcome,
+    AssessmentReviewerAssignment,
+    AssessmentTarget,
+    Capability,
+    CapabilityEvidence,
+    Competency,
+    Skill,
+    User,
 )
 from app.db.session import get_db
 from app.services.audit import audit
-from app.api.routes.capability_gap import _recalculate_user_internal
 
 router = APIRouter()
 TARGET_MODELS = {"capability": Capability, "competency": Competency, "skill": Skill}
@@ -25,7 +33,7 @@ REVIEWER_TYPES = {"self", "manager", "assessor", "peer"}
 
 def _level_from_score(score: int) -> Decimal:
     # Continuous governed conversion: 0 -> 1.00 and 100 -> 5.00.
-    value = Decimal("1") + (Decimal(score) / Decimal("100")) * Decimal("4")
+    value = Decimal(1) + (Decimal(score) / Decimal(100)) * Decimal(4)
     return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
@@ -66,21 +74,27 @@ async def _can_read_cycle(user: User, cycle: AssessmentCycle, db: AsyncSession) 
 
 
 async def _can_execute(user: User, cycle: AssessmentCycle, db: AsyncSession, assessment: Assessment) -> str:
-    if await user_has_permission(user, db, "capability_assessments.manage"):
-        return "manager"
-    if not await user_has_permission(user, db, "capability_assessments.execute"):
+    can_manage = await user_has_permission(user, db, "capability_assessments.manage")
+    can_execute = await user_has_permission(user, db, "capability_assessments.execute")
+    if not can_manage and not can_execute:
         raise HTTPException(403, "Capability assessment execution is not permitted")
+
+    # Assessment type is an authorization boundary. Never let the assessed
+    # learner's identity short-circuit manager-only, reviewer-only, or assessor
+    # workflows.
     if assessment.assessment_type == "self":
         if user.id != cycle.user_id:
             raise HTTPException(403, "Self assessment must be completed by the assessed person")
         return "self"
-    if user.id == cycle.user_id:
-        return "self"
-    learner = await db.scalar(select(User).where(User.id == cycle.user_id, User.tenant_id == user.tenant_id))
+
     if assessment.assessment_type == "manager":
-        if learner is None or learner.manager_id != user.id:
+        learner = await db.scalar(
+            select(User).where(User.id == cycle.user_id, User.tenant_id == user.tenant_id)
+        )
+        if not can_manage and (learner is None or learner.manager_id != user.id):
             raise HTTPException(403, "Only the person's manager may complete this assessment")
         return "manager"
+
     if assessment.assessment_type == "360":
         assigned = await db.scalar(select(AssessmentReviewerAssignment).where(
             AssessmentReviewerAssignment.cycle_id == cycle.id,
@@ -89,8 +103,22 @@ async def _can_execute(user: User, cycle: AssessmentCycle, db: AsyncSession, ass
         ))
         if assigned is None:
             raise HTTPException(403, "You are not assigned as a 360 reviewer")
+        if assigned.reviewer_type == "self" and user.id != cycle.user_id:
+            raise HTTPException(403, "Only the assessed person may complete the self-review")
+        if assigned.reviewer_type != "self" and user.id == cycle.user_id:
+            raise HTTPException(403, "The assessed person must use the self-review assignment")
         return assigned.reviewer_type
-    return "assessor"
+
+    if assessment.assessment_type == "knowledge_test":
+        if user.id != cycle.user_id:
+            raise HTTPException(403, "Knowledge tests may only be completed by the assessed person")
+        return "self"
+
+    if user.id == cycle.user_id:
+        raise HTTPException(403, "This assessment type cannot be self-completed")
+    if can_manage:
+        return "assessor"
+    raise HTTPException(403, "Only an authorized assessment manager may complete this assessment")
 
 
 class TargetPayload(BaseModel):
@@ -348,6 +376,16 @@ async def add_reviewer(
         raise HTTPException(404, "Reviewer not found")
     if reviewer.id == cycle.user_id and payload.reviewer_type != "self":
         raise HTTPException(422, "The assessed person may only be assigned the self reviewer type")
+    if reviewer.id != cycle.user_id and payload.reviewer_type == "self":
+        raise HTTPException(422, "Only the assessed person may be assigned the self reviewer type")
+    if payload.reviewer_type == "manager":
+        learner = await db.scalar(select(User).where(
+            User.id == cycle.user_id,
+            User.tenant_id == user.tenant_id,
+            User.is_active.is_(True),
+        ))
+        if learner is None or learner.manager_id != reviewer.id:
+            raise HTTPException(422, "A manager reviewer must be the assessed person's assigned manager")
     existing = await db.scalar(select(AssessmentReviewerAssignment.id).where(
         AssessmentReviewerAssignment.cycle_id == cycle.id,
         AssessmentReviewerAssignment.reviewer_id == reviewer.id,
@@ -505,13 +543,13 @@ async def complete_attempt(
         raise HTTPException(422, "Every mapped assessment target must have an outcome before completion")
     weight_map = {(item.target_type, item.target_id): item.weight for item in targets}
     total_weight = sum(weight_map.values())
-    level = sum((row.demonstrated_level * weight_map[(row.target_type, row.target_id)] for row in outcomes), Decimal("0")) / Decimal(total_weight)
-    confidence = sum((Decimal(row.confidence) * weight_map[(row.target_type, row.target_id)] for row in outcomes), Decimal("0")) / Decimal(total_weight)
+    level = sum((row.demonstrated_level * weight_map[(row.target_type, row.target_id)] for row in outcomes), Decimal(0)) / Decimal(total_weight)
+    confidence = sum((Decimal(row.confidence) * weight_map[(row.target_type, row.target_id)] for row in outcomes), Decimal(0)) / Decimal(total_weight)
     scores = [row.score for row in outcomes if row.score is not None]
     score = round(sum(scores) / len(scores)) if scores else None
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     attempt.demonstrated_level = level.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    attempt.confidence = int(confidence.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    attempt.confidence = int(confidence.quantize(Decimal(1), rounding=ROUND_HALF_UP))
     attempt.score = score
     attempt.passed = None if score is None else score >= assessment.passing_score
     attempt.submitted_at = now
@@ -558,7 +596,7 @@ async def complete_attempt(
         aggregate_levels = [Decimal(str(item.demonstrated_level)) for item in cycle_attempts if item.demonstrated_level is not None]
         aggregate_level = None
         if aggregate_levels:
-            aggregate_level = (sum(aggregate_levels, Decimal("0")) / Decimal(len(aggregate_levels))).quantize(Decimal("0.01"))
+            aggregate_level = (sum(aggregate_levels, Decimal(0)) / Decimal(len(aggregate_levels))).quantize(Decimal("0.01"))
         all_reviewers = list((await db.execute(select(AssessmentReviewerAssignment).where(
             AssessmentReviewerAssignment.cycle_id == cycle.id
         ))).scalars())
@@ -587,9 +625,7 @@ async def complete_attempt(
         cycle.latest_attempt_id = attempt.id
         cycle.status = "completed"
 
-    if attempt.stage == "baseline" and assessment.reassessment_interval_days:
-        cycle.next_reassessment_due_at = now + timedelta(days=assessment.reassessment_interval_days)
-    elif attempt.stage == "reassessment" and assessment.reassessment_interval_days:
+    if attempt.stage == "baseline" and assessment.reassessment_interval_days or attempt.stage == "reassessment" and assessment.reassessment_interval_days:
         cycle.next_reassessment_due_at = now + timedelta(days=assessment.reassessment_interval_days)
     if attempt.assessment_method == "review_based":
         cycle.next_reassessment_due_at = cycle.next_reassessment_due_at
@@ -623,7 +659,7 @@ async def mark_reassessment_due(
     if cycle.status in {"reassessment_in_progress"}:
         raise HTTPException(409, "A reassessment is already in progress")
     cycle.status = "reassessment_due"
-    cycle.next_reassessment_due_at = datetime.now(timezone.utc)
+    cycle.next_reassessment_due_at = datetime.now(UTC)
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="capability_assessment.reassessment_due",
                 entity_type="assessment_cycle", entity_id=str(cycle.id))
     await db.commit()

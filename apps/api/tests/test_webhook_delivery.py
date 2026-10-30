@@ -5,7 +5,11 @@ import json
 import time
 from uuid import uuid4
 
-from app.services.webhook_delivery import deliver_webhook, retry_delay, verify_webhook_signature
+from app.services.webhook_delivery import (
+    deliver_webhook,
+    retry_delay,
+    verify_webhook_signature,
+)
 
 
 def test_retry_delay_is_bounded():

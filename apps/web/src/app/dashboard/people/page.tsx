@@ -1,7 +1,7 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { redirect } from "next/navigation";
 import { PeopleDirectory, type PeoplePageResult } from "@/components/people-directory";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Unit = { id: string; name: string };
 type Params = { q?: string; status?: string; unit?: string; page?: string };
@@ -18,10 +18,12 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const query = new URLSearchParams({ page: String(page), page_size: "20", status, q });
   if (unit === "unassigned") query.set("unassigned", "true");
   else if (unit !== "all") query.set("unit_id", unit);
-  const [result, units] = await Promise.all([
-    apiJson<PeoplePageResult>("/api/v1/people/page?" + query.toString()),
-    apiJson<Unit[]>("/api/v1/organization/units"),
+  const [peopleResult, unitsResult] = await Promise.all([
+    apiJsonResult<PeoplePageResult>("/api/v1/people/page?" + query.toString()),
+    apiJsonResult<Unit[]>("/api/v1/organization/units"),
   ]);
+  const result = peopleResult.data;
+  const units = unitsResult.data;
   if (result && result.total > 0 && page > Math.ceil(result.total / result.page_size)) {
     const destination = new URLSearchParams({ page: String(Math.ceil(result.total / result.page_size)) });
     if (q) destination.set("q", q);
@@ -30,6 +32,6 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
     redirect("/dashboard/people?" + destination.toString());
   }
   return <DashboardShell title="People" eyebrow="Workforce administration" breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "People" }]}>
-    {result && units ? <PeopleDirectory result={result} units={units} filters={{ q, status, unit }} canManage={permissions.includes("users.manage")} /> : <section className="data-panel" role="alert"><h2>People directory unavailable</h2><p>Check your access or try again later.</p></section>}
+    {peopleResult.ok && result && unitsResult.ok && units ? <PeopleDirectory result={result} units={units} filters={{ q, status, unit }} canManage={permissions.includes("users.manage")} /> : <section className="data-panel" role="alert"><h2>{peopleResult.status === 403 || unitsResult.status === 403 ? "People access restricted" : peopleResult.status === 0 || peopleResult.status >= 500 || unitsResult.status === 0 || unitsResult.status >= 500 ? "People service unavailable" : "People directory could not be loaded"}</h2><p>{peopleResult.status === 403 || unitsResult.status === 403 ? "Your account does not have permission to view the directory or organization units." : peopleResult.status === 0 || unitsResult.status === 0 ? "The API service could not be reached. Check that it is running and try again." : `People request: HTTP ${peopleResult.status}; organization units: HTTP ${unitsResult.status}. ${peopleResult.error || unitsResult.error || "Refresh and try again."}`}</p></section> }
   </DashboardShell>;
 }

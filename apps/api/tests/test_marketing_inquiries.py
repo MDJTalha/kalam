@@ -18,7 +18,7 @@ class TenantLookup:
 
 
 def test_inquiry_requires_explicit_consent_and_valid_work_email():
-    base = dict(name="Ada Example", organization="Acme", work_email="ada@acme.com")
+    base = {"name": "Ada Example", "organization": "Acme", "work_email": "ada@acme.com"}
     with pytest.raises(ValidationError):
         InquiryCreate(**base, consent=False)
     with pytest.raises(ValidationError):

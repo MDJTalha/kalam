@@ -75,6 +75,10 @@ def test_worker_email_delivery_honors_preferences_but_keeps_security_notificatio
             self.title = notification_type
             self.body = "notification body"
             self.email_sent_at = None
+            self.email_suppressed_at = None
+            self.email_failed_at = None
+            self.email_attempts = 0
+            self.email_next_attempt_at = None
             self.user_id = "user"
             self.tenant_id = "tenant"
             self.preferences = preferences
@@ -113,6 +117,6 @@ def test_worker_email_delivery_honors_preferences_but_keeps_security_notificatio
 
     assert delivered == 2
     assert len(sent) == 2
-    assert rows[0][0].email_sent_at is None
+    assert rows[0][0].email_suppressed_at is not None
     assert rows[1][0].email_sent_at is not None
     assert rows[2][0].email_sent_at is not None
