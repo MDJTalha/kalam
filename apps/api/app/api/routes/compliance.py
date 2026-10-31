@@ -694,7 +694,8 @@ async def upload_my_compliance_evidence(
     await db.flush()
     evidence = ComplianceEvidence(
         tenant_id=user.tenant_id, assignment_id=assignment.id, user_id=user.id,
-        evidence_type="document", reference=f"file:{file_item.id}", notes=notes,
+        submitted_by=user.id, evidence_type="document",
+        reference=f"file:{file_item.id}", notes=notes,
     )
     db.add(evidence)
     assignment.status = "evidence_submitted"
@@ -741,6 +742,7 @@ async def add_my_compliance_evidence(
         tenant_id=user.tenant_id,
         assignment_id=assignment.id,
         user_id=user.id,
+        submitted_by=user.id,
         **payload.model_dump(),
     )
     db.add(evidence)
@@ -900,6 +902,7 @@ async def request_compliance_exception(
         reason=payload.reason,
         expires_at=payload.expires_at,
         status="requested",
+        requested_by=user.id,
     )
     db.add(item)
     assignment.status = "exception_requested"
@@ -961,8 +964,8 @@ async def reject_compliance_evidence(
         raise HTTPException(status_code=404, detail="Compliance evidence not found")
     if evidence.verified_at is not None or evidence.rejected_at is not None:
         raise HTTPException(status_code=409, detail="Evidence has already been reviewed")
-    if evidence.user_id == user.id:
-        raise HTTPException(status_code=403, detail="A different reviewer must review your evidence")
+    if evidence.user_id == user.id or evidence.submitted_by == user.id:
+        raise HTTPException(status_code=403, detail="A different reviewer must review evidence they did not submit")
     assignment = await db.scalar(select(ComplianceAssignment).where(
         ComplianceAssignment.id == evidence.assignment_id,
         ComplianceAssignment.tenant_id == user.tenant_id,
@@ -996,8 +999,8 @@ async def verify_compliance_evidence(
         raise HTTPException(status_code=404, detail="Compliance evidence not found")
     if evidence.verified_at is not None or evidence.rejected_at is not None:
         raise HTTPException(status_code=409, detail="Evidence has already been reviewed")
-    if evidence.user_id == user.id:
-        raise HTTPException(status_code=403, detail="A different reviewer must verify your evidence")
+    if evidence.user_id == user.id or evidence.submitted_by == user.id:
+        raise HTTPException(status_code=403, detail="A different reviewer must verify evidence they did not submit")
     assignment = await db.scalar(select(ComplianceAssignment).where(
         ComplianceAssignment.id == evidence.assignment_id,
         ComplianceAssignment.tenant_id == user.tenant_id,
