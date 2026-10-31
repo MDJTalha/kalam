@@ -67,7 +67,7 @@ export default async function DashboardPage(){
     : isTrainer ? "trainer"
     : "standard";
   const specializedView = roleMode !== "standard";
-  const executiveView = roleMode === "executive" && canReport && canSeeCapability;
+  const executiveView = roleMode === "executive" && canReport;
   const [enrollments,compliance,summary,engagement,intelligence,trends,risk,effectiveness,organization,audit,team,queue,sessions] = await Promise.all([
     apiJson<Enrollment[]>("/api/v1/courses/my/enrollments"),
     apiJson<Compliance[]>("/api/v1/compliance/my"),
@@ -246,6 +246,21 @@ export default async function DashboardPage(){
         {teamAttention.length ? <div className="role-list">{teamAttention.map(member => <div className="role-list-row" key={member.id}><span className="role-rank"><UsersRound size={13}/></span><div><strong>{member.first_name} {member.last_name}</strong><small>{member.job_title || "Team member"} · {member.overdue_learning} overdue learning · {member.overdue_compliance} overdue compliance</small></div><ArrowRight size={14}/></div>)}</div> : <div className="role-empty">No direct-report follow-up signals are recorded.</div>}
       </section>
       <p className="form-help">Portfolio-wide HRBP reporting is not enabled yet. Your current access is limited to your direct-report relationships; a governed business-unit portfolio assignment is required before wider access is granted.</p>
+    </section>}
+    {roleMode === "executive" && <section className="role-dashboard" aria-label="Global executive aggregate dashboard">
+      <div className="role-kpi-grid">
+        <div className="role-kpi"><span>Workforce size</span><strong>{summary?.users ?? "—"}</strong><small>Aggregate tenant population</small></div>
+        <div className="role-kpi"><span>Active learners</span><strong>{engagement?.active_learners ?? "—"}</strong><small>People with recorded learning activity</small></div>
+        <div className="role-kpi"><span>Learning completion</span><strong>{summary ? pct(summary.completed_enrollments,summary.enrollments)+"%" : "—"}</strong><small>Aggregate enrollment completion</small></div>
+        <div className="role-kpi role-kpi-risk"><span>Compliance overdue</span><strong>{risk?.overdue ?? "—"}</strong><small>Enterprise-level overdue obligations</small></div>
+      </div>
+      <div className="role-grid-two">
+        <section className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Enterprise performance</span><h2>Learning momentum</h2></div><Link href="/dashboard/analytics">Open enterprise analytics <ArrowRight size={14}/></Link></div><LearningMomentumChart points={trendPoints}/><div className="role-metric-strip"><span><b>{effectiveness?.completion_rate ?? "—"}{effectiveness?"%":""}</b> measured completion</span><span><b>{effectiveness?.average_days_to_complete ?? "—"}</b> average days to complete</span><span><b>{risk?.risk_band ?? "—"}</b> compliance risk band</span></div></section>
+        <section className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Organizational comparison</span><h2>Department outcomes</h2></div><Link href="/dashboard/reports">Open reports <ArrowRight size={14}/></Link></div>
+          {organization?.organization_units?.length?<div className="role-list">{organization.organization_units.slice(0,6).map(unit=><div className="role-list-row" key={unit.org_unit_id}><span className="role-rank"><UsersRound size={13}/></span><div><strong>{unit.org_unit}</strong><small>{unit.people} people · {unit.completion_rate}% learning completion</small></div></div>)}</div>:<div className="role-empty">No department-level aggregate data is available.</div>}
+        </section>
+      </div>
+      <section className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Executive governance</span><h2>Strategic oversight</h2></div><Link href="/dashboard/audit">Open audit trail <ArrowRight size={14}/></Link></div><div className="role-actions"><Link href="/dashboard/reports">Aggregate workforce reports</Link><Link href="/dashboard/analytics">Learning effectiveness</Link><Link href="/dashboard/skills">Capability framework</Link><Link href="/dashboard/audit">Audit trail</Link></div><p className="form-help">This role sees enterprise-level trends and organizational aggregates. Individual employee profiles, direct-report development plans and employee-level exports are not included in this executive dashboard.</p></section>
     </section>}
     {roleMode === "owner" && <section className="role-dashboard" aria-label="Tenant owner dashboard">
       <div className="role-kpi-grid">
