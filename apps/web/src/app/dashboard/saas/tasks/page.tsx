@@ -4,13 +4,17 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { TaskCreateForm, TaskQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Task={id:string;account_id?:string|null;account_name?:string|null;subscription_id?:string|null;owner_user_id?:string|null;task_type:string;title:string;description?:string|null;status:string;priority:string;due_at?:string|null;completed_at?:string|null;source_key?:string|null;created_at:string};
 type TaskPage={items:Task[];total:number;offset:number;limit:number;counts:{open:number;overdue:number;due_soon:number;completed:number}};
 type TeamMember={id:string;name:string;is_active:boolean};
 
 export default async function SaaSTasksPage({searchParams}:{searchParams:Promise<{status?:string;type?:string;page?:string}>}){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canRead=user.permissions?.includes("saas.sales.read")??false;
+  const canManage=user.permissions?.includes("saas.sales.manage")??false;
+  if(!canRead)return <DashboardShell title="Tasks" eyebrow="SaaS CRM"><EmptyState title="Sales task access is restricted" description="This role does not include sales-task visibility."/></DashboardShell>;
   const params=await searchParams;
   const query=new URLSearchParams();
   if(params.status)query.set("status",params.status);
@@ -22,7 +26,7 @@ export default async function SaaSTasksPage({searchParams}:{searchParams:Promise
   listQuery.set("offset",String((page-1)*25));
   const [result,team]=await Promise.all([
     apiJson<TaskPage>("/api/v1/saas/crm/page/tasks?"+listQuery.toString()),
-    apiJson<TeamMember[]>("/api/v1/saas/crm/team"),
+    canManage?apiJson<TeamMember[]>("/api/v1/saas/crm/team"):Promise.resolve([]),
   ]);
   if(!result||!team)return <DashboardShell title="Tasks" eyebrow="SaaS CRM"><EmptyState title="Task CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
@@ -57,7 +61,7 @@ export default async function SaaSTasksPage({searchParams}:{searchParams:Promise
           <StatusBadge key="d" status={task.priority}/>,
           <span key="e">{task.due_at?new Date(task.due_at).toLocaleDateString():"—"}</span>,
           <StatusBadge key="f" status={task.status}/>,
-          <TaskQuickActions key="g" id={task.id} status={task.status}/>
+          {canManage?<TaskQuickActions key="g" id={task.id} status={task.status}/>:<span key="g">Read only</span>}
         ])}
       />
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Task pages">
@@ -67,6 +71,6 @@ export default async function SaaSTasksPage({searchParams}:{searchParams:Promise
       </nav>
     </SectionCard>
 
-    <SectionCard eyebrow="New follow-up" title="Create task"><TaskCreateForm team={team}/></SectionCard>
+    {canManage&&<SectionCard eyebrow="New follow-up" title="Create task"><TaskCreateForm team={team}/></SectionCard>}
   </DashboardShell>;
 }
