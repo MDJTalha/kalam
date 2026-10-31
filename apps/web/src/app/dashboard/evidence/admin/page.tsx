@@ -19,7 +19,7 @@ export default async function EvidenceAdminPage(){
  const canFilterPeople=permissions.includes("users.read");
  if(!permissions.includes("evidence.read")&&!canCapture&&!canVerify) return <DashboardShell title="Evidence operations" eyebrow="Capability evidence"><EmptyState title="Access restricted" description="This workspace requires capability evidence access." icon={FileCheck2}/></DashboardShell>;
 
- const peoplePromise=canCapture&&canFilterPeople
+ const peoplePromise=canFilterPeople
    ? apiJsonResult<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active")
    : Promise.resolve(null);
  const [peopleResult,competencyResult,evidenceResult]=await Promise.all([
@@ -30,7 +30,7 @@ export default async function EvidenceAdminPage(){
  const people=peopleResult?.ok?peopleResult.data?.items??[]:[];
  const evidence=evidenceResult.ok?evidenceResult.data:null;
  const competencies=competencyResult.ok?competencyResult.data?.items:null;
- const failed=(canCapture&&canFilterPeople&&!peopleResult?.ok)
+ const failed=(canFilterPeople&&!peopleResult?.ok)
    ||!competencies
    ||!evidence
    ||((competencyResult.data?.total||0)>(competencies?.length||0));
