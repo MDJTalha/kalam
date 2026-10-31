@@ -3,7 +3,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { OfferCreateForm, OfferEditForm, PlanCreateForm, PlanQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 import { formatCommercialPrice } from "@/lib/public-commercial";
 
 type Plan={id:string;code:string;name:string;tagline?:string|null;status:string;public_visible:boolean;billing_model:string;currency:string;monthly_price_minor?:number|null;annual_price_minor?:number|null;trial_days:number;minimum_seats:number;maximum_seats?:number|null};
@@ -11,8 +11,8 @@ type Offer={id:string;plan_id?:string|null;code:string;title:string;description?
 
 export default async function SaaSPricingPage(){
   const [plans,offers]=await Promise.all([
-    apiJson<Plan[]>("/api/v1/saas/crm/plans"),
-    apiJson<Offer[]>("/api/v1/saas/crm/offers"),
+    apiJsonResult<Plan[]>("/api/v1/saas/crm/plans").then((result) => result.ok ? result.data : null),
+    apiJsonResult<Offer[]>("/api/v1/saas/crm/offers").then((result) => result.ok ? result.data : null),
   ]);
   if(!plans||!offers)return <DashboardShell title="Pricing & Offers" eyebrow="SaaS CRM"><EmptyState title="Pricing CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const options=plans.map(p=>({id:p.id,name:p.name}));

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ManagerDevelopmentWorkflow } from "@/components/manager-development-workflow";
 import { ManagerCourseAssignment } from "@/components/manager-course-assignment";
-import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { SectionCard, StateMessage, StatusBadge } from "@/components/ui";
 
 type Plan={id:string;title:string;status:string;goals:{title:string;target_date?:string|null;status:string;notes?:string|null}[]};
@@ -15,7 +15,7 @@ type CoursePage={items:Course[];total:number};
 export default async function ManagerPerson({params}:{params:Promise<{id:string}>}){
   await requireUser();
   const {id}=await params;
-  const [people,plans,coursesResult]=await Promise.all([apiJson<Person[]>("/api/v1/people/team"),apiJson<Plan[]>("/api/v1/development/users/"+id),apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=100&status=published")]);
+  const [people,plans,coursesResult]=await Promise.all([apiJsonResult<Person[]>("/api/v1/people/team").then((result) => result.ok ? result.data : null),apiJsonResult<Plan[]>("/api/v1/development/users/"+id).then((result) => result.ok ? result.data : null),apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=100&status=published")]);
   const person=people?.find(x=>x.id===id);
   if(!person)notFound();
   if(plans === null || !coursesResult.ok || !coursesResult.data) return <DashboardShell title={person.first_name+" "+person.last_name} eyebrow="Manager development view"><StateMessage tone="danger" title="Team member data unavailable">{!coursesResult.ok?`Course lookup HTTP ${coursesResult.status}: ${coursesResult.error||"request failed"}`:"Development plan data could not be loaded."}</StateMessage></DashboardShell>;

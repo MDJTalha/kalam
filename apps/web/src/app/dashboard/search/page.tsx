@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Search, BookOpenCheck, UsersRound, Layers3, Route } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 type SearchResult = {
   query: string;
@@ -15,7 +15,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   await requireUser();
   const params = await searchParams;
   const query = params.q?.trim() || "";
-  const results = query.length >= 2 ? await apiJson<SearchResult>("/api/v1/search?q=" + encodeURIComponent(query)) : null;
+  const results = query.length >= 2 ? await apiJsonResult<SearchResult>("/api/v1/search?q=" + encodeURIComponent(query)).then((result) => result.ok ? result.data : null) : null;
 
   return (
     <DashboardShell title="Global search" eyebrow="Cross-domain discovery">

@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { AccountOwnerControl, AccountProfileForm, ActivityCreateForm, ContactCreateForm, OnboardingQuickActions, OnboardingTemplateButton, ProvisionTenantButton } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type OnboardingItem={id:string;account_id:string;category:string;title:string;status:string;due_at?:string|null;completed_at?:string|null;notes?:string|null};
 type TeamMember={id:string;name:string;is_active:boolean};
@@ -34,12 +34,12 @@ function money(minor:number,currency:string){
 export default async function SaaSClientDetailPage({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
   const [account,onboarding,team,contracts,invoices,payments]=await Promise.all([
-    apiJson<AccountDetail>("/api/v1/saas/crm/accounts/"+id),
-    apiJson<OnboardingItem[]>("/api/v1/saas/crm/onboarding?account_id="+encodeURIComponent(id)),
-    apiJson<TeamMember[]>("/api/v1/saas/crm/team"),
-    apiJson<Contract[]>("/api/v1/saas/crm/contracts?account_id="+encodeURIComponent(id)),
-    apiJson<Invoice[]>("/api/v1/saas/crm/invoices?account_id="+encodeURIComponent(id)),
-    apiJson<Payment[]>("/api/v1/saas/crm/payments?account_id="+encodeURIComponent(id)),
+    apiJsonResult<AccountDetail>("/api/v1/saas/crm/accounts/"+id).then((result) => result.ok ? result.data : null),
+    apiJsonResult<OnboardingItem[]>("/api/v1/saas/crm/onboarding?account_id="+encodeURIComponent(id)).then((result) => result.ok ? result.data : null),
+    apiJsonResult<TeamMember[]>("/api/v1/saas/crm/team").then((result) => result.ok ? result.data : null),
+    apiJsonResult<Contract[]>("/api/v1/saas/crm/contracts?account_id="+encodeURIComponent(id)).then((result) => result.ok ? result.data : null),
+    apiJsonResult<Invoice[]>("/api/v1/saas/crm/invoices?account_id="+encodeURIComponent(id)).then((result) => result.ok ? result.data : null),
+    apiJsonResult<Payment[]>("/api/v1/saas/crm/payments?account_id="+encodeURIComponent(id)).then((result) => result.ok ? result.data : null),
   ]);
   if(!account)return <DashboardShell title="Client record" eyebrow="SaaS CRM"><EmptyState title="Client record unavailable" description="The account was not found or this user does not have SaaS CRM access."/></DashboardShell>;
 

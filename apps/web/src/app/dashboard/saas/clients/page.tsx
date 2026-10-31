@@ -3,7 +3,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { AccountCreateForm, AccountQuickActions, ProvisionTenantButton } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Account={id:string;name:string;slug:string;account_type:string;lifecycle_stage:string;industry?:string|null;country?:string|null;employee_band?:string|null;public_showcase:boolean;plan_id?:string|null;managed_tenant_id?:string|null};
 type Plan={id:string;name:string};
@@ -21,8 +21,8 @@ export default async function SaaSClientsPage({searchParams}:{searchParams:Promi
   listQuery.set("offset",String((page-1)*25));
   const accountPath="/api/v1/saas/crm/page/accounts?"+listQuery.toString();
   const [result,plans]=await Promise.all([
-    apiJson<AccountPage>(accountPath),
-    apiJson<Plan[]>("/api/v1/saas/crm/plans"),
+    apiJsonResult<AccountPage>(accountPath).then((result) => result.ok ? result.data : null),
+    apiJsonResult<Plan[]>("/api/v1/saas/crm/plans").then((result) => result.ok ? result.data : null),
   ]);
   if(!result||!plans)return <DashboardShell title="Clients" eyebrow="SaaS CRM"><EmptyState title="Client CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const accounts=result.items;

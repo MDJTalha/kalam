@@ -3,7 +3,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { SubscriptionCreateForm, SubscriptionQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Subscription={id:string;account_id:string;account_name:string;plan_id?:string|null;plan_name?:string|null;status:string;billing_cycle:string;currency:string;seats:number;list_price_minor:number;discount_minor:number;net_price_minor:number;renews_at?:string|null};
 type SubscriptionPage={items:Subscription[];total:number;offset:number;limit:number};
@@ -15,7 +15,7 @@ export default async function SaaSSubscriptionsPage({searchParams}:{searchParams
   const page=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,100000):1;
   const query=new URLSearchParams({limit:"25",offset:String((page-1)*25)});
   if(params.status)query.set("status",params.status);
-  const result=await apiJson<SubscriptionPage>("/api/v1/saas/crm/page/subscriptions?"+query.toString());
+  const result=await apiJsonResult<SubscriptionPage>("/api/v1/saas/crm/page/subscriptions?"+query.toString()).then((result) => result.ok ? result.data : null);
   if(!result)return <DashboardShell title="Subscriptions" eyebrow="SaaS CRM"><EmptyState title="Subscription CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const subscriptions=result.items;
   const pageCount=Math.max(1,Math.ceil(result.total/result.limit));

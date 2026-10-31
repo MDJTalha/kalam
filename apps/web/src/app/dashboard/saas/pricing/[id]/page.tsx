@@ -3,14 +3,14 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { PlanEditForm } from "@/components/saas-crm-forms";
 import { EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 import { formatCommercialPrice } from "@/lib/public-commercial";
 
 type Plan={id:string;code:string;name:string;tagline?:string|null;description?:string|null;status:string;public_visible:boolean;billing_model:string;currency:string;monthly_price_minor?:number|null;annual_price_minor?:number|null;trial_days:number;minimum_seats:number;maximum_seats?:number|null;features:unknown[];limits:Record<string,unknown>;sort_order:number};
 
 export default async function SaaSPlanDetailPage({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
-  const plans=await apiJson<Plan[]>("/api/v1/saas/crm/plans");
+  const plans=await apiJsonResult<Plan[]>("/api/v1/saas/crm/plans").then((result) => result.ok ? result.data : null);
   const plan=plans?.find(item=>item.id===id);
   if(!plan)return <DashboardShell title="Commercial plan" eyebrow="SaaS CRM"><EmptyState title="Plan unavailable" description="The plan was not found or this user does not have SaaS CRM access."/></DashboardShell>;
 

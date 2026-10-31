@@ -2,13 +2,13 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { ApiActionButton } from "@/components/api-action-button";
 import { ResourceForm } from "@/components/resource-form";
 import { EmptyState, Section, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Category={id:string;name:string;description?:string|null;active:boolean};
 
 export default async function CategoriesPage(){
   const user=await requireUser<{permissions?:string[]}>();
-  const categories=await apiJson<Category[]>("/api/v1/courses/categories?manage=true");
+  const categories=await apiJsonResult<Category[]>("/api/v1/courses/categories?manage=true").then((result) => result.ok ? result.data : null);
   const canManage=user.permissions?.includes("courses.manage")??false;
   return <DashboardShell title="Catalog categories" eyebrow="Learning taxonomy">
     {canManage?<Section eyebrow="Taxonomy" title="Create category"><ResourceForm title="Add catalog category" endpoint="/api/lms/courses/categories" fields={[

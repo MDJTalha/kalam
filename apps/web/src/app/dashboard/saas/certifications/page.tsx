@@ -3,10 +3,10 @@ import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { CertificationCreateForm } from "@/components/saas-crm-forms";
 import { CertificationsTable, type SaaSCertification } from "@/components/certifications-table";
 import { MetricCard, SectionCard } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 export default async function SaaSCertificationsPage() {
-  const certifications = await apiJson<SaaSCertification[]>("/api/v1/saas/crm/certifications");
+  const certifications = await apiJsonResult<SaaSCertification[]>("/api/v1/saas/crm/certifications").then((result) => result.ok ? result.data : null);
   if (!certifications) return <DashboardShell title="Certifications" eyebrow="SaaS CRM"><SectionCard eyebrow="Access control" title="Certification CRM access is restricted"><p className="muted">This page requires authorized SaaS CRM access.</p></SectionCard></DashboardShell>;
 
   // Request-scoped server rendering requires a current timestamp for the 90-day window.

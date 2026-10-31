@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { InvoiceCreateForm, InvoiceStatusControl, PaymentCreateForm, PaymentStatusControl } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Invoice={id:string;account_id:string;account_name:string;subscription_id?:string|null;contract_id?:string|null;invoice_number:string;status:string;currency:string;amount_minor:number;tax_minor:number;total_minor:number;paid_minor:number;outstanding_minor:number;issued_at?:string|null;due_at?:string|null;paid_at?:string|null;external_ref?:string|null;notes?:string|null};
 type Payment={id:string;account_id:string;account_name:string;invoice_id:string;invoice_number:string;amount_minor:number;currency:string;status:string;received_at:string;method?:string|null;reference?:string|null};
@@ -34,9 +34,9 @@ export default async function SaaSBillingPage({searchParams}:{searchParams:Promi
   if(params.payment_status)paymentQuery.set("status",params.payment_status);
 
   const [invoices,payments,finance]=await Promise.all([
-    apiJson<InvoicePage>("/api/v1/saas/crm/page/invoices?"+invoiceQuery.toString()),
-    apiJson<PaymentPage>("/api/v1/saas/crm/page/payments?"+paymentQuery.toString()),
-    apiJson<FinanceOverview>("/api/v1/saas/crm/finance/overview"),
+    apiJsonResult<InvoicePage>("/api/v1/saas/crm/page/invoices?"+invoiceQuery.toString()).then((result) => result.ok ? result.data : null),
+    apiJsonResult<PaymentPage>("/api/v1/saas/crm/page/payments?"+paymentQuery.toString()).then((result) => result.ok ? result.data : null),
+    apiJsonResult<FinanceOverview>("/api/v1/saas/crm/finance/overview").then((result) => result.ok ? result.data : null),
   ]);
 
   if(!invoices||!payments||!finance){

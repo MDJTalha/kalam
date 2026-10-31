@@ -3,7 +3,7 @@ import { DeveloperSupportControl } from "@/components/saas-crm-forms";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { TenantStatusControl } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type TenantRow={
   id:string;name:string;slug:string;status:string;user_count:number;created_at:string;
@@ -11,8 +11,8 @@ type TenantRow={
 };
 
 export default async function SaaSTenantsPage(){
-  const tenants=await apiJson<TenantRow[]>("/api/v1/saas/crm/tenants");
-  const supportTenants=await apiJson<Array<{id:string;name:string;slug:string;status:string}>>("/api/v1/support/developer/tenants");
+  const tenants=await apiJsonResult<TenantRow[]>("/api/v1/saas/crm/tenants").then((result) => result.ok ? result.data : null);
+  const supportTenants=await apiJsonResult<Array<{id:string;name:string;slug:string;status:string}>>("/api/v1/support/developer/tenants").then((result) => result.ok ? result.data : null);
   if(!tenants)return <DashboardShell title="Tenants" eyebrow="SaaS CRM"><EmptyState title="Tenant CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   return <DashboardShell title="Tenants" eyebrow="SaaS CRM" breadcrumbs={[{label:"SaaS Operations",href:"/dashboard/saas"},{label:"Tenants"}]}>
     <SaaSCrmNav/>

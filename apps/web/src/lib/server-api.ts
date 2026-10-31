@@ -17,6 +17,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   });
 }
 
+// Canonical status-aware server API contract; callers must not collapse HTTP failures into an untyped null helper.
 export type ApiJsonResult<T> = {
   ok: boolean;
   status: number;
@@ -54,15 +55,6 @@ export async function apiJsonResult<T>(path: string, init: RequestInit = {}): Pr
   return { ok: true, status: response.status, data: parsed as T, error: null };
 }
 
-
-/**
- * Backward-compatible JSON helper for legacy/non-critical pages.
- * Critical reads should use apiJsonResult so service/API failures remain explicit.
- */
-export async function apiJson<T>(path: string, init: RequestInit = {}): Promise<T | null> {
-  const result = await apiJsonResult<T>(path, init);
-  return result.ok ? result.data : null;
-}
 
 export async function requireUser<T = Record<string, unknown>>() {
   let response: Response;

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { UsersRound, Layers3, ArrowRight } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ProgramCreateForm } from "@/components/program-create-form";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 type Program = {
   id: string;
@@ -28,8 +28,8 @@ export default async function ProgramsPage() {
   const user = await requireUser<{ permissions?: string[] }>();
   const canManage = user.permissions?.includes("courses.manage") ?? false;
   const [programs, cohorts] = await Promise.all([
-    apiJson<Program[]>("/api/v1/programs"),
-    apiJson<Cohort[]>("/api/v1/programs/cohorts"),
+    apiJsonResult<Program[]>("/api/v1/programs").then((result) => result.ok ? result.data : null),
+    apiJsonResult<Cohort[]>("/api/v1/programs/cohorts").then((result) => result.ok ? result.data : null),
   ]);
 
   return (

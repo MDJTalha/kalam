@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { GitBranch, Plus } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 type Path = { id: string; title: string; description?: string | null; status: string; slug: string };
 export default async function LearningPathsPage() {
   const user = await requireUser<{ permissions?: string[] }>();
   const canManage = user.permissions?.includes("courses.manage") ?? false;
-  const paths = await apiJson<Path[]>("/api/v1/programs/paths/all");
+  const paths = await apiJsonResult<Path[]>("/api/v1/programs/paths/all").then((result) => result.ok ? result.data : null);
   return <DashboardShell title="Learning paths" eyebrow="Structured learning">
     <section className="data-panel">
       <div className="section-heading compact">

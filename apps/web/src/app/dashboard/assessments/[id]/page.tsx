@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { AssessmentRunner } from "@/components/assessment-runner";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Assessment = {
   id: string;
@@ -15,7 +15,7 @@ type Assessment = {
 export default async function AssessmentPage({ params }: { params: Promise<{ id: string }> }) {
   await requireUser();
   const { id } = await params;
-  const assessment = await apiJson<Assessment>(`/api/v1/assessments/${id}`);
+  const assessment = await apiJsonResult<Assessment>(`/api/v1/assessments/${id}`).then((result) => result.ok ? result.data : null);
   if (!assessment) notFound();
   return (
     <DashboardShell title={assessment.title} eyebrow="Assessment player">

@@ -2,7 +2,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { OpportunityCreateForm, OpportunityQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Opportunity={id:string;account_id:string;account_name:string;name:string;stage:string;currency:string;amount_minor:number;probability_percent:number;expected_close_at?:string|null};
 type Forecast={currency:string;stage:string;gross_amount_minor:number;weighted_amount_minor:number;opportunities:number};
@@ -11,8 +11,8 @@ function money(minor:number,currency:string){return new Intl.NumberFormat("en-US
 
 export default async function SaaSPipelinePage(){
   const [opportunities,forecast]=await Promise.all([
-    apiJson<Opportunity[]>("/api/v1/saas/crm/opportunities"),
-    apiJson<Forecast[]>("/api/v1/saas/crm/forecast"),
+    apiJsonResult<Opportunity[]>("/api/v1/saas/crm/opportunities").then((result) => result.ok ? result.data : null),
+    apiJsonResult<Forecast[]>("/api/v1/saas/crm/forecast").then((result) => result.ok ? result.data : null),
   ]);
   if(!opportunities||!forecast)return <DashboardShell title="Pipeline" eyebrow="SaaS CRM"><EmptyState title="Pipeline CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const open=opportunities.filter(o=>!["won","lost"].includes(o.stage));

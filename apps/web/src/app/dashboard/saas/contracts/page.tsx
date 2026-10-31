@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { ContractCreateForm, ContractStatusControl } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Contract={id:string;account_id:string;account_name:string;subscription_id?:string|null;reference:string;status:string;currency:string;total_value_minor:number;starts_at?:string|null;ends_at?:string|null;signed_at?:string|null;renewal_terms?:string|null;notes?:string|null};
 type ContractPage={items:Contract[];total:number;offset:number;limit:number;counts:{signed_active:number;expiring_90_days:number;draft_review:number}};
@@ -16,7 +16,7 @@ export default async function SaaSContractsPage({searchParams}:{searchParams:Pro
   const page=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,100000):1;
   const query=new URLSearchParams({limit:"25",offset:String((page-1)*25)});
   if(params.status)query.set("status",params.status);
-  const result=await apiJson<ContractPage>("/api/v1/saas/crm/page/contracts?"+query.toString());
+  const result=await apiJsonResult<ContractPage>("/api/v1/saas/crm/page/contracts?"+query.toString()).then((result) => result.ok ? result.data : null);
   if(!result)return <DashboardShell title="Contracts" eyebrow="SaaS CRM"><EmptyState title="Contract CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
   const contracts=result.items;
