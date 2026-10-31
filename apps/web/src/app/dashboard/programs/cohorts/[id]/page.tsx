@@ -3,7 +3,7 @@ import { ArrowLeft, UsersRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { CohortEditor } from "@/components/cohort-editor";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 type Member = { user_id: string; name: string; email: string; status: string };
 type Person = { id: string; first_name: string; last_name: string; email: string; is_active: boolean };
