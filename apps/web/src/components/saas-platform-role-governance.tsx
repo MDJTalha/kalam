@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Save, ShieldCheck, Trash2 } from "lucide-react";
 
 type SaaSPermission = { id: string; key: string; description?: string | null };
@@ -31,7 +31,7 @@ export function SaaSPlatformRoleGovernance({ enabled }: { enabled: boolean }) {
   const [message, setMessage] = useState("");
   const selected = roles.find(role => role.id === selectedId);
 
-  async function load() {
+  const load = useCallback(async () => {
     if (!enabled) return;
     setLoading(true);
     setError("");
@@ -47,9 +47,9 @@ export function SaaSPlatformRoleGovernance({ enabled }: { enabled: boolean }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [enabled]);
 
-  useEffect(() => { void load(); }, [enabled]);
+  useEffect(() => { void load(); }, [load]);
 
   function selectRole(role: CustomRole) {
     setSelectedId(role.id);
