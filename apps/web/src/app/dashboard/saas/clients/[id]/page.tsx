@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, CircleDollarSign, ExternalLink, FlaskConical, Handshake, UsersRound } from "lucide-react";
+import { Building2, ExternalLink, FlaskConical, Handshake, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { AccountOwnerControl, AccountProfileForm, ActivityCreateForm, ContactCreateForm, OnboardingQuickActions, OnboardingTemplateButton, ProvisionTenantButton } from "@/components/saas-crm-forms";
