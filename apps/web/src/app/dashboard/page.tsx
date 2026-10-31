@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Activity, AlertTriangle, ArrowRight, Award, BookOpenCheck, CalendarDays, CheckCircle2, Clock3, FileText, ShieldCheck, Target, TrendingUp, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LearningMomentumChart, WorkforceUnitChart } from "./dashboard-visuals";
-import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Summary = { users:number; courses:number; enrollments:number; completed_enrollments:number; certificates:number };
 type Engagement = { active_learners:number; enrolled_learners:number; learner_activation_rate?:number; learner_completion_reach?:number };
@@ -42,19 +42,19 @@ export default async function DashboardPage(){
   const specializedView = roleMode !== "standard";
   const executiveView = roleMode === "executive" && canReport && canSeeCapability;
   const [enrollments,compliance,summary,engagement,intelligence,trends,risk,effectiveness,organization,audit,team,queue,sessions] = await Promise.all([
-    apiJson<Enrollment[]>("/api/v1/courses/my/enrollments"),
-    apiJson<Compliance[]>("/api/v1/compliance/my"),
-    canReport ? apiJson<Summary>("/api/v1/reports/summary") : Promise.resolve(null),
-    canReport ? apiJson<Engagement>("/api/v1/reports/engagement") : Promise.resolve(null),
-    canSeeCapability ? apiJson<Intelligence>("/api/v1/intelligence/capability") : Promise.resolve(null),
-    executiveView || isLd ? apiJson<Trends>("/api/v1/reports/learning-trends?days=30") : Promise.resolve(null),
-    canReport ? apiJson<Risk>("/api/v1/reports/compliance-risk") : Promise.resolve(null),
-    canReport ? apiJson<Effectiveness>("/api/v1/reports/learning-effectiveness") : Promise.resolve(null),
-    canReport ? apiJson<{organization_units:OrgUnit[]}>("/api/v1/reports/organization-performance") : Promise.resolve(null),
-    canAudit ? apiJson<Audit[]>("/api/v1/admin/audit?limit=5") : Promise.resolve(null),
-    (isManager || isHrBp) && canSeeCapability ? apiJson<TeamMember[]>("/api/v1/people/team") : Promise.resolve(null),
-    isLd && permissions.includes("courses.manage") ? apiJson<QueueSummary>("/api/v1/courses/operations/enrollment-queue?page=1&page_size=1&status=all&q=") : Promise.resolve(null),
-    isTrainer ? apiJson<LiveSession[]>("/api/v1/sessions") : Promise.resolve(null),
+    apiJsonResult<Enrollment[]>("/api/v1/courses/my/enrollments").then((result) => result.ok ? result.data : null),
+    apiJsonResult<Compliance[]>("/api/v1/compliance/my").then((result) => result.ok ? result.data : null),
+    canReport ? apiJsonResult<Summary>("/api/v1/reports/summary").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    canReport ? apiJsonResult<Engagement>("/api/v1/reports/engagement").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    canSeeCapability ? apiJsonResult<Intelligence>("/api/v1/intelligence/capability").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    executiveView || isLd ? apiJsonResult<Trends>("/api/v1/reports/learning-trends?days=30").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    canReport ? apiJsonResult<Risk>("/api/v1/reports/compliance-risk").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    canReport ? apiJsonResult<Effectiveness>("/api/v1/reports/learning-effectiveness").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    canReport ? apiJsonResult<{organization_units:OrgUnit[]}>("/api/v1/reports/organization-performance").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    canAudit ? apiJsonResult<Audit[]>("/api/v1/admin/audit?limit=5").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    (isManager || isHrBp) && canSeeCapability ? apiJsonResult<TeamMember[]>("/api/v1/people/team").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    isLd && permissions.includes("courses.manage") ? apiJsonResult<QueueSummary>("/api/v1/courses/operations/enrollment-queue?page=1&page_size=1&status=all&q=").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
+    isTrainer ? apiJsonResult<LiveSession[]>("/api/v1/sessions").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
   ]);
   const assigned = enrollments?.length ?? 0;
   const completed = enrollments?.filter(row => row.status === "completed").length ?? 0;
@@ -112,7 +112,7 @@ export default async function DashboardPage(){
   const trainerSessions = (sessions ?? []).filter(session => session.instructor_id === user.id).sort((a,b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
   const trainerUpcoming = trainerSessions.filter(session => new Date(session.ends_at).getTime() >= now).slice(0,5);
   const trainerRecent = trainerSessions.filter(session => new Date(session.ends_at).getTime() < now).slice(-4);
-  const trainerSessionAnalytics = isTrainer ? await Promise.all(trainerRecent.map(session => apiJson<SessionAnalytics>(`/api/v1/sessions/${session.id}/analytics`))) : [];
+  const trainerSessionAnalytics = isTrainer ? await Promise.all(trainerRecent.map(session => apiJsonResult<SessionAnalytics>(`/api/v1/sessions/${session.id}/analytics`).then((result) => result.ok ? result.data : null))) : [];
   const trainerMarked = trainerSessionAnalytics.reduce((total,item) => total + (item?.attendance.total_marked ?? 0),0);
   const trainerPresent = trainerSessionAnalytics.reduce((total,item) => total + (item?.attendance.present ?? 0) + (item?.attendance.late ?? 0),0);
   const trainerAttendance = trainerMarked ? Math.round(trainerPresent / trainerMarked * 100) : null;
