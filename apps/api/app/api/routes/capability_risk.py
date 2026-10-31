@@ -129,13 +129,13 @@ async def _calculate(user, db):
         .all()
     )
     capmap = {c.id: c for c in caps}
-    users = (
-        await db.execute(
-            select(User.id, User.org_unit_id).where(
-                User.tenant_id == user.tenant_id, User.is_active.is_(True)
-            )
-        )
-    ).all()
+    user_stmt = select(User.id, User.org_unit_id).where(
+        User.tenant_id == user.tenant_id,
+        User.is_active.is_(True),
+    )
+    if allowed is not None:
+        user_stmt = user_stmt.where(User.id.in_(allowed))
+    users = (await db.execute(user_stmt)).all()
     active_ids = {x.id for x in users}
     total_people = max(1, len(active_ids))
     objectives = (
@@ -156,6 +156,7 @@ async def _calculate(user, db):
             await db.execute(
                 select(Certificate.user_id).where(
                     Certificate.tenant_id == user.tenant_id,
+                    Certificate.user_id.in_(allowed) if allowed is not None else True,
                     Certificate.expires_at.is_not(None),
                     Certificate.expires_at
                     <= datetime.now(timezone.utc)
@@ -173,6 +174,7 @@ async def _calculate(user, db):
             await db.execute(
                 select(DevelopmentPlan.user_id).where(
                     DevelopmentPlan.tenant_id == user.tenant_id,
+                    DevelopmentPlan.user_id.in_(allowed) if allowed is not None else True,
                     DevelopmentPlan.status.in_(["active", "in_progress"]),
                 )
             )
@@ -276,12 +278,16 @@ async def _build(user, db):
             if (cap.criticality or "").lower() == "high"
             else 0
         )
-        previous = await db.scalar(
-            select(CapabilityRisk).where(
-                CapabilityRisk.tenant_id == user.tenant_id,
-                CapabilityRisk.capability_id == cid,
+        # Historical risk records are tenant-wide snapshots. They must not
+        # influence a manager's direct-report-only risk calculation.
+        previous = None
+        if allowed is None:
+            previous = await db.scalar(
+                select(CapabilityRisk).where(
+                    CapabilityRisk.tenant_id == user.tenant_id,
+                    CapabilityRisk.capability_id == cid,
+                )
             )
-        )
         trend = (
             50 if previous is None else (100 if float(previous.risk_score) < 0 else 0)
         )
