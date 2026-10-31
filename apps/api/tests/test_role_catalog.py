@@ -31,7 +31,7 @@ def test_saas_super_admin_has_explicit_platform_governance_rights():
         "saas.roles.manage",
         "saas.team.manage",
         "saas.pricing.manage",
-        "saas.billing.manage",
+        "saas.finance.manage",
         "saas.access.revoke",
         "saas.audit.read",
     } <= grants
