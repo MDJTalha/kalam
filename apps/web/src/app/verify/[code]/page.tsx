@@ -7,7 +7,7 @@ type Verification = { valid: boolean; certificate_id: string; course: string; le
 
 export default async function VerificationPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
-  const data = await apiJson<Verification>(`/api/v1/certificates/verify/${encodeURIComponent(code)}`);
+  const data = await apiJsonResult<Verification>(`/api/v1/certificates/verify/${encodeURIComponent(code)}`).then((result) => result.ok ? result.data : null);
   return (
     <main className="auth-shell">
       <section className="auth-brand"><KalamBrand dark compact className="brand-lockup" /><div className="auth-brand-copy"><span className="eyebrow"><ShieldCheck size={15}/> Credential verification</span><h1>Verify learning evidence.</h1><p>Confirm the current status of this learning credential using the issuer’s verification service.</p></div></section>
