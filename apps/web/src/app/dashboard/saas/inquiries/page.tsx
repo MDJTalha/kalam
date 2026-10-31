@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
-import { apiFetch, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { InquiryQueue, type Inquiry } from "@/app/dashboard/admin/inquiries/queue";
 
 export default async function SaaSInquiriesPage() {
@@ -15,7 +15,7 @@ export default async function SaaSInquiriesPage() {
       </div></div>
     </DashboardShell>;
   }
-  const inquiries = (await response.json()) as Inquiry[];
+  const inquiries = result.data;
   const newCount = inquiries.filter(item => item.status === "new").length;
   const contactedCount = inquiries.filter(item => item.status === "contacted").length;
   return <DashboardShell title="Leads & Inquiries" eyebrow="SaaS CRM" breadcrumbs={[{label:"SaaS Operations",href:"/dashboard/saas"},{label:"Leads & Inquiries"}]}>
