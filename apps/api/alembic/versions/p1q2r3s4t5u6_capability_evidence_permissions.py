@@ -19,7 +19,21 @@ PERMISSIONS = {
 
 def upgrade() -> None:
     conn = op.get_bind()
-    permission_ids = {}
+    op.add_column(
+        "capability_evidence",
+        sa.Column(
+            "submitted_by",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("users.id", ondelete="SET NULL"),
+            nullable=True,
+        ),
+    )
+    op.create_index(
+        "ix_capability_evidence_submitted_by",
+        "capability_evidence",
+        ["submitted_by"],
+    )
+    permission_ids = {};
     for key, description in PERMISSIONS.items():
         permission_id = conn.execute(
             sa.text("SELECT id FROM permissions WHERE key=:key"),
@@ -88,6 +102,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Keep submitter attribution and role grants on rollback. Removing these
-    # safeguards could restore self-review vulnerabilities in the evidence queue.
+    # Preserve the attribution in deployed environments; reverting this field
+    # would discard evidence provenance and reopen reviewer self-conflict risk.
     pass
