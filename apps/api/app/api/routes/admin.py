@@ -8,9 +8,9 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, require_permission
+from app.api.deps import is_platform_developer, is_saas_super_admin, require_permission
 from app.core.security import session_token_hash, utcnow
-from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User
+from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.email import send_email
@@ -88,8 +88,9 @@ async def update_tenant_settings(
 @router.get("/roles")
 async def roles(user: User = Depends(require_permission("tenant.manage")), db: AsyncSession = Depends(get_db)):
     is_developer = await _is_platform_developer(user, db)
+    is_super_admin = await is_saas_super_admin(user, db)
     stmt = select(Role.id, Role.name, Role.description, Role.role_kind).where(Role.tenant_id == user.tenant_id)
-    if not is_developer:
+    if not is_developer and not is_super_admin:
         stmt = stmt.where(Role.role_kind.in_(["predefined", "custom"]))
     result = await db.execute(stmt.order_by(Role.name))
     return [{"id": str(row.id), "name": row.name, "description": row.description, "role_kind": row.role_kind} for row in result.all()]
@@ -364,6 +365,27 @@ async def update_user(
     if "is_active" in payload.model_fields_set and payload.is_active is False:
         if target.id == admin.id:
             raise HTTPException(status_code=422, detail="You cannot deactivate your own account")
+        has_super_admin_role = await db.scalar(
+            select(Role.id)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == target.id)
+            .where(Role.tenant_id == admin.tenant_id)
+            .where(Role.name.ilike("saas super admin"))
+            .limit(1)
+        )
+        if has_super_admin_role is not None:
+            another_active_super_admin = await db.scalar(
+                select(User.id)
+                .join(UserRole, UserRole.user_id == User.id)
+                .join(Role, Role.id == UserRole.role_id)
+                .where(Role.tenant_id == admin.tenant_id)
+                .where(Role.name.ilike("saas super admin"))
+                .where(User.is_active.is_(True))
+                .where(User.id != target.id)
+                .limit(1)
+            )
+            if another_active_super_admin is None:
+                raise HTTPException(status_code=409, detail="The last active SaaS Super Admin cannot be deactivated")
         active_sessions = await db.execute(
             select(SessionRecord).where(SessionRecord.user_id == target.id, SessionRecord.revoked_at.is_(None))
         )
