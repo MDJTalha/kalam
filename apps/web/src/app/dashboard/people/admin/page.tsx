@@ -19,21 +19,24 @@ export default async function UserAdministrationPage({ searchParams }: { searchP
   const { person, q = "", page: rawPage = "1" } = await searchParams;
   const page = Math.max(1, Number.parseInt(rawPage, 10) || 1);
   const peopleQuery = new URLSearchParams({ page: String(page), page_size: "50", q: q.slice(0, 160), status: "all" });
-  const [peopleResult, roles, units] = await Promise.all([
+  const [peopleResult, rolesResult, unitsResult] = await Promise.all([
     apiJsonResult<PeoplePage>(`/api/v1/people/page?${peopleQuery}`),
-    apiJson<Role[]>("/api/v1/organization/roles"),
-    apiJson<Unit[]>("/api/v1/organization/units"),
+    apiJsonResult<Role[]>("/api/v1/organization/roles"),
+    apiJsonResult<Unit[]>("/api/v1/organization/units"),
   ]);
   const people = peopleResult.ok ? peopleResult.data?.items ?? [] : null;
+  const roles = rolesResult.ok ? rolesResult.data : null;
+  const units = unitsResult.ok ? unitsResult.data : null;
+  const referenceError = !rolesResult.ok || !unitsResult.ok;
   const peopleTotal = peopleResult.ok ? peopleResult.data?.total ?? 0 : 0;
   return <DashboardShell title="User administration" eyebrow="People & organization" breadcrumbs={[{ label: "People", href: "/dashboard/people" }, { label: "User administration" }]}>
     <section className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Workforce lifecycle</span><h2>Invite and manage people</h2></div><Link className="text-link" href="/dashboard/people">View directory</Link></div>
       <p>Invite colleagues, update employment details and manage access within your organization.</p>
     </section>
     <form className="form-actions" action="/dashboard/people/admin" method="get"><label className="form-field"><span>Search people</span><input name="q" defaultValue={q} placeholder="Name, email, employee number or title" maxLength={160} /></label><button className="button button-secondary" type="submit">Search</button>{q&&<Link className="button button-ghost" href="/dashboard/people/admin">Clear</Link>}</form>
-    {people && roles && units ? <><p className="form-help">Showing {people.length} of {peopleTotal} matching people. Search to find a specific person or manager.</p><UserLifecyclePanel people={people} roles={roles} units={units} initialSelectedId={person} accessPermissions={permissions} />
+    {people && roles && units && !referenceError ? <><p className="form-help">Showing {people.length} of {peopleTotal} matching people. Search to find a specific person or manager.</p><UserLifecyclePanel people={people} roles={roles} units={units} initialSelectedId={person} accessPermissions={permissions} />
       {peopleTotal > 50 && <nav className="button-row" aria-label="People pages">{page > 1 && <Link className="button button-secondary" href={`/dashboard/people/admin?q=${encodeURIComponent(q)}&page=${page - 1}`}>Previous</Link>}<span>Page {page} of {Math.ceil(peopleTotal / 50)}</span>{page * 50 < peopleTotal && <Link className="button button-secondary" href={`/dashboard/people/admin?q=${encodeURIComponent(q)}&page=${page + 1}`}>Next</Link>}</nav>}
       <section className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Access control</span><h2>Assign a role</h2></div></div><RoleAssignment people={people} roles={roles} initialSelectedId={person} accessPermissions={permissions} /></section>{permissions.includes("users.manage") && <PeopleBulkInvite roles={roles} />}</>
-      : <section className="data-panel" role="alert"><h2>Workforce data unavailable</h2><p>Check the API connection or your access and try again.</p></section>}
+      : <section className="data-panel" role="alert"><h2>Workforce data unavailable</h2><p>HTTP ${rolesResult.ok ? unitsResult.status : rolesResult.status}: ${rolesResult.ok ? unitsResult.error || "Organization units unavailable" : rolesResult.error || "Organization roles unavailable"}.</p></section>}
   </DashboardShell>;
 }
