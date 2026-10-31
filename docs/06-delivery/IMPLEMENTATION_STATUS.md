@@ -1,5 +1,5 @@
 # Corporate LMS — Implementation Status
-As of: 2026-09-25
+As of: 2026-10-31
 Implementation root: C:\\Projects\\CorpLMS
 
 ## Status policy
@@ -7,7 +7,9 @@ A phase is marked CLOSED only when its roadmap output exists and its evidence ga
 A phase may remain IN PROGRESS when deployment-dependent evidence is still open.
 
 ## Overall status
-**IN PROGRESS — not production-release closed**
+**IN PROGRESS — engineering implementation substantially complete; production-release gates remain open**
+
+Current mainline engineering is CI-validated through the canonical role-catalogue merge. Hosted CI run **41201894930** passed API migration/bootstrap/static/type/test gates, web dependency/type/lint/build gates, and production compose/Nginx/image/smoke validation. This does not constitute production deployment, external-provider, security-review, accessibility-certification, backup/restore or legal approval.
 
 The LMS has completed substantial enterprise functionality across identity, learning, assessments, L&D, compliance/skills, analytics/integrations and governed-AI foundation work. Later-phase deployment prerequisites remain independent of the Phase 2 local gate.
 
@@ -108,6 +110,8 @@ External prerequisites remain: third-party handshakes, production SMTP, external
 ## Phase 7 — Governed AI
 Status: **LOCAL ENGINEERING GATE PASS — external production-provider certification remains deployment-dependent**
 
+The Phase 7 work breakdown has been reconciled against the Phase 7 exit evidence. The previously marked OPEN/PARTIAL local implementation items are now classified as locally complete where evidence exists; remaining items are explicitly deployment/independent-certification gates.
+
 Implemented/evidenced:
 - Tenant-scoped providers/models, versioned prompts and governed policy controls.
 - ai.manage authorization, administrative audit events and human interaction review.
@@ -130,6 +134,8 @@ External production-provider credentials, billing reconciliation, production lat
 
 ## Phase 8 — Commercial readiness
 Status: **IN PROGRESS — local release gates passed; production certification open**
+
+Current hosted CI also validates production compose/Nginx policy, production image builds and built-image smoke. This is still not target-environment certification. The authoritative release acceptance register remains open until production deployment, monitoring/alert acknowledgement, off-host backup/restore with measured RPO/RTO, independent security/TLS review, target performance, accessibility, external provider handshakes, customer/UAT review and required legal/commercial approvals are recorded.
 
 On 2026-09-26, preflight, 103 API tests, web typecheck/lint, isolated 49-route production build, production API/web image builds, and 78 desktop/mobile browser route checks passed. The local performance smoke passed on an idle rerun after an earlier readiness latency failure under load. See `PHASE_8_PROGRESS_EVIDENCE.md`. The release remains subject to final security, operational, accessibility, deployment and production-certification evidence.
 
