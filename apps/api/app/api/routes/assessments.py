@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, model_validator
-from sqlalchemy import func, select
+from sqlalchemy import false, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
@@ -160,7 +160,7 @@ async def list_assessments(
                 ).distinct()
             )
             accessible_course_ids.update(enrolled_courses.scalars().all())
-        stmt = stmt.where(Assessment.course_id.in_(accessible_course_ids)) if accessible_course_ids else stmt.where(sa.false())
+        stmt = stmt.where(Assessment.course_id.in_(accessible_course_ids)) if accessible_course_ids else stmt.where(false())
     result = await db.execute(
         stmt.group_by(Assessment.id, Course.title).order_by(Assessment.title.asc())
     )
@@ -543,6 +543,7 @@ async def list_attempts(
         select(AssessmentAttempt, User)
         .join(User, User.id == AssessmentAttempt.user_id)
         .where(AssessmentAttempt.assessment_id == assessment.id)
+        .where(User.tenant_id == user.tenant_id)
         .order_by(AssessmentAttempt.started_at.desc())
     )
     return [
@@ -728,7 +729,7 @@ async def reorder_questions(
 @router.get('/{assessment_id}/question-analytics')
 async def question_analytics(
     assessment_id: UUID,
-    user: User = Depends(require_permission('assessments.manage')),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
@@ -754,7 +755,7 @@ async def question_analytics(
 @router.get('/{assessment_id}/analytics')
 async def assessment_analytics(
     assessment_id: UUID,
-    user: User = Depends(require_permission('assessments.manage')),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
