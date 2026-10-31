@@ -42,10 +42,16 @@ def test_saas_super_admin_is_separate_from_platform_developer():
     assert PLATFORM_ROLE_PERMISSIONS["SaaS Super Admin"]
 
 
-def test_regional_executive_does_not_receive_unscoped_people_access():
-    # Until regional row-level filters exist, this role must not receive the
-    # tenant-wide users.read grant.
-    assert "users.read" not in TENANT_ROLE_PERMISSIONS["Regional Executive"]
+def test_manager_has_direct_report_scope_not_tenant_wide_directory_or_reports():
+    grants = set(TENANT_ROLE_PERMISSIONS["Manager"])
+    assert "team.read" in grants
+    assert "users.read" not in grants
+    assert "reports.read" not in grants
+
+
+def test_regional_executive_has_no_unscoped_data_grants():
+    # No regional-to-org-unit assignment or cross-screen row filter exists yet.
+    assert TENANT_ROLE_PERMISSIONS["Regional Executive"] == ()
 
 
 def test_core_business_roles_are_present():
