@@ -68,6 +68,7 @@ const baseGroups: NavGroup[] = [
   ] },
   { label: "Commercial Operations", items: [
     item("/dashboard/saas", "Commercial CRM", Building2, "saas.crm.read", true),
+    item("/dashboard/saas/roles", "Tenant Role Management", KeyRound, "saas.roles.manage"),
     item("/dashboard/saas/clients", "Clients", UsersRound, "saas.crm.read"),
     item("/dashboard/saas/tenants", "Tenants", Building2, "saas.crm.read"),
     item("/dashboard/saas/pipeline", "Pipeline", Workflow, "saas.crm.read"),
