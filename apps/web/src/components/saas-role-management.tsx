@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Pencil, Plus, Save, ShieldCheck, Trash2, X } from "lucide-react";
 
 type TenantOption = { id: string; name: string; slug: string; status: string };
@@ -105,7 +105,7 @@ export function SaaSRoleManagement({
     );
   }
 
-  async function saveRole(event: React.FormEvent<HTMLFormElement>) {
+  async function saveRole(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!tenantId || !name.trim() || busy || !editable) return;
     setBusy(true);
