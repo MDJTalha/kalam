@@ -4,13 +4,16 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { ContractCreateForm, ContractStatusControl } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Contract={id:string;account_id:string;account_name:string;subscription_id?:string|null;reference:string;status:string;currency:string;total_value_minor:number;starts_at?:string|null;ends_at?:string|null;signed_at?:string|null;renewal_terms?:string|null;notes?:string|null};
 type ContractPage={items:Contract[];total:number;offset:number;limit:number;counts:{signed_active:number;expiring_90_days:number;draft_review:number}};
 function money(minor:number,currency:string){return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:minor%100===0?0:2}).format(minor/100);}
 
 export default async function SaaSContractsPage({searchParams}:{searchParams:Promise<{page?:string;status?:string}>}){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("saas.finance.manage")??false;
+  if(!user.permissions?.includes("saas.finance.read"))return <DashboardShell title="Contracts" eyebrow="SaaS Finance"><EmptyState title="Finance access is restricted" description="This role does not include contract visibility."/></DashboardShell>;
   const params=await searchParams;
   const requestedPage=Number(params.page||1);
   const page=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,100000):1;
@@ -40,7 +43,7 @@ export default async function SaaSContractsPage({searchParams}:{searchParams:Pro
         <span key="d">{c.starts_at?new Date(c.starts_at).toLocaleDateString():"—"} → {c.ends_at?new Date(c.ends_at).toLocaleDateString():"—"}</span>,
         <span key="e">{c.signed_at?new Date(c.signed_at).toLocaleDateString():"—"}</span>,
         <StatusBadge key="f" status={c.status}/>,
-        <ContractStatusControl key="g" id={c.id} status={c.status}/>
+        {canManage?<ContractStatusControl key="g" id={c.id} status={c.status}/>:<span key="g">Read only</span>}
       ])}/>
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Contract pages">
         {page>1?<Link className="button button-secondary" href={pageHref(page-1)}>Previous</Link>:null}
@@ -48,6 +51,6 @@ export default async function SaaSContractsPage({searchParams}:{searchParams:Pro
         {page<pageCount?<Link className="button button-secondary" href={pageHref(page+1)}>Next</Link>:null}
       </nav>
     </SectionCard>
-    <SectionCard eyebrow="New agreement" title="Create contract"><ContractCreateForm/></SectionCard>
+    {canManage&&<SectionCard eyebrow="New agreement" title="Create contract"><ContractCreateForm/></SectionCard>}
   </DashboardShell>;
 }
