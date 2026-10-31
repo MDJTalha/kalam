@@ -2035,3 +2035,20 @@ def test_phase9_course_reorder_is_atomic_and_normalized(client: TestClient) -> N
     assert [item["position"] for item in unchanged["modules"]] == [1, 2, 3]
 
 
+
+
+def test_webhook_list_is_bounded(client: TestClient) -> None:
+    login(client, ADMIN)
+    first = client.post(
+        "/api/v1/webhooks",
+        json={"url": "https://example.com/hooks/one", "event_types": ["course.completed"]},
+    )
+    second = client.post(
+        "/api/v1/webhooks",
+        json={"url": "https://example.com/hooks/two", "event_types": ["course.completed"]},
+    )
+    assert first.status_code == second.status_code == 201
+    listed = client.get("/api/v1/webhooks", params={"limit": 1})
+    assert listed.status_code == 200, listed.text
+    assert len(listed.json()) == 1
+    assert client.get("/api/v1/webhooks", params={"limit": 101}).status_code == 422
