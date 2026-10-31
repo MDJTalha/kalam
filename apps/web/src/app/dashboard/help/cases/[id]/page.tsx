@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SupportCaseConversation, type SupportCaseDetail, type SupportCaseMessage } from "@/components/support-case-conversation";
-import { apiJsonResult, apiFetch, requireUser  } from "@/lib/server-api";
+import { apiJsonResult, apiFetch, requireUser } from "@/lib/server-api";
 
 export default async function SupportCasePage({params}:{params:Promise<{id:string}>}){
   await requireUser();
