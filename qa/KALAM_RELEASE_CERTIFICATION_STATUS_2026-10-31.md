@@ -15,7 +15,7 @@ This ledger distinguishes source implementation from independently executed runt
 - Enrollment/completion persistence is implemented.
 - Capability-gap recalculation is implemented.
 - `requireUser()` separates 401 sign-in, 403 access-denied, and service-failure handling.
-- `apiJsonResult()` is the canonical status-aware server API contract. The legacy generic `apiJson()` compatibility helper is removed on the certification branch. All application callers identified by the repository code search were migrated to `apiJsonResult()` with explicit success/null handling; no compatibility helper remains in `server-api.ts`.
+- `apiJsonResult()` is the canonical status-aware server API contract. The legacy generic `apiJson()` compatibility helper is removed. All identified application callers were migrated with explicit success/null handling.
 - Business-critical Compliance, People, and L&D Operations pages use status-aware API handling.
 - Enterprise selectors/read paths have received bounding hardening. Current main also bounds compatibility organization unit/role lists to a validated maximum of 100 and includes regression coverage.
 - Backup manifest, SHA-256/size verification and pg_restore catalog inspection are implemented.
@@ -25,18 +25,18 @@ This ledger distinguishes source implementation from independently executed runt
 
 | Gate | Current state | Required evidence |
 |---|---|---|
-| Exact-candidate CI | MERGE-EQUIVALENT TREE VERIFIED | Hosted PR run #466 passed API/Web/release-config against the exact pre-merge tree; the squash merge preserves that tree. A separate push-triggered run for the merge SHA is not surfaced by the connector. |
-| Full API regression | NOT CERTIFIED | Complete suite result and artifact tied to the candidate. |
+| Exact-candidate CI | MERGE-EQUIVALENT TREE VERIFIED | Hosted PR run #470 (ID `41214013410`) passed API/Web/release-config against the exact PR #30 application tree, including production-image runtime smoke. The merge is a squash of that tree. |
+| Full API regression | NOT CERTIFIED | Complete suite result and artifact tied to the final candidate from a clean certification checkout. |
 | Browser E2E | NOT CERTIFIED | Real authenticated role matrix covering admin, HR/L&D, manager, instructor, learner, auditor/compliance. |
 | Tenant isolation | SOURCE + REGRESSION COVERAGE | Execute negative A→B access matrix in a live disposable/staging environment. |
 | Learning lifecycle | IMPLEMENTED + REGRESSION COVERAGE | Browser/runtime proof: enrollment → learning → assessment → completion → capability update → gap recalculation. |
 | Accessibility | PARTIALLY VERIFIED | Automated results plus manual keyboard/screen-reader/responsive review. |
 | Scale | NOT CERTIFIED | Representative 10k+ employee load with p95/p99, DB, CPU, memory, concurrency and error evidence. |
-| Backup restore | NOT CERTIFIED | Actual clean-database restore, integrity checks and measured recovery duration. |
+| Backup restore | LOCAL RESTORE VERIFIED / PRODUCTION RECOVERY OPEN | A retained recovery-drill PostgreSQL dump was restored successfully into a disposable local database and removed afterward. Production backup freshness, off-host retention, measured RTO/RPO and candidate-tied recovery remain open. |
 | DR/failover | NOT CERTIFIED | Executed failover/recovery with measured RTO/RPO. |
 | AWS production | NOT CERTIFIED | TLS, secrets, migrations, health checks, monitoring, integrations and rollback evidence. |
-| API helper migration | CLOSED | Legacy `apiJson()` helper removed and all identified application callers migrated; merged to main and covered by successful hosted PR CI #466. |
-| Reference-data bounds | SUBSTANTIALLY HARDENED / AUDIT OPEN | Compatibility organization lists are now bounded; finish systematic audit for any remaining broad enterprise consumers. |
+| API helper migration | CLOSED | Legacy `apiJson()` helper removed and all identified application callers migrated; covered by successful hosted PR CI #470. |
+| Reference-data bounds | SUBSTANTIALLY HARDENED / AUDIT OPEN | Compatibility organization lists are bounded; finish systematic audit for remaining broad enterprise consumers. |
 | AI activation | NOT CERTIFIED | Provider, grounding, safety, tenant isolation, human override and audit evidence before enabling real-provider AI. |
 
 ## Exact evidence package
@@ -55,17 +55,28 @@ This ledger distinguishes source implementation from independently executed runt
 12. AI certification record if AI is enabled.
 13. Independent release approval.
 
-## Environment constraint
+## Latest execution evidence
 
-The connected Desktop Commander device **MDT** is available for repository/runtime diagnostics. Current infrastructure checks show the AWS session has expired and the active Kubernetes context is `docker-desktop`, not a staging/production cluster. Local Docker is available. Consequently, this ledger still makes no claim of staging/production AWS deployment, production secrets injection, browser/UAT certification, backup/restore, or DR execution.
+See `qa/KALAM_FINAL_CERTIFICATION_EXECUTION_2026-10-31.md`.
+
+Verified during the current execution window:
+
+- Desktop Commander device MDT was online.
+- Local PostgreSQL, Valkey and ClamAV containers were healthy/running.
+- Development and production Compose validation passed.
+- The installed `C:\Projects\Kalam` checkout is not the GitHub certification checkout and lacks `apps/api`; the release preflight therefore stopped instead of generating false API certification evidence.
+- The installed local web application returned HTTP 200 for `/login`.
+- A retained PostgreSQL recovery dump was actually restored into disposable database `kalam_restore_verify_20261031`; restore exit code was 0.
+- The restored database contained 99 public tables and the dump inventory contained 99 TABLE DATA entries.
+- The disposable restore database was dropped after verification.
+- AWS CLI authentication is expired; active Kubernetes context is `docker-desktop`. No cloud production certification is claimed.
 
 ## Current mainline evidence
 
-- Merged certification candidate: `2a26dd18ad57c024d99be5216db77eb76781ca8a`.
-- PR #29 was merged previously after hosted CI run #466 (`41213279219`) completed successfully against its exact pre-merge tree. The final mainline migration reconciliation was then merged as PR #30 (`2a26dd18ad57c024d99be5216db77eb76781ca8a`) after hosted CI run #470 (`41214013410`) completed successfully against the exact PR #30 tree: API, Web, and release-config all passed, including production-image runtime smoke.
-- The merge commit is a squash of the certification branch; its diff contains the same application migration/removal changes that were exercised by the successful CI candidate.
-- The GitHub connector exposes PR-triggered runs only; no separate push-triggered run is currently surfaced for the merge SHA. PR #30's hosted run #470 is the latest exact application-tree CI evidence.
+- Current main candidate: `2a26dd18ad57c024d99be5216db77eb76781ca8a`.
+- PR #30 hosted run #470 (`41214013410`) completed successfully against the exact PR tree: API, Web and release-config, including production-image runtime smoke.
+- No separate push-triggered workflow run for the merge SHA is exposed by the available GitHub connector.
 
 ## Certification rule
 
-No source-only assertion, historical CI run, or developer declaration substitutes for runtime evidence. **9.99/10 production certification remains blocked until every hard gate is evidenced for the exact immutable candidate.**
+No source-only assertion, historical CI run, or developer declaration substitutes for runtime evidence. **9.99/10 production certification remains blocked until every mandatory gate is evidenced for the exact immutable candidate.**
