@@ -9,6 +9,7 @@ type Summary = { users:number; courses:number; enrollments:number; completed_enr
 type Engagement = { active_learners:number; enrolled_learners:number; learner_activation_rate?:number; learner_completion_reach?:number };
 type Trends = { days:number; points:Array<{date:string;enrollments:number;completions:number}> };
 type Risk = { total:number; open:number; overdue:number; risk_band:string };
+type ComplianceOpsSummary = { open_assignments:number; overdue:number; evidence_review:number; exception_review:number; expiring_exceptions_7d:number };
 type Effectiveness = { completed:number; in_progress:number; completion_rate:number; average_days_to_complete:number|null; measured_completions:number };
 type Course = { id:string; title:string; status:string; estimated_minutes?:number|null };
 type CoursePage = { items:Course[]; total:number; page:number; page_size:number };
@@ -80,6 +81,9 @@ export default async function DashboardPage(){
     isLd && permissions.includes("courses.manage") ? apiJson<QueueSummary>("/api/v1/courses/operations/enrollment-queue?page=1&page_size=1&status=all&q=") : Promise.resolve(null),
     isTrainer ? apiJson<LiveSession[]>("/api/v1/sessions") : Promise.resolve(null),
   ]);
+  const qualitySummary = isQuality
+    ? await apiJson<ComplianceOpsSummary>("/api/v1/compliance/operations/summary")
+    : null;
   const assigned = enrollments?.length ?? 0;
   const completed = enrollments?.filter(row => row.status === "completed").length ?? 0;
   const openCompliance = compliance?.filter(row => !["completed","excepted"].includes(row.status)).length ?? 0;
@@ -273,12 +277,12 @@ export default async function DashboardPage(){
     </section>}
     {roleMode === "quality" && <section className="role-dashboard" aria-label="Quality and compliance dashboard">
       <div className="role-kpi-grid">
-        <div className="role-kpi"><span>Open obligations</span><strong>{risk?.open ?? "—"}</strong><small>Current compliance workload</small></div>
-        <div className="role-kpi role-kpi-risk"><span>Overdue</span><strong>{risk?.overdue ?? "—"}</strong><small>Items requiring remediation</small></div>
-        <div className="role-kpi"><span>Risk band</span><strong>{risk?.risk_band ?? "—"}</strong><small>Current recorded risk status</small></div>
-        <div className="role-kpi"><span>Recent audit events</span><strong>{audit?.length ?? "—"}</strong><small>Recent decisions and changes</small></div>
+        <div className="role-kpi"><span>Open obligations</span><strong>{qualitySummary?.open_assignments ?? "—"}</strong><small>Current compliance workload</small></div>
+        <div className="role-kpi role-kpi-risk"><span>Overdue</span><strong>{qualitySummary?.overdue ?? "—"}</strong><small>Items requiring remediation</small></div>
+        <div className="role-kpi"><span>Evidence review</span><strong>{qualitySummary?.evidence_review ?? "—"}</strong><small>Submitted evidence waiting for decision</small></div>
+        <div className="role-kpi"><span>Exception review</span><strong>{qualitySummary?.exception_review ?? "—"}</strong><small>Requests awaiting independent review</small></div>
       </div>
-      <div className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Compliance control</span><h2>Evidence, decisions and audit trail</h2></div><Link href="/dashboard/compliance/admin">Open compliance operations <ArrowRight size={14}/></Link></div><div className="role-actions"><Link href="/dashboard/compliance/admin">Compliance obligations</Link><Link href="/dashboard/evidence/admin">Evidence review</Link><Link href="/dashboard/audit">Audit events</Link><Link href="/dashboard/reports">Compliance reports</Link></div><p className="form-help">Evidence submitters must not verify or reject their own submissions. Keep policy ownership, evidence submission and final assurance review separated wherever staffing permits.</p></div>
+      <div className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Compliance control</span><h2>Evidence, decisions and audit trail</h2></div><Link href="/dashboard/compliance/admin">Open compliance operations <ArrowRight size={14}/></Link></div><div className="role-actions"><Link href="/dashboard/compliance/admin">Compliance obligations</Link><Link href="/dashboard/evidence/admin">Evidence review</Link><Link href="/dashboard/audit">Audit events</Link></div><div className="role-metric-strip"><span><b>{qualitySummary?.expiring_exceptions_7d ?? "—"}</b> exceptions expiring in 7 days</span><span><b>{audit?.length ?? "—"}</b> recent audit events</span></div><p className="form-help">Evidence submitters must not verify or reject their own submissions. Approval and rejection actions are audited and remain separate from submission.</p></div>
     </section>}
     {roleMode === "auditor" && <section className="role-dashboard" aria-label="Auditor dashboard">
       <div className="role-kpi-grid">
