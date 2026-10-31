@@ -183,3 +183,21 @@ def test_phase4_manager_and_tenant_isolation():
         login(client, tenant=OTHER_TENANT, credentials=OTHER_USER)
         assert client.get("/api/v1/capability-gaps").status_code in {200, 403}
         assert client.get("/api/v1/capability-gaps/snapshots").status_code in {200, 403}
+
+
+def test_manager_direct_report_gap_summary_is_scoped_and_not_recalculable():
+    with TestClient(app, base_url="http://localhost") as client:
+        login(client, {"email": "manager@demo.corp", "password": "DemoOnly!1234"})
+        summary = client.get("/api/v1/capability-gaps/summary?scope=direct_reports")
+        assert summary.status_code == 200, summary.text
+        assert summary.json()["scope"] == "direct_reports"
+        assert summary.json()["scope_id"] is None
+
+        own_gaps = client.get("/api/v1/capability-gaps")
+        assert own_gaps.status_code == 200, own_gaps.text
+        assert client.post("/api/v1/capability-gaps/recalculate").status_code == 403
+
+        # The direct-report scope is not a disguised tenant-wide summary.
+        with TestClient(app, base_url="http://localhost") as second_client:
+            login(second_client, {"email": "learner@demo.corp", "password": "DemoOnly!1234"})
+            assert second_client.get("/api/v1/capability-gaps/summary?scope=direct_reports").status_code == 403
