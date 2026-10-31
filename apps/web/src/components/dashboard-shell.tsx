@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Building2, ChevronRight, Search } from "lucide-react";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { requireUser } from "@/lib/server-api";
 import { AccountMenu } from "./account-menu";
 import { NotificationsCenter } from "./notifications-center";
 import { WorkspaceNav } from "./workspace-nav";
@@ -13,7 +13,7 @@ export async function DashboardShell({ children, title, eyebrow = "Kalam Enterpr
   const roles = user?.roles?.map((item) => item.name) ?? [];
   const permissions = user?.permissions ?? [];
   const support = roles.some((role) => role.toLowerCase() === "platform developer")
-    ? await apiJson<{active:boolean;tenant_name?:string;expires_at?:string}>("/api/v1/support/developer/support/current")
+    ? await apiJsonResult<{active:boolean;tenant_name?:string;expires_at?:string}>("/api/v1/support/developer/support/current").then((result) => result.ok ? result.data : null)
     : null;
   const preferredName = user?.preferences?.preferred_name?.trim() || user?.first_name || "Account";
   const initials = `${preferredName[0] ?? "A"}${user?.last_name?.[0] ?? "I"}`.toUpperCase();
