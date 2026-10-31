@@ -3,8 +3,13 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 
-from app.db.models import ComplianceAssignment, ComplianceEvidence, ComplianceException
+from app.core.security import hash_password
+from app.db.models import (
+    ComplianceAssignment, ComplianceEvidence, ComplianceException,
+    Role, Tenant, User, UserRole,
+)
 from app.db.session import SessionLocal
 from app.main import app
 
@@ -112,6 +117,42 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
         )
         assert exception.status_code == 201, exception.text
         exception_id = exception.json()["id"]
+
+        # The requester must not approve their own exception. Provision a
+        # second Compliance reviewer to prove independent review succeeds.
+        self_approval = client.post(f"/api/v1/compliance/exceptions/{exception_id}/approve")
+        assert self_approval.status_code == 403, self_approval.text
+
+        reviewer_email = f"quality-reviewer-{token}@demo.corp"
+        reviewer_password = "ReviewerOnly!1234"
+
+        async def provision_independent_reviewer() -> None:
+            async with SessionLocal() as db:
+                tenant = await db.scalar(select(Tenant).where(Tenant.slug == TENANT))
+                assert tenant is not None
+                role = await db.scalar(
+                    select(Role).where(
+                        Role.tenant_id == tenant.id,
+                        Role.name == "Quality & Compliance",
+                    )
+                )
+                assert role is not None
+                reviewer = User(
+                    tenant_id=tenant.id,
+                    email=reviewer_email,
+                    password_hash=hash_password(reviewer_password),
+                    first_name="Independent",
+                    last_name="Reviewer",
+                    job_title="Quality & Compliance",
+                    is_active=True,
+                )
+                db.add(reviewer)
+                await db.flush()
+                db.add(UserRole(user_id=reviewer.id, role_id=role.id))
+                await db.commit()
+
+        asyncio.run(provision_independent_reviewer())
+        login(client, {"email": reviewer_email, "password": reviewer_password})
         approved = client.post(f"/api/v1/compliance/exceptions/{exception_id}/approve")
         assert approved.status_code == 200, approved.text
 
