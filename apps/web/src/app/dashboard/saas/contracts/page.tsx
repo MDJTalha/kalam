@@ -16,7 +16,7 @@ export default async function SaaSContractsPage({searchParams}:{searchParams:Pro
   const page=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,100000):1;
   const query=new URLSearchParams({limit:"25",offset:String((page-1)*25)});
   if(params.status)query.set("status",params.status);
-  const result=await apiJson<ContractPage>("/api/v1/saas/crm/page/contracts?"+query.toString());
+  const result=await apiJsonResult<ContractPage>("/api/v1/saas/crm/page/contracts?"+query.toString()).then((result) => result.ok ? result.data : null);
   if(!result)return <DashboardShell title="Contracts" eyebrow="SaaS CRM"><EmptyState title="Contract CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
   const contracts=result.items;
