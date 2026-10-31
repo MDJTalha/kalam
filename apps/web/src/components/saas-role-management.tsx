@@ -72,9 +72,24 @@ export function SaaSRoleManagement({
   }
 
   useEffect(() => {
-    void loadRoles(tenantId);
-    // loadRoles is intentionally driven by the selected tenant only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!tenantId) return;
+    let active = true;
+    async function loadSelectedTenantRoles() {
+      try {
+        const rows = await requestJson(`/api/lms/saas/crm/tenants/${tenantId}/roles`) as RoleRow[];
+        if (!active) return;
+        setRoles(Array.isArray(rows) ? rows : []);
+        setError("");
+      } catch (err) {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : "Unable to load tenant roles.");
+        setRoles([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void loadSelectedTenantRoles();
+    return () => { active = false; };
   }, [tenantId]);
 
   function selectRole(role: RoleRow) {
