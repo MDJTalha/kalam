@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 revision = "p2q3r4s5t6u7"
 down_revision = "n1p2q3r4s5t6"
