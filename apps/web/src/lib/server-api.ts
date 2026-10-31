@@ -54,6 +54,7 @@ export async function apiJsonResult<T>(path: string, init: RequestInit = {}): Pr
   return { ok: true, status: response.status, data: parsed as T, error: null };
 }
 
+
 /**
  * Backward-compatible JSON helper for legacy/non-critical pages.
  * Critical reads should use apiJsonResult so service/API failures remain explicit.
