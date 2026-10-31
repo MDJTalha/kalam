@@ -6,12 +6,19 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, is_saas_ops_user, is_saas_super_admin, require_permission
+from app.api.deps import is_platform_developer, is_saas_ops_user, is_saas_super_admin, require_permission, user_has_permission
 from app.db.models import OrgUnit, Role, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
 
 router = APIRouter()
+
+BASIC_ASSIGNABLE_TENANT_ROLES = {
+    "manager",
+    "instructor",
+    "learner / employee",
+    "employee / learner",
+}
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
     return await is_platform_developer(user, db)
@@ -131,8 +138,16 @@ async def list_roles(
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Role).where(Role.tenant_id == user.tenant_id)
-    if not await _is_platform_developer(user, db):
+    is_developer = await _is_platform_developer(user, db)
+    is_super_admin = await is_saas_super_admin(user, db)
+    can_manage_roles = await user_has_permission(user, db, "tenant.manage")
+    if not is_developer and not is_super_admin:
         stmt = stmt.where(Role.role_kind.in_(["predefined", "custom"]))
+    if not can_manage_roles:
+        stmt = stmt.where(
+            Role.role_kind == "predefined",
+            func.lower(Role.name).in_(BASIC_ASSIGNABLE_TENANT_ROLES),
+        )
     result = await db.execute(stmt.order_by(Role.name))
     return list(result.scalars().all())
 
@@ -167,15 +182,16 @@ async def assign_role(
     )
     if target is None or role is None:
         raise HTTPException(status_code=404, detail="User or role not found")
+    is_developer = await _is_platform_developer(user, db)
+    is_super_admin = await is_saas_super_admin(user, db) and await is_saas_ops_user(user, db)
+    can_manage_roles = await user_has_permission(user, db, "tenant.manage")
     if role.role_kind not in ("predefined", "custom"):
-        platform_developer = await _is_platform_developer(user, db)
-        saas_super_admin = (
-            role.name.strip().lower() != "platform developer"
-            and await is_saas_super_admin(user, db)
-            and await is_saas_ops_user(user, db)
-        )
-        if not platform_developer and not saas_super_admin:
+        if not is_developer and not (is_super_admin and role.name.strip().lower() != "platform developer"):
             raise HTTPException(status_code=403, detail="This platform role can only be assigned by an authorized platform administrator")
+    elif not can_manage_roles and not (
+        role.role_kind == "predefined" and role.name.strip().lower() in BASIC_ASSIGNABLE_TENANT_ROLES
+    ):
+        raise HTTPException(status_code=403, detail="Assigning administrative or custom roles requires tenant administration permission")
     existing = await db.scalar(
         select(UserRole).where(
             UserRole.user_id == target.id,
@@ -210,15 +226,16 @@ async def remove_role(
         raise HTTPException(status_code=404, detail="User or role not found")
     if target.id == user.id:
         raise HTTPException(status_code=422, detail="You cannot remove a role from your own account")
+    is_developer = await _is_platform_developer(user, db)
+    is_super_admin = await is_saas_super_admin(user, db) and await is_saas_ops_user(user, db)
+    can_manage_roles = await user_has_permission(user, db, "tenant.manage")
     if role.role_kind not in ("predefined", "custom"):
-        platform_developer = await _is_platform_developer(user, db)
-        saas_super_admin = (
-            role.name.strip().lower() != "platform developer"
-            and await is_saas_super_admin(user, db)
-            and await is_saas_ops_user(user, db)
-        )
-        if not platform_developer and not saas_super_admin:
+        if not is_developer and not (is_super_admin and role.name.strip().lower() != "platform developer"):
             raise HTTPException(status_code=403, detail="This platform role can only be removed by an authorized platform administrator")
+    elif not can_manage_roles and not (
+        role.role_kind == "predefined" and role.name.strip().lower() in BASIC_ASSIGNABLE_TENANT_ROLES
+    ):
+        raise HTTPException(status_code=403, detail="Removing administrative or custom roles requires tenant administration permission")
     assignment = await db.scalar(select(UserRole).where(UserRole.user_id == target.id, UserRole.role_id == role.id))
     if assignment is None:
         raise HTTPException(status_code=404, detail="Role assignment not found")
