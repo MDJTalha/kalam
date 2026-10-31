@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { EmptyState, MetricCard, SectionCard } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Row={currency:string;stage:string;gross_minor:number;weighted_minor:number;opportunities:number};
 type Forecast={pipeline:Row[];open_invoices:Array<{currency:string;outstanding_minor:number;invoices:number}>};
