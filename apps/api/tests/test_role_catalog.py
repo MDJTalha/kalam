@@ -157,3 +157,16 @@ def test_saas_business_owner_has_no_internal_operator_directory():
 def test_saas_administrator_cannot_create_custom_platform_roles():
     assert "saas.team.manage" in PLATFORM_ROLE_PERMISSIONS["SaaS Administrator"]
     assert "saas.roles.manage" not in PLATFORM_ROLE_PERMISSIONS["SaaS Administrator"]
+
+
+def test_quality_has_organization_metadata_but_not_people_directory():
+    quality = set(TENANT_ROLE_PERMISSIONS["Quality & Compliance"])
+    assert {"tenant.read", "organization.read", "compliance.manage"} <= quality
+    assert "users.read" not in quality
+
+
+def test_tenant_administrator_does_not_inherit_compliance_operations():
+    admin = set(TENANT_ROLE_PERMISSIONS["Tenant Administrator"])
+    quality = set(TENANT_ROLE_PERMISSIONS["Quality & Compliance"])
+    assert "compliance.manage" not in admin
+    assert "compliance.manage" in quality
