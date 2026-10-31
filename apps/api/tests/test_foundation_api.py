@@ -1679,6 +1679,7 @@ def test_phase5_manager_development_workflow_authorization(client: TestClient) -
     people = client.get("/api/v1/people").json()
     learner = next(item for item in people if item["email"] == LEARNER["email"])
     manager = next(item for item in people if item["email"] == MANAGER["email"])
+    tenant_admin = next(item for item in people if item["email"] == ADMIN["email"])
     assigned = client.patch(
         f"/api/v1/admin/users/{learner['id']}",
         json={"manager_id": manager["id"]},
@@ -1698,6 +1699,11 @@ def test_phase5_manager_development_workflow_authorization(client: TestClient) -
     assert progress.json()["plan"]["id"] == learner_plan_id
 
     login(client, MANAGER)
+    direct_report_plans = client.get(f"/api/v1/development/users/{learner['id']}")
+    assert direct_report_plans.status_code == 200, direct_report_plans.text
+    assert any(item["id"] == learner_plan_id for item in direct_report_plans.json())
+    outside_scope = client.get(f"/api/v1/development/users/{tenant_admin['id']}")
+    assert outside_scope.status_code == 404
     manager_progress = client.get(f"/api/v1/development/{learner_plan_id}/progress")
     assert manager_progress.status_code == 200
     assert manager_progress.json()["plan"]["id"] == learner_plan_id
