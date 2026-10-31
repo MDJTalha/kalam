@@ -591,33 +591,49 @@ Deliver:
 Exit gate:
 Data is consistent, permission-aware, exportable and integration-ready.
 
-### Phase 6 — AI learning layer
+### Phase 6 — Reporting, analytics and integrations
 Deliver:
-- AI content assistance
-- Search/Q&A
-- Recommendations
-- Summaries
-- Skill-gap assistance
-- Governance and traceability
+- Executive and operational analytics
+- Reports and exports
+- Saved and scheduled reports
+- REST/OpenAPI integration boundary
+- Webhooks and integration registry
+- External-provider adapter boundaries
+- Server-side filtering, sorting and pagination for high-volume datasets
 
 Exit gate:
-AI provides value without bypassing permissions or creating unsupported authoritative claims.
+Reporting is tenant-scoped, permission-aware, scalable and auditable; integration contracts are locally evidenced.
 
-### Phase 7 — Production hardening and commercialization
+### Phase 7 — Governed AI
 Deliver:
+- Governed AI gateway
+- Authorized retrieval and citations
+- Content assistance
+- Learner/course summaries
+- Learning recommendations
+- Skill-gap explanations
+- Provider/model governance
+- Evaluation, human review and audit controls
+- Token/cost budgets, telemetry and deterministic fallback
+
+Exit gate:
+AI is assistive and traceable, cannot bypass permissions or tenant boundaries, and does not create unsupported authoritative or consequential employment decisions.
+
+### Phase 8 — Production hardening and commercialization
+Deliver:
+- Production deployment
 - Security verification
 - Accessibility verification
 - Performance testing
-- Backup/restore testing
-- Disaster recovery procedures
-- Monitoring
-- Deployment automation
-- Documentation
-- License/EULA/privacy/terms placeholders
-- Release checklist
+- Backup/restore and disaster recovery
+- Monitoring and alerting
+- Deployment/rollback automation
+- Customer documentation
+- Legal/privacy/commercial review
+- Release checklist and evidence packet
 
 Exit gate:
-All release criteria passed and open critical defects = 0.
+All applicable target-environment and independent release criteria pass; open Critical/High defects = 0.
 
 ## 13. Quality gates
 
@@ -703,9 +719,9 @@ The project will maintain:
 9. Build learner journey.
 10. Build assessment/certification.
 11. Build compliance/skills.
-12. Build analytics/integrations.
-13. Add governed AI.
-14. Execute complete QA and release process.
+12. Build reporting/analytics and integrations.
+13. Add governed AI with evaluation and audit controls.
+14. Execute production-hardening, QA and release certification.
 
 ## 19. Source standards considered
 
