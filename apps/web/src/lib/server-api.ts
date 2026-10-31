@@ -55,6 +55,19 @@ export async function apiJsonResult<T>(path: string, init: RequestInit = {}): Pr
 }
 
 
+/**
+ * Backward-compatible JSON helper for non-critical pages. Critical reads should
+ * use apiJsonResult so service/API failures remain explicit to the caller.
+ */
+export async function apiJson<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const result = await apiJsonResult<T>(path, init);
+  if (!result.ok || result.data === null) {
+    throw new Error(result.error || "Request failed");
+  }
+  return result.data;
+}
+
+
 export async function requireUser<T = Record<string, unknown>>() {
   let response: Response;
   try {
