@@ -3,7 +3,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { SubscriptionCreateForm, SubscriptionQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Subscription={id:string;account_id:string;account_name:string;plan_id?:string|null;plan_name?:string|null;status:string;billing_cycle:string;currency:string;seats:number;list_price_minor:number;discount_minor:number;net_price_minor:number;renews_at?:string|null};
 type SubscriptionPage={items:Subscription[];total:number;offset:number;limit:number};
