@@ -14,10 +14,12 @@ export default async function CapabilityGapsPage(){
  const permissions=user.permissions||[];
  const canManage=permissions.includes("capability_gaps.manage");
  if(!permissions.includes("capability_gaps.read")&&!canManage)return <DashboardShell title="Capability Gaps" eyebrow="Capability intelligence"><section className="data-panel"><Target size={22}/><h2>Access restricted</h2><p>Your role does not have access to capability gap intelligence.</p></section></DashboardShell>;
- const query=canManage?"":"?user_id="+encodeURIComponent(user.id);
+ const hasTeamScope=permissions.includes("team.read")&&!canManage;
+ const query=canManage||hasTeamScope?"":"?user_id="+encodeURIComponent(user.id);
+ const summaryQuery=canManage?"?scope=enterprise":hasTeamScope?"?scope=direct_reports":"?scope=person&scope_id="+encodeURIComponent(user.id);
  const fallback:Summary={scope:canManage?"enterprise":"person",total_requirements:0,material_gaps:0,counts:{},critical_exposure:0,major_exposure:0,weighted_gap:0,calculation_version:"phase4.v1",freshness_days:180}; const [gapsResult,summaryResult,peopleResult,currentPerson]=await Promise.all([
   apiJsonResult<Gap[]>("/api/v1/capability-gaps"+query),
-  apiJsonResult<Summary>("/api/v1/capability-gaps/summary?scope="+(canManage?"enterprise":"person")+(canManage?"":"&scope_id="+encodeURIComponent(user.id))),
+  apiJsonResult<Summary>("/api/v1/capability-gaps/summary"+summaryQuery),
   canManage?apiJsonResult<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"):Promise.resolve({ok:true,status:200,data:{items:[]},error:null}),
   canManage?apiJsonResult<Person>("/api/v1/people/me"):Promise.resolve({ok:true,status:200,data:null,error:null})
  ]);
