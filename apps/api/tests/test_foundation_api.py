@@ -2054,6 +2054,17 @@ def test_webhook_list_is_bounded(client: TestClient) -> None:
     assert client.get("/api/v1/webhooks", params={"limit": 101}).status_code == 422
 
 
+def test_compatibility_organization_lists_are_bounded(client: TestClient) -> None:
+    login(client, ADMIN)
+    units = client.get("/api/v1/organization/units", params={"limit": 1})
+    roles = client.get("/api/v1/organization/roles", params={"limit": 1})
+    assert units.status_code == roles.status_code == 200
+    assert len(units.json()) <= 1
+    assert len(roles.json()) <= 1
+    assert client.get("/api/v1/organization/units", params={"limit": 101}).status_code == 422
+    assert client.get("/api/v1/organization/roles", params={"limit": 101}).status_code == 422
+
+
 def test_live_session_and_program_catalog_reads_are_bounded(client: TestClient) -> None:
     login(client, ADMIN)
     assert client.get("/api/v1/sessions", params={"limit": 101}).status_code == 422
