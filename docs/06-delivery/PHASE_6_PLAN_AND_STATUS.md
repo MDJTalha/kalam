@@ -1,4 +1,4 @@
-# Kalam Phase 6 — Development Intelligence
+> **Historical planning record — superseded by the current delivery roadmap.** The numbering in this file reflects an earlier phase sequence in which Development Intelligence was called Phase 6. The current canonical sequence is: Phase 6 Reporting/Analytics & Integrations, Phase 7 Governed AI, Phase 8 Production/Commercial Readiness. See `docs/06-delivery/DELIVERY_ROADMAP.md` and `docs/06-delivery/IMPLEMENTATION_STATUS.md` for current status.\n\n# Kalam Phase 6 — Development Intelligence
 
 **Status:** Implementation complete; Phase 6 v2 enhancement, stale-state reconciliation, and focused regression QA passed locally.
 **Date:** 2026-10-01
