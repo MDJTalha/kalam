@@ -25,6 +25,7 @@ PERMISSION_DESCRIPTIONS: dict[str, str] = {
     "reports.manage": "Create and manage saved reports and schedules",
     "reports.export.people": "Export employee-identifiable workforce registers",
     "reports.export.learning": "Export employee-linked learning and enrollment registers",
+    "reports.export.compliance": "Export employee-linked compliance assignment records",
     "audit.read": "View tenant audit records",
     "files.read": "View governed files and evidence",
     "files.manage": "Manage governed file controls",
@@ -73,7 +74,8 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     ),
     "HR / People Administrator": (
         "users.read", "users.manage", "team.read", "reports.read",
-        "reports.export.people", "reports.export.learning", "compliance.manage",
+        "reports.export.people", "reports.export.learning", "reports.export.compliance",
+        "compliance.manage",
         "capabilities.read", "development.manage",
         "capability_gaps.read", "capability_gaps.manage",
         "capability_risk.read", "capability_risk.manage",
@@ -107,6 +109,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     ),
     "Quality & Compliance": (
         "compliance.manage", "audit.read", "files.read", "evidence.read",
+        "reports.export.compliance",
     ),
     # Auditors work through the audit trail and governed evidence repository.
     # Broad reports.read also exposes tenant-wide people exports, so it is not
