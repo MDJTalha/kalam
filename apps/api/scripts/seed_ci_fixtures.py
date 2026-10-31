@@ -41,6 +41,7 @@ ROLE_PERMISSIONS = {
     # customer-facing Tenant Administrator role used by role acceptance tests.
     "QA Harness Administrator": PERMISSIONS,
     "Tenant Administrator": list(TENANT_ROLE_PERMISSIONS["Tenant Administrator"]),
+    "L&D Administrator": list(TENANT_ROLE_PERMISSIONS["L&D Administrator"]),
     "Manager": list(TENANT_ROLE_PERMISSIONS["Manager"]),
     "Instructor": list(TENANT_ROLE_PERMISSIONS["Instructor"]),
     "Learner": list(TENANT_ROLE_PERMISSIONS["Learner / Employee"]),
@@ -76,6 +77,7 @@ async def seed():
         demo_users = [
             ("admin@demo.corp", "Demo", "QA Harness", "QA Harness Administrator"),
             ("tenant-admin@demo.corp", "Demo", "Tenant Administrator", "Tenant Administrator"),
+            ("ld@demo.corp", "Demo", "Learning Administrator", "L&D Administrator"),
             ("quality@demo.corp", "Demo", "Quality Reviewer", "Quality & Compliance"),
             ("manager@demo.corp", "Demo", "Manager", "Manager"),
             ("instructor@demo.corp", "Demo", "Instructor", "Instructor"),
