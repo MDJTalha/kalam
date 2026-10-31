@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, ClipboardCheck, MapPin, UsersRound } from "lucide-react";
+import { ArrowLeft, CalendarDays, ClipboardCheck, UsersRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SessionAttendanceRoster } from "@/components/session-attendance-roster";
