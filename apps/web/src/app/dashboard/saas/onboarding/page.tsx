@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { OnboardingItemCreateForm, OnboardingQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Item={
   id:string;account_id:string;account_name:string;managed_tenant_id?:string|null;owner_user_id?:string|null;
@@ -17,6 +17,9 @@ async function requestTimestamp():Promise<number>{
 }
 
 export default async function SaaSOnboardingPage(){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("saas.customer_success.manage")??false;
+  if(!user.permissions?.includes("saas.customer_success.read"))return <DashboardShell title="Onboarding" eyebrow="SaaS Customer Success"><EmptyState title="Customer success access is restricted" description="This role does not include onboarding visibility."/></DashboardShell>;
   const items=await apiJson<Item[]>("/api/v1/saas/crm/onboarding");
   if(!items)return <DashboardShell title="Onboarding" eyebrow="SaaS CRM"><EmptyState title="Onboarding CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
@@ -45,13 +48,11 @@ export default async function SaaSOnboardingPage(){
           <span key="c">{item.category.replaceAll("_"," ")}</span>,
           <span key="d">{item.due_at?new Date(item.due_at).toLocaleDateString():"—"}</span>,
           <StatusBadge key="e" status={item.status}/>,
-          <OnboardingQuickActions key="f" id={item.id} status={item.status}/>
+          {canManage?<OnboardingQuickActions key="f" id={item.id} status={item.status}/>:<span key="f">Read only</span>}
         ])}
       />
     </SectionCard>
 
-    <SectionCard eyebrow="Add task" title="Create onboarding item">
-      <OnboardingItemCreateForm />
-    </SectionCard>
+    {canManage&&<SectionCard eyebrow="Add task" title="Create onboarding item"><OnboardingItemCreateForm /></SectionCard>}
   </DashboardShell>;
 }
