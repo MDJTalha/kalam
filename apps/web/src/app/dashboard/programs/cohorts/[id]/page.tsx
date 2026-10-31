@@ -3,7 +3,7 @@ import { ArrowLeft, UsersRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { CohortEditor } from "@/components/cohort-editor";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { requireUser } from "@/lib/server-api";
 
 type Member = { user_id: string; name: string; email: string; status: string };
 type Person = { id: string; first_name: string; last_name: string; email: string; is_active: boolean };
@@ -30,8 +30,8 @@ export default async function CohortDetailPage({
   const canManageMembers = user.permissions?.includes("users.manage") ?? false;
   const { id } = await params;
   const [cohort, people] = await Promise.all([
-    apiJson<Cohort>("/api/v1/programs/cohorts/" + id),
-    canManage && canManageMembers ? apiJson<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active") : Promise.resolve(null),
+    apiJsonResult<Cohort>("/api/v1/programs/cohorts/" + id).then((result) => result.ok ? result.data : null),
+    canManage && canManageMembers ? apiJsonResult<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active").then((result) => result.ok ? result.data : null) : Promise.resolve(null),
   ]);
   if (!cohort) notFound();
 
