@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { CalendarDays, CheckCircle2, MessageSquare, Plus, RefreshCw, UserRound } from "lucide-react";
+import { CalendarDays, CheckCircle2, ClipboardList, MessageSquare, Plus, RefreshCw, UserRound } from "lucide-react";
 import { StatusBadge } from "@/components/ui";
 
 type Member = { id: string; first_name: string; last_name: string; email: string; job_title?: string | null };
