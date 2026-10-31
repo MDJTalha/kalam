@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { GenerateRenewalTasksButton } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Renewal={
   subscription_id:string;account_id:string;account_name:string;plan_id?:string|null;plan_name?:string|null;
