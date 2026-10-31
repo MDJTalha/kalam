@@ -551,7 +551,7 @@ button:disabled,.button[aria-disabled="true"]{cursor:not-allowed;opacity:.58}
 /* Kalam identity: retain the established icon and theme, update only the wordmark. */
 .kalam-logo-asset{display:flex;align-items:center;gap:9px;min-width:0;width:100%;line-height:1}
 .kalam-logo-icon{width:34px;height:34px;flex:0 0 34px;display:block}
-.kalam-logo-wordmark{color:#092844;font-size:clamp(20px,2vw,25px);font-weight:760;letter-spacing:-.035em;line-height:1}
+.kalam-logo-wordmark{color:#08243D;font-size:clamp(20px,2vw,25px);font-weight:760;letter-spacing:-.035em;line-height:1}
 .kalam-logo-dark .kalam-logo-wordmark{color:#F4FAFF}
 .kalam-logo-dark .kalam-logo-asset{color:#F4FAFF}
 @media(max-width:760px){.kalam-logo-icon{width:30px;height:30px;flex-basis:30px}.kalam-logo-wordmark{font-size:20px}}
@@ -566,7 +566,7 @@ button:disabled,.button[aria-disabled="true"]{cursor:not-allowed;opacity:.58}
 @media(max-width:520px){.k-mobile-brand .kalam-logo-icon{width:36px;height:36px;flex-basis:36px}.k-mobile-brand .kalam-logo-wordmark{font-size:28px;font-weight:700}}
 
 /* Kalam Integrations â€” brand-aligned enterprise control surface */
-.kalam-integration-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;overflow:hidden;margin:0 0 14px;padding:28px 30px;border:1px solid #c9dced;border-radius:18px;background:linear-gradient(120deg,#092844 0%,#104f7d 62%,var(--kalam-blue) 100%);color:#fff;box-shadow:0 16px 36px rgba(20,69,108,.13)}
+.kalam-integration-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;overflow:hidden;margin:0 0 14px;padding:28px 30px;border:1px solid #c9dced;border-radius:18px;background:linear-gradient(120deg,#08243D 0%,#104f7d 62%,var(--kalam-blue) 100%);color:#fff;box-shadow:0 16px 36px rgba(20,69,108,.13)}
 .kalam-integration-hero:after{content:"";position:absolute;width:330px;height:330px;right:-150px;top:-180px;border:1px solid rgba(255,255,255,.13);border-radius:50%;box-shadow:0 0 0 42px rgba(255,255,255,.025),0 0 0 84px rgba(255,255,255,.02)}
 .kalam-integration-hero-copy,.kalam-integration-hero-side{position:relative;z-index:1}.kalam-integration-eyebrow{display:inline-flex;align-items:center;gap:7px;color:#9ed0f4;font-size:9px;font-weight:900;letter-spacing:.14em}
 .kalam-integration-hero h2{margin:10px 0 10px;font-size:clamp(26px,3vw,38px);line-height:1.03;letter-spacing:-.045em}.kalam-integration-hero h2 span{color:#bfe2fb}.kalam-integration-hero p{max-width:690px;margin:0;color:#c7dceb;font-size:11px;line-height:1.65}
