@@ -13,7 +13,8 @@ PERMISSION_DESCRIPTIONS: dict[str, str] = {
     "courses.read": "View learning courses",
     "courses.manage": "Create and manage learning courses",
     "learning.access": "Access assigned learning experiences",
-    "assessments.manage": "Manage and grade learning assessments",
+    "assessments.manage": "Author and administer tenant assessments",
+    "assessments.grade_assigned": "Review and grade assessments for assigned instructor sessions",
     "certificates.manage": "Manage credentials and certificates",
     "compliance.manage": "Manage compliance requirements and assignments",
     "skills.manage": "Manage skills and competency frameworks",
@@ -85,7 +86,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "capability_assessments.execute",
     ),
     "Instructor": (
-        "courses.read", "learning.access", "assessments.manage",
+        "courses.read", "learning.access", "assessments.grade_assigned",
     ),
     "Learner / Employee": (
         "courses.read", "learning.access", "development.manage",
