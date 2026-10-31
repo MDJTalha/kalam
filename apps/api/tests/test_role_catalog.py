@@ -125,7 +125,7 @@ def test_hrbp_and_quality_roles_are_limited_to_their_job_scope():
     assert "reports.read" not in hrbp
 
     quality = set(TENANT_ROLE_PERMISSIONS["Quality & Compliance"])
-    assert {"compliance.manage", "audit.read", "files.read", "evidence.read"} <= quality
+    assert {"compliance.manage", "audit.read", "files.read", "reports.export.compliance"} <= quality
     assert "users.read" not in quality
     assert "reports.read" not in quality
     assert "evidence.read" not in quality
