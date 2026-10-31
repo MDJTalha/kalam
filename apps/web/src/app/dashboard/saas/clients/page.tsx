@@ -3,7 +3,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { AccountCreateForm, AccountQuickActions, ProvisionTenantButton } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Account={id:string;name:string;slug:string;account_type:string;lifecycle_stage:string;industry?:string|null;country?:string|null;employee_band?:string|null;public_showcase:boolean;plan_id?:string|null;managed_tenant_id?:string|null};
 type Plan={id:string;name:string};
