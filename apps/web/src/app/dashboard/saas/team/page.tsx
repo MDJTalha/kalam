@@ -2,6 +2,7 @@ import { UserRoundCog, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { SaaSTeamAdmin } from "@/components/saas-team-admin";
+import { SaaSPlatformRoleGovernance } from "@/components/saas-platform-role-governance";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
 import { apiJson, requireUser } from "@/lib/server-api";
 
@@ -13,8 +14,10 @@ type TeamMember={
 type Role={id:string;name:string;role_kind:string;description?:string|null};
 
 export default async function SaaSTeamPage(){
-  const user=await requireUser<{permissions?:string[]}>();
+  const user=await requireUser<{permissions?:string[];roles?:Array<{name:string}>}>();
   const canManage=user.permissions?.includes("saas.team.manage")??false;
+  const roleNames=(user.roles??[]).map(role=>role.name.trim().toLowerCase());
+  const canManagePlatformRoles=roleNames.includes("saas super admin")||roleNames.includes("platform developer");
   if(!user.permissions?.includes("saas.team.read"))return <DashboardShell title="SaaS Team" eyebrow="Platform operations"><EmptyState title="SaaS team access is restricted" description="This role does not include internal SaaS team visibility."/></DashboardShell>;
   const [team,roles]=await Promise.all([
     apiJson<TeamMember[]>("/api/v1/saas/crm/team"),
@@ -35,7 +38,7 @@ export default async function SaaSTeamPage(){
     </div>
 
     {canManage&&roles
-      ? <SaaSTeamAdmin initialMembers={team} roles={roles}/>
+      ? <><SaaSTeamAdmin initialMembers={team} roles={roles}/><SaaSPlatformRoleGovernance enabled={canManagePlatformRoles}/></>
       : <SectionCard eyebrow="Least-privilege overview" title="Kalam operations team" meta={team.length+" users"}>
           <DataTable
             columns={["Team member","Email","Role(s)","Account status"]}
