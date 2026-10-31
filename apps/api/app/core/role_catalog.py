@@ -8,6 +8,7 @@ PERMISSION_DESCRIPTIONS: dict[str, str] = {
     "tenant.read": "View the current tenant and its configuration",
     "tenant.manage": "Manage the current tenant configuration",
     "users.read": "View authorized workforce profiles",
+    "team.read": "View the current user's direct reports and team learning signals",
     "users.manage": "Manage authorized workforce users and invitations",
     "courses.read": "View learning courses",
     "courses.manage": "Create and manage learning courses",
@@ -50,12 +51,12 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "tenant.read", "reports.read", "audit.read",
     ),
     "Tenant Administrator": (
-        "tenant.read", "tenant.manage", "users.read", "users.manage",
+        "tenant.read", "tenant.manage", "users.read", "users.manage", "team.read",
         "reports.read", "audit.read", "integrations.manage",
         "capabilities.read", "capabilities.manage",
     ),
     "HR / People Administrator": (
-        "users.read", "users.manage", "reports.read", "compliance.manage",
+        "users.read", "users.manage", "team.read", "reports.read", "compliance.manage",
         "capabilities.read", "development.manage",
     ),
     "L&D Administrator": (
@@ -65,7 +66,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "compliance.manage", "reassessment.manage",
     ),
     "Manager": (
-        "users.read", "courses.read", "learning.access", "reports.read",
+        "team.read", "courses.read", "learning.access",
         "development.manage", "capabilities.read", "capability_gaps.read",
         "capability_risk.read", "capability_assessments.read",
         "capability_assessments.execute",
@@ -78,7 +79,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "capability_assessments.read", "capability_assessments.execute",
     ),
     "HR Business Partner": (
-        "users.read", "reports.read", "development.manage", "capabilities.read",
+        "users.read", "team.read", "reports.read", "development.manage", "capabilities.read",
         "capability_gaps.read", "capability_risk.read",
     ),
     "Quality & Compliance": (
@@ -91,9 +92,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     # Regional data isolation is not yet represented in the current API model.
     # This role is deliberately limited to reporting until regional row-level
     # authorization is implemented and tested.
-    "Regional Executive": (
-        "reports.read",
-    ),
+    "Regional Executive": (),
     "Global Executive": (
         "tenant.read", "users.read", "courses.read", "learning.access",
         "reports.read", "audit.read", "compliance.manage", "skills.manage",
