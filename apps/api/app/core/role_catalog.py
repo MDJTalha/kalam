@@ -44,7 +44,8 @@ PERMISSION_DESCRIPTIONS: dict[str, str] = {
     "saas.pricing.manage": "Create and manage SaaS plans, pricing and offers",
     "saas.finance.read": "View subscriptions, contracts, invoices, payments and renewals",
     "saas.finance.manage": "Manage subscriptions, contracts, invoices, payments and renewals",
-    "saas.customer_success.read": "View customer onboarding, trials, tenant status and customer access",
+    "saas.customer_success.read": "View customer onboarding, trials and tenant lifecycle status",
+    "saas.customer_users.read": "View customer-tenant employee accounts and access status",
     "saas.customer_success.manage": "Manage customer onboarding, trials, tenant status and customer access",
     "saas.platform.read": "View SaaS platform administration",
     "saas.platform.manage": "Manage SaaS platform administration",
@@ -142,12 +143,12 @@ PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     "SaaS Business Owner": (
         "tenant.read", "saas.crm.read", "saas.sales.read",
         "saas.pricing.read", "saas.finance.read", "saas.customer_success.read",
-        "saas.platform.read", "saas.team.read", "saas.audit.read",
+        "saas.platform.read", "saas.audit.read",
         "reports.read",
     ),
     "Sales Operations": (
         "saas.sales.read", "saas.sales.manage", "saas.sales.export",
-        "saas.pricing.read", "saas.team.read", "saas.customer_success.read",
+        "saas.pricing.read", "saas.team.read",
     ),
     "Sales Viewer": (
         "saas.sales.read", "saas.pricing.read",
@@ -157,6 +158,6 @@ PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     ),
     "Customer Success Manager": (
         "saas.sales.read", "saas.pricing.read", "saas.customer_success.read",
-        "saas.customer_success.manage",
+        "saas.customer_success.manage", "saas.customer_users.read",
     ),
 }
