@@ -26,7 +26,7 @@ export default async function ManagerWorkspacePage() {
   return <DashboardShell title="Manager workspace" eyebrow="Team leadership" breadcrumbs={[{label:"Overview",href:"/dashboard"},{label:"Manager workspace"}]}>
     <div className="page-heading">
       <div><span className="eyebrow">Direct reports only</span><h2>Lead your team with clear follow-up.</h2><p>Review learning progress, compliance obligations and individual development plans for your assigned direct reports.</p></div>
-      <div className="page-heading-actions"><Link className="button button-secondary" href="/dashboard/team">Open team workspace</Link><Link className="button button-primary" href="/dashboard/development">Development plans</Link></div>
+      <div className="page-heading-actions"><Link className="button button-secondary" href="/dashboard/team">Open team workspace</Link><Link className="button button-primary" href="/dashboard/development/team">Development plans</Link></div>
     </div>
     <div className="stat-grid">
       <MetricCard label="Direct reports" value={team.length} detail="People reporting directly to you" icon={UsersRound}/>
@@ -36,10 +36,10 @@ export default async function ManagerWorkspacePage() {
     </div>
     <div className="two-column">
       <SectionCard eyebrow="Manager attention" title="People needing follow-up" meta={attention.length+" direct reports"}>
-        {attention.length?<div className="compact-list">{attention.map(item=><div className="compact-row" key={item.id}><div><strong>{item.first_name} {item.last_name}</strong><small>{item.job_title||item.email}</small><small>{item.overdue_learning} overdue learning · {item.overdue_compliance} overdue compliance · {item.active_plans} active plans</small></div><Link className="text-link" href={"/dashboard/development?user_id="+encodeURIComponent(item.id)}>Review development</Link></div>)}</div>:<EmptyState title="No follow-up flags" description="No overdue learning or compliance items are currently recorded for your direct reports."/>}
+        {attention.length?<div className="compact-list">{attention.map(item=><div className="compact-row" key={item.id}><div><strong>{item.first_name} {item.last_name}</strong><small>{item.job_title||item.email}</small><small>{item.overdue_learning} overdue learning · {item.overdue_compliance} overdue compliance · {item.active_plans} active plans</small></div><Link className="text-link" href={"/dashboard/development/team?person="+encodeURIComponent(item.id)}>Review development</Link></div>)}</div>:<EmptyState title="No follow-up flags" description="No overdue learning or compliance items are currently recorded for your direct reports."/>}
       </SectionCard>
       <SectionCard eyebrow="Team controls" title="Work within your management scope">
-        <div className="role-actions"><Link href="/dashboard/team">Team learning and activity</Link><Link href="/dashboard/capability-gaps">Capability gaps for your team</Link><Link href="/dashboard/capability-risk">Team capability risk</Link><Link href="/dashboard/development">Development plans</Link></div>
+        <div className="role-actions"><Link href="/dashboard/team">Team learning and activity</Link><Link href="/dashboard/capability-gaps">Capability gaps for your team</Link><Link href="/dashboard/capability-risk">Team capability risk</Link><Link href="/dashboard/development/team">Development plans</Link></div>
         <p className="form-help">You cannot open another department’s people records or tenant-wide HR reports unless separately authorized.</p>
       </SectionCard>
     </div>
