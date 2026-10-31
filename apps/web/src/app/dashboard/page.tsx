@@ -28,18 +28,20 @@ const pct = (value:number,total:number) => total ? Math.round(value / total * 10
 export default async function DashboardPage(){
   const user = await requireUser<{ id:string; job_title?:string|null; org_unit_name?:string|null; roles?:Array<{name:string}>; permissions?:string[] }>();
   const permissions = user.permissions ?? [];
-  const roleNames = (user.roles ?? []).map(role => role.name.toLowerCase());
-  const jobTitle = (user.job_title ?? "").toLowerCase();
-  const isTrainer = roleNames.some(name => name.includes("instructor") || name.includes("trainer")) || /trainer|instructor|facilitator/.test(jobTitle);
-  const isManager = roleNames.some(name => name === "manager" || name.includes("manager")) || /manager|head of|department head/.test(jobTitle);
-  const isHrBp = roleNames.some(name => name.includes("hrbp") || name.includes("hr business partner")) || /hrbp|hr business partner|human resources business partner/.test(jobTitle);
-  const isLd = roleNames.some(name => name.includes("hr/l&d") || name.includes("l&d") || name.includes("learning")) || /l&d|learning and development|learning & development/.test(jobTitle);
-  const isPeopleAdmin = roleNames.some(name => name.includes("hr / people administrator"));
+  const roleNames = (user.roles ?? []).map(role => role.name.trim().toLowerCase());
+  // Authorization and workspace selection come from assigned roles. HR job
+  // titles are descriptive metadata and never grant a workspace by themselves.
+  const isTrainer = roleNames.some(name => name === "instructor" || name === "trainer");
+  const isManager = roleNames.includes("manager");
+  const isHrBp = roleNames.some(name => name === "hrbp" || name === "hr business partner");
+  const isLd = roleNames.some(name => name === "hr/l&d admin" || name === "l&d administrator" || name === "learning & development administrator");
+  const isPeopleAdmin = roleNames.includes("hr / people administrator");
   const isTenantAdmin = roleNames.some(name => name === "tenant administrator" || name === "tenant admin");
-  const isTenantOwner = roleNames.some(name => name === "tenant owner");
-  const isQuality = roleNames.some(name => name === "quality & compliance");
-  const isAuditor = roleNames.some(name => name === "auditor");
-  const isExecutive = roleNames.some(name => name.includes("global executive") || name === "executive") || /ceo|chief|chro|coo|president|managing director/.test(jobTitle);
+  const isTenantOwner = roleNames.includes("tenant owner");
+  const isQuality = roleNames.includes("quality & compliance");
+  const isAuditor = roleNames.includes("auditor");
+  const isRegionalExecutive = roleNames.includes("regional executive");
+  const isExecutive = roleNames.some(name => name === "global executive" || name === "executive");
 
   // Give internal SaaS operators the workspace that matches their job, rather
   // than sending them through learner/compliance widgets that are not theirs.
@@ -56,6 +58,7 @@ export default async function DashboardPage(){
   const canSeeCapability = permissions.includes("users.read");
   const canAudit = permissions.includes("audit.read");
   const roleMode = isExecutive ? "executive"
+    : isRegionalExecutive ? "regional"
     : isTenantOwner ? "owner"
     : isTenantAdmin ? "admin"
     : isLd ? "ld"
@@ -148,6 +151,7 @@ export default async function DashboardPage(){
   const trainerAttendance = trainerMarked ? Math.round(trainerPresent / trainerMarked * 100) : null;
   const roleCopy = {
     executive:{eyebrow:"Workforce intelligence",title:"Lead Workforce Capability.",description:"See where capability, learning, and compliance require leadership attention—at a glance.",primary:"Open workforce analytics",href:"/dashboard/analytics"},
+    regional:{eyebrow:"Regional leadership",title:"Regional reporting is not enabled yet.",description:"This role is deliberately restricted until a region is assigned to governed organizational units and row-level access is tested. Your job title does not provide substitute tenant-wide access.",primary:"Contact tenant administrator",href:"/dashboard/access-denied"},
     owner:{eyebrow:"Organization stewardship",title:"Govern Your Learning Organization.",description:"Review high-level workforce, learning and compliance indicators without opening individual employee records.",primary:"Open organization reports",href:"/dashboard/reports"},
     admin:{eyebrow:"Tenant administration",title:"Keep Your Workspace Governed.",description:"Coordinate people access, organizational structure, integrations and workforce controls for this tenant.",primary:"Open tenant administration",href:"/dashboard/admin"},
     ld:{eyebrow:"Learning & capability leadership",title:"Build Capability at Scale.",description:"Connect learning performance, capability gaps and delivery operations into one view of L&D effectiveness.",primary:"Open L&D analytics",href:"/dashboard/analytics"},
@@ -161,7 +165,7 @@ export default async function DashboardPage(){
   }[roleMode];
 
   const pageTitle = {
-    executive:"Executive Overview", owner:"Tenant Owner Overview", admin:"Tenant Administration",
+    executive:"Executive Overview", regional:"Regional Executive — Access Setup Required", owner:"Tenant Owner Overview", admin:"Tenant Administration",
     ld:"L&D Overview", hrbp:"HR Business Partner", people:"People Operations",
     quality:"Quality & Compliance", auditor:"Audit & Evidence", manager:"Team Overview",
     trainer:"Delivery Overview", standard:"My Learning",
@@ -246,6 +250,14 @@ export default async function DashboardPage(){
         {teamAttention.length ? <div className="role-list">{teamAttention.map(member => <div className="role-list-row" key={member.id}><span className="role-rank"><UsersRound size={13}/></span><div><strong>{member.first_name} {member.last_name}</strong><small>{member.job_title || "Team member"} · {member.overdue_learning} overdue learning · {member.overdue_compliance} overdue compliance</small></div><ArrowRight size={14}/></div>)}</div> : <div className="role-empty">No direct-report follow-up signals are recorded.</div>}
       </section>
       <p className="form-help">Portfolio-wide HRBP reporting is not enabled yet. Your current access is limited to your direct-report relationships; a governed business-unit portfolio assignment is required before wider access is granted.</p>
+    </section>}
+    {roleMode === "regional" && <section className="role-dashboard" aria-label="Regional executive scope unavailable">
+      <section className="role-panel">
+        <div className="role-panel-head"><div><span className="eyebrow">Access governance</span><h2>Regional reporting is not enabled.</h2></div><ShieldCheck size={18}/></div>
+        <p>This role remains restricted until an administrator assigns the region to specific organizational units and the system enforces those boundaries across workforce, capability, learning and compliance reports.</p>
+        <p>No tenant-wide or individual employee reporting is substituted for regional scope.</p>
+        <div className="role-actions"><Link href="/dashboard/access-denied">View access guidance</Link><Link href="/dashboard/audit">Open authorized audit activity</Link></div>
+      </section>
     </section>}
     {roleMode === "executive" && <section className="role-dashboard" aria-label="Global executive aggregate dashboard">
       <div className="role-kpi-grid">
