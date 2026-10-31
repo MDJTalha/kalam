@@ -79,3 +79,42 @@ def test_phase6_accept_endpoint_requires_existing_recommendation():
             "/api/v1/development/recommendations/00000000-0000-0000-0000-000000000000/accept"
         )
         assert response.status_code == 404
+
+
+def test_phase6_recommendations_cannot_cross_tenant_to_real_user():
+    import asyncio
+    from sqlalchemy import select
+    from app.db.models import Tenant, User
+    from app.db.session import SessionLocal
+
+    async def first_demo_user():
+        async with SessionLocal() as db:
+            return str((await db.execute(
+                select(User.id)
+                .join(Tenant, Tenant.id == User.tenant_id)
+                .where(Tenant.slug == TENANT, User.is_active.is_(True))
+            )).scalars().first())
+
+    user_id = asyncio.run(first_demo_user())
+    assert user_id and user_id != "None"
+
+    with TestClient(app, base_url="http://localhost") as client:
+        login(client)
+        assert client.post(f"/api/v1/capability-gaps/recalculate?user_id={user_id}").status_code == 200
+        recommendations = client.get(
+            f"/api/v1/development/recommendations?user_id={user_id}&limit=50"
+        )
+        assert recommendations.status_code == 200, recommendations.text
+        assert recommendations.json(), "seeded capability lifecycle should produce a recommendation"
+        recommendation_id = recommendations.json()[0]["id"]
+
+        login(client, tenant="isolation-corporation",
+              credentials={"email": "isolated@other.corp", "password": "DemoOnly!1234"})
+        cross = client.get(
+            f"/api/v1/development/recommendations?user_id={user_id}&limit=50"
+        )
+        assert cross.status_code in {403, 404}, cross.text
+        cross_accept = client.post(
+            f"/api/v1/development/recommendations/{recommendation_id}/accept"
+        )
+        assert cross_accept.status_code in {403, 404}, cross_accept.text

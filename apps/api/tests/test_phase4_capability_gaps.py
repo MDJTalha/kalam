@@ -175,11 +175,27 @@ def test_phase4_stale_evidence_becomes_insufficient_evidence():
 
 
 def test_phase4_manager_and_tenant_isolation():
+    import asyncio
+    from app.db.session import SessionLocal
+
+    async def first_user():
+        async with SessionLocal() as db:
+            return str((await db.execute(
+                select(User.id)
+                .join(Tenant, Tenant.id == User.tenant_id)
+                .where(Tenant.slug == TENANT, User.is_active.is_(True))
+            )).scalars().first())
+
+    user_id = asyncio.run(first_user())
+    assert user_id and user_id != "None"
+
     with TestClient(app, base_url="http://localhost") as client:
         login(client)
-        own = client.get("/api/v1/capability-gaps")
+        own = client.get(f"/api/v1/capability-gaps?user_id={user_id}")
         assert own.status_code == 200
 
         login(client, tenant=OTHER_TENANT, credentials=OTHER_USER)
-        assert client.get("/api/v1/capability-gaps").status_code in {200, 403}
-        assert client.get("/api/v1/capability-gaps/snapshots").status_code in {200, 403}
+        cross = client.get(f"/api/v1/capability-gaps?user_id={user_id}")
+        assert cross.status_code in {403, 404}, cross.text
+        cross_snapshots = client.get(f"/api/v1/capability-gaps/snapshots?user_id={user_id}")
+        assert cross_snapshots.status_code in {403, 404}, cross_snapshots.text
