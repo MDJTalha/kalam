@@ -89,9 +89,8 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     "Auditor": (
         "reports.read", "audit.read", "files.read", "evidence.read",
     ),
-    # Regional data isolation is not yet represented in the current API model.
-    # This role is deliberately limited to reporting until regional row-level
-    # authorization is implemented and tested.
+    # No grants until a verifiable regional-to-org-unit scope and row-level
+    # filters exist across People, reports, capability, and compliance APIs.
     "Regional Executive": (),
     "Global Executive": (
         "tenant.read", "users.read", "courses.read", "learning.access",
