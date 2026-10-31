@@ -1,6 +1,6 @@
 # Kalam — Release Certification Status
 Date: 2026-10-31
-Current main candidate observed: `2a26dd18ad57c024d99be5216db77eb76781ca8a`
+Current main candidate observed: `0846b2b15e3c6ec64458804f4b35e30b43d07d0e`
 
 ## Executive status
 
@@ -25,8 +25,8 @@ This ledger distinguishes source implementation from independently executed runt
 
 | Gate | Current state | Required evidence |
 |---|---|---|
-| Exact-candidate CI | MERGE-EQUIVALENT TREE VERIFIED | Hosted PR run #470 (ID `41214013410`) passed API/Web/release-config against the exact PR #30 application tree, including production-image runtime smoke. The merge is a squash of that tree. |
-| Full API regression | CERTIFIED FOR EXACT APPLICATION TREE | Hosted PR #30 run #470 (ID `41214013410`) executed the complete API suite against the exact application tree that was squash-merged to main; the API job completed successfully with **182 passed, 0 failed**, one dependency deprecation warning, in 80.06 seconds. |
+| Exact-candidate CI | MERGE-EQUIVALENT TREE VERIFIED | Hosted PR run #477 (ID `41215669267`) passed API/Web/release-config for the final certification-evidence tree; the application tree remained unchanged from the exact PR #30 application tree. PR #33 then passed hosted run #478 (ID `41215769207`) for the evidence-collection bound hardening before merge. |
+| Full API regression | CERTIFIED FOR EXACT APPLICATION TREE | Hosted PR #30 run #470 (ID `41214013410`) executed the complete API suite against the exact application tree that was subsequently carried forward; the API job completed successfully with **182 passed, 0 failed**, one dependency deprecation warning, in 80.06 seconds. PR #33 run #478 (ID `41215769207`) also passed after adding bounded legacy evidence collection reads and regression coverage. |
 | Browser E2E | NOT CERTIFIED | Real authenticated role matrix covering admin, HR/L&D, manager, instructor, learner, auditor/compliance. |
 | Tenant isolation | SOURCE + REGRESSION COVERAGE | Execute negative A→B access matrix in a live disposable/staging environment. |
 | Learning lifecycle | IMPLEMENTED + REGRESSION COVERAGE | Browser/runtime proof: enrollment → learning → assessment → completion → capability update → gap recalculation. |
@@ -36,7 +36,7 @@ This ledger distinguishes source implementation from independently executed runt
 | DR/failover | NOT CERTIFIED | Executed failover/recovery with measured RTO/RPO. |
 | AWS production | NOT CERTIFIED | TLS, secrets, migrations, health checks, monitoring, integrations and rollback evidence. |
 | API helper migration | CLOSED | Legacy `apiJson()` helper removed and all identified application callers migrated; covered by successful hosted PR CI #470. |
-| Reference-data bounds | SUBSTANTIALLY HARDENED / AUDIT OPEN | Compatibility organization lists are bounded; finish systematic audit for remaining broad enterprise consumers. |
+| Reference-data bounds | HARDENED FOR IDENTIFIED LEGACY EVIDENCE GAP / AUDIT OPEN | PR #33 bounds `GET /api/v1/evidence` to 1–100 records with validated offset pagination and regression tests; continue systematic audit for any remaining broad enterprise consumers. |
 | AI activation | NOT CERTIFIED | Provider, grounding, safety, tenant isolation, human override and audit evidence before enabling real-provider AI. |
 
 ## Exact evidence package
@@ -73,9 +73,9 @@ Verified during the current execution window:
 
 ## Current mainline evidence
 
-- Current main candidate: `2a26dd18ad57c024d99be5216db77eb76781ca8a`.
-- PR #30 hosted run #470 (`41214013410`) completed successfully against the exact PR tree: API, Web and release-config, including production-image runtime smoke.
-- No separate push-triggered workflow run for the merge SHA is exposed by the available GitHub connector.
+- Current main candidate: `0846b2b15e3c6ec64458804f4b35e30b43d07d0e`.
+- PR #30 hosted run #470 (`41214013410`) completed successfully against the exact application tree: API, Web and release-config, including production-image runtime smoke. PR #32 run #477 (`41215669267`) and PR #33 run #478 (`41215769207`) also passed before their respective merges.
+- No separate push-triggered workflow run for the merge SHA is exposed by the available GitHub connector; hosted PR evidence is tied to the exact pre-merge trees.
 
 ## Certification rule
 
