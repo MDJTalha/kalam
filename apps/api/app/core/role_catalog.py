@@ -67,7 +67,8 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     ),
     "Tenant Administrator": (
         "tenant.read", "tenant.manage", "users.read", "users.manage", "team.read",
-        "reports.read", "audit.read", "integrations.manage",
+        "reports.read", "reports.export.people", "reports.export.learning",
+        "reports.export.compliance", "audit.read", "integrations.manage",
         "capabilities.read", "capabilities.manage",
         "capability_gaps.read", "capability_gaps.manage",
         "capability_risk.read", "capability_risk.manage",
