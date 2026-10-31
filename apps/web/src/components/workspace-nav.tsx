@@ -23,7 +23,7 @@ type NavGroup = { label: string; items: NavItem[] };
 const allowed = (permissions: string[], permission?: string | string[]) =>
   !permission || (Array.isArray(permission) ? permission.some(key => permissions.includes(key)) : permissions.includes(permission));
 
-const item = (href: string, label: string, icon: NavIcon, permission?: string, exact = false): NavItem =>
+const item = (href: string, label: string, icon: NavIcon, permission?: string | string[], exact = false): NavItem =>
   ({ href, label, icon, permission, exact });
 const baseGroups: NavGroup[] = [
   { label: "Workspace", items: [item("/dashboard", "Overview", BarChart3, undefined, true)] },
