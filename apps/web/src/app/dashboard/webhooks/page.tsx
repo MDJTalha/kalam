@@ -2,7 +2,7 @@ import { Webhook } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ResourceForm } from "@/components/resource-form";
 import { EmptyState, Section, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Hook={id:string;url:string;event_types:string[];active:boolean;created_at:string};
 
@@ -13,7 +13,8 @@ export default async function WebhooksPage(){
       <EmptyState title="Access restricted" description="Webhook administration requires integration management permission." icon={Webhook}/>
     </DashboardShell>;
   }
-  const hooks=await apiJson<Hook[]>("/api/v1/webhooks");
+  const hooksResult=await apiJsonResult<Hook[]>("/api/v1/webhooks");
+  const hooks=hooksResult.data;
   return <DashboardShell title="Webhooks" eyebrow="Event delivery" breadcrumbs={[{label:"Integrations",href:"/dashboard/integrations"},{label:"Webhooks"}]}>
     <div className="two-column">
       <Section eyebrow="Endpoint" title="Create webhook">
@@ -25,6 +26,7 @@ export default async function WebhooksPage(){
       <div className="callout"><Webhook size={16}/><strong>Secure event delivery</strong><p>A signing secret is generated once when the endpoint is created. Store it securely; it is not recoverable later.</p></div>
     </div>
     <Section eyebrow="Event endpoints" title="Configured webhooks">
+      {!hooksResult.ok ? <div role="alert" className="empty-state"><h3>Webhook registry unavailable</h3><p>HTTP {hooksResult.status}: {hooksResult.error || "Unable to load webhook endpoints."}</p></div> : null}
       {hooks?.length?<div className="compact-list">{hooks.map(item=><div className="compact-row" key={item.id}>
         <div><strong>{item.url}</strong><small>{item.event_types.join(" · ")} · {new Date(item.created_at).toLocaleDateString()}</small></div>
         <StatusBadge status={item.active?"active":"disabled"}/>
