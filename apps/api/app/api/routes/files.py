@@ -9,7 +9,7 @@ from app.api.deps import require_permission
 from app.db.models import FileObject, User
 from app.db.session import get_db
 from app.services.audit import audit
-from app.services.file_scanner import FileScanError, scan_file
+from app.services.file_scanner import FileScanError, scan_file, validate_file_content_type
 from app.services.storage import get_storage
 
 router = APIRouter()
@@ -45,6 +45,7 @@ async def upload_file(
 
     path = storage.path_for(object_key)
     try:
+        validate_file_content_type(path, upload.content_type)
         clean, scanner = await scan_file(path)
     except FileScanError as exc:
         storage.delete(object_key)
