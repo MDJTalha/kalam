@@ -52,7 +52,7 @@ export default async function DashboardPage(){
     canReport ? apiJson<Effectiveness>("/api/v1/reports/learning-effectiveness") : Promise.resolve(null),
     canReport ? apiJson<{organization_units:OrgUnit[]}>("/api/v1/reports/organization-performance") : Promise.resolve(null),
     canAudit ? apiJson<Audit[]>("/api/v1/admin/audit?limit=5") : Promise.resolve(null),
-    (isManager || isHrBp) && canSeeCapability ? apiJson<TeamMember[]>("/api/v1/people/team") : Promise.resolve(null),
+    (isManager || isHrBp) && permissions.includes("team.read") ? apiJson<TeamMember[]>("/api/v1/people/team") : Promise.resolve(null),
     isLd && permissions.includes("courses.manage") ? apiJson<QueueSummary>("/api/v1/courses/operations/enrollment-queue?page=1&page_size=1&status=all&q=") : Promise.resolve(null),
     isTrainer ? apiJson<LiveSession[]>("/api/v1/sessions") : Promise.resolve(null),
   ]);
@@ -77,7 +77,7 @@ export default async function DashboardPage(){
     {label:"Explore learning",href:"/dashboard/catalog",icon:BookOpenCheck,permission:"learning.access"},
     {label:"Create learning",href:"/dashboard/catalog/new",icon:BookOpenCheck,permission:"courses.manage"},
     {label:"Open L&D operations",href:"/dashboard/ld-operations",icon:Activity,permission:"courses.manage"},
-    {label:"Open team workspace",href:"/dashboard/team",icon:UsersRound,permission:"users.read"},
+    {label:"Open team workspace",href:"/dashboard/team",icon:UsersRound,permission:"team.read"},
     {label:"Add user",href:"/dashboard/people/admin",icon:UsersRound,permission:"users.manage"},
     {label:"Review compliance",href:"/dashboard/compliance/admin",icon:ShieldCheck,permission:"compliance.manage"},
     {label:"Open analytics",href:"/dashboard/analytics",icon:Activity,permission:"reports.read"},
