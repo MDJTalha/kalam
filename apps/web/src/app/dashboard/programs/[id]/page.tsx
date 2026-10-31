@@ -3,7 +3,7 @@ import { ArrowLeft, Layers3, UsersRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ProgramEditor } from "@/components/program-editor";
-import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { StateMessage } from "@/components/ui";
 
 type Course = { course_id: string; title: string; position: number; is_required: boolean };
@@ -17,8 +17,8 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
   const canManage = user.permissions?.includes("courses.manage") ?? false;
   const { id } = await params;
   const [program, cohorts, catalog] = await Promise.all([
-    apiJson<Program>("/api/v1/programs/" + id),
-    apiJson<Cohort[]>("/api/v1/programs/cohorts"),
+    apiJsonResult<Program>("/api/v1/programs/" + id).then((result) => result.ok ? result.data : null),
+    apiJsonResult<Cohort[]>("/api/v1/programs/cohorts").then((result) => result.ok ? result.data : null),
     canManage ? apiJsonResult<CatalogCoursePage>("/api/v1/courses/page?page=1&page_size=100&manage=true") : Promise.resolve(null),
   ]);
   if (!program) notFound();
