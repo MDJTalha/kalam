@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import is_platform_developer, is_saas_super_admin, require_permission
 from app.core.config import settings
+from app.core.role_catalog import TENANT_ROLE_PERMISSIONS as PREDEFINED_TENANT_ROLES
 from app.db.models import (
     CRMAccount,
     CRMContact,
@@ -59,7 +60,6 @@ class TenantRolePermissionsUpdate(BaseModel):
 
 router = APIRouter()
 
-from app.core.role_catalog import TENANT_ROLE_PERMISSIONS as PREDEFINED_TENANT_ROLES
 
 async def _ensure_tenant_roles(db: AsyncSession, tenant_id: UUID) -> None:
     permission_rows = list((await db.execute(
