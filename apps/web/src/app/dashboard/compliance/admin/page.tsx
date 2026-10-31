@@ -47,16 +47,16 @@ export default async function ComplianceAdminPage({ searchParams }: { searchPara
   ]);
   const results = [requirementsResult, reportResult, assignmentsResult, evidenceResult, exceptionsResult, coursesResult, operationsResult];
   const failed = results.filter((item) => !item.ok);
-  const requirements = requirementsResult.data?.items ?? [];
+  const requirementsPage = requirementsResult.data;\n  const requirements = requirementsPage?.items ?? [];
   const report = reportResult.data;
   const assignments = assignmentsResult.data;
   const evidence = evidenceResult.data;
   const exceptions = exceptionsResult.data;
-  const courses = coursesResult.data?.items ?? [];
+  const coursesPage = coursesResult.data;\n  const courses = coursesPage?.items ?? [];
   const operations = operationsResult.data;
   const roleOptions = roleOptionsResult.data ?? [];
   const unitOptions = unitOptionsResult.data ?? [];
-  const serviceUnavailable = failed.length > 0;
+  const serviceUnavailable = failed.length > 0 || (requirementsPage ? requirementsPage.total > requirementsPage.items.length : false) || (coursesPage ? coursesPage.total > coursesPage.items.length : false);
   const editing = requirements.find((item) => item.id === query.edit);
   const [previewResult, versionsResult] = editing ? await Promise.all([
     apiJsonResult<AudiencePreview>(`/api/v1/compliance/${editing.id}/preview`),
