@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { GitBranch, Plus } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 type Path = { id: string; title: string; description?: string | null; status: string; slug: string };
 export default async function LearningPathsPage() {
