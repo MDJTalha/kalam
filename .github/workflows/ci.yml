@@ -105,7 +105,7 @@ jobs:
       - name: Verify ClamAV transport
         run: |
           for attempt in $(seq 1 90); do
-            if .venv/bin/python -c "import socket; s=socket.create_connection(('127.0.0.1', 3310), timeout=3); s.sendall(b'PING\\n'); result=s.recv(100); s.close(); assert result.strip()==b'PONG', result"; then
+            if .venv/bin/python -c "import socket; s=socket.create_connection(('127.0.0.1', 3310), timeout=3); s.sendall(b'PING\n'); result=s.recv(100); s.close(); assert result.strip()==b'PONG', result"; then
               echo "ClamAV transport is ready."
               exit 0
             fi
