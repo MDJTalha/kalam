@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_permission
@@ -145,6 +145,73 @@ async def create_category(
         "name": item.name,
         "description": item.description,
         "active": item.active,
+    }
+
+
+@router.get("/page")
+async def page_capabilities(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    q: str = Query(default="", max_length=100),
+    status: str | None = Query(default=None),
+    criticality: str | None = Query(default=None),
+    user: User = Depends(require_permission("capabilities.read")),
+    db: AsyncSession = Depends(get_db),
+):
+    conditions = [Capability.tenant_id == user.tenant_id]
+    term = q.strip()
+    if term:
+        escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        match = f"%{escaped}%"
+        conditions.append(
+            or_(
+                Capability.name.ilike(match, escape="\\"),
+                Capability.code.ilike(match, escape="\\"),
+            )
+        )
+    if status:
+        conditions.append(Capability.status == status)
+    if criticality:
+        conditions.append(Capability.criticality == criticality)
+    total = int(await db.scalar(select(func.count()).select_from(Capability).where(*conditions)) or 0)
+    rows = (await db.scalars(
+        select(Capability).where(*conditions)
+        .order_by(Capability.name, Capability.id)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )).all()
+    category_ids = {item.category_id for item in rows if item.category_id}
+    category_map = {}
+    if category_ids:
+        category_rows = await db.execute(
+            select(CapabilityCategory).where(
+                CapabilityCategory.tenant_id == user.tenant_id,
+                CapabilityCategory.id.in_(category_ids),
+            )
+        )
+        category_map = {row.id: row for row in category_rows.scalars()}
+    capability_ids = [item.id for item in rows]
+    levels_by_capability: dict[UUID, list[CapabilityLevel]] = {}
+    if capability_ids:
+        level_rows = await db.execute(
+            select(CapabilityLevel)
+            .where(CapabilityLevel.capability_id.in_(capability_ids))
+            .order_by(CapabilityLevel.capability_id, CapabilityLevel.level)
+        )
+        for level in level_rows.scalars():
+            levels_by_capability.setdefault(level.capability_id, []).append(level)
+    return {
+        "items": [
+            _serialize_capability_payload(
+                item,
+                category_map.get(item.category_id) if item.category_id else None,
+                levels_by_capability.get(item.id, []),
+            )
+            for item in rows
+        ],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
     }
 
 
