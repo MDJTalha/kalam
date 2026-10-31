@@ -8,7 +8,7 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, is_saas_super_admin, require_permission, user_has_permission
+from app.api.deps import is_platform_developer, is_saas_ops_user, is_saas_super_admin, require_permission, user_has_permission
 from app.core.security import session_token_hash, utcnow
 from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
 from app.db.session import get_db
@@ -23,6 +23,12 @@ BASIC_ASSIGNABLE_TENANT_ROLES = {
     "instructor",
     "learner / employee",
     "employee / learner",
+}
+ASSIGNABLE_SAAS_TEAM_ROLES = {
+    "sales operations",
+    "sales viewer",
+    "saas finance administrator",
+    "customer success manager",
 }
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
@@ -238,12 +244,20 @@ async def create_invitation(
         raise HTTPException(status_code=404, detail="Role not found")
     is_developer = await _is_platform_developer(user, db)
     is_super_admin = await is_saas_super_admin(user, db)
+    is_ops_team_admin = (
+        await is_saas_ops_user(user, db)
+        and await user_has_permission(user, db, "saas.team.manage")
+    )
     can_manage_roles = await user_has_permission(user, db, "tenant.manage")
     if role.role_kind == "platform":
-        if role.name.strip().lower() == "platform developer" and not is_developer:
-            raise HTTPException(status_code=403, detail="SaaS Super Admin cannot provision Platform Developer identities")
-        if not is_developer and not is_super_admin:
-            raise HTTPException(status_code=403, detail="Platform-role invitations require platform administration rights")
+        role_name = role.name.strip().lower()
+        can_invite_platform_role = (
+            is_developer
+            or (is_super_admin and role_name != "platform developer")
+            or (is_ops_team_admin and role_name in ASSIGNABLE_SAAS_TEAM_ROLES)
+        )
+        if not can_invite_platform_role:
+            raise HTTPException(status_code=403, detail="Your SaaS team role cannot invite this platform role")
     elif not can_manage_roles and not (
         role.role_kind == "predefined" and role.name.strip().lower() in BASIC_ASSIGNABLE_TENANT_ROLES
     ):
@@ -357,6 +371,18 @@ async def update_user(
     )
     if target_privileged_role is not None and not can_manage_roles:
         raise HTTPException(status_code=403, detail="Managing accounts with administrative or platform roles requires tenant administration permission")
+    target_root_platform_role = await db.scalar(
+        select(Role.id)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == target.id)
+        .where(Role.tenant_id == admin.tenant_id)
+        .where(func.lower(Role.name).in_(("platform developer", "saas super admin", "saas administrator")))
+        .limit(1)
+    )
+    if target_root_platform_role is not None and not (
+        await _is_platform_developer(admin, db) or await is_saas_super_admin(admin, db)
+    ):
+        raise HTTPException(status_code=403, detail="Only Platform Developer or SaaS Super Admin can manage root platform administrator accounts")
     target_is_platform_developer = await db.scalar(
         select(Role.id)
         .join(UserRole, UserRole.role_id == Role.id)
