@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import delete, select
 
 from app.core.security import hash_password
-from app.db.models import CRMAccount, Role, SaaSOffer, SaaSPlan, SessionRecord, Tenant, User, UserRole
+from app.db.models import CRMAccount, Role, RolePermission, SaaSOffer, SaaSPlan, SessionRecord, Tenant, User, UserRole
 from app.db.session import SessionLocal
 from app.main import app
 
@@ -14,34 +14,33 @@ OPS_SLUG = "kalam"
 PASSWORD = "SaaSCRMTest!2026"
 
 
-async def _create_ops_user(email: str) -> None:
+async def _create_ops_user(email: str, role_name: str = "SaaS Super Admin") -> None:
+    """Create an operations test user with exactly the requested role.
+
+    Do not attach Platform Developer as a test shortcut: that role bypasses
+    normal permission checks and would invalidate SaaS role-boundary tests.
+    """
     async with SessionLocal() as db:
         tenant = await db.scalar(select(Tenant).where(Tenant.slug == OPS_SLUG))
         assert tenant is not None
-        role = await db.scalar(select(Role).where(Role.tenant_id == tenant.id, Role.name == "SaaS Administrator"))
+        role = await db.scalar(select(Role).where(Role.tenant_id == tenant.id, Role.name == role_name))
         assert role is not None
-        developer_role = await db.scalar(select(Role).where(Role.tenant_id == tenant.id, Role.name.ilike("platform developer")))
-        if developer_role is None:
-            developer_role = Role(tenant_id=tenant.id, name="Platform Developer", description="Test-only internal platform role", role_kind="platform")
-            db.add(developer_role)
-            await db.flush()
         user = User(
             tenant_id=tenant.id,
             email=email,
             password_hash=hash_password(PASSWORD),
             first_name="CRM",
             last_name="Test",
-            job_title="SaaS Administrator",
+            job_title=role_name,
             is_active=True,
         )
         db.add(user)
         await db.flush()
         db.add(UserRole(user_id=user.id, role_id=role.id))
-        db.add(UserRole(user_id=user.id, role_id=developer_role.id))
         await db.commit()
 
 
-async def _cleanup(email: str, plan_code: str, account_slug: str | None = None, offer_code: str | None = None, provisioned_slug: str | None = None) -> None:
+async def _cleanup(email: str, plan_code: str, account_slug: str | None = None, offer_code: str | None = None, provisioned_slug: str | None = None, platform_role_name: str | None = None) -> None:
     async with SessionLocal() as db:
         tenant = await db.scalar(select(Tenant).where(Tenant.slug == OPS_SLUG))
         if tenant is None:
@@ -52,6 +51,16 @@ async def _cleanup(email: str, plan_code: str, account_slug: str | None = None, 
             await db.execute(delete(Tenant).where(Tenant.slug == provisioned_slug))
         if offer_code:
             await db.execute(delete(SaaSOffer).where(SaaSOffer.ops_tenant_id == tenant.id, SaaSOffer.code == offer_code))
+        if platform_role_name:
+            platform_role = await db.scalar(select(Role).where(
+                Role.tenant_id == tenant.id,
+                Role.name == platform_role_name,
+                Role.role_kind == "platform_custom",
+            ))
+            if platform_role is not None:
+                await db.execute(delete(UserRole).where(UserRole.role_id == platform_role.id))
+                await db.execute(delete(RolePermission).where(RolePermission.role_id == platform_role.id))
+                await db.delete(platform_role)
         plan = await db.scalar(select(SaaSPlan).where(SaaSPlan.ops_tenant_id == tenant.id, SaaSPlan.code == plan_code))
         if plan is not None:
             await db.execute(delete(SaaSPlan).where(SaaSPlan.id == plan.id))
@@ -507,3 +516,60 @@ def test_plan_offer_subscription_and_trial_guards():
             assert active.status_code == 200, active.text
     finally:
         asyncio.run(_cleanup(email, code, slug, offer_code, slug))
+
+def test_saas_administrator_cannot_manage_custom_platform_roles():
+    suffix = uuid4().hex[:8]
+    email = f"saas-admin-boundary-{suffix}@example.com"
+    asyncio.run(_create_ops_user(email, role_name="SaaS Administrator"))
+    try:
+        with TestClient(app, base_url="http://127.0.0.1") as client:
+            login = client.post("/api/v1/auth/login", json={
+                "tenant_slug": OPS_SLUG,
+                "email": email,
+                "password": PASSWORD,
+            })
+            assert login.status_code == 200, login.text
+            assert client.get("/api/v1/saas/crm/team/roles").status_code == 403
+            denied = client.post("/api/v1/saas/crm/team/roles", json={
+                "name": f"Forbidden Role {suffix}",
+                "permission_keys": ["saas.sales.read"],
+            })
+            assert denied.status_code == 403, denied.text
+    finally:
+        asyncio.run(_cleanup(email, f"unused-{suffix}"))
+
+
+def test_saas_super_admin_can_manage_custom_platform_roles_without_delegating_root_access():
+    suffix = uuid4().hex[:8]
+    email = f"saas-super-admin-role-{suffix}@example.com"
+    role_name = f"QA Custom Role {suffix}"
+    asyncio.run(_create_ops_user(email))
+    try:
+        with TestClient(app, base_url="http://127.0.0.1") as client:
+            login = client.post("/api/v1/auth/login", json={
+                "tenant_slug": OPS_SLUG,
+                "email": email,
+                "password": PASSWORD,
+            })
+            assert login.status_code == 200, login.text
+
+            created = client.post("/api/v1/saas/crm/team/roles", json={
+                "name": role_name,
+                "description": "Temporary role-governance integration test",
+                "permission_keys": ["saas.sales.read"],
+            })
+            assert created.status_code == 201, created.text
+            role_id = created.json()["id"]
+            assert created.json()["permission_keys"] == ["saas.sales.read"]
+
+            forbidden = client.post("/api/v1/saas/crm/team/roles", json={
+                "name": f"Root Delegation Attempt {suffix}",
+                "permission_keys": ["saas.roles.manage"],
+            })
+            assert forbidden.status_code == 403, forbidden.text
+
+            deleted = client.delete(f"/api/v1/saas/crm/team/roles/{role_id}")
+            assert deleted.status_code == 200, deleted.text
+    finally:
+        asyncio.run(_cleanup(email, f"unused-{suffix}", platform_role_name=role_name))
+
