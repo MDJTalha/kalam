@@ -1705,8 +1705,6 @@ async def list_managed_tenant_users(
 ):
     await _require_ops_user(user, db)
     ops = await _ops_tenant(db)
-    if ops is None or not (await _is_platform_developer(user, db) or await is_saas_super_admin(user, db)):
-        raise HTTPException(status_code=403, detail="SaaS Super Admin access is required for tenant identity administration")
     account = await db.scalar(select(CRMAccount).where(
         CRMAccount.ops_tenant_id == ops.id,
         CRMAccount.managed_tenant_id == tenant_id,
@@ -1738,10 +1736,8 @@ async def update_managed_tenant_user(
 ):
     await _require_ops_user(user, db)
     ops = await _ops_tenant(db)
-    if ops is None or not (
-        await _is_platform_developer(user, db) or await is_saas_super_admin(user, db)
-    ):
-        raise HTTPException(status_code=403, detail="SaaS team-management access is required for tenant identity administration")
+    if ops is None:
+        raise HTTPException(status_code=503, detail="SaaS operations tenant is not configured")
     account = await db.scalar(select(CRMAccount).where(
         CRMAccount.ops_tenant_id == ops.id,
         CRMAccount.managed_tenant_id == tenant_id,
@@ -1752,14 +1748,36 @@ async def update_managed_tenant_user(
     if target is None:
         raise HTTPException(status_code=404, detail="User not found")
     if payload.is_active is not None:
-        target.is_active = payload.is_active
         if not payload.is_active:
+            protected_admin = await db.scalar(
+                select(Role.id)
+                .join(UserRole, UserRole.role_id == Role.id)
+                .where(UserRole.user_id == target.id)
+                .where(Role.tenant_id == tenant_id)
+                .where(func.lower(Role.name).in_(("tenant administrator", "tenant admin", "tenant owner")))
+                .limit(1)
+            )
+            if protected_admin is not None:
+                another_active_admin = await db.scalar(
+                    select(User.id)
+                    .join(UserRole, UserRole.user_id == User.id)
+                    .join(Role, Role.id == UserRole.role_id)
+                    .where(User.tenant_id == tenant_id)
+                    .where(User.is_active.is_(True))
+                    .where(User.id != target.id)
+                    .where(Role.tenant_id == tenant_id)
+                    .where(func.lower(Role.name).in_(("tenant administrator", "tenant admin", "tenant owner")))
+                    .limit(1)
+                )
+                if another_active_admin is None:
+                    raise HTTPException(status_code=409, detail="The last active tenant owner or administrator cannot be deactivated")
             sessions = (await db.execute(
                 select(SessionRecord).where(SessionRecord.user_id == target.id, SessionRecord.revoked_at.is_(None))
             )).scalars().all()
             now = datetime.now(timezone.utc)
             for session in sessions:
                 session.revoked_at = now
+        target.is_active = payload.is_active
     for field in ("first_name", "last_name", "job_title"):
         if field in payload.model_fields_set:
             setattr(target, field, getattr(payload, field))
@@ -2732,12 +2750,24 @@ async def list_crm_team(
     user: User = Depends(_require_ops_permission("saas.team.read")),
     db: AsyncSession = Depends(get_db),
 ):
-    rows = (await db.execute(
+    stmt = (
         select(User, Role)
         .outerjoin(UserRole, UserRole.user_id == User.id)
         .outerjoin(Role, and_(Role.id == UserRole.role_id, Role.tenant_id == User.tenant_id))
         .where(User.tenant_id == user.tenant_id)
-        .order_by(User.is_active.desc(), User.first_name, User.last_name, Role.name)
+    )
+    # Non-team-admin sales users see only the Sales Operations owner pool,
+    # not Finance, Customer Success or privileged platform administrator accounts.
+    if not await user_has_permission(user, db, "saas.team.manage"):
+        sales_owner_ids = select(UserRole.user_id).join(
+            Role, Role.id == UserRole.role_id
+        ).where(
+            Role.tenant_id == user.tenant_id,
+            func.lower(Role.name) == "sales operations",
+        )
+        stmt = stmt.where(User.id.in_(sales_owner_ids))
+    rows = (await db.execute(
+        stmt.order_by(User.is_active.desc(), User.first_name, User.last_name, Role.name)
     )).all()
     grouped: dict[UUID, dict[str, Any]] = {}
     for member, role in rows:
@@ -3234,21 +3264,24 @@ async def commercial_forecast(
     user: User = Depends(_require_ops_permission("saas.finance.read")),
     db: AsyncSession = Depends(get_db),
 ):
-    opportunity_rows = (await db.execute(
-        select(
-            CRMOpportunity.currency,
-            CRMOpportunity.stage,
-            func.coalesce(func.sum(CRMOpportunity.amount_minor), 0),
-            func.coalesce(func.sum(CRMOpportunity.amount_minor * CRMOpportunity.probability_percent / 100.0), 0),
-            func.count(CRMOpportunity.id),
-        )
-        .where(
-            CRMOpportunity.ops_tenant_id == user.tenant_id,
-            CRMOpportunity.stage.notin_(["won", "lost"]),
-        )
-        .group_by(CRMOpportunity.currency, CRMOpportunity.stage)
-        .order_by(CRMOpportunity.currency, CRMOpportunity.stage)
-    )).all()
+    can_read_sales = await user_has_permission(user, db, "saas.sales.read")
+    opportunity_rows = []
+    if can_read_sales:
+        opportunity_rows = (await db.execute(
+            select(
+                CRMOpportunity.currency,
+                CRMOpportunity.stage,
+                func.coalesce(func.sum(CRMOpportunity.amount_minor), 0),
+                func.coalesce(func.sum(CRMOpportunity.amount_minor * CRMOpportunity.probability_percent / 100.0), 0),
+                func.count(CRMOpportunity.id),
+            )
+            .where(
+                CRMOpportunity.ops_tenant_id == user.tenant_id,
+                CRMOpportunity.stage.notin_(["won", "lost"]),
+            )
+            .group_by(CRMOpportunity.currency, CRMOpportunity.stage)
+            .order_by(CRMOpportunity.currency, CRMOpportunity.stage)
+        )).all()
 
     open_invoices = (await db.execute(
         select(CRMInvoice)
