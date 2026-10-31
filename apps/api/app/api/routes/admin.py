@@ -249,7 +249,10 @@ async def create_invitation(
         and await user_has_permission(user, db, "saas.team.manage")
     )
     can_manage_roles = await user_has_permission(user, db, "tenant.manage")
-    if role.role_kind == "platform":
+    if role.role_kind == "platform_custom":
+        if not is_developer and not is_super_admin:
+            raise HTTPException(status_code=403, detail="Only SaaS Super Admin can invite users into custom platform roles")
+    elif role.role_kind == "platform":
         role_name = role.name.strip().lower()
         can_invite_platform_role = (
             is_developer
@@ -379,10 +382,20 @@ async def update_user(
         .where(func.lower(Role.name).in_(("platform developer", "saas super admin", "saas administrator")))
         .limit(1)
     )
-    if target_root_platform_role is not None and not (
-        await _is_platform_developer(admin, db) or await is_saas_super_admin(admin, db)
-    ):
+    is_developer = await _is_platform_developer(admin, db)
+    is_super_admin = await is_saas_super_admin(admin, db)
+    if target_root_platform_role is not None and not (is_developer or is_super_admin):
         raise HTTPException(status_code=403, detail="Only Platform Developer or SaaS Super Admin can manage root platform administrator accounts")
+    target_custom_platform_role = await db.scalar(
+        select(Role.id)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == target.id)
+        .where(Role.tenant_id == admin.tenant_id)
+        .where(Role.role_kind == "platform_custom")
+        .limit(1)
+    )
+    if target_custom_platform_role is not None and not (is_developer or is_super_admin):
+        raise HTTPException(status_code=403, detail="Only SaaS Super Admin can manage custom platform-role accounts")
     target_is_platform_developer = await db.scalar(
         select(Role.id)
         .join(UserRole, UserRole.role_id == Role.id)
