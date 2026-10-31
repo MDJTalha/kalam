@@ -2,7 +2,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { OpportunityCreateForm, OpportunityQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Opportunity={id:string;account_id:string;account_name:string;name:string;stage:string;currency:string;amount_minor:number;probability_percent:number;expected_close_at?:string|null};
 type Forecast={currency:string;stage:string;gross_amount_minor:number;weighted_amount_minor:number;opportunities:number};
@@ -10,9 +10,13 @@ type Forecast={currency:string;stage:string;gross_amount_minor:number;weighted_a
 function money(minor:number,currency:string){return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:minor%100===0?0:2}).format(minor/100);}
 
 export default async function SaaSPipelinePage(){
+  const currentUser=await requireUser<{permissions?:string[]}>();
+  const permissions=currentUser.permissions??[];
+  const canManage=permissions.includes("saas.sales.manage");
+  if(!permissions.includes("saas.sales.read"))return <DashboardShell title="Pipeline" eyebrow="SaaS CRM"><EmptyState title="Sales access is restricted" description="This role does not include sales pipeline visibility."/></DashboardShell>;
   const [opportunities,forecast]=await Promise.all([
     apiJson<Opportunity[]>("/api/v1/saas/crm/opportunities"),
-    apiJson<Forecast[]>("/api/v1/saas/crm/forecast"),
+    apiJson<Forecast[]>("/api/v1/saas/crm/pipeline-forecast"),
   ]);
   if(!opportunities||!forecast)return <DashboardShell title="Pipeline" eyebrow="SaaS CRM"><EmptyState title="Pipeline CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const open=opportunities.filter(o=>!["won","lost"].includes(o.stage));
@@ -35,9 +39,9 @@ export default async function SaaSPipelinePage(){
         <span key="c">{money(o.amount_minor,o.currency)}</span>,
         <span key="d">{o.probability_percent}%</span>,
         <span key="e">{o.expected_close_at?new Date(o.expected_close_at).toLocaleDateString():"—"}</span>,
-        <span key="f"><StatusBadge status={o.stage}/><OpportunityQuickActions id={o.id} stage={o.stage}/></span>
+        <span key="f"><StatusBadge status={o.stage}/>{canManage?<OpportunityQuickActions id={o.id} stage={o.stage}/>:null}</span>
       ])}/>
     </SectionCard>
-    <SectionCard eyebrow="New opportunity" title="Add pipeline opportunity"><OpportunityCreateForm/></SectionCard>
+    {canManage&&<SectionCard eyebrow="New opportunity" title="Add pipeline opportunity"><OpportunityCreateForm/></SectionCard>}
   </DashboardShell>;
 }
