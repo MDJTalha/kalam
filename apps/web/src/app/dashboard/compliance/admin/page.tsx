@@ -59,8 +59,8 @@ export default async function ComplianceAdminPage({ searchParams }: { searchPara
   const serviceUnavailable = failed.length > 0;
   const editing = requirements.find((item) => item.id === query.edit);
   const [previewResult, versionsResult] = editing ? await Promise.all([
-    apiJson<AudiencePreview>(`/api/v1/compliance/${editing.id}/preview`),
-    apiJson<RequirementVersion[]>(`/api/v1/compliance/${editing.id}/versions`),
+    apiJsonResult<AudiencePreview>(`/api/v1/compliance/${editing.id}/preview`),
+    apiJsonResult<RequirementVersion[]>(`/api/v1/compliance/${editing.id}/versions`),
   ]) : [{ok:false,status:0,data:null,error:""}, {ok:false,status:0,data:null,error:""}];
   return (
     <DashboardShell title="Compliance operations" eyebrow="Policy governance, evidence review & readiness">
