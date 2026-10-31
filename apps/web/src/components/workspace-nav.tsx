@@ -29,7 +29,7 @@ const baseGroups: NavGroup[] = [
   { label: "Workspace", items: [item("/dashboard", "Overview", BarChart3, undefined, true)] },
   { label: "People & Organization", items: [
     item("/dashboard/people", "People", UsersRound, "users.read", true),
-    item("/dashboard/team", "Teams", UsersRound, "users.read"),
+    item("/dashboard/team", "Teams", UsersRound, "team.read"),
     item("/dashboard/organization", "Organization", Network, "users.read"),
     item("/dashboard/people/admin", "People Administration", UserRoundCog, "users.manage"),
   ] },
