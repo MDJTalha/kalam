@@ -857,8 +857,12 @@ async def crm_lookup(
     raise HTTPException(status_code=404, detail="Unknown CRM lookup type")
 
 @router.get("/crm/plans")
-async def list_plans(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
-    items = (await db.execute(select(SaaSPlan).where(SaaSPlan.ops_tenant_id == user.tenant_id).order_by(SaaSPlan.sort_order, SaaSPlan.name))).scalars().all()
+async def list_plans(
+    limit: int = Query(default=100, ge=1, le=100),
+    user: User = Depends(_require_ops_user),
+    db: AsyncSession = Depends(get_db),
+):
+    items = (await db.execute(select(SaaSPlan).where(SaaSPlan.ops_tenant_id == user.tenant_id).order_by(SaaSPlan.sort_order, SaaSPlan.name).limit(limit))).scalars().all()
     return [_plan_payload(item) for item in items]
 
 
@@ -1186,8 +1190,12 @@ async def create_offer(payload: OfferCreate, user: User = Depends(require_permis
 
 
 @router.get("/crm/certifications")
-async def list_certifications(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
-    items = (await db.execute(select(SaaSCertification).where(SaaSCertification.ops_tenant_id == user.tenant_id).order_by(SaaSCertification.display_order, SaaSCertification.title))).scalars().all()
+async def list_certifications(
+    limit: int = Query(default=100, ge=1, le=100),
+    user: User = Depends(_require_ops_user),
+    db: AsyncSession = Depends(get_db),
+):
+    items = (await db.execute(select(SaaSCertification).where(SaaSCertification.ops_tenant_id == user.tenant_id).order_by(SaaSCertification.display_order, SaaSCertification.title).limit(limit))).scalars().all()
     return [{"id": str(x.id), "title": x.title, "issuer": x.issuer, "registration_number": x.registration_number, "status": x.status, "public_visible": x.public_visible, "issued_at": x.issued_at, "expires_at": x.expires_at, "verification_url": x.verification_url} for x in items]
 
 
