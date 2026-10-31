@@ -2,7 +2,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { ApiActionButton } from "@/components/api-action-button";
 import { ResourceForm } from "@/components/resource-form";
 import { EmptyState, Section, StatusBadge } from "@/components/ui";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Category={id:string;name:string;description?:string|null;active:boolean};
 
