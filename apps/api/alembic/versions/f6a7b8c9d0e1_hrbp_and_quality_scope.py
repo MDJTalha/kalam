@@ -34,7 +34,7 @@ def upgrade() -> None:
         WHERE rp.role_id=r.id
           AND rp.permission_id=p.id
           AND lower(r.name)='quality & compliance'
-          AND p.key IN ('users.read','reports.read')
+          AND p.key IN ('users.read','reports.read','evidence.read')
     """))
 
 
