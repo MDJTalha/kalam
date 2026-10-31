@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { DeveloperSupportControl } from "@/components/saas-crm-forms";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
@@ -13,6 +14,7 @@ type TenantRow={
 export default async function SaaSTenantsPage(){
   const user=await requireUser<{permissions?:string[]}>();
   const canManage=user.permissions?.includes("saas.customer_success.manage")??false;
+  const userHasCustomerUserAccess=user.permissions?.includes("saas.customer_users.read")??false;
   if(!user.permissions?.includes("saas.customer_success.read"))return <DashboardShell title="Tenants" eyebrow="SaaS Customer Success"><EmptyState title="Customer tenant access is restricted" description="This role does not include customer tenant visibility."/></DashboardShell>;
   const tenants=await apiJson<TenantRow[]>("/api/v1/saas/crm/tenants");
   const supportTenants=await apiJson<Array<{id:string;name:string;slug:string;status:string}>>("/api/v1/support/developer/tenants");
@@ -28,7 +30,7 @@ export default async function SaaSTenantsPage(){
         columns={["Tenant","CRM account","Lifecycle","Users","Created","Technical status"]}
         empty={<EmptyState title="No customer tenants provisioned" description="Provision a tenant from the Clients workspace when an approved organization is ready for a trial or deployment."/>}
         rows={tenants.map(t=>[
-          <span key="a"><strong>{t.name}</strong><small>{t.slug}</small></span>,
+          <span key="a"><strong>{t.name}</strong><small>{t.slug}</small>{userHasCustomerUserAccess&&<Link className="text-link" href={"/dashboard/saas/tenants/"+t.id}>Manage customer users</Link>}</span>,
           <span key="b">{t.crm_account_name||"Not linked"}</span>,
           t.lifecycle_stage?<StatusBadge key="c" status={t.lifecycle_stage}/>:<span key="c">—</span>,
           <span key="d">{t.user_count}</span>,
