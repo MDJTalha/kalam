@@ -4,8 +4,8 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-revision = "g7h8i9j0k1l2"
-down_revision = "f6a7b8c9d0e1"
+revision = "r2s3t4u5v6w7"
+down_revision = "r1s2t3u4v5w6"
 branch_labels = None
 depends_on = None
 
