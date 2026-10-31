@@ -14,8 +14,21 @@ from app.db.session import SessionLocal
 from app.main import app
 
 TENANT = "demo-corporation"
-ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
+QUALITY = {"email": "quality@demo.corp", "password": "DemoOnly!1234"}
 LEARNER = {"email": "learner@demo.corp", "password": "DemoOnly!1234"}
+
+
+def fixture_user_id(email: str) -> str:
+    async def load() -> str:
+        async with SessionLocal() as db:
+            tenant = await db.scalar(select(Tenant).where(Tenant.slug == TENANT))
+            assert tenant is not None
+            user = await db.scalar(
+                select(User).where(User.tenant_id == tenant.id, User.email == email)
+            )
+            assert user is not None
+            return str(user.id)
+    return asyncio.run(load())
 
 
 def login(client: TestClient, credentials: dict[str, str]) -> None:
@@ -28,7 +41,7 @@ def login(client: TestClient, credentials: dict[str, str]) -> None:
 
 def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
     with TestClient(app, base_url="http://localhost") as client:
-        login(client, ADMIN)
+        login(client, QUALITY)
         token = uuid4().hex[:8]
         requirement = client.post(
             "/api/v1/compliance",
@@ -44,8 +57,7 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
         assert requirement.status_code == 201, requirement.text
         requirement_id = requirement.json()["id"]
 
-        people = client.get("/api/v1/people").json()
-        learner_id = next(item["id"] for item in people if item["email"] == LEARNER["email"])
+        learner_id = fixture_user_id(LEARNER["email"])
         assignment = client.post(
             f"/api/v1/compliance/{requirement_id}/assign",
             json={"user_id": learner_id},
@@ -67,7 +79,7 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
         assert evidence.status_code == 201, evidence.text
         evidence_id = evidence.json()["id"]
 
-        login(client, ADMIN)
+        login(client, QUALITY)
         verified = client.post(f"/api/v1/compliance/evidence/{evidence_id}/verify")
         assert verified.status_code == 200, verified.text
         review_page = client.get("/api/v1/compliance/evidence?verified=true&limit=1&offset=0")
@@ -96,7 +108,7 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
 
         exception_assignment = client.post(
             f"/api/v1/compliance/{requirement_id}/assign",
-            json={"user_id": client.get("/api/v1/people").json()[1]["id"]},
+            json={"user_id": fixture_user_id("manager@demo.corp")},
         )
         assert exception_assignment.status_code in {201, 409}
         if exception_assignment.status_code == 409:
@@ -184,7 +196,7 @@ def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
 
 def test_phase8_compliance_escalation_is_idempotent() -> None:
     with TestClient(app, base_url="http://localhost") as client:
-        login(client, ADMIN)
+        login(client, QUALITY)
         token = uuid4().hex[:8]
         requirement = client.post(
             "/api/v1/compliance",
@@ -197,8 +209,7 @@ def test_phase8_compliance_escalation_is_idempotent() -> None:
         )
         assert requirement.status_code == 201, requirement.text
         requirement_id = requirement.json()["id"]
-        people = client.get("/api/v1/people").json()
-        learner_id = next(item["id"] for item in people if item["email"] == LEARNER["email"])
+        learner_id = fixture_user_id(LEARNER["email"])
 
         assignment = client.post(
             f"/api/v1/compliance/{requirement_id}/assign",
