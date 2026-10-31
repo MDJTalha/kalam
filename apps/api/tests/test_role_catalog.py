@@ -128,6 +128,7 @@ def test_hrbp_and_quality_roles_are_limited_to_their_job_scope():
     assert {"compliance.manage", "audit.read", "files.read", "evidence.read"} <= quality
     assert "users.read" not in quality
     assert "reports.read" not in quality
+    assert "evidence.read" not in quality
 
 
 def test_sales_export_is_a_separate_grant():
