@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { AccountOwnerControl, AccountProfileForm, ActivityCreateForm, ContactCreateForm, OnboardingQuickActions, OnboardingTemplateButton, ProvisionTenantButton } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type OnboardingItem={id:string;account_id:string;category:string;title:string;status:string;due_at?:string|null;completed_at?:string|null;notes?:string|null};
 type TeamMember={id:string;name:string;is_active:boolean};
