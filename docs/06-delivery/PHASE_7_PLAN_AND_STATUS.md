@@ -1,4 +1,4 @@
-# Kalam 9.9 — Phase 7 Plan & Status
+> **Historical planning record — superseded by the current delivery roadmap.** The numbering in this file reflects an earlier phase sequence in which Coaching, Mentoring & Experience was called Phase 7. The current canonical sequence is: Phase 6 Reporting/Analytics & Integrations, Phase 7 Governed AI, Phase 8 Production/Commercial Readiness. See `docs/06-delivery/DELIVERY_ROADMAP.md`, `docs/07-ai/PHASE_7_WORK_BREAKDOWN.md` and `docs/06-delivery/IMPLEMENTATION_STATUS.md` for current status.\n\n# Kalam 9.9 — Phase 7 Plan & Status
 
 ## Phase
 Phase 7 — Coaching, Mentoring & Experience
