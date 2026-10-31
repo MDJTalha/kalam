@@ -2,7 +2,7 @@ import { UserRoundCog, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type TeamMember={
   id:string;name:string;email:string;job_title?:string|null;is_active:boolean;roles:string[];
