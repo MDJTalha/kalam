@@ -3,13 +3,20 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { AccountCreateForm, AccountQuickActions, ProvisionTenantButton } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Account={id:string;name:string;slug:string;account_type:string;lifecycle_stage:string;industry?:string|null;country?:string|null;employee_band?:string|null;public_showcase:boolean;plan_id?:string|null;managed_tenant_id?:string|null};
 type Plan={id:string;name:string};
 type AccountPage={items:Account[];total:number;offset:number;limit:number};
 
 export default async function SaaSClientsPage({searchParams}:{searchParams:Promise<{q?:string;stage?:string;page?:string}>}){
+  const user=await requireUser<{permissions?:string[]}>();
+  const permissions=user.permissions??[];
+  const canRead=permissions.includes("saas.sales.read");
+  const canManageSales=permissions.includes("saas.sales.manage");
+  const canExport=permissions.includes("saas.sales.export");
+  const canProvision=permissions.includes("saas.customer_success.manage");
+  if(!canRead)return <DashboardShell title="Clients" eyebrow="SaaS CRM"><EmptyState title="Sales access is restricted" description="Your role does not include client and pipeline visibility."/></DashboardShell>;
   const params=await searchParams;
   const query=new URLSearchParams();
   if(params.q?.trim())query.set("q",params.q.trim());
@@ -37,7 +44,7 @@ export default async function SaaSClientsPage({searchParams}:{searchParams:Promi
         <label>Lifecycle<select name="stage" defaultValue={params.stage||""}><option value="">All stages</option><option value="lead">Lead</option><option value="qualified">Qualified</option><option value="trial">Trial</option><option value="customer">Customer</option><option value="churned">Churned</option></select></label>
         <button className="button button-primary" type="submit">Apply filters</button>
         <Link className="button button-secondary" href="/dashboard/saas/clients">Clear</Link>
-        <a className="button button-secondary" href={"/api/lms/saas/crm/export/accounts.csv"+exportQuery}>Export CSV</a>
+        {canExport&&<a className="button button-secondary" href={"/api/lms/saas/crm/export/accounts.csv"+exportQuery}>Export CSV</a>}
       </form>
     </SectionCard>
     <div className="two-column">
@@ -47,8 +54,8 @@ export default async function SaaSClientsPage({searchParams}:{searchParams:Promi
           <StatusBadge key="b" status={a.lifecycle_stage}/>,
           <span key="c">{[a.industry,a.country,a.employee_band].filter(Boolean).join(" · ")||"—"}</span>,
           <StatusBadge key="d" status={a.public_showcase?"published":"private"}/>,
-          <ProvisionTenantButton key="e" accountId={a.id} disabled={!!a.managed_tenant_id}/>,
-          <AccountQuickActions key="f" id={a.id} lifecycleStage={a.lifecycle_stage} publicShowcase={a.public_showcase}/>
+          {canProvision?<ProvisionTenantButton key="e" accountId={a.id} disabled={!!a.managed_tenant_id}/>:<span key="e">{a.managed_tenant_id?"Provisioned":"Not provisioned"}</span>},
+          {canManageSales?<AccountQuickActions key="f" id={a.id} lifecycleStage={a.lifecycle_stage} publicShowcase={a.public_showcase}/>:<span key="f">Read only</span>}
         ])}/>
         <nav className="toolbar-row saas-spaced-pagination" aria-label="Account pages">
           {page>1?<Link className="button button-secondary" href={pageHref(page-1)}>Previous</Link>:null}
@@ -56,7 +63,7 @@ export default async function SaaSClientsPage({searchParams}:{searchParams:Promi
           {page<pageCount?<Link className="button button-secondary" href={pageHref(page+1)}>Next</Link>:null}
         </nav>
       </SectionCard>
-      <SectionCard eyebrow="New account" title="Add prospect, client or partner"><AccountCreateForm plans={plans}/></SectionCard>
+      {canManageSales&&<SectionCard eyebrow="New account" title="Add prospect, client or partner"><AccountCreateForm plans={plans}/></SectionCard>}
     </div>
   </DashboardShell>;
 }
