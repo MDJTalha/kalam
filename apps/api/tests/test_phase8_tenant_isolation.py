@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import delete, select
 
 from app.core.security import hash_password
-from app.db.models import Course, Integration, Permission , Role, RolePermission, SavedReport, Tenant, User, UserRole, WebhookEndpoint
+from app.db.models import Course, Integration, Permission, Role, RolePermission, SavedReport, Tenant, User, UserRole, WebhookEndpoint
 from app.db.session import SessionLocal
 from app.main import app
 
