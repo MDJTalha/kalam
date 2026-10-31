@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { RefreshCw, ShieldCheck, UserPlus, UserRoundX } from "lucide-react";
 
 type Assignment = { id: string; name: string; role_kind: string };
@@ -51,7 +51,7 @@ export function SaaSTeamAdmin({
     );
   }, [members, query]);
 
-  async function invite(event: React.FormEvent<HTMLFormElement>) {
+  async function invite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!email.trim() || !roleId || busyKey) return;
     setBusyKey("invite");
@@ -118,8 +118,6 @@ export function SaaSTeamAdmin({
     }
   }
 
-  const assignedIds = new Set(members.flatMap(member => member.role_assignments.map(assignment => assignment.id)));
-  const unassignedRoles = roles.filter(role => !assignedIds.has(role.id));
 
   return (
     <div className="saas-team-admin">
