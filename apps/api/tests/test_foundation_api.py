@@ -2052,3 +2052,11 @@ def test_webhook_list_is_bounded(client: TestClient) -> None:
     assert listed.status_code == 200, listed.text
     assert len(listed.json()) == 1
     assert client.get("/api/v1/webhooks", params={"limit": 101}).status_code == 422
+
+
+def test_live_session_and_program_catalog_reads_are_bounded(client: TestClient) -> None:
+    login(client, ADMIN)
+    assert client.get("/api/v1/sessions", params={"limit": 101}).status_code == 422
+    assert client.get("/api/v1/programs", params={"limit": 101}).status_code == 422
+    assert client.get("/api/v1/programs/cohorts", params={"limit": 101}).status_code == 422
+    assert client.get("/api/v1/programs/paths/all", params={"limit": 101}).status_code == 422
