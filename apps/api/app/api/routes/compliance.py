@@ -1054,6 +1054,8 @@ async def approve_compliance_exception(
         return {"status": "already_approved", "exception_id": str(item.id)}
     if item.status != "requested":
         raise HTTPException(status_code=409, detail="Only requested exceptions can be approved")
+    if item.requested_by == user.id:
+        raise HTTPException(status_code=403, detail="A different reviewer must approve an exception they did not request")
     if item.expires_at is None or item.expires_at <= datetime.now(timezone.utc):
         raise HTTPException(status_code=409, detail="A future expiry is required before approval")
     item.status = "approved"
@@ -1096,7 +1098,11 @@ async def reject_compliance_exception(
         raise HTTPException(status_code=404, detail="Compliance exception not found")
     if item.status != "requested":
         raise HTTPException(status_code=409, detail="Only requested exceptions can be rejected")
+    if item.requested_by == user.id:
+        raise HTTPException(status_code=403, detail="A different reviewer must reject an exception they did not request")
     item.status = "rejected"
+    item.rejected_by = user.id
+    item.rejected_at = datetime.now(timezone.utc)
     assignment = await db.scalar(
         select(ComplianceAssignment).where(
             ComplianceAssignment.id == item.assignment_id,
