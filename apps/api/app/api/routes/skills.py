@@ -1,5 +1,5 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,8 +32,8 @@ async def list_skills(user: User = Depends(get_current_user), db: AsyncSession =
 @router.get("/page")
 async def page_skills(
     q: str | None = None,
-    page: int = Field(default=1, ge=1),
-    page_size: int = Field(default=50, ge=1, le=100),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
