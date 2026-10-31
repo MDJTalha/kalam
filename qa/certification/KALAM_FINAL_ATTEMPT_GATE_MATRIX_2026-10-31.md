@@ -1,7 +1,7 @@
 # Kalam Final Attempt — Gate Matrix
 
 Date: 2026-10-31
-Latest implementation commit: `565b386877308dcc22cb064f6fc4020d120e1a6b`
+Latest implementation commit: `e14e1bb8331eb392f02a8b8cf30655c34606eb6e`
 Candidate branch: `work/final-production-readiness-2026-10-31`
 
 | Gate | Status | Evidence required / current evidence |
@@ -23,7 +23,7 @@ Candidate branch: `work/final-production-readiness-2026-10-31`
 | C14 AWS/staging | NOT CERTIFIED | Exact artifact, TLS, secrets, migrations, health, rollback |
 | C15 Observability | NOT CERTIFIED | Failure→alert→diagnosis→recovery evidence |
 | C16 Browser E2E | NOT CERTIFIED | Critical-path role matrix |
-| C17 AI governance | NOT CERTIFIED | Provider/safety/tenant/audit evidence or explicit disablement |
+| C17 AI governance | CERTIFIED | Fail-closed disabled-by-default posture is documented in `qa/certification/KALAM_AI_GOVERNANCE_CERTIFICATION_2026-10-31.md`; real-provider activation remains separately uncertified. |
 | C18 Independent review | NOT CERTIFIED | Independent reviewer decision |
 | C19 Production smoke/rollback | NOT CERTIFIED | Immutable production deployment + smoke + rollback readiness |
 
