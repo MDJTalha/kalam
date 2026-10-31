@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
 from sqlalchemy import delete, insert, select
 
 from app.core.security import hash_password
+from app.core.role_catalog import TENANT_ROLE_PERMISSIONS
 from app.db.models import (
     Assessment, AssessmentAttempt, Certificate, ComplianceAssignment,
     ComplianceRequirement, ComplianceRequirementVersion, Course, CourseCategory,
@@ -114,23 +115,18 @@ async def seed():
         permissions = await get_permissions(session)
 
         role_permissions = {
-            "Tenant Owner": ["tenant.read","reports.read","audit.read"],
-             "Tenant Administrator": ["tenant.read","tenant.manage","users.read","users.manage","reports.read","audit.read","integrations.manage","capabilities.read","capabilities.manage"],
-            "HR / People Administrator": ["users.read","users.manage","reports.read"],
-            "L&D Administrator": ["courses.read","courses.manage","learning.access","assessments.manage","certificates.manage","reports.read","skills.manage","capabilities.read","capabilities.manage","development.manage"],
-            "Manager": ["users.read","courses.read","learning.access","reports.read","development.manage"],
-            "Instructor": ["courses.read","learning.access","assessments.manage"],
-            "Learner / Employee": ["courses.read","learning.access","development.manage"],
-            "HR/L&D Admin": ["users.read","users.manage","courses.read","courses.manage","learning.access","assessments.manage","certificates.manage","reports.read","skills.manage","capabilities.read","capabilities.manage","development.manage"],
-            "HR Business Partner": ["users.read","reports.read","development.manage"],
-            "Quality & Compliance": ["users.read","courses.read","learning.access","compliance.manage","reports.read","audit.read"],
-            "Auditor": ["reports.read","audit.read","files.read"],
-            "Regional Executive": ["users.read","courses.read","learning.access","reports.read","development.manage"],
-            "Global Executive": ["tenant.read","users.read","courses.read","learning.access","reports.read","audit.read","compliance.manage","skills.manage","capabilities.read","development.manage"],
+            name: list(keys) for name, keys in TENANT_ROLE_PERMISSIONS.items()
         }
+        # Keep this legacy label only in the reference dataset for compatibility
+        # with its sample-user assignments; production tenants use L&D Administrator.
+        role_permissions["HR/L&D Admin"] = list(TENANT_ROLE_PERMISSIONS["L&D Administrator"])
         roles = {}
         for name, keys in role_permissions.items():
-            role = Role(id=uuid4(), tenant_id=tenant_id, name=name, description=f"{name} access role", role_kind="predefined")
+            role = Role(
+                id=uuid4(), tenant_id=tenant_id, name=name,
+                description=f"{name} access role",
+                role_kind="legacy" if name == "HR/L&D Admin" else "predefined",
+            )
             session.add(role); roles[name] = role
         await session.flush()
         role_links = []
