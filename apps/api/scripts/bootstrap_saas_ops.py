@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
 
 from sqlalchemy import select
 
+from app.core.role_catalog import PERMISSION_DESCRIPTIONS, PLATFORM_ROLE_PERMISSIONS
 from app.core.security import hash_password
 from app.db.models import Permission, Role, RolePermission, Tenant, User, UserRole
 from app.db.session import SessionLocal
@@ -21,18 +22,6 @@ OPS_SLUG = os.getenv("SAAS_OPS_TENANT_SLUG", "kalam")
 OPS_NAME = os.getenv("SAAS_OPS_TENANT_NAME", "Kalam")
 ADMIN_EMAIL = os.getenv("SAAS_OPS_ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("SAAS_OPS_ADMIN_PASSWORD")
-
-PERMISSIONS = [
-    ("tenant.read", "View tenant"),
-    ("tenant.manage", "Manage tenant"),
-    ("saas.crm.read", "View Kalam SaaS commercial CRM"),
-    ("saas.crm.manage", "Manage Kalam SaaS commercial CRM"),
-]
-ROLE_PERMISSIONS = {
-    "SaaS Administrator": [key for key, _ in PERMISSIONS],
-    "Sales Operations": ["tenant.read", "saas.crm.read", "saas.crm.manage"],
-    "Sales Viewer": ["tenant.read", "saas.crm.read"],
-}
 
 
 async def main() -> None:
@@ -47,7 +36,7 @@ async def main() -> None:
             tenant.status = "active"
 
         permissions: dict[str, Permission] = {}
-        for key, description in PERMISSIONS:
+        for key, description in PERMISSION_DESCRIPTIONS.items():
             item = await db.scalar(select(Permission).where(Permission.key == key))
             if item is None:
                 item = Permission(key=key, description=description)
@@ -55,8 +44,7 @@ async def main() -> None:
                 await db.flush()
             permissions[key] = item
 
-        roles: dict[str, Role] = {}
-        for name, keys in ROLE_PERMISSIONS.items():
+        roles: dict[str, Role] = {}\n        for name, keys in PLATFORM_ROLE_PERMISSIONS.items():
             role = await db.scalar(select(Role).where(Role.tenant_id == tenant.id, Role.name == name))
             if role is None:
                 role = Role(tenant_id=tenant.id, name=name, description=f"Kalam operator role: {name}", role_kind="platform")
@@ -95,7 +83,7 @@ async def main() -> None:
 
         await db.commit()
         print(f"SaaS operations tenant ready: {tenant.slug}")
-        print("Roles ready: " + ", ".join(ROLE_PERMISSIONS))
+        print("Roles ready: " + ", ".join(PLATFORM_ROLE_PERMISSIONS))
         if ADMIN_EMAIL and ADMIN_PASSWORD:
             print("Operator account provisioned from environment variables.")
         else:
