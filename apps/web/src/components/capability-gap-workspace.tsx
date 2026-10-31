@@ -6,10 +6,10 @@ import { PeopleLookupSelect } from "@/components/people-lookup-select";
 type Gap={user_id:string;role_id:string;role:string;role_requirement_id:string;target_type:string;target_id:string;target:string|null;required_level:number;demonstrated_level:number|null;gap:number|null;severity:string;criticality:string;weight:number;evidence_confidence:number;evidence_count:number;evidence_observed_at:string|null;evidence_freshness:string;calculation_version:string};
 type Summary={scope:string;total_requirements:number;material_gaps:number;counts:Record<string,number>;critical_exposure:number;major_exposure:number;weighted_gap:number;calculation_version:string;freshness_days:number};
 type Person={id:string;first_name:string;last_name:string;email:string;job_title?:string|null};
-type Props={initialGaps:Gap[];initialSummary:Summary;people:Person[];canManage:boolean;currentUserId:string};
+type Props={initialGaps:Gap[];initialSummary:Summary;people:Person[];canManage:boolean;teamScoped:boolean;currentUserId:string};
 const label=(s:string)=>s.replaceAll("_"," ");
 const severityClass=(s:string)=>s==="critical_gap"?"status-danger":s==="major_gap"?"status-warning":s==="moderate_gap"?"status-neutral":s==="met"?"status-success":"status-neutral";
-export function CapabilityGapWorkspace({initialGaps,initialSummary,people,canManage,currentUserId}:Props){
+export function CapabilityGapWorkspace({initialGaps,initialSummary,people,canManage,teamScoped,currentUserId}:Props){
  const [gaps,setGaps]=useState(initialGaps); const [summary,setSummary]=useState(initialSummary); const [personId,setPersonId]=useState(currentUserId);
  const [severity,setSeverity]=useState(""); const [q,setQ]=useState(""); const [busy,setBusy]=useState(false); const [message,setMessage]=useState(""); const [error,setError]=useState("");
  const visible=useMemo(()=>gaps.filter(x=>!severity||x.severity===severity).filter(x=>!q||((x.target||"")+" "+x.role).toLowerCase().includes(q.toLowerCase())),[gaps,severity,q]);
@@ -17,8 +17,9 @@ export function CapabilityGapWorkspace({initialGaps,initialSummary,people,canMan
   setBusy(true);setError("");setMessage("");
   try{
    if(canManage){const r=await fetch("/api/v1/capability-gaps/recalculate",{method:"POST"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||"Gap recalculation failed.");}
-   const query=canManage?"":("?user_id="+encodeURIComponent(personId));
-   const [gr,sr]=await Promise.all([fetch("/api/v1/capability-gaps"+query,{cache:"no-store"}),fetch("/api/v1/capability-gaps/summary?scope="+(canManage?"enterprise":"person")+(canManage?"":"&scope_id="+encodeURIComponent(personId)),{cache:"no-store"})]);
+   const query=canManage||teamScoped?"":("?user_id="+encodeURIComponent(personId));
+   const summaryQuery=canManage?"scope=enterprise":teamScoped?"scope=direct_reports":"scope=person&scope_id="+encodeURIComponent(personId);
+   const [gr,sr]=await Promise.all([fetch("/api/v1/capability-gaps"+query,{cache:"no-store"}),fetch("/api/v1/capability-gaps/summary?"+summaryQuery,{cache:"no-store"})]);
    const gd=await gr.json().catch(()=>[]),sd=await sr.json().catch(()=>({}));
    if(!gr.ok)throw new Error(gd.detail||"Gap data could not be loaded.");if(!sr.ok)throw new Error(sd.detail||"Gap summary could not be loaded.");
    setGaps(Array.isArray(gd)?gd:[]);setSummary(sd);setMessage("Capability gaps refreshed using the governed Phase 4 calculation.");
