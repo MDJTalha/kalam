@@ -191,7 +191,8 @@ async def create_evidence(
         if duplicate:
             raise HTTPException(409, "Evidence with the same source provenance already exists for this target")
     item = CapabilityEvidence(
-        tenant_id=user.tenant_id, user_id=learner.id, target_type=payload.target_type,
+        tenant_id=user.tenant_id, user_id=learner.id, submitted_by=user.id,
+        target_type=payload.target_type,
         target_id=payload.target_id, evidence_type=payload.evidence_type,
         source_type=payload.source_type, source_id=payload.source_id,
         demonstrated_level=payload.demonstrated_level, confidence=payload.confidence,
@@ -216,6 +217,12 @@ async def decide_evidence(
     item = await db.scalar(select(CapabilityEvidence).where(CapabilityEvidence.id == evidence_id, CapabilityEvidence.tenant_id == user.tenant_id))
     if item is None:
         raise HTTPException(404, "Evidence not found")
+    if (
+        item.user_id == user.id
+        or item.submitted_by == user.id
+        or item.assessor_id == user.id
+    ):
+        raise HTTPException(403, "A reviewer cannot verify or reject evidence they submitted, assessed, or own")
     if item.status == payload.decision:
         return _json(item)
     if item.status != "pending":
