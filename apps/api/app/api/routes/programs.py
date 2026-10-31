@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -58,13 +58,14 @@ class CohortMemberCreate(BaseModel):
 
 @router.get("")
 async def list_programs(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     statement = select(Program).where(Program.tenant_id == user.tenant_id)
     if not await user_has_permission(user, db, "courses.manage"):
         statement = statement.where(Program.status == "published")
-    result = await db.execute(statement.order_by(Program.title))
+    result = await db.execute(statement.order_by(Program.title).limit(limit))
     return list(result.scalars().all())
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -230,6 +231,7 @@ async def remove_program_course(
 
 @router.get("/cohorts")
 async def list_cohorts(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -239,7 +241,7 @@ async def list_cohorts(
             Cohort.status == "active",
             Cohort.id.in_(select(CohortMember.cohort_id).where(CohortMember.user_id == user.id)),
         )
-    result = await db.execute(statement.order_by(Cohort.starts_at.nulls_last(), Cohort.name))
+    result = await db.execute(statement.order_by(Cohort.starts_at.nulls_last(), Cohort.name).limit(limit))
     return [
         {
             "id": str(item.id),
@@ -558,13 +560,14 @@ async def get_program(
 
 @router.get("/paths/all")
 async def list_learning_paths(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     statement = select(LearningPath).where(LearningPath.tenant_id == user.tenant_id)
     if not await user_has_permission(user, db, "courses.manage"):
         statement = statement.where(LearningPath.status == "published")
-    result = await db.execute(statement.order_by(LearningPath.title))
+    result = await db.execute(statement.order_by(LearningPath.title).limit(limit))
     return list(result.scalars().all())
 
 @router.post("/paths", status_code=status.HTTP_201_CREATED)
