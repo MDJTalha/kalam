@@ -6,7 +6,11 @@ type Summary = { users: number; courses: number; enrollments: number; completed_
 
 export default async function ReportsPage() {
   const user = await requireUser<{ permissions?:string[] }>();
-  const canReport = user.permissions?.includes("reports.read") ?? false;
+  const permissions=user.permissions??[];
+  const canReport = permissions.includes("reports.read");
+  const canExportPeople=permissions.includes("reports.export.people");
+  const canExportLearning=permissions.includes("reports.export.learning");
+  const canExportCompliance=permissions.includes("reports.export.compliance");
   const summary = canReport ? await apiJson<Summary>("/api/v1/reports/summary") : null;
   return (
     <DashboardShell title="Reports & analytics" eyebrow="Decision-ready reporting">
@@ -23,11 +27,11 @@ export default async function ReportsPage() {
       ) : (
         <div className="data-panel"><div className="empty-state"><FileText size={28}/><h2>{canReport ? "Reports unavailable" : "Report access is restricted"}</h2><p>{canReport ? "Reporting data could not be loaded. Refresh or try again later." : "Your current role does not include the reporting permission required for this workspace."}</p></div></div>
       )}
-      {summary && <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Exports</span><h2>Operational datasets</h2></div><FileText size={20}/></div><div className="module-grid">{/* API CSV download endpoint; native anchor is intentional. */}
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a className="module-card" href="/api/lms/reports/export/people"><div className="module-icon"><FileText size={19}/></div><div><h3>People CSV</h3><p>Tenant-scoped employee identity and job data.</p></div></a>
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a className="module-card" href="/api/lms/reports/export/enrollments"><div className="module-icon"><FileText size={19}/></div><div><h3>Enrollment CSV</h3><p>Learning registrations, statuses and completion dates.</p></div></a></div></div>}
+      {summary && (canExportPeople||canExportLearning||canExportCompliance) && <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Authorized exports</span><h2>Operational datasets</h2></div><FileText size={20}/></div><div className="module-grid">
+          {canExportPeople&&<a className="module-card" href="/api/lms/reports/export/people"><div className="module-icon"><FileText size={19}/></div><div><h3>People CSV</h3><p>Employee identity and job data. Access is separately authorized and audited.</p></div></a>}
+          {canExportLearning&&<a className="module-card" href="/api/lms/reports/export/enrollments"><div className="module-icon"><FileText size={19}/></div><div><h3>Enrollment CSV</h3><p>Learning registrations, statuses and completion dates.</p></div></a>}
+          {canExportCompliance&&<a className="module-card" href="/api/lms/reports/export/compliance"><div className="module-icon"><FileText size={19}/></div><div><h3>Compliance CSV</h3><p>Employee-linked compliance assignments and due dates.</p></div></a>}
+        </div></div>}
       <div className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Reporting architecture</span><h2>Evidence boundaries</h2></div></div><div className="compact-list"><div className="compact-row"><div><strong>Persisted records</strong><small>Counts come from tenant-scoped database records.</small></div><BarChart3 size={17}/></div><div className="compact-row"><div><strong>Derived metrics</strong><small>Ratios are calculated from the persisted summary fields.</small></div><BarChart3 size={17}/></div><div className="compact-row"><div><strong>AI narratives</strong><small>Future generated summaries will remain clearly distinguished from authoritative metrics.</small></div><BarChart3 size={17}/></div></div></div>
     </DashboardShell>
   );
