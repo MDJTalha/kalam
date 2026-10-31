@@ -241,6 +241,57 @@ export default async function DashboardPage(){
       </section>
       <p className="form-help">Portfolio-wide HRBP reporting is not enabled yet. Your current access is limited to your direct-report relationships; a governed business-unit portfolio assignment is required before wider access is granted.</p>
     </section>}
+    {roleMode === "owner" && <section className="role-dashboard" aria-label="Tenant owner dashboard">
+      <div className="role-kpi-grid">
+        <div className="role-kpi"><span>People</span><strong>{summary?.users ?? "—"}</strong><small>Tenant workforce total</small></div>
+        <div className="role-kpi"><span>Learning</span><strong>{summary?.courses ?? "—"}</strong><small>Available learning catalogue</small></div>
+        <div className="role-kpi"><span>Enrollment completion</span><strong>{summary ? pct(summary.completed_enrollments,summary.enrollments)+"%" : "—"}</strong><small>Aggregate tenant indicator</small></div>
+        <div className="role-kpi role-kpi-risk"><span>Compliance exposure</span><strong>{risk?.overdue ?? "—"}</strong><small>Overdue obligations</small></div>
+      </div>
+      <div className="role-grid-two">
+        <section className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Governance</span><h2>Tenant oversight</h2></div><Link href="/dashboard/reports">Open aggregate reports <ArrowRight size={14}/></Link></div><p>Review organization-level outcomes and audit trails. Individual employee records remain outside the Tenant Owner role unless separately authorized.</p><div className="role-actions"><Link href="/dashboard/audit">Audit trail</Link><Link href="/dashboard/reports">Aggregate reports</Link><Link href="/dashboard/settings">Tenant settings</Link></div></section>
+        <section className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Learning assurance</span><h2>Outcome indicators</h2></div><Link href="/dashboard/analytics">Learning analytics <ArrowRight size={14}/></Link></div><LearningMomentumChart points={trendPoints}/></section>
+      </div>
+    </section>}
+    {roleMode === "admin" && <section className="role-dashboard" aria-label="Tenant administrator dashboard">
+      <div className="role-kpi-grid">
+        <div className="role-kpi"><span>Workforce records</span><strong>{summary?.users ?? "—"}</strong><small>Tenant people records</small></div>
+        <div className="role-kpi"><span>Learning catalogue</span><strong>{summary?.courses ?? "—"}</strong><small>Published and available courses</small></div>
+        <div className="role-kpi role-kpi-risk"><span>Compliance overdue</span><strong>{risk?.overdue ?? "—"}</strong><small>Requires operational follow-up</small></div>
+        <div className="role-kpi"><span>Audit activity</span><strong>{audit?.length ?? "—"}</strong><small>Recent audit events loaded</small></div>
+      </div>
+      <div className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Administration actions</span><h2>Keep the tenant operating smoothly</h2></div><Link href="/dashboard/admin">Open administration center <ArrowRight size={14}/></Link></div><div className="role-actions"><Link href="/dashboard/people/admin">People and access</Link><Link href="/dashboard/organization">Organization structure</Link><Link href="/dashboard/integrations">Integrations</Link><Link href="/dashboard/audit">Audit trail</Link></div></div>
+    </section>}
+    {roleMode === "people" && <section className="role-dashboard" aria-label="People administrator dashboard">
+      <div className="role-kpi-grid">
+        <div className="role-kpi"><span>People records</span><strong>{summary?.users ?? "—"}</strong><small>Tenant workforce directory</small></div>
+        <div className="role-kpi"><span>Completed learning</span><strong>{summary?.completed_enrollments ?? "—"}</strong><small>Recorded completions</small></div>
+        <div className="role-kpi role-kpi-risk"><span>Overdue compliance</span><strong>{risk?.overdue ?? "—"}</strong><small>Obligations to coordinate</small></div>
+        <div className="role-kpi"><span>Audit activity</span><strong>{audit?.length ?? "—"}</strong><small>Recent changes</small></div>
+      </div>
+      <div className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">People operations</span><h2>Maintain trusted workforce data</h2></div><Link href="/dashboard/people/admin">Open people administration <ArrowRight size={14}/></Link></div><div className="role-actions"><Link href="/dashboard/people">Employee directory</Link><Link href="/dashboard/organization">Reporting lines and organization</Link><Link href="/dashboard/compliance/admin">Employee compliance</Link><Link href="/dashboard/reports">People reports</Link></div><p className="form-help">People administrators can manage workforce records and invitations, but cannot assign tenant-wide administrative or platform roles.</p></div>
+    </section>}
+    {roleMode === "quality" && <section className="role-dashboard" aria-label="Quality and compliance dashboard">
+      <div className="role-kpi-grid">
+        <div className="role-kpi"><span>Open obligations</span><strong>{risk?.open ?? "—"}</strong><small>Current compliance workload</small></div>
+        <div className="role-kpi role-kpi-risk"><span>Overdue</span><strong>{risk?.overdue ?? "—"}</strong><small>Items requiring remediation</small></div>
+        <div className="role-kpi"><span>Risk band</span><strong>{risk?.risk_band ?? "—"}</strong><small>Current recorded risk status</small></div>
+        <div className="role-kpi"><span>Recent audit events</span><strong>{audit?.length ?? "—"}</strong><small>Recent decisions and changes</small></div>
+      </div>
+      <div className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Compliance control</span><h2>Evidence, decisions and audit trail</h2></div><Link href="/dashboard/compliance/admin">Open compliance operations <ArrowRight size={14}/></Link></div><div className="role-actions"><Link href="/dashboard/compliance/admin">Compliance obligations</Link><Link href="/dashboard/evidence/admin">Evidence review</Link><Link href="/dashboard/audit">Audit events</Link><Link href="/dashboard/reports">Compliance reports</Link></div><p className="form-help">Evidence submitters must not verify or reject their own submissions. Keep policy ownership, evidence submission and final assurance review separated wherever staffing permits.</p></div>
+    </section>}
+    {roleMode === "auditor" && <section className="role-dashboard" aria-label="Auditor dashboard">
+      <div className="role-kpi-grid">
+        <div className="role-kpi"><span>Recent audit events</span><strong>{audit?.length ?? "—"}</strong><small>Latest records available</small></div>
+        <div className="role-kpi"><span>Evidence access</span><strong>Read only</strong><small>Governed files and evidence</small></div>
+        <div className="role-kpi"><span>People exports</span><strong>Restricted</strong><small>Not available under this role</small></div>
+        <div className="role-kpi"><span>Approvals</span><strong>None</strong><small>Auditor cannot administer compliance decisions</small></div>
+      </div>
+      <section className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Independent assurance</span><h2>Recent audit trail</h2></div><Link href="/dashboard/audit">Open full audit log <ArrowRight size={14}/></Link></div>
+        {audit?.length?<div className="role-list">{audit.map(item=><div className="role-list-row" key={item.id}><span className="role-rank"><FileText size={13}/></span><div><strong>{item.action}</strong><small>{item.summary||"Audit event"} · {new Date(item.created_at).toLocaleString()}</small></div></div>)}</div>:<div className="role-empty">No audit events were returned for the current view.</div>}
+      </section>
+    </section>}
+
     {roleMode === "manager" && <section className="role-dashboard" aria-label="Manager dashboard"><div className="role-kpi-grid"><div className="role-kpi"><span>Team</span><strong>{teamMembers.length}</strong><small>Direct reports in your team</small></div><div className="role-kpi"><span>Learning completion</span><strong>{teamCompletionRate === null ? "—" : teamCompletionRate + "%"}</strong><small>Across tracked team learning</small></div><div className="role-kpi role-kpi-risk"><span>Overdue learning</span><strong>{teamOverdueLearning}</strong><small>Items requiring follow-up</small></div><div className="role-kpi role-kpi-risk"><span>Overdue compliance</span><strong>{teamOverdueCompliance}</strong><small>Team obligations past due</small></div></div><section className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Manager attention</span><h2>People who need follow-up</h2></div><Link href="/dashboard/team">Open team workspace <ArrowRight size={14}/></Link></div>{teamAttention.length ? <div className="role-list">{teamAttention.map(member => <div className="role-list-row" key={member.id}><span className="role-rank"><UsersRound size={13}/></span><div><strong>{member.first_name} {member.last_name}</strong><small>{member.job_title || "Team member"} · {member.overdue_learning} overdue learning · {member.overdue_compliance} overdue compliance</small></div><ArrowRight size={14}/></div>)}</div> : <div className="role-empty">No immediate team follow-up signals are recorded.</div>}</section></section>}
     {roleMode === "trainer" && <section className="role-dashboard" aria-label="Trainer dashboard"><div className="role-kpi-grid"><div className="role-kpi"><span>Upcoming sessions</span><strong>{trainerUpcoming.length}</strong><small>Your next scheduled deliveries</small></div><div className="role-kpi"><span>Sessions delivered</span><strong>{trainerSessions.filter(session => new Date(session.ends_at).getTime() < now).length}</strong><small>Completed schedule records</small></div><div className="role-kpi"><span>Attendance</span><strong>{trainerAttendance === null ? "—" : trainerAttendance + "%"}</strong><small>Across recent marked sessions</small></div><div className="role-kpi"><span>Assigned learners</span><strong>{assigned}</strong><small>Your current learning assignments</small></div></div><section className="role-panel"><div className="role-panel-head"><div><span className="eyebrow">Your delivery</span><h2>Upcoming sessions</h2></div><Link href="/dashboard/sessions">Open sessions <ArrowRight size={14}/></Link></div>{trainerUpcoming.length ? <div className="role-list">{trainerUpcoming.map(session => <div className="role-list-row" key={session.id}><span className="role-rank"><CalendarDays size={13}/></span><div><strong>{session.title}</strong><small>{new Date(session.starts_at).toLocaleString()} · {session.location || "Location not set"}</small></div><ArrowRight size={14}/></div>)}</div> : <div className="role-empty">No upcoming sessions are assigned to you.</div>}</section></section>}
     {!specializedView && <section className="stat-grid enterprise-kpis" aria-label="Workspace measures">
