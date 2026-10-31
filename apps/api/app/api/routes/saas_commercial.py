@@ -58,6 +58,32 @@ class TenantRolePermissionsUpdate(BaseModel):
     permission_keys: list[str] = Field(default_factory=list, max_length=100)
 
 
+class SaaSPlatformRoleCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+    permission_keys: list[str] = Field(default_factory=list, max_length=30)
+
+
+class SaaSPlatformRoleUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+
+
+class SaaSPlatformRolePermissionsUpdate(BaseModel):
+    permission_keys: list[str] = Field(default_factory=list, max_length=30)
+
+
+PLATFORM_CUSTOM_ROLE_PERMISSION_KEYS = {
+    "saas.sales.read", "saas.sales.manage",
+    "saas.pricing.read",
+    "saas.finance.read", "saas.finance.manage",
+    "saas.customer_success.read", "saas.customer_success.manage",
+    "saas.team.read",
+    "saas.platform.read",
+    "saas.audit.read",
+}
+
+
 router = APIRouter()
 
 
@@ -2502,6 +2528,191 @@ async def remove_managed_tenant_role(
     )
     await db.commit()
     return {"status": "removed"}
+
+
+@router.get("/crm/team/roles")
+async def list_saas_team_roles(
+    user: User = Depends(_require_ops_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_saas_platform_admin(user, db)
+    rows = (await db.execute(
+        select(Role).where(
+            Role.tenant_id == user.tenant_id,
+            Role.role_kind == "platform_custom",
+        ).order_by(Role.name)
+    )).scalars().all()
+    assignments = (await db.execute(
+        select(RolePermission.role_id, Permission.key)
+        .join(Permission, Permission.id == RolePermission.permission_id)
+        .join(Role, Role.id == RolePermission.role_id)
+        .where(Role.tenant_id == user.tenant_id, Role.role_kind == "platform_custom")
+        .order_by(Permission.key)
+    )).all()
+    grants: dict[UUID, list[str]] = {}
+    for role_id, key in assignments:
+        grants.setdefault(role_id, []).append(key)
+    return [{
+        "id": str(role.id),
+        "name": role.name,
+        "description": role.description,
+        "role_kind": role.role_kind,
+        "permission_keys": grants.get(role.id, []),
+    } for role in rows]
+
+
+@router.post("/crm/team/roles", status_code=201)
+async def create_saas_team_role(
+    payload: SaaSPlatformRoleCreate,
+    user: User = Depends(_require_ops_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_saas_platform_admin(user, db)
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="Role name is required")
+    if name.lower() in {
+        "platform developer", "saas super admin", "saas administrator",
+        "sales operations", "sales viewer", "saas finance administrator",
+        "customer success manager", "saas business owner",
+    }:
+        raise HTTPException(status_code=409, detail="This name is reserved for a built-in SaaS platform role")
+    duplicate = await db.scalar(
+        select(Role.id).where(Role.tenant_id == user.tenant_id, Role.name.ilike(name))
+    )
+    if duplicate:
+        raise HTTPException(status_code=409, detail="A role with this name already exists")
+    requested = sorted(set(payload.permission_keys))
+    unknown_or_forbidden = sorted(set(requested) - PLATFORM_CUSTOM_ROLE_PERMISSION_KEYS)
+    if unknown_or_forbidden:
+        raise HTTPException(
+            status_code=403,
+            detail={"forbidden_platform_permissions": unknown_or_forbidden},
+        )
+    permission_rows = list((await db.execute(
+        select(Permission).where(Permission.key.in_(requested))
+    )).scalars().all()) if requested else []
+    found = {permission.key for permission in permission_rows}
+    missing = sorted(set(requested) - found)
+    if missing:
+        raise HTTPException(status_code=422, detail={"unknown_permissions": missing})
+    role = Role(
+        tenant_id=user.tenant_id,
+        name=name,
+        description=payload.description,
+        role_kind="platform_custom",
+    )
+    db.add(role)
+    await db.flush()
+    for permission in permission_rows:
+        db.add(RolePermission(role_id=role.id, permission_id=permission.id))
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id, action="saas.team.role.created",
+        entity_type="role", entity_id=str(role.id),
+        metadata={"permission_keys": requested},
+    )
+    await db.commit()
+    return {
+        "id": str(role.id), "name": role.name, "description": role.description,
+        "role_kind": role.role_kind, "permission_keys": requested,
+    }
+
+
+@router.patch("/crm/team/roles/{role_id}")
+async def update_saas_team_role(
+    role_id: UUID,
+    payload: SaaSPlatformRoleUpdate,
+    user: User = Depends(_require_ops_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_saas_platform_admin(user, db)
+    role = await db.scalar(select(Role).where(
+        Role.id == role_id, Role.tenant_id == user.tenant_id, Role.role_kind == "platform_custom"
+    ))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Custom SaaS role not found")
+    if "name" in payload.model_fields_set:
+        name = (payload.name or "").strip()
+        if len(name) < 2:
+            raise HTTPException(status_code=422, detail="Role name is required")
+        duplicate = await db.scalar(select(Role.id).where(
+            Role.tenant_id == user.tenant_id, Role.name.ilike(name), Role.id != role.id
+        ))
+        if duplicate:
+            raise HTTPException(status_code=409, detail="A role with this name already exists")
+        role.name = name
+    if "description" in payload.model_fields_set:
+        role.description = payload.description
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id, action="saas.team.role.updated",
+        entity_type="role", entity_id=str(role.id),
+        metadata={"changed_fields": sorted(payload.model_fields_set)},
+    )
+    await db.commit()
+    return {"id": str(role.id), "name": role.name, "description": role.description, "role_kind": role.role_kind}
+
+
+@router.put("/crm/team/roles/{role_id}/permissions")
+async def update_saas_team_role_permissions(
+    role_id: UUID,
+    payload: SaaSPlatformRolePermissionsUpdate,
+    user: User = Depends(_require_ops_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_saas_platform_admin(user, db)
+    role = await db.scalar(select(Role).where(
+        Role.id == role_id, Role.tenant_id == user.tenant_id, Role.role_kind == "platform_custom"
+    ))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Custom SaaS role not found")
+    requested = sorted(set(payload.permission_keys))
+    forbidden = sorted(set(requested) - PLATFORM_CUSTOM_ROLE_PERMISSION_KEYS)
+    if forbidden:
+        raise HTTPException(status_code=403, detail={"forbidden_platform_permissions": forbidden})
+    permission_rows = list((await db.execute(
+        select(Permission).where(Permission.key.in_(requested))
+    )).scalars().all()) if requested else []
+    found = {permission.key for permission in permission_rows}
+    missing = sorted(set(requested) - found)
+    if missing:
+        raise HTTPException(status_code=422, detail={"unknown_permissions": missing})
+    current = list((await db.execute(select(RolePermission).where(RolePermission.role_id == role.id))).scalars().all())
+    for assignment in current:
+        await db.delete(assignment)
+    for permission in permission_rows:
+        db.add(RolePermission(role_id=role.id, permission_id=permission.id))
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id, action="saas.team.role.permissions.updated",
+        entity_type="role", entity_id=str(role.id),
+        metadata={"permission_keys": requested},
+    )
+    await db.commit()
+    return {"role_id": str(role.id), "permission_keys": requested}
+
+
+@router.delete("/crm/team/roles/{role_id}")
+async def delete_saas_team_role(
+    role_id: UUID,
+    user: User = Depends(_require_ops_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_saas_platform_admin(user, db)
+    role = await db.scalar(select(Role).where(
+        Role.id == role_id, Role.tenant_id == user.tenant_id, Role.role_kind == "platform_custom"
+    ))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Custom SaaS role not found")
+    assigned = await db.scalar(select(UserRole.user_id).where(UserRole.role_id == role.id).limit(1))
+    if assigned is not None:
+        raise HTTPException(status_code=409, detail="Remove this role from all members before deleting it")
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id, action="saas.team.role.deleted",
+        entity_type="role", entity_id=str(role.id),
+        metadata={"role_name": role.name},
+    )
+    await db.delete(role)
+    await db.commit()
+    return {"status": "deleted", "role_id": str(role_id)}
 
 
 @router.get("/crm/team")
