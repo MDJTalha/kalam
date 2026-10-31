@@ -857,8 +857,12 @@ async def crm_lookup(
     raise HTTPException(status_code=404, detail="Unknown CRM lookup type")
 
 @router.get("/crm/plans")
-async def list_plans(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
-    items = (await db.execute(select(SaaSPlan).where(SaaSPlan.ops_tenant_id == user.tenant_id).order_by(SaaSPlan.sort_order, SaaSPlan.name))).scalars().all()
+async def list_plans(
+    limit: int = Query(default=100, ge=1, le=100),
+    user: User = Depends(_require_ops_user),
+    db: AsyncSession = Depends(get_db),
+):
+    items = (await db.execute(select(SaaSPlan).where(SaaSPlan.ops_tenant_id == user.tenant_id).order_by(SaaSPlan.sort_order, SaaSPlan.name).limit(limit))).scalars().all()
     return [_plan_payload(item) for item in items]
 
 
@@ -880,6 +884,7 @@ async def list_accounts(
     q: str | None = Query(default=None, max_length=160),
     owner_user_id: UUID | None = Query(default=None),
     country: str | None = Query(default=None, max_length=120),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -898,7 +903,7 @@ async def list_accounts(
             CRMAccount.industry.ilike(term),
             CRMAccount.country.ilike(term),
         ))
-    items = (await db.execute(stmt.order_by(CRMAccount.updated_at.desc(), CRMAccount.name))).scalars().all()
+    items = (await db.execute(stmt.order_by(CRMAccount.updated_at.desc(), CRMAccount.name).limit(limit))).scalars().all()
     return [{
         "id": str(item.id), "name": item.name, "slug": item.slug, "account_type": item.account_type,
         "lifecycle_stage": item.lifecycle_stage, "industry": item.industry, "country": item.country,
@@ -973,13 +978,18 @@ async def create_contact(payload: ContactCreate, user: User = Depends(require_pe
 
 
 @router.get("/crm/trials")
-async def list_trials(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
+async def list_trials(
+    limit: int = Query(default=100, ge=1, le=100),
+    user: User = Depends(_require_ops_user),
+    db: AsyncSession = Depends(get_db),
+):
     rows = (await db.execute(
         select(CRMTrial, CRMAccount, SaaSPlan)
         .join(CRMAccount, CRMAccount.id == CRMTrial.account_id)
         .outerjoin(SaaSPlan, SaaSPlan.id == CRMTrial.plan_id)
         .where(CRMTrial.ops_tenant_id == user.tenant_id)
         .order_by(CRMTrial.created_at.desc())
+        .limit(limit)
     )).all()
     return [{
         "id": str(trial.id), "account_id": str(trial.account_id), "account_name": account.name,
@@ -1006,8 +1016,12 @@ async def create_trial(payload: TrialCreate, user: User = Depends(require_permis
 
 
 @router.get("/crm/subscriptions")
-async def list_subscriptions(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
-    items = (await db.execute(select(CRMSubscription).where(CRMSubscription.ops_tenant_id == user.tenant_id).order_by(CRMSubscription.created_at.desc()))).scalars().all()
+async def list_subscriptions(
+    limit: int = Query(default=100, ge=1, le=100),
+    user: User = Depends(_require_ops_user),
+    db: AsyncSession = Depends(get_db),
+):
+    items = (await db.execute(select(CRMSubscription).where(CRMSubscription.ops_tenant_id == user.tenant_id).order_by(CRMSubscription.created_at.desc()).limit(limit))).scalars().all()
     return [{"id": str(x.id), "account_id": str(x.account_id), "plan_id": str(x.plan_id) if x.plan_id else None, "status": x.status, "billing_cycle": x.billing_cycle, "currency": x.currency, "seats": x.seats, "list_price_minor": x.list_price_minor, "discount_minor": x.discount_minor, "net_price_minor": x.net_price_minor, "renews_at": x.renews_at} for x in items]
 
 
@@ -1090,6 +1104,7 @@ async def list_opportunities(
     stage: str | None = Query(default=None, max_length=40),
     q: str | None = Query(default=None, max_length=180),
     owner_user_id: UUID | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -1101,7 +1116,7 @@ async def list_opportunities(
     if q:
         term = f"%{q.strip()}%"
         stmt = stmt.where(or_(CRMOpportunity.name.ilike(term), CRMAccount.name.ilike(term), CRMAccount.slug.ilike(term)))
-    rows = (await db.execute(stmt.order_by(CRMOpportunity.updated_at.desc()))).all()
+    rows = (await db.execute(stmt.order_by(CRMOpportunity.updated_at.desc()).limit(limit))).all()
     return [{
         "id": str(x.id), "account_id": str(x.account_id), "account_name": account.name,
         "name": x.name, "stage": x.stage, "currency": x.currency, "amount_minor": x.amount_minor,
@@ -1148,8 +1163,12 @@ async def create_opportunity(payload: OpportunityCreate, user: User = Depends(re
 
 
 @router.get("/crm/offers")
-async def list_offers(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
-    items = (await db.execute(select(SaaSOffer).where(SaaSOffer.ops_tenant_id == user.tenant_id).order_by(SaaSOffer.created_at.desc()))).scalars().all()
+async def list_offers(
+    limit: int = Query(default=100, ge=1, le=100),
+    user: User = Depends(_require_ops_user),
+    db: AsyncSession = Depends(get_db),
+):
+    items = (await db.execute(select(SaaSOffer).where(SaaSOffer.ops_tenant_id == user.tenant_id).order_by(SaaSOffer.created_at.desc()).limit(limit))).scalars().all()
     return [{"id": str(x.id), "plan_id": str(x.plan_id) if x.plan_id else None, "code": x.code, "title": x.title, "discount_type": x.discount_type, "discount_value": x.discount_value, "status": x.status, "public_visible": x.public_visible, "starts_at": x.starts_at, "ends_at": x.ends_at} for x in items]
 
 
@@ -1171,8 +1190,12 @@ async def create_offer(payload: OfferCreate, user: User = Depends(require_permis
 
 
 @router.get("/crm/certifications")
-async def list_certifications(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
-    items = (await db.execute(select(SaaSCertification).where(SaaSCertification.ops_tenant_id == user.tenant_id).order_by(SaaSCertification.display_order, SaaSCertification.title))).scalars().all()
+async def list_certifications(
+    limit: int = Query(default=100, ge=1, le=100),
+    user: User = Depends(_require_ops_user),
+    db: AsyncSession = Depends(get_db),
+):
+    items = (await db.execute(select(SaaSCertification).where(SaaSCertification.ops_tenant_id == user.tenant_id).order_by(SaaSCertification.display_order, SaaSCertification.title).limit(limit))).scalars().all()
     return [{"id": str(x.id), "title": x.title, "issuer": x.issuer, "registration_number": x.registration_number, "status": x.status, "public_visible": x.public_visible, "issued_at": x.issued_at, "expires_at": x.expires_at, "verification_url": x.verification_url} for x in items]
 
 
@@ -1557,6 +1580,7 @@ async def convert_inquiry(
 
 @router.get("/crm/tenants")
 async def list_managed_tenants(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -1572,12 +1596,13 @@ async def list_managed_tenants(
         .where(Tenant.id.in_(linked_ids), Tenant.id != user.tenant_id, Tenant.slug != settings.saas_demo_tenant_slug)
         .group_by(Tenant.id)
         .order_by(Tenant.created_at.desc())
+        .limit(limit)
     )
     account_result = await db.execute(
         select(CRMAccount).where(
             CRMAccount.ops_tenant_id == user.tenant_id,
             CRMAccount.managed_tenant_id.is_not(None),
-        )
+        ).limit(limit)
     )
     account_by_tenant = {
         item.managed_tenant_id: item
@@ -1612,6 +1637,7 @@ class ManagedUserUpdate(BaseModel):
 @router.get("/crm/tenants/{tenant_id}/users")
 async def list_managed_tenant_users(
     tenant_id: UUID,
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -1625,7 +1651,7 @@ async def list_managed_tenant_users(
     if account is None:
         raise HTTPException(status_code=404, detail="Tenant is not linked to this CRM")
     rows = (await db.execute(
-        select(User).where(User.tenant_id == tenant_id).order_by(User.last_name, User.first_name, User.email)
+        select(User).where(User.tenant_id == tenant_id).order_by(User.last_name, User.first_name, User.email).limit(limit)
     )).scalars().all()
     return [{
         "id": str(item.id),
@@ -1794,6 +1820,7 @@ async def update_managed_tenant(
 @router.get("/crm/accounts/{account_id}")
 async def account_detail(
     account_id: UUID,
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -1809,37 +1836,37 @@ async def account_detail(
     contacts = (await db.execute(
         select(CRMContact)
         .where(CRMContact.account_id == account.id, CRMContact.ops_tenant_id == user.tenant_id)
-        .order_by(CRMContact.is_primary.desc(), CRMContact.created_at.desc())
+        .order_by(CRMContact.is_primary.desc(), CRMContact.created_at.desc()).limit(limit)
     )).scalars().all()
     trials = (await db.execute(
         select(CRMTrial)
         .where(CRMTrial.account_id == account.id, CRMTrial.ops_tenant_id == user.tenant_id)
-        .order_by(CRMTrial.created_at.desc())
+        .order_by(CRMTrial.created_at.desc()).limit(limit)
     )).scalars().all()
     subscriptions = (await db.execute(
         select(CRMSubscription)
         .where(CRMSubscription.account_id == account.id, CRMSubscription.ops_tenant_id == user.tenant_id)
-        .order_by(CRMSubscription.created_at.desc())
+        .order_by(CRMSubscription.created_at.desc()).limit(limit)
     )).scalars().all()
     opportunities = (await db.execute(
         select(CRMOpportunity)
         .where(CRMOpportunity.account_id == account.id, CRMOpportunity.ops_tenant_id == user.tenant_id)
-        .order_by(CRMOpportunity.updated_at.desc())
+        .order_by(CRMOpportunity.updated_at.desc()).limit(limit)
     )).scalars().all()
     contracts = (await db.execute(
         select(CRMContract)
         .where(CRMContract.account_id == account.id, CRMContract.ops_tenant_id == user.tenant_id)
-        .order_by(CRMContract.updated_at.desc())
+        .order_by(CRMContract.updated_at.desc()).limit(limit)
     )).scalars().all()
     invoices = (await db.execute(
         select(CRMInvoice)
         .where(CRMInvoice.account_id == account.id, CRMInvoice.ops_tenant_id == user.tenant_id)
-        .order_by(CRMInvoice.created_at.desc())
+        .order_by(CRMInvoice.created_at.desc()).limit(limit)
     )).scalars().all()
     payments = (await db.execute(
         select(CRMPayment)
         .where(CRMPayment.account_id == account.id, CRMPayment.ops_tenant_id == user.tenant_id)
-        .order_by(CRMPayment.received_at.desc())
+        .order_by(CRMPayment.received_at.desc()).limit(limit)
     )).scalars().all()
     invoice_financials: dict[UUID, tuple[int, int]] = {}
     for invoice in invoices:
@@ -1969,6 +1996,7 @@ async def account_detail(
 async def list_onboarding_items(
     account_id: UUID | None = Query(default=None),
     status: str | None = Query(default=None, max_length=30),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -1983,7 +2011,7 @@ async def list_onboarding_items(
             CRMOnboardingItem.due_at.asc().nullslast(),
             CRMOnboardingItem.sort_order,
             CRMOnboardingItem.created_at,
-        )
+        ).limit(limit)
     )).scalars().all()
     account_ids = {item.account_id for item in items}
     account_rows = (await db.execute(
@@ -2141,6 +2169,7 @@ async def create_standard_onboarding(
 @router.get("/crm/renewals")
 async def list_renewals(
     days: int = Query(default=90, ge=1, le=730),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2157,6 +2186,7 @@ async def list_renewals(
             CRMSubscription.renews_at <= horizon,
         )
         .order_by(CRMSubscription.renews_at.asc())
+        .limit(limit)
     )).all()
     return [{
         "subscription_id": str(subscription.id),
@@ -2178,6 +2208,7 @@ async def list_renewals(
 
 @router.get("/crm/team")
 async def list_crm_team(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2187,6 +2218,7 @@ async def list_crm_team(
         .outerjoin(Role, Role.id == UserRole.role_id)
         .where(User.tenant_id == user.tenant_id)
         .order_by(User.is_active.desc(), User.first_name, User.last_name, Role.name)
+        .limit(limit)
     )).all()
     grouped: dict[UUID, dict[str, Any]] = {}
     for member, role in rows:
@@ -2326,6 +2358,7 @@ async def _reconcile_invoice(db: AsyncSession, invoice: CRMInvoice) -> tuple[int
 @router.get("/crm/contracts")
 async def list_contracts(
     account_id: UUID | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2464,6 +2497,7 @@ async def update_contract(
 async def list_invoices(
     status: str | None = Query(default=None, max_length=30),
     account_id: UUID | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2594,6 +2628,7 @@ async def update_invoice(
 async def list_payments(
     invoice_id: UUID | None = Query(default=None),
     account_id: UUID | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2607,7 +2642,7 @@ async def list_payments(
         stmt = stmt.where(CRMPayment.invoice_id == invoice_id)
     if account_id is not None:
         stmt = stmt.where(CRMPayment.account_id == account_id)
-    rows = (await db.execute(stmt.order_by(CRMPayment.received_at.desc()))).all()
+    rows = (await db.execute(stmt.order_by(CRMPayment.received_at.desc()).limit(limit))).all()
     return [{
         "id": str(payment.id),
         "account_id": str(account.id),
@@ -2781,6 +2816,7 @@ async def list_crm_tasks(
     task_type: str | None = Query(default=None, max_length=50),
     owner_user_id: UUID | None = Query(default=None),
     account_id: UUID | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2804,7 +2840,7 @@ async def list_crm_tasks(
             CRMTask.due_at.asc().nullslast(),
             CRMTask.priority.desc(),
             CRMTask.created_at.desc(),
-        )
+        ).limit(limit)
     )).all()
     return [{
         "id": str(task.id),

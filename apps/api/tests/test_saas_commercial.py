@@ -507,3 +507,39 @@ def test_plan_offer_subscription_and_trial_guards():
             assert active.status_code == 200, active.text
     finally:
         asyncio.run(_cleanup(email, code, slug, offer_code, slug))
+
+
+def test_saas_crm_collection_reads_are_bounded():
+    suffix = uuid4().hex[:8]
+    email = f"bounds-test-{suffix}@example.com"
+    asyncio.run(_create_ops_user(email))
+    try:
+        with TestClient(app, base_url="http://127.0.0.1") as client:
+            login = client.post("/api/v1/auth/login", json={
+                "tenant_slug": OPS_SLUG,
+                "email": email,
+                "password": PASSWORD,
+            })
+            assert login.status_code == 200, login.text
+            paths = (
+                "/api/v1/saas/crm/accounts",
+                "/api/v1/saas/crm/subscriptions",
+                "/api/v1/saas/crm/offers",
+                "/api/v1/saas/crm/opportunities",
+                "/api/v1/saas/crm/contracts",
+                "/api/v1/saas/crm/invoices",
+                "/api/v1/saas/crm/payments",
+                "/api/v1/saas/crm/plans",
+                "/api/v1/saas/crm/trials",
+                "/api/v1/saas/crm/certifications",
+                "/api/v1/saas/crm/onboarding",
+                "/api/v1/saas/crm/renewals",
+                "/api/v1/saas/crm/team",
+                "/api/v1/saas/crm/tasks",
+                f"/api/v1/saas/crm/tenants/{uuid4()}/users",
+                f"/api/v1/saas/crm/accounts/{uuid4()}",
+            )
+            for path in paths:
+                assert client.get(path, params={"limit": 101}).status_code == 422
+    finally:
+        asyncio.run(_cleanup(email, f"bounds-plan-{suffix}"))
