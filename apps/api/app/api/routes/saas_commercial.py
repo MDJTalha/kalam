@@ -1992,6 +1992,7 @@ async def account_detail(
 async def list_onboarding_items(
     account_id: UUID | None = Query(default=None),
     status: str | None = Query(default=None, max_length=30),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2006,7 +2007,7 @@ async def list_onboarding_items(
             CRMOnboardingItem.due_at.asc().nullslast(),
             CRMOnboardingItem.sort_order,
             CRMOnboardingItem.created_at,
-        )
+        ).limit(limit)
     )).scalars().all()
     account_ids = {item.account_id for item in items}
     account_rows = (await db.execute(
@@ -2164,6 +2165,7 @@ async def create_standard_onboarding(
 @router.get("/crm/renewals")
 async def list_renewals(
     days: int = Query(default=90, ge=1, le=730),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2180,6 +2182,7 @@ async def list_renewals(
             CRMSubscription.renews_at <= horizon,
         )
         .order_by(CRMSubscription.renews_at.asc())
+        .limit(limit)
     )).all()
     return [{
         "subscription_id": str(subscription.id),
@@ -2201,6 +2204,7 @@ async def list_renewals(
 
 @router.get("/crm/team")
 async def list_crm_team(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -2210,6 +2214,7 @@ async def list_crm_team(
         .outerjoin(Role, Role.id == UserRole.role_id)
         .where(User.tenant_id == user.tenant_id)
         .order_by(User.is_active.desc(), User.first_name, User.last_name, Role.name)
+        .limit(limit)
     )).all()
     grouped: dict[UUID, dict[str, Any]] = {}
     for member, role in rows:
