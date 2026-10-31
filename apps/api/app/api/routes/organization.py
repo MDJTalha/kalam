@@ -65,6 +65,7 @@ async def page_units(
 
 @router.get("/units", response_model=list[OrgUnitOut])
 async def list_units(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(require_permission("users.read")),
     db: AsyncSession = Depends(get_db),
 ):
@@ -72,6 +73,7 @@ async def list_units(
         select(OrgUnit)
         .where(OrgUnit.tenant_id == user.tenant_id)
         .order_by(OrgUnit.unit_type, OrgUnit.name)
+        .limit(limit)
     )
     return list(result.scalars().all())
 
@@ -169,13 +171,14 @@ async def page_roles(
 
 @router.get("/roles", response_model=list[RoleOut])
 async def list_roles(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(require_permission("users.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Role).where(Role.tenant_id == user.tenant_id)
     if not await _is_platform_developer(user, db):
         stmt = stmt.where(Role.role_kind.in_(["predefined", "custom"]))
-    result = await db.execute(stmt.order_by(Role.name))
+    result = await db.execute(stmt.order_by(Role.name).limit(limit))
     return list(result.scalars().all())
 
 @router.get("/users/{user_id}/roles", response_model=list[RoleOut])
