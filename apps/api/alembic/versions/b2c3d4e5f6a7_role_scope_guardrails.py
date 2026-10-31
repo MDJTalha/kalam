@@ -63,6 +63,25 @@ def upgrade() -> None:
         WHERE rp.role_id=r.id
           AND lower(r.name)='regional executive'
     """))
+    conn.execute(sa.text("""
+        UPDATE roles
+        SET description='Unavailable until regional row-level data scope is implemented'
+        WHERE lower(name)='regional executive'
+    """))
+
+    # Remove the former all-purpose CRM grants from operator roles. Their new
+    # domain grants are added by the canonical role-catalogue migration.
+    conn.execute(sa.text("""
+        DELETE FROM role_permissions rp
+        USING roles r, permissions p
+        WHERE rp.role_id=r.id
+          AND rp.permission_id=p.id
+          AND r.name IN (
+              'SaaS Administrator', 'Sales Operations', 'Sales Viewer',
+              'SaaS Finance Administrator', 'Customer Success Manager'
+          )
+          AND p.key IN ('saas.crm.read','saas.crm.manage')
+    """))
 
 
 def downgrade() -> None:
