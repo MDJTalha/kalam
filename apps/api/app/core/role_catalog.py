@@ -111,7 +111,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     ),
     "Quality & Compliance": (
         "tenant.read", "organization.read",
-        "compliance.manage", "audit.read", "files.read", "evidence.read",
+        "compliance.manage", "audit.read", "files.read",
         "reports.export.compliance",
     ),
     # Auditors work through the audit trail and governed evidence repository.
