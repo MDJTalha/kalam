@@ -11,7 +11,7 @@ function money(minor:number,currency:string){return new Intl.NumberFormat("en-US
 function pct(value:number,total:number){return total?Math.round(value/total*100):0;}
 
 export default async function SaaSForecastPage(){
-  const forecast=await apiJson<Forecast>("/api/v1/saas/crm/forecast");
+  const forecast=await apiJsonResult<Forecast>("/api/v1/saas/crm/forecast").then((result) => result.ok ? result.data : null);
   if(!forecast)return <DashboardShell title="Forecast" eyebrow="SaaS CRM"><EmptyState title="Forecast access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const opportunityCount=forecast.pipeline.reduce((s,r)=>s+r.opportunities,0), invoiceCount=forecast.open_invoices.reduce((s,r)=>s+r.invoices,0);
   const currencies=[...new Set([...forecast.pipeline.map(r=>r.currency),...forecast.open_invoices.map(r=>r.currency)])];
