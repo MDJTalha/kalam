@@ -3,13 +3,16 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { SubscriptionCreateForm, SubscriptionQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Subscription={id:string;account_id:string;account_name:string;plan_id?:string|null;plan_name?:string|null;status:string;billing_cycle:string;currency:string;seats:number;list_price_minor:number;discount_minor:number;net_price_minor:number;renews_at?:string|null};
 type SubscriptionPage={items:Subscription[];total:number;offset:number;limit:number};
 function money(minor:number,currency:string){return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:minor%100===0?0:2}).format(minor/100);}
 
 export default async function SaaSSubscriptionsPage({searchParams}:{searchParams:Promise<{page?:string;status?:string}>}){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("saas.finance.manage")??false;
+  if(!user.permissions?.includes("saas.finance.read"))return <DashboardShell title="Subscriptions" eyebrow="SaaS Finance"><EmptyState title="Finance access is restricted" description="This role does not include subscription visibility."/></DashboardShell>;
   const params=await searchParams;
   const requestedPage=Number(params.page||1);
   const page=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,100000):1;
@@ -31,7 +34,7 @@ export default async function SaaSSubscriptionsPage({searchParams}:{searchParams
         <span key="d">{money(s.list_price_minor,s.currency)}</span>,
         <span key="e">{money(s.discount_minor,s.currency)}</span>,
         <span key="f"><strong>{money(s.net_price_minor,s.currency)}</strong><small>{s.billing_cycle}</small></span>,
-        <span key="g"><StatusBadge status={s.status}/><SubscriptionQuickActions id={s.id} status={s.status}/></span>
+        <span key="g"><StatusBadge status={s.status}/>{canManage?<SubscriptionQuickActions id={s.id} status={s.status}/>:null}</span>
       ])}/>
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Subscription pages">
         {page>1?<Link className="button button-secondary" href={pageHref(page-1)}>Previous</Link>:null}
@@ -39,8 +42,6 @@ export default async function SaaSSubscriptionsPage({searchParams}:{searchParams
         {page<pageCount?<Link className="button button-secondary" href={pageHref(page+1)}>Next</Link>:null}
       </nav>
     </SectionCard>
-    <SectionCard eyebrow="New agreement" title="Create subscription">
-      <SubscriptionCreateForm/>
-    </SectionCard>
+    {canManage&&<SectionCard eyebrow="New agreement" title="Create subscription"><SubscriptionCreateForm/></SectionCard>}
   </DashboardShell>;
 }
