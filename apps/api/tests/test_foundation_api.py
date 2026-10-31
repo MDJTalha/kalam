@@ -2053,6 +2053,14 @@ def test_webhook_list_is_bounded(client: TestClient) -> None:
     assert len(listed.json()) == 1
     assert client.get("/api/v1/webhooks", params={"limit": 101}).status_code == 422
 
+def test_capability_category_read_is_bounded(client: TestClient) -> None:
+    login(client, ADMIN)
+    response = client.get("/api/v1/capabilities/categories", params={"limit": 1})
+    assert response.status_code == 200
+    assert len(response.json()) <= 1
+    assert client.get("/api/v1/capabilities/categories", params={"limit": 101}).status_code == 422
+
+
 
 def test_compatibility_organization_lists_are_bounded(client: TestClient) -> None:
     login(client, ADMIN)
