@@ -42,6 +42,12 @@ def login(client: TestClient, credentials: dict[str, str]) -> None:
 def test_phase8_compliance_operations_recurrence_and_exception_expiry() -> None:
     with TestClient(app, base_url="http://localhost") as client:
         login(client, QUALITY)
+        # Quality can target policy applicability using role/unit metadata but
+        # cannot browse the tenant employee directory or role-assignment API.
+        assert client.get("/api/v1/people").status_code == 403
+        assert client.get("/api/v1/organization/roles/catalog").status_code == 200
+        assert client.get("/api/v1/organization/units").status_code == 200
+        assert client.get("/api/v1/organization/roles").status_code == 403
         token = uuid4().hex[:8]
         requirement = client.post(
             "/api/v1/compliance",
