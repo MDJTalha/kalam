@@ -119,6 +119,7 @@ def _json(item: CapabilityEvidence) -> dict:
         "demonstrated_level": float(item.demonstrated_level), "confidence": item.confidence,
         "status": item.status, "observed_at": item.observed_at, "expires_at": item.expires_at,
         "assessor_id": str(item.assessor_id) if item.assessor_id else None,
+        "submitted_by": str(item.submitted_by) if item.submitted_by else None,
         "notes": item.notes, "metadata": item.record_metadata,
         "verified_by": str(item.verified_by) if item.verified_by else None,
         "verified_at": item.verified_at, "rejection_reason": item.rejection_reason,
