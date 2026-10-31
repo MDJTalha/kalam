@@ -22,7 +22,8 @@ export default async function DevelopmentTeamPage({
   const permissions = user.permissions ?? [];
   const canManageDevelopment = permissions.includes("development.manage") || permissions.includes("tenant.manage");
   const canViewDirectReports = permissions.includes("team.read") && canManageDevelopment;
-  const canViewWorkforce = permissions.includes("users.read") && canManageDevelopment;
+  const canViewWorkforce = permissions.includes("users.read")
+    && (permissions.includes("development.manage") || permissions.includes("tenant.manage"));
 
   if (!canViewDirectReports && !canViewWorkforce) {
     return <DashboardShell title="Team development" eyebrow="Development governance">
