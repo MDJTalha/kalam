@@ -10,7 +10,7 @@ type Plan={id:string;code:string;name:string;tagline?:string|null;description?:s
 
 export default async function SaaSPlanDetailPage({params}:{params:Promise<{id:string}>}){
   const {id}=await params;
-  const plans=await apiJson<Plan[]>("/api/v1/saas/crm/plans");
+  const plans=await apiJsonResult<Plan[]>("/api/v1/saas/crm/plans").then((result) => result.ok ? result.data : null);
   const plan=plans?.find(item=>item.id===id);
   if(!plan)return <DashboardShell title="Commercial plan" eyebrow="SaaS CRM"><EmptyState title="Plan unavailable" description="The plan was not found or this user does not have SaaS CRM access."/></DashboardShell>;
 
