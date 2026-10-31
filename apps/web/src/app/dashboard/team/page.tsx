@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { TeamWorkspace } from "@/components/team-workspace";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Member = { id: string; email: string; first_name: string; last_name: string; employee_number?: string | null; job_title?: string | null; completed_learning: number; open_learning: number; overdue_learning: number; open_compliance: number; overdue_compliance: number; active_plans: number };
 export default async function TeamPage() {
