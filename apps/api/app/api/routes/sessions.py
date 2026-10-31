@@ -61,8 +61,11 @@ async def mark_attendance(
     if session is None or learner is None:
         raise HTTPException(status_code=404, detail="Session or learner not found")
     can_manage_all = await user_has_permission(user, db, "courses.manage")
-    if not can_manage_all and session.instructor_id != user.id:
-        raise HTTPException(status_code=403, detail="Facilitator scope does not include this session")
+    can_grade_assigned = await user_has_permission(user, db, "assessments.grade_assigned")
+    if not can_manage_all and not (
+        can_grade_assigned and session.instructor_id == user.id
+    ):
+        raise HTTPException(status_code=403, detail="Assigned instructor access is required for this session")
     enrollment = await db.scalar(
         select(Enrollment.id).where(
             Enrollment.tenant_id == user.tenant_id,
@@ -147,8 +150,9 @@ async def session_analytics(
         raise HTTPException(status_code=404, detail="Session not found")
 
     is_admin = await user_has_permission(user, db, "courses.manage")
-    if not is_admin and session.instructor_id != user.id:
-        raise HTTPException(status_code=403, detail="Facilitator scope does not include this session")
+    can_grade_assigned = await user_has_permission(user, db, "assessments.grade_assigned")
+    if not is_admin and not (can_grade_assigned and session.instructor_id == user.id):
+        raise HTTPException(status_code=403, detail="Assigned instructor access is required for this session")
 
     counts = await db.execute(
         select(AttendanceRecord.status, func.count(AttendanceRecord.id))
