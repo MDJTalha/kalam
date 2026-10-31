@@ -1,7 +1,7 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { EvidenceOperations } from "@/components/evidence-operations";
 import { EmptyState, Section } from "@/components/ui";
-import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { FileCheck2 } from "lucide-react";
 
 type Person={id:string;first_name:string;last_name:string;email:string;job_title?:string|null};
@@ -15,13 +15,13 @@ export default async function EvidenceAdminPage(){
  const user=await requireUser<{permissions?:string[]}>();
  const permissions=user.permissions??[];
  if(!permissions.includes("evidence.read")) return <DashboardShell title="Evidence operations" eyebrow="Capability evidence"><EmptyState title="Access restricted" description="This workspace requires evidence access." icon={FileCheck2}/></DashboardShell>;
- const [peoplePage,competencyResult,evidenceResult]=await Promise.all([apiJson<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"),apiJsonResult<CompetencyPage>("/api/v1/capability-domain/competencies/page?page=1&page_size=100"),apiJsonResult<EvidencePage>("/api/v1/evidence/page?page=1&page_size=50")]);
- const people=peoplePage?.items??null;
+ const [peopleResult,competencyResult,evidenceResult]=await Promise.all([apiJsonResult<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"),apiJsonResult<CompetencyPage>("/api/v1/capability-domain/competencies/page?page=1&page_size=100"),apiJsonResult<EvidencePage>("/api/v1/evidence/page?page=1&page_size=50")]);
+ const people=peopleResult.ok?peopleResult.data?.items??null:null;
  const evidence=evidenceResult.ok?evidenceResult.data:null;
  const competencies=competencyResult.ok?competencyResult.data?.items:null;
- const failed=!people||!competencies||!evidence||((competencyResult.data?.total||0)>(competencies?.length||0));
+ const failed=!peopleResult.ok||!people||!competencies||!evidence||((competencyResult.data?.total||0)>(competencies?.length||0));
  return <DashboardShell title="Evidence operations" eyebrow="Capability evidence" breadcrumbs={[{label:"Skills & Capabilities",href:"/dashboard/skills"},{label:"Evidence operations"}]}>
-  {failed?<Section eyebrow="Evidence engine" title="Evidence data unavailable"><p>One or more governed evidence sources could not be loaded, or the competency catalog exceeds the 100-item safety limit. Refresh after the capability services are available or narrow the catalog.</p></Section>:
+  {failed?<Section eyebrow="Evidence engine" title="Evidence data unavailable"><p>One or more governed evidence sources could not be loaded, or the competency catalog exceeds the 100-item safety limit. {!peopleResult.ok ? `People lookup HTTP ${peopleResult.status}: ${peopleResult.error || "request failed"} ` : ""}Refresh after the capability services are available or narrow the catalog.</p></Section>:
    <EvidenceOperations people={people??[]} competencies={(competencies??[]).filter(x=>x.status!=="retired")} initialEvidence={evidence?.items??[]} initialTotal={evidence?.total??0} canVerify={permissions.includes("evidence.verify")}/>}
  </DashboardShell>;
 }
