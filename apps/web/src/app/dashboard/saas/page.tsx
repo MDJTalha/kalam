@@ -3,7 +3,7 @@ import { AlertTriangle, Building2, CircleDollarSign, ClipboardCheck, FlaskConica
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { EmptyState, MetricCard, SectionCard } from "@/components/ui";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Overview={accounts:number;customers:number;active_trials:number;scheduled_trials:number;active_subscriptions:number;open_tasks:number;overdue_tasks:number;overdue_invoices:number;pipeline_by_currency:Array<{currency:string;amount_minor:number;opportunities:number}>;subscriptions_by_currency_cycle:Array<{currency:string;billing_cycle:string;net_value_minor:number;subscriptions:number}>};
 type CurrentUser={permissions?:string[]};
