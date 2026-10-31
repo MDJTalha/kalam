@@ -93,11 +93,10 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     # HRBP access is limited to direct reports and their capability signals.
     # Business-unit population access requires an explicit org-scope assignment model.
     "HR Business Partner": (
-        "team.read",
+        "team.read", "development.manage",
     ),
     "Quality & Compliance": (
-        "users.read", "courses.read", "learning.access", "compliance.manage",
-        "reports.read", "audit.read", "files.read", "evidence.read",
+        "compliance.manage", "audit.read", "files.read", "evidence.read",
     ),
     # Auditors work through the audit trail and governed evidence repository.
     # Broad reports.read also exposes tenant-wide people exports, so it is not
