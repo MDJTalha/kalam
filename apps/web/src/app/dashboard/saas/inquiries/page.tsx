@@ -5,8 +5,8 @@ import { InquiryQueue, type Inquiry } from "@/app/dashboard/admin/inquiries/queu
 
 export default async function SaaSInquiriesPage() {
   await requireUser();
-  const response = await apiFetch("/api/v1/marketing/inquiries");
-  if (!response.ok) {
+  const result = await apiJsonResult<Inquiry[]>("/api/v1/marketing/inquiries");
+  if (!result.ok || !result.data) {
     return <DashboardShell title="Leads & Inquiries" eyebrow="SaaS CRM" breadcrumbs={[{label:"SaaS Operations",href:"/dashboard/saas"},{label:"Leads & Inquiries"}]}>
       <SaaSCrmNav/>
       <div className="data-panel saas-spaced-section"><div className="empty-state">
