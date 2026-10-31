@@ -1882,34 +1882,44 @@ async def account_detail(
         .where(CRMTrial.account_id == account.id, CRMTrial.ops_tenant_id == user.tenant_id)
         .order_by(CRMTrial.created_at.desc())
     )).scalars().all()
-    subscriptions = (await db.execute(
-        select(CRMSubscription)
-        .where(CRMSubscription.account_id == account.id, CRMSubscription.ops_tenant_id == user.tenant_id)
-        .order_by(CRMSubscription.created_at.desc())
-    )).scalars().all()
-    opportunities = (await db.execute(
-        select(CRMOpportunity)
-        .where(CRMOpportunity.account_id == account.id, CRMOpportunity.ops_tenant_id == user.tenant_id)
-        .order_by(CRMOpportunity.updated_at.desc())
-    )).scalars().all()
-    contracts = (await db.execute(
-        select(CRMContract)
-        .where(CRMContract.account_id == account.id, CRMContract.ops_tenant_id == user.tenant_id)
-        .order_by(CRMContract.updated_at.desc())
-    )).scalars().all()
-    invoices = (await db.execute(
-        select(CRMInvoice)
-        .where(CRMInvoice.account_id == account.id, CRMInvoice.ops_tenant_id == user.tenant_id)
-        .order_by(CRMInvoice.created_at.desc())
-    )).scalars().all()
-    payments = (await db.execute(
-        select(CRMPayment)
-        .where(CRMPayment.account_id == account.id, CRMPayment.ops_tenant_id == user.tenant_id)
-        .order_by(CRMPayment.received_at.desc())
-    )).scalars().all()
-    invoice_financials: dict[UUID, tuple[int, int]] = {}
-    for invoice in invoices:
-        invoice_financials[invoice.id] = await _reconcile_invoice(db, invoice)
+    can_read_finance = await user_has_permission(user, db, "saas.finance.read")
+    if can_read_finance:
+        subscriptions = (await db.execute(
+            select(CRMSubscription)
+            .where(CRMSubscription.account_id == account.id, CRMSubscription.ops_tenant_id == user.tenant_id)
+            .order_by(CRMSubscription.created_at.desc())
+        )).scalars().all()
+        opportunities = (await db.execute(
+            select(CRMOpportunity)
+            .where(CRMOpportunity.account_id == account.id, CRMOpportunity.ops_tenant_id == user.tenant_id)
+            .order_by(CRMOpportunity.updated_at.desc())
+        )).scalars().all()
+        contracts = (await db.execute(
+            select(CRMContract)
+            .where(CRMContract.account_id == account.id, CRMContract.ops_tenant_id == user.tenant_id)
+            .order_by(CRMContract.updated_at.desc())
+        )).scalars().all()
+        invoices = (await db.execute(
+            select(CRMInvoice)
+            .where(CRMInvoice.account_id == account.id, CRMInvoice.ops_tenant_id == user.tenant_id)
+            .order_by(CRMInvoice.created_at.desc())
+        )).scalars().all()
+        payments = (await db.execute(
+            select(CRMPayment)
+            .where(CRMPayment.account_id == account.id, CRMPayment.ops_tenant_id == user.tenant_id)
+            .order_by(CRMPayment.received_at.desc())
+        )).scalars().all()
+        invoice_financials: dict[UUID, tuple[int, int]] = {}
+        for invoice in invoices:
+            invoice_financials[invoice.id] = await _reconcile_invoice(db, invoice)
+    
+    else:
+        subscriptions = []
+        contracts = []
+        invoices = []
+        payments = []
+        invoice_financials = {}
+
     activities = (await db.execute(
         select(CRMSalesActivity)
         .where(CRMSalesActivity.account_id == account.id, CRMSalesActivity.ops_tenant_id == user.tenant_id)
