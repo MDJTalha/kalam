@@ -40,6 +40,9 @@ PERMISSION_DESCRIPTIONS: dict[str, str] = {
     "capability_assessments.read": "View capability assessments within authorized scope",
     "capability_assessments.execute": "Complete assigned capability assessments",
     "evidence.read": "View capability evidence within authorized scope",
+    "evidence.manage": "Capture and administer capability evidence",
+    "evidence.verify": "Independently verify or reject submitted capability evidence",
+    "competencies.read": "View governed competency definitions and proficiency levels",
     "saas.crm.read": "View consolidated Kalam SaaS business overview and full client 360",
     "saas.crm.manage": "Manage consolidated Kalam SaaS commercial records",
     "saas.sales.read": "View sales accounts, contacts, opportunities, tasks and pipeline",
@@ -88,6 +91,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "skills.manage", "capabilities.read",
         "capabilities.manage", "development.manage", "users.read",
         "compliance.manage", "reassessment.manage",
+        "evidence.read", "evidence.manage", "evidence.verify", "competencies.read",
         "capability_gaps.read", "capability_gaps.manage",
         "capability_risk.read", "capability_risk.manage",
     ),
@@ -118,7 +122,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     # Broad reports.read also exposes tenant-wide people exports, so it is not
     # granted until report classification and field-level redaction are available.
     "Auditor": (
-        "audit.read", "files.read", "evidence.read",
+        "audit.read", "files.read", "evidence.read", "competencies.read",
     ),
     # No grants until a verifiable regional-to-org-unit scope and row-level
     # filters exist across People, reports, capability, and compliance APIs.
