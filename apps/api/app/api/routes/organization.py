@@ -316,6 +316,30 @@ async def remove_role(
     assignment = await db.scalar(select(UserRole).where(UserRole.user_id == target.id, UserRole.role_id == role.id))
     if assignment is None:
         raise HTTPException(status_code=404, detail="Role assignment not found")
+    if role.name.strip().lower() in {"tenant owner", "tenant administrator", "tenant admin"} and target.is_active:
+        target_retains_admin_role = await db.scalar(
+            select(UserRole.id)
+            .join(Role, Role.id == UserRole.role_id)
+            .where(UserRole.user_id == target.id)
+            .where(Role.tenant_id == user.tenant_id)
+            .where(Role.id != role.id)
+            .where(func.lower(Role.name).in_(("tenant owner", "tenant administrator", "tenant admin")))
+            .limit(1)
+        )
+        if target_retains_admin_role is None:
+            another_active_tenant_admin = await db.scalar(
+                select(User.id)
+                .join(UserRole, UserRole.user_id == User.id)
+                .join(Role, Role.id == UserRole.role_id)
+                .where(User.tenant_id == user.tenant_id)
+                .where(User.is_active.is_(True))
+                .where(User.id != target.id)
+                .where(Role.tenant_id == user.tenant_id)
+                .where(func.lower(Role.name).in_(("tenant owner", "tenant administrator", "tenant admin")))
+                .limit(1)
+            )
+            if another_active_tenant_admin is None:
+                raise HTTPException(status_code=409, detail="The last active Tenant Owner or Administrator role cannot be removed")
     if role.name.strip().lower() == "saas super admin":
         remaining = await db.scalar(
             select(func.count())
