@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { InvoiceCreateForm, InvoiceStatusControl, PaymentCreateForm, PaymentStatusControl } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Invoice={id:string;account_id:string;account_name:string;subscription_id?:string|null;contract_id?:string|null;invoice_number:string;status:string;currency:string;amount_minor:number;tax_minor:number;total_minor:number;paid_minor:number;outstanding_minor:number;issued_at?:string|null;due_at?:string|null;paid_at?:string|null;external_ref?:string|null;notes?:string|null};
 type Payment={id:string;account_id:string;account_name:string;invoice_id:string;invoice_number:string;amount_minor:number;currency:string;status:string;received_at:string;method?:string|null;reference?:string|null};
@@ -25,6 +25,9 @@ function billingHref(values:{invoicePage?:number;paymentPage?:number;invoiceStat
   return "/dashboard/saas/billing"+(q.toString()?"?"+q.toString():"");
 }
 export default async function SaaSBillingPage({searchParams}:{searchParams:Promise<{invoice_page?:string;payment_page?:string;invoice_status?:string;payment_status?:string}>}){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("saas.finance.manage")??false;
+  if(!user.permissions?.includes("saas.finance.read"))return <DashboardShell title="Billing" eyebrow="SaaS Finance"><EmptyState title="Finance access is restricted" description="This role is not authorized to view invoices or payments."/></DashboardShell>;
   const params=await searchParams;
   const invoicePageNumber=Math.max(1,Math.min(100000,Number(params.invoice_page||1)||1));
   const paymentPageNumber=Math.max(1,Math.min(100000,Number(params.payment_page||1)||1));
@@ -69,7 +72,7 @@ export default async function SaaSBillingPage({searchParams}:{searchParams:Promi
         <strong key="e">{money(i.outstanding_minor,i.currency)}</strong>,
         <span key="f">{i.due_at?new Date(i.due_at).toLocaleDateString():"—"}</span>,
         <StatusBadge key="g" status={i.status}/>,
-        <InvoiceStatusControl key="h" id={i.id} status={i.status}/>
+        {canManage?<InvoiceStatusControl key="h" id={i.id} status={i.status}/>:<span key="h">Read only</span>}
       ])}/>
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Invoice pages">
         <span>Page {invoicePageNumber} of {invoicePages} · {invoices.total} invoices</span>
@@ -79,8 +82,8 @@ export default async function SaaSBillingPage({searchParams}:{searchParams:Promi
     </SectionCard>
 
     <div className="two-column">
-      <SectionCard eyebrow="New receivable" title="Create invoice"><InvoiceCreateForm/></SectionCard>
-      <SectionCard eyebrow="Cash receipt" title="Record payment"><PaymentCreateForm/></SectionCard>
+      {canManage&&<SectionCard eyebrow="New receivable" title="Create invoice"><InvoiceCreateForm/></SectionCard>}
+      {canManage&&<SectionCard eyebrow="Cash receipt" title="Record payment"><PaymentCreateForm/></SectionCard>}
     </div>
     <SectionCard eyebrow="Payment register" title="Received payments" meta={payments.total+" payments"}>
       <form method="get" className="toolbar-row">
@@ -98,7 +101,7 @@ export default async function SaaSBillingPage({searchParams}:{searchParams:Promi
         <span key="e">{p.method||"—"}</span>,
         <span key="f">{p.reference||"—"}</span>,
         <StatusBadge key="g" status={p.status}/>,
-        <PaymentStatusControl key="h" id={p.id} status={p.status}/>
+        {canManage?<PaymentStatusControl key="h" id={p.id} status={p.status}/>:<span key="h">Read only</span>}
       ])}/>
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Payment pages">
         <span>Page {paymentPageNumber} of {paymentPages} · {payments.total} payments</span>
