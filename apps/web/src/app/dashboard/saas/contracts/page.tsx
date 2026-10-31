@@ -43,7 +43,7 @@ export default async function SaaSContractsPage({searchParams}:{searchParams:Pro
         <span key="d">{c.starts_at?new Date(c.starts_at).toLocaleDateString():"—"} → {c.ends_at?new Date(c.ends_at).toLocaleDateString():"—"}</span>,
         <span key="e">{c.signed_at?new Date(c.signed_at).toLocaleDateString():"—"}</span>,
         <StatusBadge key="f" status={c.status}/>,
-        {canManage?<ContractStatusControl key="g" id={c.id} status={c.status}/>:<span key="g">Read only</span>}
+        canManage?<ContractStatusControl key="g" id={c.id} status={c.status}/>:<span key="g">Read only</span>
       ])}/>
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Contract pages">
         {page>1?<Link className="button button-secondary" href={pageHref(page-1)}>Previous</Link>:null}
