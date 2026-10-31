@@ -1,7 +1,7 @@
 import secrets
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import AnyHttpUrl, BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,6 +25,7 @@ class WebhookCreate(BaseModel):
 
 @router.get("")
 async def list_webhooks(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(require_permission("integrations.manage")),
     db: AsyncSession = Depends(get_db),
 ):
@@ -32,6 +33,7 @@ async def list_webhooks(
         select(WebhookEndpoint)
         .where(WebhookEndpoint.tenant_id == user.tenant_id)
         .order_by(WebhookEndpoint.created_at.desc())
+        .limit(limit)
     )
     return [
         {
