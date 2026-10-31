@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { RefreshCw, ShieldCheck, UserPlus, UserRoundX } from "lucide-react";
+import { ShieldCheck, UserPlus, UserRoundX } from "lucide-react";
 
 type Assignment = { id: string; name: string; role_kind: string };
 type Member = {
