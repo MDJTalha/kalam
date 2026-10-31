@@ -240,8 +240,9 @@ async def page_requirements(
         select(ComplianceRequirement).where(*filters).order_by(ComplianceRequirement.name).offset((page - 1) * page_size).limit(page_size)
     )
     items = list(result.scalars().all())
+    output_items: list[ComplianceRequirement | dict[str, object]] = []
     if await user_has_permission(user, db, "compliance.manage"):
-        output_items: list[ComplianceRequirement | dict[str, object]] = items
+        output_items.extend(items)
     else:
         output_items = [
             {
