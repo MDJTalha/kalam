@@ -9,7 +9,7 @@ type TeamMember={
 };
 
 export default async function SaaSTeamPage(){
-  const team=await apiJson<TeamMember[]>("/api/v1/saas/crm/team");
+  const team=await apiJsonResult<TeamMember[]>("/api/v1/saas/crm/team").then((result) => result.ok ? result.data : null);
   if(!team)return <DashboardShell title="Sales Team" eyebrow="SaaS CRM"><EmptyState title="SaaS team access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
   const active=team.filter(member=>member.is_active);
