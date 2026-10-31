@@ -8,7 +8,7 @@ import { apiJsonResult, requireUser } from "@/lib/server-api";
 type Skill={id:string;name:string;description?:string|null;category?:string|null};
 type SkillPage={items:Skill[];total:number};
 type Role={id:string;name:string};type Course={id:string;title:string};type CoursePage={items:Course[];total:number};
-type Capability={id:string;name:string;code:string};
+type Capability={id:string;name:string;code:string};type CapabilityPage={items:Capability[];total:number};
 type Objective={id:string;objective:string;priority:number;status:string};
 type Competency={id:string;name:string;code:string;definition:string;type:string;status:string;levels?:Array<{level:number;definition:string;behavioral_indicators?:string[]}>};
 type Level={level:number;name:string;definition:string};
@@ -23,7 +23,7 @@ export default async function CapabilityFramework(){
   const results=await Promise.all([
     apiJsonResult<SkillPage>("/api/v1/skills/page?page=1&page_size=100"),apiJsonResult<Role[]>("/api/v1/organization/roles"),
     apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=100&manage=true"),apiJsonResult<Governance>("/api/v1/skills/governance"),apiJsonResult<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"),
-    apiJsonResult<Objective[]>("/api/v1/capability-domain/objectives"),apiJsonResult<Capability[]>("/api/v1/capabilities"),
+    apiJsonResult<ObjectivePage>("/api/v1/capability-domain/objectives/page?page=1&page_size=100"),apiJsonResult<CapabilityPage>("/api/v1/capabilities/page?page=1&page_size=100"),
     apiJsonResult<CompetencyPage>("/api/v1/capability-domain/competencies/page?page=1&page_size=100"),apiJsonResult<Level[]>("/api/v1/capability-domain/proficiency-levels")
   ]);
   const failed=results.flatMap((result,index)=>result.ok?[]:[`Dataset ${index+1}: HTTP ${result.status} — ${result.error||"request failed"}`]);
