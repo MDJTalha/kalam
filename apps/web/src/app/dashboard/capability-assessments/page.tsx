@@ -11,7 +11,6 @@ type Target={id:string;assessment_id:string;target_type:string;target_id:string;
 type Cycle={id:string;assessment_id:string;assessment_title:string;assessment_type:string;user_id:string;target_type:string;target_id:string;required_level:number;baseline_level:number|null;current_level:number|null;gap:number|null;improvement:number|null;status:string;next_reassessment_due_at:string|null;development_plan_id:string|null};
 type PeoplePage={items:Person[];total:number};
 type CandidateRecord={id:string;name:string;code:string;status:string};
-type CandidatePage={items:CandidateRecord[];total:number};
 type CompetencyPage={items:CandidateRecord[];total:number};
 
 export default async function CapabilityAssessmentsPage({searchParams}:{searchParams:Promise<{assessment?:string}>}){
