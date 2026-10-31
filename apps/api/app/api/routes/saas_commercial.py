@@ -74,11 +74,11 @@ class SaaSPlatformRolePermissionsUpdate(BaseModel):
 
 
 PLATFORM_CUSTOM_ROLE_PERMISSION_KEYS = {
-    "saas.sales.read", "saas.sales.manage",
+    "saas.sales.read", "saas.sales.manage", "saas.sales.export",
     "saas.pricing.read",
     "saas.finance.read", "saas.finance.manage",
     "saas.customer_success.read", "saas.customer_success.manage",
-    "saas.team.read",
+    "saas.customer_users.read", "saas.team.read",
     "saas.platform.read",
     "saas.audit.read",
 }
