@@ -118,10 +118,8 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     # filters exist across People, reports, capability, and compliance APIs.
     "Regional Executive": (),
     "Global Executive": (
-        "tenant.read", "users.read", "courses.read", "learning.access",
-        "reports.read", "audit.read", "compliance.manage", "skills.manage",
-        "capabilities.read", "development.manage", "capability_gaps.read",
-        "capability_risk.read",
+        "tenant.read", "courses.read", "learning.access",
+        "reports.read", "audit.read", "capabilities.read",
     ),
 }
 
