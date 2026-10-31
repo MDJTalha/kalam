@@ -205,7 +205,9 @@ async def compliance_operations_summary(
 
 @router.get("")
 async def list_requirements(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(ComplianceRequirement).where(ComplianceRequirement.tenant_id == user.tenant_id).order_by(ComplianceRequirement.name))
+    result = await db.execute(
+        select(ComplianceRequirement).where(ComplianceRequirement.tenant_id == user.tenant_id).order_by(ComplianceRequirement.name).limit(100)
+    )
     requirements = list(result.scalars().all())
     if await user_has_permission(user, db, "compliance.manage"):
         return requirements
@@ -221,6 +223,36 @@ async def list_requirements(user: User = Depends(get_current_user), db: AsyncSes
         for item in requirements
         if item.active and await requirement_applies_to_user(item, user, db)
     ]
+
+@router.get("/page")
+async def page_requirements(
+    q: str | None = Query(default=None, max_length=240),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    filters = [ComplianceRequirement.tenant_id == user.tenant_id]
+    if q and q.strip():
+        filters.append(ComplianceRequirement.name.ilike(f"%{q.strip()}%"))
+    total = int(await db.scalar(select(func.count(ComplianceRequirement.id)).where(*filters)) or 0)
+    result = await db.execute(
+        select(ComplianceRequirement).where(*filters).order_by(ComplianceRequirement.name).offset((page - 1) * page_size).limit(page_size)
+    )
+    items = list(result.scalars().all())
+    output_items: list[ComplianceRequirement | dict[str, object]] = []
+    if await user_has_permission(user, db, "compliance.manage"):
+        output_items.extend(items)
+    else:
+        output_items = [
+            {
+                "id": str(item.id), "name": item.name, "description": item.description,
+                "recurrence_days": item.recurrence_days, "due_days": item.due_days, "active": item.active,
+            }
+            for item in items if item.active and await requirement_applies_to_user(item, user, db)
+        ]
+    return {"items": output_items, "total": total, "page": page, "page_size": page_size}
+
 
 @router.post("", status_code=201)
 async def create_requirement(payload: RequirementCreate, user: User = Depends(require_permission("compliance.manage")), db: AsyncSession = Depends(get_db)):
@@ -297,8 +329,29 @@ async def list_compliance_courses(
 ):
     courses = (await db.scalars(select(Course).where(
         Course.tenant_id == user.tenant_id, Course.status == "published",
-    ).order_by(Course.title))).all()
+    ).order_by(Course.title).limit(100))).all()
     return [{"id": str(course.id), "title": course.title} for course in courses]
+
+
+@router.get("/courses/page")
+async def page_compliance_courses(
+    q: str | None = Query(default=None, max_length=240),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    user: User = Depends(require_permission("compliance.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    filters = [Course.tenant_id == user.tenant_id, Course.status == "published"]
+    if q and q.strip():
+        filters.append(Course.title.ilike(f"%{q.strip()}%"))
+    total = int(await db.scalar(select(func.count(Course.id)).where(*filters)) or 0)
+    result = await db.execute(
+        select(Course.id, Course.title).where(*filters).order_by(Course.title).offset((page - 1) * page_size).limit(page_size)
+    )
+    return {
+        "items": [{"id": str(course_id), "title": title} for course_id, title in result.all()],
+        "total": total, "page": page, "page_size": page_size,
+    }
 
 
 @router.get("/{requirement_id}/preview")

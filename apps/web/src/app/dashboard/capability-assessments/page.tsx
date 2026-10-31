@@ -33,11 +33,12 @@ export default async function CapabilityAssessmentsPage({searchParams}:{searchPa
   const candidates:Candidate[]=[];
   if(canManage){
     const [capabilityResult,competencyResult]=await Promise.all([
-      apiJsonResult<CandidateRecord[]>("/api/v1/capabilities?status=active"),
+      apiJsonResult<{items:CandidateRecord[];total:number}>("/api/v1/capabilities/page?page=1&page_size=100&status=active"),
       apiJsonResult<CompetencyPage>("/api/v1/capability-domain/competencies/page?page=1&page_size=100")
     ]);
     if(!capabilityResult.ok||!competencyResult.ok){const failed=[capabilityResult,competencyResult].filter(result=>!result.ok).map(result=>`HTTP ${result.status}: ${result.error||"request failed"}`);return <DashboardShell title="Capability Assessments" eyebrow="Capability measurement"><StateMessage tone="danger" title="Assessment target catalog unavailable">{failed.join(" · ")}</StateMessage></DashboardShell>;}
-    const capabilities=capabilityResult.data||[],competencies=competencyResult.data?.items||[];
+    const capabilities=capabilityResult.data?.items||[],competencies=competencyResult.data?.items||[];
+    if((capabilityResult.data?.total||0)>capabilities.length)return <DashboardShell title="Capability Assessments" eyebrow="Capability measurement"><StateMessage tone="danger" title="Capability target catalog exceeds the loaded limit">The capability catalog has more than 100 records. Narrow the catalog or add server-side search before creating assessment targets; the current screen will not present an incomplete list.</StateMessage></DashboardShell>;
     if((competencyResult.data?.total||0)>competencies.length)return <DashboardShell title="Capability Assessments" eyebrow="Capability measurement"><StateMessage tone="danger" title="Assessment target catalog exceeds the loaded limit">The competency catalog has more than 100 records. Narrow the catalog or add server-side search before creating assessment targets; the current screen will not present an incomplete list.</StateMessage></DashboardShell>;
     (capabilities||[]).forEach(x=>candidates.push({id:x.id,type:"capability",name:x.name,code:x.code}));
     (competencies||[]).filter(x=>x.status!=="retired").forEach(x=>candidates.push({id:x.id,type:"competency",name:x.name,code:x.code}));

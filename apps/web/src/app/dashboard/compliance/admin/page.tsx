@@ -5,15 +5,17 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { ApiActionButton } from "@/components/api-action-button";
 import { ResourceForm } from "@/components/resource-form";
 import { EmptyState, Section, StateMessage, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Requirement = { id: string; name: string; description?: string | null; due_days?: number | null; recurrence_days?: number | null; active: boolean; rules?: Record<string, unknown>; version?: number };
+type RequirementPage = { items: Requirement[]; total: number; page: number; page_size: number };
 type RequirementVersion = { version: number; snapshot: { name: string; description?: string | null; due_days?: number | null; recurrence_days?: number | null; active: boolean }; changed_by?: string | null; created_at: string };
 type Report = { requirements: number; active_requirements: number; assignments: number; overdue: number; completed: number; exceptions: number; approved_exceptions: number; requested_exceptions?: number; pending_evidence?: number };
 type Assignment = { id: string; requirement: string; requirement_version?: number; user_name: string; user_email: string; status: string; due_state?: string; due_at?: string | null };
 type Evidence = { id: string; user_id: string; requirement: string; user_name: string; user_email: string; evidence_type: string; reference: string; attachment_status?: string | null; notes?: string | null; created_at: string };
 type EvidencePage = { total: number; items: Evidence[] };
 type ComplianceCourse = { id: string; title: string };
+type CoursePage = { items: ComplianceCourse[]; total: number; page: number; page_size: number };
 type RoleOption = { id: string; name: string };
 type UnitOption = { id: string; name: string; unit_type: string };
 type AudiencePreview = { active_learners: number; matching: number; already_open: number; eligible: number };
@@ -32,23 +34,36 @@ export default async function ComplianceAdminPage({ searchParams }: { searchPara
   if (!user.permissions?.includes("compliance.manage")) {
     return <DashboardShell title="Compliance operations" eyebrow="Controlled obligations"><Section eyebrow="Access" title="Restricted workspace"><p>This workspace requires compliance administration permission.</p></Section></DashboardShell>;
   }
-  const [requirements, report, assignments, evidence, exceptions, courses, operations, roleOptions, unitOptions] = await Promise.all([
-    apiJson<Requirement[]>("/api/v1/compliance"),
-    apiJson<Report>("/api/v1/compliance/reports"),
-    apiJson<{ total: number; items: Assignment[] }>(`/api/v1/compliance/assignments?${params}`),
-    apiJson<EvidencePage>(`/api/v1/compliance/evidence?limit=50&offset=${(evidencePage - 1) * 50}`),
-    apiJson<ExceptionItem[]>("/api/v1/compliance/exceptions?status=requested"),
-    apiJson<ComplianceCourse[]>("/api/v1/compliance/courses"),
-    apiJson<OperationsSummary>("/api/v1/compliance/operations/summary"),
-    user.permissions?.includes("users.read") ? apiJson<RoleOption[]>("/api/v1/organization/roles") : Promise.resolve<RoleOption[]>([]),
-    user.permissions?.includes("users.read") ? apiJson<UnitOption[]>("/api/v1/organization/units") : Promise.resolve<UnitOption[]>([]),
+  const [requirementsResult, reportResult, assignmentsResult, evidenceResult, exceptionsResult, coursesResult, operationsResult, roleOptionsResult, unitOptionsResult] = await Promise.all([
+    apiJsonResult<RequirementPage>("/api/v1/compliance/page?page=1&page_size=100"),
+    apiJsonResult<Report>("/api/v1/compliance/reports"),
+    apiJsonResult<{ total: number; items: Assignment[] }>(`/api/v1/compliance/assignments?${params}`),
+    apiJsonResult<EvidencePage>(`/api/v1/compliance/evidence?limit=50&offset=${(evidencePage - 1) * 50}`),
+    apiJsonResult<ExceptionItem[]>("/api/v1/compliance/exceptions?status=requested"),
+    apiJsonResult<CoursePage>("/api/v1/compliance/courses/page?page=1&page_size=100"),
+    apiJsonResult<OperationsSummary>("/api/v1/compliance/operations/summary"),
+    user.permissions?.includes("users.read") ? apiJsonResult<RoleOption[]>("/api/v1/organization/roles") : Promise.resolve({ok:true,status:200,data:[] as RoleOption[],error:null}),
+    user.permissions?.includes("users.read") ? apiJsonResult<UnitOption[]>("/api/v1/organization/units") : Promise.resolve({ok:true,status:200,data:[] as UnitOption[],error:null}),
   ]);
-  const serviceUnavailable = [requirements, report, assignments, evidence, exceptions, courses, operations].some((item) => item === null);
-  const editing = requirements?.find((item) => item.id === query.edit);
-  const [preview, versions] = editing ? await Promise.all([
-    apiJson<AudiencePreview>(`/api/v1/compliance/${editing.id}/preview`),
-    apiJson<RequirementVersion[]>(`/api/v1/compliance/${editing.id}/versions`),
-  ]) : [null, null];
+  const results = [requirementsResult, reportResult, assignmentsResult, evidenceResult, exceptionsResult, coursesResult, operationsResult];
+  const failed = results.filter((item) => !item.ok);
+  const requirementsPage = requirementsResult.data;
+  const requirements = requirementsPage?.items ?? [];
+  const report = reportResult.data;
+  const assignments = assignmentsResult.data;
+  const evidence = evidenceResult.data;
+  const exceptions = exceptionsResult.data;
+  const coursesPage = coursesResult.data;
+  const courses = coursesPage?.items ?? [];
+  const operations = operationsResult.data;
+  const roleOptions = roleOptionsResult.data ?? [];
+  const unitOptions = unitOptionsResult.data ?? [];
+  const serviceUnavailable = failed.length > 0 || (requirementsPage ? requirementsPage.total > requirementsPage.items.length : false) || (coursesPage ? coursesPage.total > coursesPage.items.length : false);
+  const editing = requirements.find((item) => item.id === query.edit);
+  const [previewResult, versionsResult] = editing ? await Promise.all([
+    apiJsonResult<AudiencePreview>(`/api/v1/compliance/${editing.id}/preview`),
+    apiJsonResult<RequirementVersion[]>(`/api/v1/compliance/${editing.id}/versions`),
+  ]) : [{ok:false,status:0,data:null,error:""}, {ok:false,status:0,data:null,error:""}];
   return (
     <DashboardShell title="Compliance operations" eyebrow="Policy governance, evidence review & readiness">
       <div className="stat-grid">
@@ -58,7 +73,7 @@ export default async function ComplianceAdminPage({ searchParams }: { searchPara
         <div className="stat-card"><span>Review queue</span><strong>{(report?.pending_evidence ?? 0) + (report?.requested_exceptions ?? 0)}</strong><small>{report?.pending_evidence ?? 0} evidence · {report?.requested_exceptions ?? 0} exceptions</small></div>
       </div>
       <nav className="button-row" aria-label="Related workspaces"><a className="button button-secondary" href="/api/lms/compliance/reports/export">Export assignments CSV</a>{user.permissions?.includes("courses.manage") ? <Link className="button button-secondary" href="/dashboard/course-studio">Course studio</Link> : null}{user.permissions?.includes("files.read") ? <Link className="button button-secondary" href="/dashboard/files">Evidence repository</Link> : null}{user.permissions?.includes("reports.read") ? <Link className="button button-secondary" href="/dashboard/reports">Reports</Link> : null}{user.permissions?.includes("audit.read") ? <Link className="button button-secondary" href="/dashboard/audit">Audit log</Link> : null}</nav>
-      {serviceUnavailable ? <StateMessage tone="danger" title="Compliance operations data is incomplete">One or more management datasets could not be loaded. No governance action should be taken until the workspace is refreshed successfully.</StateMessage> : null}
+      {serviceUnavailable ? <StateMessage tone="danger" title="Compliance operations data is incomplete">{failed.map((item) => `HTTP ${item.status} — ${item.error || "request failed"}`).join(" · ")} No governance action should be taken until the workspace is refreshed successfully.</StateMessage> : null}
       <Section eyebrow="Operations engine" title="Readiness control loop" action={<ApiActionButton endpoint="/api/lms/compliance/operations/run" label="Run compliance operations" body={{}} confirmText="Run overdue normalization, exception expiry, recurrence and escalation processing now?" />}>
         {operations ? <div className="metric-strip"><span><b>{operations.open_assignments}</b> open obligations</span><span><b>{operations.overdue}</b> overdue</span><span><b>{operations.evidence_review}</b> evidence review</span><span><b>{operations.exception_review}</b> exception review</span><span><b>{operations.expiring_exceptions_7d}</b> exceptions expiring in 7 days</span></div> : <StateMessage tone="warning" title="Operations summary unavailable">The compliance control-loop summary could not be loaded.</StateMessage>}
         <p className="form-help">The operations runner normalizes overdue states, expires approved exceptions, creates due recurring obligations, and sends idempotent escalation notifications.</p>
@@ -69,9 +84,9 @@ export default async function ComplianceAdminPage({ searchParams }: { searchPara
           { name: "description", label: "Policy description", type: "textarea", placeholder: "State the control objective, evidence expectation and accountable owner." },
           { name: "due_days", label: "Due within days", type: "number", defaultValue: 30, required: true },
           { name: "recurrence_days", label: "Renew every days", type: "number", placeholder: "Optional" },
-          { name: "role_names", label: "Roles", type: "multi-select", options: roleOptions?.map((item) => ({ value: item.name, label: item.name })) || [], help: "Select any role that should be included." },
+          { name: "role_names", label: "Roles", type: "multi-select", options: roleOptions.map((item) => ({ value: item.name, label: item.name })) || [], help: "Select any role that should be included." },
           { name: "job_titles", label: "Job titles", placeholder: "One or more titles, separated by commas or lines." },
-          { name: "org_unit_ids", label: "Organization units", type: "multi-select", options: unitOptions?.map((item) => ({ value: item.id, label: item.name + " · " + item.unit_type })) || [], help: "Select any unit that should be included." },
+          { name: "org_unit_ids", label: "Organization units", type: "multi-select", options: unitOptions.map((item) => ({ value: item.id, label: item.name + " · " + item.unit_type })) || [], help: "Select any unit that should be included." },
           { name: "exclude_user_ids", label: "Exclude specific people", type: "lookup-multi", endpoint: "/api/v1/people/page?status=active&page_size=20" },
           { name: "escalation_days", label: "Escalate after days", type: "number", defaultValue: 7, required: true },
         ]} />
@@ -81,19 +96,19 @@ export default async function ComplianceAdminPage({ searchParams }: { searchPara
         {requirements?.length ? <div className="compact-list">{requirements.map((item) => <div className="compact-row" key={item.id}><div><strong>{item.name}</strong><small>Version {item.version ?? 1} · {item.description || "Organizational compliance requirement"} · due within {item.due_days ?? 30} days{item.recurrence_days ? ` · renews every ${item.recurrence_days} days` : ""}</small></div><div className="button-row"><StatusBadge status={item.active ? "active" : "inactive"} />{item.active ? <ApiActionButton endpoint={`/api/lms/compliance/${item.id}/assign-applicable`} label="Assign evidence obligation" body={{}} confirmText={`Assign ${item.name} as an evidence obligation to all matching active learners? Existing open assignments will be skipped.`} /> : null}<Link className="button button-secondary" href={`/dashboard/compliance/admin?edit=${item.id}#edit-requirement`}>Configure / assign course</Link><ApiActionButton endpoint={`/api/lms/compliance/${item.id}`} method="PATCH" label={item.active ? "Deactivate" : "Activate"} body={{ active: !item.active }} confirmText={`${item.active ? "Deactivate" : "Activate"} ${item.name}?`} /></div></div>)}</div> : <EmptyState title="No requirements configured" description="Create the first controlled compliance obligation for this tenant." />}
       </Section>
       {editing ? <section id="edit-requirement" className="data-panel">
-        {preview ? <p><strong>Current audience:</strong> {preview.matching} of {preview.active_learners} active learners match · {preview.already_open} already assigned · {preview.eligible} eligible for a new assignment. This preview uses the saved rules.</p> : <StateMessage tone="warning" title="Audience preview unavailable">Check the applicability rules before assigning.</StateMessage>}
+        {previewResult.ok && previewResult.data ? <p><strong>Current audience:</strong> {previewResult.data.matching} of {previewResult.data.active_learners} active learners match · {previewResult.data.already_open} already assigned · {previewResult.data.eligible} eligible for a new assignment. This preview uses the saved rules.</p> : <StateMessage tone="warning" title="Audience preview unavailable">Check the applicability rules before assigning.</StateMessage>}
         <ResourceForm key={editing.id} title={`Edit ${editing.name}`} description="Updates to timing and audience apply to future assignments; existing obligations retain their assigned due dates." transformProfile="compliance_rules" endpoint={`/api/lms/compliance/${editing.id}`} method="PATCH" submitLabel="Save requirement" fields={[
           { name: "name", label: "Requirement name", required: true, defaultValue: editing.name },
           { name: "description", label: "Policy description", type: "textarea", defaultValue: editing.description || "" },
           { name: "due_days", label: "Due within days", type: "number", required: true, defaultValue: editing.due_days ?? 30 },
           { name: "recurrence_days", label: "Renew every days", type: "number", defaultValue: editing.recurrence_days ?? "" },
-          { name: "role_names", label: "Roles", type: "multi-select", options: roleOptions?.map((item) => ({ value: item.name, label: item.name })) || [], defaultValue: Array.isArray(editing.rules?.role_names) ? (editing.rules.role_names as string[]).join(",") : "" },
+          { name: "role_names", label: "Roles", type: "multi-select", options: roleOptions.map((item) => ({ value: item.name, label: item.name })) || [], defaultValue: Array.isArray(editing.rules?.role_names) ? (editing.rules.role_names as string[]).join(",") : "" },
           { name: "job_titles", label: "Job titles", defaultValue: Array.isArray(editing.rules?.job_titles) ? (editing.rules.job_titles as string[]).join(", ") : "" },
-          { name: "org_unit_ids", label: "Organization units", type: "multi-select", options: unitOptions?.map((item) => ({ value: item.id, label: item.name + " · " + item.unit_type })) || [], defaultValue: Array.isArray(editing.rules?.org_unit_ids) ? (editing.rules.org_unit_ids as string[]).join(",") : "" },
+          { name: "org_unit_ids", label: "Organization units", type: "multi-select", options: unitOptions.map((item) => ({ value: item.id, label: item.name + " · " + item.unit_type })) || [], defaultValue: Array.isArray(editing.rules?.org_unit_ids) ? (editing.rules.org_unit_ids as string[]).join(",") : "" },
           { name: "exclude_user_ids", label: "Exclude specific people", type: "lookup-multi", endpoint: "/api/v1/people/page?status=active&page_size=20", defaultValue: Array.isArray(editing.rules?.exclude_user_ids) ? (editing.rules.exclude_user_ids as string[]).join(",") : "" },
           { name: "escalation_days", label: "Escalate after days", type: "number", required: true, defaultValue: typeof editing.rules?.escalation_days === "number" ? editing.rules.escalation_days : 7 },
         ]} includeEmptyFields={["description", "recurrence_days"]} />
-        {versions?.length ? <details><summary>Policy history ({versions.length} versions)</summary><div className="compact-list">{versions.map((entry) => <div className="compact-row" key={entry.version}><div><strong>Version {entry.version} · {entry.snapshot.name}</strong><small>{new Date(entry.created_at).toLocaleString()} · {entry.snapshot.active ? "Active" : "Inactive"} · due within {entry.snapshot.due_days ?? 30} days{entry.snapshot.recurrence_days ? ` · renews every ${entry.snapshot.recurrence_days} days` : ""}</small></div></div>)}</div></details> : null}
+        {versionsResult.ok && versionsResult.data?.length ? <details><summary>Policy history ({versionsResult.data.length} versions)</summary><div className="compact-list">{versionsResult.data.map((entry) => <div className="compact-row" key={entry.version}><div><strong>Version {entry.version} · {entry.snapshot.name}</strong><small>{new Date(entry.created_at).toLocaleString()} · {entry.snapshot.active ? "Active" : "Inactive"} · due within {entry.snapshot.due_days ?? 30} days{entry.snapshot.recurrence_days ? ` · renews every ${entry.snapshot.recurrence_days} days` : ""}</small></div></div>)}</div></details> : null}
         {courses?.length ? <ResourceForm title="Assign a learning course" description="Enroll matching active learners in a published course. Existing open obligations are skipped." endpoint={`/api/lms/compliance/${editing.id}/assign-applicable`} fields={[
           { name: "course_id", label: "Published course", type: "select", required: true, options: courses.map((course) => ({ value: course.id, label: course.title })) },
         ]} submitLabel="Assign course to applicable learners" /> : <p>No published courses are available for assignment.</p>}
