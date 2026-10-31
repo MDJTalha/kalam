@@ -6,7 +6,7 @@ type Role = { id: string; name: string };
 type Props = { people: Person[]; roles: Role[]; accessPermissions: string[]; initialSelectedId?: string };
 
 export function RoleAssignment({ people, roles, accessPermissions, initialSelectedId }: Props) {
-  const canManage = accessPermissions.includes("users.manage");
+  const canManage = accessPermissions.includes("tenant.manage");
   const [userId, setUserId] = useState(people.find(p => p.id === initialSelectedId)?.id ?? people[0]?.id ?? "");
   const [roleId, setRoleId] = useState(roles[0]?.id ?? "");
   const [assigned, setAssigned] = useState<Role[]>([]);
@@ -52,7 +52,7 @@ export function RoleAssignment({ people, roles, accessPermissions, initialSelect
       <label className="form-field"><span>Employee</span><select value={userId} onChange={e => selectUser(e.target.value)}>{people.map(p => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select></label>
       <label className="form-field"><span>Role to assign</span><select value={roleId} onChange={e => setRoleId(e.target.value)} disabled={!canManage || busy}>{roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
     </div>
-    <div className="form-actions">{canManage ? <button className="button button-primary" onClick={() => void changeRole("POST", roleId)} disabled={busy || loading || !userId || !roleId || assigned.some(role => role.id === roleId)}>Assign role</button> : <span className="form-help">Role changes require users.manage permission.</span>}</div>
+    <div className="form-actions">{canManage ? <button className="button button-primary" onClick={() => void changeRole("POST", roleId)} disabled={busy || loading || !userId || !roleId || assigned.some(role => role.id === roleId)}>Assign role</button> : <span className="form-help">Assigning roles requires tenant administration permission.</span>}</div>
     <strong>Current roles</strong>
     {loading ? <p role="status">Loading roles…</p> : error ? <p>Role assignments could not be loaded.</p> : assigned.length ? <div className="compact-list">{assigned.map(role => <div className="compact-row" key={role.id}><span>{role.name}</span>{canManage && <button type="button" className="button button-secondary" disabled={busy} onClick={() => void changeRole("DELETE", role.id)}>Remove</button>}</div>)}</div> : <p>No roles assigned.</p>}
     {error && <div className="form-error" role="alert">{error}</div>}
