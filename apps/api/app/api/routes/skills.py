@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, require_permission
 from app.db.models import Course, CourseSkill, Role, RoleSkillRequirement, Skill, User, UserSkill
@@ -23,8 +23,33 @@ class UserSkillCreate(BaseModel):
 
 @router.get("")
 async def list_skills(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Skill).where(Skill.tenant_id == user.tenant_id).order_by(Skill.name))
+    result = await db.execute(
+        select(Skill).where(Skill.tenant_id == user.tenant_id).order_by(Skill.name).limit(100)
+    )
     return list(result.scalars().all())
+
+
+@router.get("/page")
+async def page_skills(
+    q: str | None = None,
+    page: int = Field(default=1, ge=1),
+    page_size: int = Field(default=50, ge=1, le=100),
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    filters = [Skill.tenant_id == user.tenant_id]
+    if q and q.strip():
+        filters.append(Skill.name.ilike(f"%{q.strip()}%"))
+    total = int(await db.scalar(select(func.count(Skill.id)).where(*filters)) or 0)
+    result = await db.execute(
+        select(Skill).where(*filters).order_by(Skill.name).offset((page - 1) * page_size).limit(page_size)
+    )
+    return {
+        "items": list(result.scalars().all()),
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
 
 @router.post("", status_code=201)
 async def create_skill(payload: SkillCreate, user: User = Depends(require_permission("skills.manage")), db: AsyncSession = Depends(get_db)):
