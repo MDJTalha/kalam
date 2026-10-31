@@ -64,7 +64,11 @@ async def is_saas_ops_user(user: User, db: AsyncSession) -> bool:
 
 async def is_saas_demo_user(user: User, db: AsyncSession) -> bool:
     """Recognize the explicitly configured demo CRM identity by persisted home tenant."""
-    if not settings.saas_demo_tenant_slug or not settings.saas_demo_admin_email:
+    if (
+        not settings.saas_demo_crm_enabled
+        or not settings.saas_demo_tenant_slug
+        or not settings.saas_demo_admin_email
+    ):
         return False
     home_tenant_id = await db.scalar(select(User.tenant_id).where(User.id == user.id))
     if home_tenant_id is None:
@@ -73,6 +77,7 @@ async def is_saas_demo_user(user: User, db: AsyncSession) -> bool:
         select(Tenant.id).where(
             Tenant.id == home_tenant_id,
             Tenant.slug == settings.saas_demo_tenant_slug,
+            Tenant.status == "active",
         )
     ) is not None and user.email.lower() == settings.saas_demo_admin_email.lower()
 
