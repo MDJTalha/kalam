@@ -134,3 +134,26 @@ def test_sales_export_is_a_separate_grant():
     assert "saas.sales.export" in PLATFORM_ROLE_PERMISSIONS["Sales Operations"]
     assert "saas.sales.export" in PLATFORM_ROLE_PERMISSIONS["SaaS Super Admin"]
     assert "saas.sales.export" not in PLATFORM_ROLE_PERMISSIONS["Sales Viewer"]
+
+
+def test_instructor_can_grade_assigned_assessments_but_cannot_administer_them():
+    grants = set(TENANT_ROLE_PERMISSIONS["Instructor"])
+    assert "assessments.grade_assigned" in grants
+    assert "assessments.manage" not in grants
+
+
+def test_customer_user_directory_is_restricted_to_customer_success_and_super_admin():
+    assert "saas.customer_users.read" in PLATFORM_ROLE_PERMISSIONS["Customer Success Manager"]
+    assert "saas.customer_users.read" in PLATFORM_ROLE_PERMISSIONS["SaaS Super Admin"]
+    assert "saas.customer_users.read" not in PLATFORM_ROLE_PERMISSIONS["Sales Operations"]
+    assert "saas.customer_users.read" not in PLATFORM_ROLE_PERMISSIONS["SaaS Business Owner"]
+    assert "saas.customer_users.read" not in PLATFORM_ROLE_PERMISSIONS["SaaS Finance Administrator"]
+
+
+def test_saas_business_owner_has_no_internal_operator_directory():
+    assert "saas.team.read" not in PLATFORM_ROLE_PERMISSIONS["SaaS Business Owner"]
+
+
+def test_saas_administrator_cannot_create_custom_platform_roles():
+    assert "saas.team.manage" in PLATFORM_ROLE_PERMISSIONS["SaaS Administrator"]
+    assert "saas.roles.manage" not in PLATFORM_ROLE_PERMISSIONS["SaaS Administrator"]
