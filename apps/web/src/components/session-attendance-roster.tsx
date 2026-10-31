@@ -80,7 +80,7 @@ export function SessionAttendanceRoster({ sessionId, initialRows }: { sessionId:
             </tbody>
           </table>
         </div>
-      ) : <div className="empty-state"><p>No active or completed enrollments exist for this session's course.</p></div>}
+      ) : <div className="empty-state"><p>No active or completed enrollments exist for this session&apos;s course.</p></div>}
       {error&&<p className="form-error" role="alert">{error}</p>}
       {message&&<p className="form-success" role="status">{message}</p>}
     </section>
