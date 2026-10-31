@@ -1700,7 +1700,7 @@ class ManagedUserUpdate(BaseModel):
 @router.get("/crm/tenants/{tenant_id}/users")
 async def list_managed_tenant_users(
     tenant_id: UUID,
-    user: User = Depends(_require_ops_permission("saas.customer_success.read")),
+    user: User = Depends(_require_ops_permission("saas.customer_users.read")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
