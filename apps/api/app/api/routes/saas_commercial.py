@@ -1921,11 +1921,14 @@ async def account_detail(
         .where(CRMContact.account_id == account.id, CRMContact.ops_tenant_id == user.tenant_id)
         .order_by(CRMContact.is_primary.desc(), CRMContact.created_at.desc())
     )).scalars().all()
-    trials = (await db.execute(
-        select(CRMTrial)
-        .where(CRMTrial.account_id == account.id, CRMTrial.ops_tenant_id == user.tenant_id)
-        .order_by(CRMTrial.created_at.desc())
-    )).scalars().all()
+    can_read_customer_success = await user_has_permission(user, db, "saas.customer_success.read")
+    trials = []
+    if can_read_customer_success:
+        trials = (await db.execute(
+            select(CRMTrial)
+            .where(CRMTrial.account_id == account.id, CRMTrial.ops_tenant_id == user.tenant_id)
+            .order_by(CRMTrial.created_at.desc())
+        )).scalars().all()
     opportunities = (await db.execute(
         select(CRMOpportunity)
         .where(CRMOpportunity.account_id == account.id, CRMOpportunity.ops_tenant_id == user.tenant_id)
