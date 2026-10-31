@@ -1,6 +1,6 @@
 # Kalam — Release Certification Status
 Date: 2026-10-31
-Current main candidate observed: `8d4323e66adbe5e2db42edca2e9f097f3f523532`
+Current main candidate observed: `637f6b7481fb6b2b8ca43719e5c4ee924720a465`
 
 ## Executive status
 
@@ -35,7 +35,7 @@ This ledger distinguishes source implementation from independently executed runt
 | Backup restore | NOT CERTIFIED | Actual clean-database restore, integrity checks and measured recovery duration. |
 | DR/failover | NOT CERTIFIED | Executed failover/recovery with measured RTO/RPO. |
 | AWS production | NOT CERTIFIED | TLS, secrets, migrations, health checks, monitoring, integrations and rollback evidence. |
-| API helper migration | REMEDIATED ON CERTIFICATION BRANCH | Current main contains the reintroduced helper; certification branch removes it and migrates the application callers. Merge and exact-candidate CI are required before treating this gate as closed. |
+| API helper migration | REMEDIATED ON CERTIFICATION BRANCH | Current main contains the reintroduced helper; certification branch removes it and migrates the application callers. The migration is now merged. The hosted PR candidate CI passed; a separate push-triggered mainline run is not surfaced by the current connector. |
 | Reference-data bounds | SUBSTANTIALLY HARDENED / AUDIT OPEN | Compatibility organization lists are now bounded; finish systematic audit for any remaining broad enterprise consumers. |
 | AI activation | NOT CERTIFIED | Provider, grounding, safety, tenant isolation, human override and audit evidence before enabling real-provider AI. |
 
@@ -59,11 +59,12 @@ This ledger distinguishes source implementation from independently executed runt
 
 The previously connected Desktop Commander device **MDT** is not available for runtime execution in this session. Consequently, this ledger makes no claim that local PowerShell, Docker, PostgreSQL, browser, staging, AWS, backup/restore or DR commands have been executed here.
 
-## Current certification-branch evidence
+## Current mainline evidence
 
-- Certification branch head: `7e12b87a9785bfe6177bd665ac8ad894f41ec269`.
-- Hosted CI run #440 (`41212567887`) is queued for that exact head; it must complete successfully before merge/certification.
-- Previous run #420 proved API tests pass but exposed the web typecheck/build failures caused by removing `apiJson()` before its callers were migrated; those callers are now migrated on the certification branch.
+- Merged certification candidate: `637f6b7481fb6b2b8ca43719e5c4ee924720a465`.
+- PR #29 was merged after hosted CI run #466 (`41213279219`) completed successfully against the exact pre-merge tree: API, Web, and release-config all passed, including production-image runtime smoke.
+- The merge commit is a squash of the certification branch; its diff contains the same application migration/removal changes that were exercised by the successful CI candidate.
+- The GitHub connector exposes PR-triggered runs only; no separate push-triggered run is currently surfaced for the merge SHA.
 
 ## Certification rule
 
