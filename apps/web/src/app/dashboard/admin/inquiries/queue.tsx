@@ -14,7 +14,7 @@ export type Inquiry = {
   crm_account_id?: string | null; converted_at?: string | null;
 };
 
-export function InquiryQueue({ initial }: { initial: Inquiry[] }) {
+export function InquiryQueue({ initial, canManage = true }: { initial: Inquiry[]; canManage?: boolean }) {
   const [items, setItems] = useState(initial);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -41,9 +41,9 @@ export function InquiryQueue({ initial }: { initial: Inquiry[] }) {
       {(item.primary_objective || item.evaluation_timeline) && <p><strong>{item.primary_objective || "Objective not specified"}</strong>{item.evaluation_timeline ? ` · ${item.evaluation_timeline}` : ""}</p>}
       {(item.utm_source || item.utm_campaign || item.landing_path) && <p><small>Attribution: {[item.utm_source, item.utm_medium, item.utm_campaign, item.landing_path].filter(Boolean).join(" · ")}</small></p>}
       {item.message && <p className={styles.message}>{item.message}</p>}
-      <div className={styles.actions}><label>Status <select value={item.status} disabled={busy === item.id} onChange={event => update(item.id, event.target.value as Inquiry["status"])}>
+      <div className={styles.actions}><label>Status <select value={item.status} disabled={!canManage || busy === item.id} onChange={event => update(item.id, event.target.value as Inquiry["status"])}>
         <option value="new">New</option><option value="contacted">Contacted</option><option value="closed">Closed</option>
-      </select></label><InquiryConvertButton id={item.id} accountId={item.crm_account_id} requestType={item.request_type}/></div>
+      </select></label>{canManage?<InquiryConvertButton id={item.id} accountId={item.crm_account_id} requestType={item.request_type}/>:<span>Read only</span>}</div>
     </article>)}
   </div>;
 }
