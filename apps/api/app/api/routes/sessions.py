@@ -3,11 +3,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_permission, user_has_permission
-from app.db.models import AttendanceRecord, Course, LiveSession, User
+from app.db.models import AttendanceRecord, Course, Enrollment, LiveSession, User
 from app.db.session import get_db
 from app.services.audit import audit
 
@@ -63,6 +63,16 @@ async def mark_attendance(
     can_manage_all = await user_has_permission(user, db, "courses.manage")
     if not can_manage_all and session.instructor_id != user.id:
         raise HTTPException(status_code=403, detail="Facilitator scope does not include this session")
+    enrollment = await db.scalar(
+        select(Enrollment.id).where(
+            Enrollment.tenant_id == user.tenant_id,
+            Enrollment.course_id == session.course_id,
+            Enrollment.user_id == learner.id,
+            Enrollment.status.notin_(("rejected", "cancelled")),
+        )
+    )
+    if enrollment is None:
+        raise HTTPException(status_code=404, detail="Learner is not enrolled in this session's course")
     row = await db.scalar(select(AttendanceRecord).where(AttendanceRecord.live_session_id == session.id, AttendanceRecord.user_id == learner.id))
     if row is None:
         row = AttendanceRecord(live_session_id=session.id, user_id=learner.id, status=payload.status)
@@ -72,6 +82,54 @@ async def mark_attendance(
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="attendance.marked", entity_type="attendance_record", entity_id=str(row.id), metadata={"status": payload.status})
     await db.commit()
     return {"status": row.status}
+
+@router.get("/{session_id}/roster")
+async def session_roster(
+    session_id: UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    session = await db.scalar(
+        select(LiveSession).where(
+            LiveSession.id == session_id,
+            LiveSession.tenant_id == user.tenant_id,
+        )
+    )
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    can_manage_all = await user_has_permission(user, db, "courses.manage")
+    if not can_manage_all and session.instructor_id != user.id:
+        raise HTTPException(status_code=403, detail="Facilitator scope does not include this session")
+    rows = (await db.execute(
+        select(
+            User.id,
+            User.first_name,
+            User.last_name,
+            User.email,
+            Enrollment.status,
+            AttendanceRecord.status,
+        )
+        .join(Enrollment, and_(
+            Enrollment.user_id == User.id,
+            Enrollment.tenant_id == user.tenant_id,
+            Enrollment.course_id == session.course_id,
+            Enrollment.status.notin_(("rejected", "cancelled")),
+        ))
+        .outerjoin(AttendanceRecord, and_(
+            AttendanceRecord.user_id == User.id,
+            AttendanceRecord.live_session_id == session.id,
+        ))
+        .where(User.tenant_id == user.tenant_id, User.is_active.is_(True))
+        .order_by(User.last_name, User.first_name, User.email)
+    )).all()
+    return [{
+        "user_id": str(row.id),
+        "learner": " ".join(part for part in (row.first_name, row.last_name) if part),
+        "email": row.email,
+        "enrollment_status": row.status_1,
+        "attendance_status": row.status_2,
+    } for row in rows]
+
 
 @router.get("/{session_id}/analytics")
 async def session_analytics(
