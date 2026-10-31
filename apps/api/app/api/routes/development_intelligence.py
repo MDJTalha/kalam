@@ -681,6 +681,7 @@ async def recommendations(
                     *([DevelopmentRecommendation.intervention_type == intervention_type] if intervention_type else []),
                 )
                 .order_by(DevelopmentRecommendation.score.desc())
+                .limit(limit)
             )
         )
         .scalars()
