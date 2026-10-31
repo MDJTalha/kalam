@@ -729,7 +729,7 @@ async def public_catalog(db: AsyncSession = Depends(get_db)):
 
 @router.get("/crm/overview")
 async def crm_overview(
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.crm.read")),
     db: AsyncSession = Depends(get_db),
 ):
     account_count = await db.scalar(
@@ -909,13 +909,13 @@ async def crm_lookup(
     raise HTTPException(status_code=404, detail="Unknown CRM lookup type")
 
 @router.get("/crm/plans")
-async def list_plans(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
+async def list_plans(user: User = Depends(_require_ops_permission("saas.pricing.read")), db: AsyncSession = Depends(get_db)):
     items = (await db.execute(select(SaaSPlan).where(SaaSPlan.ops_tenant_id == user.tenant_id).order_by(SaaSPlan.sort_order, SaaSPlan.name))).scalars().all()
     return [_plan_payload(item) for item in items]
 
 
 @router.post("/crm/plans", status_code=201)
-async def create_plan(payload: PlanCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_plan(payload: PlanCreate, user: User = Depends(_require_ops_permission("saas.pricing.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     _validate_plan_bounds(payload.minimum_seats, payload.maximum_seats)
     item = SaaSPlan(ops_tenant_id=user.tenant_id, **payload.model_dump())
@@ -932,7 +932,7 @@ async def list_accounts(
     q: str | None = Query(default=None, max_length=160),
     owner_user_id: UUID | None = Query(default=None),
     country: str | None = Query(default=None, max_length=120),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.sales.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(CRMAccount).where(CRMAccount.ops_tenant_id == user.tenant_id)
@@ -966,7 +966,7 @@ async def paged_accounts(
     q: str | None = Query(default=None, max_length=160),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=25, ge=1, le=100),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.sales.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(CRMAccount).where(CRMAccount.ops_tenant_id == user.tenant_id)
@@ -996,7 +996,7 @@ async def paged_accounts(
 
 
 @router.post("/crm/accounts", status_code=201)
-async def create_account(payload: AccountCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_account(payload: AccountCreate, user: User = Depends(_require_ops_permission("saas.sales.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     await _require_plan(db, user.tenant_id, payload.plan_id)
     await _require_owner(db, user.tenant_id, payload.owner_user_id)
@@ -1013,7 +1013,7 @@ async def create_account(payload: AccountCreate, user: User = Depends(require_pe
 
 
 @router.post("/crm/contacts", status_code=201)
-async def create_contact(payload: ContactCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_contact(payload: ContactCreate, user: User = Depends(_require_ops_permission("saas.sales.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     account = await db.scalar(select(CRMAccount).where(CRMAccount.id == payload.account_id, CRMAccount.ops_tenant_id == user.tenant_id))
     if account is None:
@@ -1025,7 +1025,7 @@ async def create_contact(payload: ContactCreate, user: User = Depends(require_pe
 
 
 @router.get("/crm/trials")
-async def list_trials(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
+async def list_trials(user: User = Depends(_require_ops_permission("saas.customer_success.read")), db: AsyncSession = Depends(get_db)):
     rows = (await db.execute(
         select(CRMTrial, CRMAccount, SaaSPlan)
         .join(CRMAccount, CRMAccount.id == CRMTrial.account_id)
@@ -1041,7 +1041,7 @@ async def list_trials(user: User = Depends(_require_ops_user), db: AsyncSession 
 
 
 @router.post("/crm/trials", status_code=201)
-async def create_trial(payload: TrialCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_trial(payload: TrialCreate, user: User = Depends(_require_ops_permission("saas.customer_success.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     account = await _require_account(db, user.tenant_id, payload.account_id)
     plan = await _require_plan(db, user.tenant_id, payload.plan_id)
@@ -1058,7 +1058,7 @@ async def create_trial(payload: TrialCreate, user: User = Depends(require_permis
 
 
 @router.get("/crm/subscriptions")
-async def list_subscriptions(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
+async def list_subscriptions(user: User = Depends(_require_ops_permission("saas.finance.read")), db: AsyncSession = Depends(get_db)):
     items = (await db.execute(select(CRMSubscription).where(CRMSubscription.ops_tenant_id == user.tenant_id).order_by(CRMSubscription.created_at.desc()))).scalars().all()
     return [{"id": str(x.id), "account_id": str(x.account_id), "plan_id": str(x.plan_id) if x.plan_id else None, "status": x.status, "billing_cycle": x.billing_cycle, "currency": x.currency, "seats": x.seats, "list_price_minor": x.list_price_minor, "discount_minor": x.discount_minor, "net_price_minor": x.net_price_minor, "renews_at": x.renews_at} for x in items]
 
@@ -1069,7 +1069,7 @@ async def paged_subscriptions(
     status: str | None = Query(default=None, max_length=30),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=25, ge=1, le=100),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.finance.read")),
     db: AsyncSession = Depends(get_db),
 ):
     base = select(CRMSubscription.id).where(CRMSubscription.ops_tenant_id == user.tenant_id)
@@ -1102,7 +1102,7 @@ async def paged_subscriptions(
 
 
 @router.post("/crm/subscriptions", status_code=201)
-async def create_subscription(payload: SubscriptionCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_subscription(payload: SubscriptionCreate, user: User = Depends(_require_ops_permission("saas.finance.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     account = await _require_account(db, user.tenant_id, payload.account_id)
     plan = await _require_plan(db, user.tenant_id, payload.plan_id)
@@ -1142,7 +1142,7 @@ async def list_opportunities(
     stage: str | None = Query(default=None, max_length=40),
     q: str | None = Query(default=None, max_length=180),
     owner_user_id: UUID | None = Query(default=None),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.sales.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(CRMOpportunity, CRMAccount).join(CRMAccount, CRMAccount.id == CRMOpportunity.account_id).where(CRMOpportunity.ops_tenant_id == user.tenant_id)
@@ -1163,7 +1163,7 @@ async def list_opportunities(
 
 
 @router.get("/crm/pipeline-forecast")
-async def pipeline_forecast(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
+async def pipeline_forecast(user: User = Depends(_require_ops_permission("saas.sales.read")), db: AsyncSession = Depends(get_db)):
     rows = (await db.execute(
         select(
             CRMOpportunity.currency,
@@ -1189,7 +1189,7 @@ async def pipeline_forecast(user: User = Depends(_require_ops_user), db: AsyncSe
 
 
 @router.post("/crm/opportunities", status_code=201)
-async def create_opportunity(payload: OpportunityCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_opportunity(payload: OpportunityCreate, user: User = Depends(_require_ops_permission("saas.sales.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     await _require_account(db, user.tenant_id, payload.account_id)
     await _require_owner(db, user.tenant_id, payload.owner_user_id)
@@ -1200,13 +1200,13 @@ async def create_opportunity(payload: OpportunityCreate, user: User = Depends(re
 
 
 @router.get("/crm/offers")
-async def list_offers(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
+async def list_offers(user: User = Depends(_require_ops_permission("saas.pricing.read")), db: AsyncSession = Depends(get_db)):
     items = (await db.execute(select(SaaSOffer).where(SaaSOffer.ops_tenant_id == user.tenant_id).order_by(SaaSOffer.created_at.desc()))).scalars().all()
     return [{"id": str(x.id), "plan_id": str(x.plan_id) if x.plan_id else None, "code": x.code, "title": x.title, "discount_type": x.discount_type, "discount_value": x.discount_value, "status": x.status, "public_visible": x.public_visible, "starts_at": x.starts_at, "ends_at": x.ends_at} for x in items]
 
 
 @router.post("/crm/offers", status_code=201)
-async def create_offer(payload: OfferCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_offer(payload: OfferCreate, user: User = Depends(_require_ops_permission("saas.pricing.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     await _require_plan(db, user.tenant_id, payload.plan_id)
     _validate_offer_terms(
@@ -1223,13 +1223,13 @@ async def create_offer(payload: OfferCreate, user: User = Depends(require_permis
 
 
 @router.get("/crm/certifications")
-async def list_certifications(user: User = Depends(_require_ops_user), db: AsyncSession = Depends(get_db)):
+async def list_certifications(user: User = Depends(_require_ops_permission("saas.platform.read")), db: AsyncSession = Depends(get_db)):
     items = (await db.execute(select(SaaSCertification).where(SaaSCertification.ops_tenant_id == user.tenant_id).order_by(SaaSCertification.display_order, SaaSCertification.title))).scalars().all()
     return [{"id": str(x.id), "title": x.title, "issuer": x.issuer, "registration_number": x.registration_number, "status": x.status, "public_visible": x.public_visible, "issued_at": x.issued_at, "expires_at": x.expires_at, "verification_url": x.verification_url} for x in items]
 
 
 @router.post("/crm/certifications", status_code=201)
-async def create_certification(payload: CertificationCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_certification(payload: CertificationCreate, user: User = Depends(_require_ops_permission("saas.platform.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     _validate_public_certification(
         public_visible=payload.public_visible,
@@ -1245,7 +1245,7 @@ async def create_certification(payload: CertificationCreate, user: User = Depend
 
 
 @router.post("/crm/activities", status_code=201)
-async def create_activity(payload: ActivityCreate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def create_activity(payload: ActivityCreate, user: User = Depends(_require_ops_permission("saas.sales.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     await _require_account(db, user.tenant_id, payload.account_id)
     item = CRMSalesActivity(
@@ -1268,7 +1268,7 @@ def _apply_patch(item: Any, payload: BaseModel) -> list[str]:
 
 
 @router.patch("/crm/plans/{plan_id}")
-async def update_plan(plan_id: UUID, payload: PlanUpdate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def update_plan(plan_id: UUID, payload: PlanUpdate, user: User = Depends(_require_ops_permission("saas.pricing.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     item = await db.scalar(select(SaaSPlan).where(SaaSPlan.id == plan_id, SaaSPlan.ops_tenant_id == user.tenant_id))
     if item is None:
@@ -1285,7 +1285,7 @@ async def update_plan(plan_id: UUID, payload: PlanUpdate, user: User = Depends(r
 
 
 @router.patch("/crm/accounts/{account_id}")
-async def update_account(account_id: UUID, payload: AccountUpdate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def update_account(account_id: UUID, payload: AccountUpdate, user: User = Depends(_require_ops_permission("saas.crm.read")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     item = await db.scalar(select(CRMAccount).where(CRMAccount.id == account_id, CRMAccount.ops_tenant_id == user.tenant_id))
     if item is None:
@@ -1307,7 +1307,7 @@ async def update_account(account_id: UUID, payload: AccountUpdate, user: User = 
 
 
 @router.patch("/crm/offers/{offer_id}")
-async def update_offer(offer_id: UUID, payload: OfferUpdate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def update_offer(offer_id: UUID, payload: OfferUpdate, user: User = Depends(_require_ops_permission("saas.pricing.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     item = await db.scalar(select(SaaSOffer).where(SaaSOffer.id == offer_id, SaaSOffer.ops_tenant_id == user.tenant_id))
     if item is None:
@@ -1332,7 +1332,7 @@ async def update_offer(offer_id: UUID, payload: OfferUpdate, user: User = Depend
 
 
 @router.patch("/crm/trials/{trial_id}")
-async def update_trial(trial_id: UUID, payload: TrialUpdate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def update_trial(trial_id: UUID, payload: TrialUpdate, user: User = Depends(_require_ops_permission("saas.customer_success.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     item = await db.scalar(select(CRMTrial).where(CRMTrial.id == trial_id, CRMTrial.ops_tenant_id == user.tenant_id))
     if item is None:
@@ -1357,7 +1357,7 @@ async def update_trial(trial_id: UUID, payload: TrialUpdate, user: User = Depend
 
 
 @router.patch("/crm/subscriptions/{subscription_id}")
-async def update_subscription(subscription_id: UUID, payload: SubscriptionUpdate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def update_subscription(subscription_id: UUID, payload: SubscriptionUpdate, user: User = Depends(_require_ops_permission("saas.finance.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     item = await db.scalar(select(CRMSubscription).where(CRMSubscription.id == subscription_id, CRMSubscription.ops_tenant_id == user.tenant_id))
     if item is None:
@@ -1390,7 +1390,7 @@ async def update_subscription(subscription_id: UUID, payload: SubscriptionUpdate
 
 
 @router.patch("/crm/opportunities/{opportunity_id}")
-async def update_opportunity(opportunity_id: UUID, payload: OpportunityUpdate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def update_opportunity(opportunity_id: UUID, payload: OpportunityUpdate, user: User = Depends(_require_ops_permission("saas.sales.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     item = await db.scalar(select(CRMOpportunity).where(CRMOpportunity.id == opportunity_id, CRMOpportunity.ops_tenant_id == user.tenant_id))
     if item is None:
@@ -1402,7 +1402,7 @@ async def update_opportunity(opportunity_id: UUID, payload: OpportunityUpdate, u
 
 
 @router.patch("/crm/certifications/{certification_id}")
-async def update_certification(certification_id: UUID, payload: CertificationUpdate, user: User = Depends(require_permission("saas.crm.manage")), db: AsyncSession = Depends(get_db)):
+async def update_certification(certification_id: UUID, payload: CertificationUpdate, user: User = Depends(_require_ops_permission("saas.platform.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     item = await db.scalar(select(SaaSCertification).where(SaaSCertification.id == certification_id, SaaSCertification.ops_tenant_id == user.tenant_id))
     if item is None:
@@ -1432,7 +1432,7 @@ async def update_certification(certification_id: UUID, payload: CertificationUpd
 async def convert_inquiry(
     inquiry_id: UUID,
     payload: InquiryConvert,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.sales.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -1609,7 +1609,7 @@ async def convert_inquiry(
 
 @router.get("/crm/tenants")
 async def list_managed_tenants(
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.customer_success.read")),
     db: AsyncSession = Depends(get_db),
 ):
     if await _is_demo_crm_user(user, db):
@@ -1664,7 +1664,7 @@ class ManagedUserUpdate(BaseModel):
 @router.get("/crm/tenants/{tenant_id}/users")
 async def list_managed_tenant_users(
     tenant_id: UUID,
-    user: User = Depends(require_permission("saas.team.manage")),
+    user: User = Depends(_require_ops_permission("saas.customer_success.read")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -1697,7 +1697,7 @@ async def update_managed_tenant_user(
     tenant_id: UUID,
     user_id: UUID,
     payload: ManagedUserUpdate,
-    user: User = Depends(require_permission("saas.team.manage")),
+    user: User = Depends(_require_ops_permission("saas.customer_success.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -1744,7 +1744,7 @@ async def update_managed_tenant_user(
 async def provision_tenant(
     account_id: UUID,
     payload: TenantProvisionCreate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.customer_success.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -1815,7 +1815,7 @@ async def provision_tenant(
 async def update_managed_tenant(
     tenant_id: UUID,
     payload: TenantCommercialUpdate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.customer_success.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -1850,7 +1850,7 @@ async def update_managed_tenant(
 @router.get("/crm/accounts/{account_id}")
 async def account_detail(
     account_id: UUID,
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.crm.read")),
     db: AsyncSession = Depends(get_db),
 ):
     account = await db.scalar(
@@ -2025,7 +2025,7 @@ async def account_detail(
 async def list_onboarding_items(
     account_id: UUID | None = Query(default=None),
     status: str | None = Query(default=None, max_length=30),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.customer_success.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(CRMOnboardingItem).where(CRMOnboardingItem.ops_tenant_id == user.tenant_id)
@@ -2068,7 +2068,7 @@ async def list_onboarding_items(
 @router.post("/crm/onboarding", status_code=201)
 async def create_onboarding_item(
     payload: OnboardingItemCreate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.customer_success.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -2099,7 +2099,7 @@ async def create_onboarding_item(
 async def update_onboarding_item(
     item_id: UUID,
     payload: OnboardingItemUpdate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.customer_success.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -2141,7 +2141,7 @@ async def update_onboarding_item(
 @router.post("/crm/accounts/{account_id}/onboarding-template", status_code=201)
 async def create_standard_onboarding(
     account_id: UUID,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.customer_success.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -2197,7 +2197,7 @@ async def create_standard_onboarding(
 @router.get("/crm/renewals")
 async def list_renewals(
     days: int = Query(default=90, ge=1, le=730),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.finance.read")),
     db: AsyncSession = Depends(get_db),
 ):
     now = datetime.now(timezone.utc)
@@ -2482,7 +2482,7 @@ async def remove_managed_tenant_role(
 
 @router.get("/crm/team")
 async def list_crm_team(
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.team.read")),
     db: AsyncSession = Depends(get_db),
 ):
     rows = (await db.execute(
@@ -2511,7 +2511,7 @@ async def list_crm_team(
 async def export_accounts_csv(
     stage: str | None = Query(default=None, max_length=30),
     q: str | None = Query(default=None, max_length=160),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.sales.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(CRMAccount).where(CRMAccount.ops_tenant_id == user.tenant_id)
@@ -2630,7 +2630,7 @@ async def _reconcile_invoice(db: AsyncSession, invoice: CRMInvoice) -> tuple[int
 @router.get("/crm/contracts")
 async def list_contracts(
     account_id: UUID | None = Query(default=None),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.finance.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = (
@@ -2664,7 +2664,7 @@ async def paged_contracts(
     status: str | None = Query(default=None, max_length=30),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=25, ge=1, le=100),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.finance.read")),
     db: AsyncSession = Depends(get_db),
 ):
     filters = [CRMContract.ops_tenant_id == user.tenant_id]
@@ -2715,7 +2715,7 @@ async def paged_contracts(
 @router.post("/crm/contracts", status_code=201)
 async def create_contract(
     payload: ContractCreate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.finance.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -2745,7 +2745,7 @@ async def create_contract(
 async def update_contract(
     contract_id: UUID,
     payload: ContractUpdate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.finance.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -2768,7 +2768,7 @@ async def update_contract(
 async def list_invoices(
     status: str | None = Query(default=None, max_length=30),
     account_id: UUID | None = Query(default=None),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.finance.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = (
@@ -2811,7 +2811,7 @@ async def list_invoices(
 @router.post("/crm/invoices", status_code=201)
 async def create_invoice(
     payload: InvoiceCreate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.finance.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -2848,7 +2848,7 @@ async def create_invoice(
 async def update_invoice(
     invoice_id: UUID,
     payload: InvoiceUpdate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.finance.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -2898,7 +2898,7 @@ async def update_invoice(
 async def list_payments(
     invoice_id: UUID | None = Query(default=None),
     account_id: UUID | None = Query(default=None),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.finance.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = (
@@ -2931,7 +2931,7 @@ async def list_payments(
 @router.post("/crm/payments", status_code=201)
 async def create_payment(
     payload: PaymentCreate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.finance.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -2979,7 +2979,7 @@ async def create_payment(
 
 @router.get("/crm/forecast")
 async def commercial_forecast(
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.finance.read")),
     db: AsyncSession = Depends(get_db),
 ):
     opportunity_rows = (await db.execute(
@@ -3036,7 +3036,7 @@ async def commercial_forecast(
 async def update_payment(
     payment_id: UUID,
     payload: PaymentUpdate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.finance.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -3085,7 +3085,7 @@ async def list_crm_tasks(
     task_type: str | None = Query(default=None, max_length=50),
     owner_user_id: UUID | None = Query(default=None),
     account_id: UUID | None = Query(default=None),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.sales.read")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = (
@@ -3136,7 +3136,7 @@ async def paged_crm_tasks(
     account_id: UUID | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=25, ge=1, le=100),
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(_require_ops_permission("saas.sales.read")),
     db: AsyncSession = Depends(get_db),
 ):
     filters = [CRMTask.ops_tenant_id == user.tenant_id]
@@ -3199,7 +3199,7 @@ async def paged_crm_tasks(
 @router.post("/crm/tasks", status_code=201)
 async def create_crm_task(
     payload: TaskCreate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.sales.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -3231,7 +3231,7 @@ async def create_crm_task(
 async def update_crm_task(
     task_id: UUID,
     payload: TaskUpdate,
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.sales.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
@@ -3265,7 +3265,7 @@ async def update_crm_task(
 @router.post("/crm/tasks/generate-renewals")
 async def generate_renewal_tasks(
     horizon_days: int = Query(default=120, ge=30, le=365),
-    user: User = Depends(require_permission("saas.crm.manage")),
+    user: User = Depends(_require_ops_permission("saas.sales.manage")),
     db: AsyncSession = Depends(get_db),
 ):
     await _require_ops_user(user, db)
