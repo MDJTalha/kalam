@@ -3,7 +3,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { RoleAssignment } from "@/components/role-assignment";
 import { PeopleBulkInvite } from "@/components/people-bulk-invite";
 import { UserLifecyclePanel } from "@/components/user-lifecycle-panel";
-import { apiJsonResult, apiJsonResult, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Person = { id: string; email: string; first_name: string; last_name: string; employee_number?: string | null; job_title?: string | null; manager_id?: string | null; org_unit_id?: string | null; is_active: boolean };
 type Role = { id: string; name: string };
