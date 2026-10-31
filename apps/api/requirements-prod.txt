@@ -10,5 +10,5 @@ email-validator==2.3.0
 redis==6.4.0
 structlog==25.5.0
 cryptography==50.0.2
-joserfc==1.7.3
+joserfc==1.7.6
 httpx==0.28.1
