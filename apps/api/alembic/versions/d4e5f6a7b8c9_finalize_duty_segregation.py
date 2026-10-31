@@ -38,6 +38,17 @@ def upgrade() -> None:
           AND p.key='saas.customer_success.manage'
     """))
 
+    # The SaaS Administrator may operate team lifecycle but cannot define
+    # custom platform roles; that authority is reserved for SaaS Super Admin.
+    conn.execute(sa.text("""
+        DELETE FROM role_permissions rp
+        USING roles r, permissions p
+        WHERE rp.role_id=r.id
+          AND rp.permission_id=p.id
+          AND r.name='SaaS Administrator'
+          AND p.key='saas.roles.manage'
+    """))
+
 
 def downgrade() -> None:
     # Do not restore unscoped HRBP data access or combine sales and customer-
