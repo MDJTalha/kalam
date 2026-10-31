@@ -54,6 +54,10 @@ def test_phase6_recommendations_contract_and_filter():
         assert learning.status_code == 200, learning.text
         assert all(item["intervention_type"] == "learning" for item in learning.json())
 
+        bounded = client.get("/api/v1/development/recommendations?limit=1")
+        assert bounded.status_code == 200, bounded.text
+        assert len(bounded.json()) <= 1
+
 
 def test_phase6_no_cross_tenant_recommendation_access():
     with TestClient(app, base_url="http://localhost") as client:
