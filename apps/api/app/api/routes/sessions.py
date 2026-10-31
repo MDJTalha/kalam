@@ -174,6 +174,12 @@ async def session_analytics(
     roster = await db.execute(
         select(User.id, User.first_name, User.last_name, User.email, AttendanceRecord.status)
         .join(AttendanceRecord, AttendanceRecord.user_id == User.id)
+        .join(Enrollment, and_(
+            Enrollment.user_id == User.id,
+            Enrollment.tenant_id == user.tenant_id,
+            Enrollment.course_id == session.course_id,
+            Enrollment.status.notin_(("rejected", "cancelled")),
+        ))
         .where(
             User.tenant_id == user.tenant_id,
             AttendanceRecord.live_session_id == session.id,
