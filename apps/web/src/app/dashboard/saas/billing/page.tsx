@@ -34,9 +34,9 @@ export default async function SaaSBillingPage({searchParams}:{searchParams:Promi
   if(params.payment_status)paymentQuery.set("status",params.payment_status);
 
   const [invoices,payments,finance]=await Promise.all([
-    apiJson<InvoicePage>("/api/v1/saas/crm/page/invoices?"+invoiceQuery.toString()),
-    apiJson<PaymentPage>("/api/v1/saas/crm/page/payments?"+paymentQuery.toString()),
-    apiJson<FinanceOverview>("/api/v1/saas/crm/finance/overview"),
+    apiJsonResult<InvoicePage>("/api/v1/saas/crm/page/invoices?"+invoiceQuery.toString()).then((result) => result.ok ? result.data : null),
+    apiJsonResult<PaymentPage>("/api/v1/saas/crm/page/payments?"+paymentQuery.toString()).then((result) => result.ok ? result.data : null),
+    apiJsonResult<FinanceOverview>("/api/v1/saas/crm/finance/overview").then((result) => result.ok ? result.data : null),
   ]);
 
   if(!invoices||!payments||!finance){
