@@ -1,6 +1,6 @@
 # Kalam — Release Certification Status
 Date: 2026-10-31
-Current main candidate observed: `2a26dd18ad57c024d99be5216db77eb76781ca8a`
+Current main candidate observed: `34170b2578db1206a7ec40614b5c10395342018f`
 
 ## Executive status
 
@@ -25,7 +25,7 @@ This ledger distinguishes source implementation from independently executed runt
 
 | Gate | Current state | Required evidence |
 |---|---|---|
-| Exact-candidate CI | MERGE-EQUIVALENT TREE VERIFIED | Hosted PR run #470 (ID `41214013410`) passed API/Web/release-config against the exact PR #30 application tree, including production-image runtime smoke. The merge is a squash of that tree. |
+| Exact-candidate CI | MERGE-EQUIVALENT TREE VERIFIED | Hosted PR run #477 (ID `41215669267`) passed API/Web/release-config against the exact certification-documentation tree that was squash-merged to main; the application tree is unchanged from the previously certified PR #30 tree. |
 | Full API regression | CERTIFIED FOR EXACT APPLICATION TREE | Hosted PR #30 run #470 (ID `41214013410`) executed the complete API suite against the exact application tree that was squash-merged to main; the API job completed successfully with **182 passed, 0 failed**, one dependency deprecation warning, in 80.06 seconds. |
 | Browser E2E | NOT CERTIFIED | Real authenticated role matrix covering admin, HR/L&D, manager, instructor, learner, auditor/compliance. |
 | Tenant isolation | SOURCE + REGRESSION COVERAGE | Execute negative A→B access matrix in a live disposable/staging environment. |
@@ -73,8 +73,8 @@ Verified during the current execution window:
 
 ## Current mainline evidence
 
-- Current main candidate: `2a26dd18ad57c024d99be5216db77eb76781ca8a`.
-- PR #30 hosted run #470 (`41214013410`) completed successfully against the exact PR tree: API, Web and release-config, including production-image runtime smoke.
+- Current main candidate: `34170b2578db1206a7ec40614b5c10395342018f`.
+- PR #30 hosted run #470 (`41214013410`) completed successfully against the exact application tree: API, Web and release-config, including production-image runtime smoke. PR #32 hosted run #477 (`41215669267`) also completed successfully for the final certification-evidence tree before squash merge.
 - No separate push-triggered workflow run for the merge SHA is exposed by the available GitHub connector.
 
 ## Certification rule
