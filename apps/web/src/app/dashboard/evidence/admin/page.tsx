@@ -15,13 +15,19 @@ export default async function EvidenceAdminPage(){
  const user=await requireUser<{permissions?:string[]}>();
  const permissions=user.permissions??[];
  if(!permissions.includes("evidence.read")) return <DashboardShell title="Evidence operations" eyebrow="Capability evidence"><EmptyState title="Access restricted" description="This workspace requires evidence access." icon={FileCheck2}/></DashboardShell>;
- const [peoplePage,competencyResult,evidenceResult]=await Promise.all([apiJson<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"),apiJsonResult<CompetencyPage>("/api/v1/capability-domain/competencies/page?page=1&page_size=100"),apiJsonResult<EvidencePage>("/api/v1/evidence/page?page=1&page_size=50")]);
- const people=peoplePage?.items??null;
+ const canManage=permissions.includes("evidence.manage");
+ const canVerify=permissions.includes("evidence.verify");
+ const [peoplePage,competencyResult,evidenceResult]=await Promise.all([
+  canManage?apiJson<PeoplePage>("/api/v1/people/page?page=1&page_size=20&status=active"):Promise.resolve(null),
+  apiJsonResult<CompetencyPage>("/api/v1/capability-domain/competencies/page?page=1&page_size=100"),
+  apiJsonResult<EvidencePage>("/api/v1/evidence/page?page=1&page_size=50")
+ ]);
+ const people=peoplePage?.items??[];
  const evidence=evidenceResult.ok?evidenceResult.data:null;
  const competencies=competencyResult.ok?competencyResult.data?.items:null;
- const failed=!people||!competencies||!evidence||((competencyResult.data?.total||0)>(competencies?.length||0));
- return <DashboardShell title="Evidence operations" eyebrow="Capability evidence" breadcrumbs={[{label:"Skills & Capabilities",href:"/dashboard/skills"},{label:"Evidence operations"}]}>
+ const failed=(canManage&&!peoplePage)||!competencies||!evidence||((competencyResult.data?.total||0)>(competencies?.length||0));
+ return <DashboardShell title={canManage?"Evidence operations":"Capability evidence register"} eyebrow="Capability evidence" breadcrumbs={[{label:"Overview",href:"/dashboard"},{label:"Evidence register"}]}>
   {failed?<Section eyebrow="Evidence engine" title="Evidence data unavailable"><p>One or more governed evidence sources could not be loaded, or the competency catalog exceeds the 100-item safety limit. Refresh after the capability services are available or narrow the catalog.</p></Section>:
-   <EvidenceOperations people={people??[]} competencies={(competencies??[]).filter(x=>x.status!=="retired")} initialEvidence={evidence?.items??[]} initialTotal={evidence?.total??0} canVerify={permissions.includes("evidence.verify")}/>}
+   <EvidenceOperations people={people} competencies={(competencies??[]).filter(x=>x.status!=="retired")} initialEvidence={evidence?.items??[]} initialTotal={evidence?.total??0} canManage={canManage} canVerify={canVerify}/>}
  </DashboardShell>;
 }
