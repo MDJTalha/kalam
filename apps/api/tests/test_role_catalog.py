@@ -80,3 +80,30 @@ def test_core_business_roles_are_present():
         "SaaS Finance Administrator",
         "Customer Success Manager",
     } <= set(PLATFORM_ROLE_PERMISSIONS)
+
+
+def test_saas_sales_and_finance_are_segregated():
+    sales_ops = set(PLATFORM_ROLE_PERMISSIONS["Sales Operations"])
+    sales_viewer = set(PLATFORM_ROLE_PERMISSIONS["Sales Viewer"])
+    finance = set(PLATFORM_ROLE_PERMISSIONS["SaaS Finance Administrator"])
+    assert {"saas.sales.read", "saas.sales.manage"} <= sales_ops
+    assert "saas.finance.read" not in sales_ops
+    assert "saas.finance.manage" not in sales_ops
+    assert "saas.finance.read" not in sales_viewer
+    assert "saas.finance.manage" not in sales_viewer
+    assert {"saas.finance.read", "saas.finance.manage"} <= finance
+    assert "saas.sales.manage" not in finance
+
+
+def test_saas_administrator_is_not_a_commercial_superuser():
+    grants = set(PLATFORM_ROLE_PERMISSIONS["SaaS Administrator"])
+    assert {"saas.platform.read", "saas.platform.manage", "saas.team.manage"} <= grants
+    assert "saas.crm.manage" not in grants
+    assert "saas.finance.manage" not in grants
+
+
+def test_customer_success_cannot_read_finance():
+    grants = set(PLATFORM_ROLE_PERMISSIONS["Customer Success Manager"])
+    assert {"saas.customer_success.read", "saas.customer_success.manage"} <= grants
+    assert "saas.finance.read" not in grants
+    assert "saas.finance.manage" not in grants
