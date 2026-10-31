@@ -1,7 +1,7 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { redirect } from "next/navigation";
 import { PeopleDirectory, type PeoplePageResult } from "@/components/people-directory";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Unit = { id: string; name: string };
 type Params = { q?: string; status?: string; unit?: string; page?: string };
@@ -18,10 +18,12 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const query = new URLSearchParams({ page: String(page), page_size: "20", status, q });
   if (unit === "unassigned") query.set("unassigned", "true");
   else if (unit !== "all") query.set("unit_id", unit);
-  const [result, units] = await Promise.all([
-    apiJson<PeoplePageResult>("/api/v1/people/page?" + query.toString()),
-    apiJson<Unit[]>("/api/v1/organization/units"),
+  const [resultResult, unitsResult] = await Promise.all([
+    apiJsonResult<PeoplePageResult>("/api/v1/people/page?" + query.toString()),
+    apiJsonResult<Unit[]>("/api/v1/organization/units"),
   ]);
+  const result = resultResult.ok ? resultResult.data : null;
+  const units = unitsResult.ok ? unitsResult.data : null;
   if (result && result.total > 0 && page > Math.ceil(result.total / result.page_size)) {
     const destination = new URLSearchParams({ page: String(Math.ceil(result.total / result.page_size)) });
     if (q) destination.set("q", q);
