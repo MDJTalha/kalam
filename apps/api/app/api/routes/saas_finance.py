@@ -253,6 +253,7 @@ async def update_contract(contract_id: UUID, payload: ContractUpdate, user: User
 @router.get("/crm/invoices")
 async def list_invoices(
     account_id: UUID | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -385,6 +386,7 @@ async def update_invoice(invoice_id: UUID, payload: InvoiceUpdate, user: User = 
 @router.get("/crm/payments")
 async def list_payments(
     account_id: UUID | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
