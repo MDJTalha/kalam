@@ -320,7 +320,7 @@ async def export_course_performance(
 
 @router.get("/export/people")
 async def export_people(
-    user: User = Depends(require_permission("reports.read")),
+    user: User = Depends(require_permission("reports.export.people")),
     db: AsyncSession = Depends(get_db),
 ) -> StreamingResponse:
     result = await db.execute(
@@ -350,7 +350,7 @@ async def export_people(
 
 @router.get("/export/enrollments")
 async def export_enrollments(
-    user: User = Depends(require_permission("reports.read")),
+    user: User = Depends(require_permission("reports.export.learning")),
     db: AsyncSession = Depends(get_db),
 ) -> StreamingResponse:
     result = await db.execute(
