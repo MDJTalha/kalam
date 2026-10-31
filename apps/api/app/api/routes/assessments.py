@@ -7,8 +7,8 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_permission
-from app.db.models import Assessment, AssessmentAttempt, AuditLog, Certificate, Course, Enrollment, Question, User
+from app.api.deps import get_current_user, require_permission, user_has_permission
+from app.db.models import Assessment, AssessmentAttempt, AuditLog, Certificate, Course, Enrollment, LiveSession, Question, User
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.notifications import create_notification
@@ -19,6 +19,59 @@ async def ensure_editable(db: AsyncSession, assessment_id: UUID):
     count = await db.scalar(select(func.count(AssessmentAttempt.id)).where(AssessmentAttempt.assessment_id == assessment_id))
     if count:
         raise HTTPException(status_code=409, detail="This assessment has attempts. Clone it to revise its questions.")
+
+
+async def _assessment_scope(
+    assessment: Assessment,
+    user: User,
+    db: AsyncSession,
+) -> str | None:
+    """Resolve an assessment to administrator, assigned instructor, or enrolled learner scope."""
+    if await user_has_permission(user, db, "assessments.manage"):
+        return "manage"
+    if assessment.course_id is None:
+        return None
+    if await user_has_permission(user, db, "assessments.grade_assigned"):
+        assigned_session = await db.scalar(
+            select(LiveSession.id).where(
+                LiveSession.tenant_id == user.tenant_id,
+                LiveSession.course_id == assessment.course_id,
+                LiveSession.instructor_id == user.id,
+            ).limit(1)
+        )
+        if assigned_session is not None:
+            return "grade"
+    if await user_has_permission(user, db, "learning.access"):
+        enrolled = await db.scalar(
+            select(Enrollment.id).where(
+                Enrollment.tenant_id == user.tenant_id,
+                Enrollment.course_id == assessment.course_id,
+                Enrollment.user_id == user.id,
+                Enrollment.status.notin_(("rejected", "cancelled")),
+            ).limit(1)
+        )
+        if enrolled is not None:
+            return "learner"
+    return None
+
+
+async def _get_assessment_with_scope(
+    assessment_id: UUID,
+    user: User,
+    db: AsyncSession,
+) -> tuple[Assessment, str]:
+    assessment = await db.scalar(
+        select(Assessment).where(
+            Assessment.id == assessment_id,
+            Assessment.tenant_id == user.tenant_id,
+        )
+    )
+    if assessment is None:
+        raise HTTPException(status_code=404, detail="Assessment not found")
+    scope = await _assessment_scope(assessment, user, db)
+    if scope is None:
+        raise HTTPException(status_code=404, detail="Assessment not found")
+    return assessment, scope
 
 class AssessmentCreate(BaseModel):
     title: str = Field(min_length=3, max_length=240)
@@ -77,13 +130,39 @@ async def list_assessments(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
+    can_manage = await user_has_permission(user, db, "assessments.manage")
+    can_grade_assigned = await user_has_permission(user, db, "assessments.grade_assigned")
+    can_learn = await user_has_permission(user, db, "learning.access")
+    if not (can_manage or can_grade_assigned or can_learn):
+        raise HTTPException(status_code=403, detail="Assessment access is restricted")
+    stmt = (
         select(Assessment, Course.title, func.count(Question.id))
         .outerjoin(Course, Course.id == Assessment.course_id)
         .outerjoin(Question, Question.assessment_id == Assessment.id)
         .where(Assessment.tenant_id == user.tenant_id)
-        .group_by(Assessment.id, Course.title)
-        .order_by(Assessment.title.asc())
+    )
+    if not can_manage:
+        accessible_course_ids: set[UUID] = set()
+        if can_grade_assigned:
+            assigned_courses = await db.execute(
+                select(LiveSession.course_id).where(
+                    LiveSession.tenant_id == user.tenant_id,
+                    LiveSession.instructor_id == user.id,
+                ).distinct()
+            )
+            accessible_course_ids.update(assigned_courses.scalars().all())
+        if can_learn:
+            enrolled_courses = await db.execute(
+                select(Enrollment.course_id).where(
+                    Enrollment.tenant_id == user.tenant_id,
+                    Enrollment.user_id == user.id,
+                    Enrollment.status.notin_(("rejected", "cancelled")),
+                ).distinct()
+            )
+            accessible_course_ids.update(enrolled_courses.scalars().all())
+        stmt = stmt.where(Assessment.course_id.in_(accessible_course_ids)) if accessible_course_ids else stmt.where(sa.false())
+    result = await db.execute(
+        stmt.group_by(Assessment.id, Course.title).order_by(Assessment.title.asc())
     )
     return [
         {
@@ -146,9 +225,7 @@ async def get_assessment(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    assessment = await db.scalar(select(Assessment).where(Assessment.id == assessment_id, Assessment.tenant_id == user.tenant_id))
-    if assessment is None:
-        raise HTTPException(status_code=404, detail="Assessment not found")
+    assessment, _scope = await _get_assessment_with_scope(assessment_id, user, db)
     questions = await db.execute(
         select(Question.id, Question.question_type, Question.prompt, Question.options, Question.points, Question.position)
         .where(Question.assessment_id == assessment.id)
@@ -186,14 +263,9 @@ async def start_assessment(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    assessment = await db.scalar(
-        select(Assessment).where(
-            Assessment.id == assessment_id,
-            Assessment.tenant_id == user.tenant_id,
-        )
-    )
-    if assessment is None:
-        raise HTTPException(status_code=404, detail="Assessment not found")
+    assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
+    if scope != "learner":
+        raise HTTPException(status_code=403, detail="Only enrolled learners can start this assessment")
 
     question_count = await db.scalar(select(func.count(Question.id)).where(Question.assessment_id == assessment.id))
     if not question_count:
@@ -246,9 +318,9 @@ async def submit_assessment(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    assessment = await db.scalar(select(Assessment).where(Assessment.id == assessment_id, Assessment.tenant_id == user.tenant_id))
-    if assessment is None:
-        raise HTTPException(status_code=404, detail="Assessment not found")
+    assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
+    if scope != "learner":
+        raise HTTPException(status_code=403, detail="Only enrolled learners can submit this assessment")
     attempts_count = await db.scalar(
         select(func.count(AssessmentAttempt.id)).where(
             AssessmentAttempt.assessment_id == assessment.id,
@@ -368,7 +440,7 @@ async def submit_assessment(
 @router.get("/attempts/{attempt_id}/detail")
 async def attempt_detail(
     attempt_id: UUID,
-    user: User = Depends(require_permission("assessments.manage")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -386,6 +458,9 @@ async def attempt_detail(
         raise HTTPException(status_code=404, detail="Assessment attempt not found")
 
     attempt, assessment, learner = row
+    scope = await _assessment_scope(assessment, user, db)
+    if scope not in {"manage", "grade"}:
+        raise HTTPException(status_code=404, detail="Assessment attempt not found")
     questions_result = await db.execute(
         select(Question)
         .where(Question.assessment_id == assessment.id)
@@ -457,16 +532,11 @@ async def attempt_detail(
 @router.get("/{assessment_id}/attempts")
 async def list_attempts(
     assessment_id: UUID,
-    user: User = Depends(require_permission("assessments.manage")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    assessment = await db.scalar(
-        select(Assessment).where(
-            Assessment.id == assessment_id,
-            Assessment.tenant_id == user.tenant_id,
-        )
-    )
-    if assessment is None:
+    assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
+    if scope not in {"manage", "grade"}:
         raise HTTPException(status_code=404, detail="Assessment not found")
 
     result = await db.execute(
@@ -496,7 +566,7 @@ async def list_attempts(
 async def override_grade(
     attempt_id: UUID,
     payload: ManualGrade,
-    user: User = Depends(require_permission("assessments.manage")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -512,6 +582,9 @@ async def override_grade(
         raise HTTPException(status_code=404, detail="Assessment attempt not found")
 
     attempt, assessment = row
+    scope = await _assessment_scope(assessment, user, db)
+    if scope not in {"manage", "grade"}:
+        raise HTTPException(status_code=404, detail="Assessment attempt not found")
     attempt.score = payload.score
     attempt.passed = payload.passed
     attempt.feedback = payload.feedback
@@ -658,8 +731,8 @@ async def question_analytics(
     user: User = Depends(require_permission('assessments.manage')),
     db: AsyncSession = Depends(get_db),
 ):
-    assessment = await db.scalar(select(Assessment).where(Assessment.id == assessment_id, Assessment.tenant_id == user.tenant_id))
-    if assessment is None:
+    assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
+    if scope not in {"manage", "grade"}:
         raise HTTPException(status_code=404, detail='Assessment not found')
     q_result = await db.execute(select(Question).where(Question.assessment_id == assessment.id).order_by(Question.position.asc()))
     questions = list(q_result.scalars().all())
@@ -684,8 +757,8 @@ async def assessment_analytics(
     user: User = Depends(require_permission('assessments.manage')),
     db: AsyncSession = Depends(get_db),
 ):
-    assessment = await db.scalar(select(Assessment).where(Assessment.id == assessment_id, Assessment.tenant_id == user.tenant_id))
-    if assessment is None:
+    assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
+    if scope not in {"manage", "grade"}:
         raise HTTPException(status_code=404, detail='Assessment not found')
     result = await db.execute(select(AssessmentAttempt).where(AssessmentAttempt.assessment_id == assessment.id).order_by(AssessmentAttempt.started_at.asc()))
     attempts = list(result.scalars().all())
@@ -714,8 +787,8 @@ async def assessment_analytics(
 
 @router.get("/{assessment_id}/my-attempts")
 async def my_assessment_attempts(assessment_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    assessment = await db.scalar(select(Assessment).where(Assessment.id == assessment_id, Assessment.tenant_id == user.tenant_id))
-    if assessment is None:
+    assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
+    if scope != "learner":
         raise HTTPException(status_code=404, detail="Assessment not found")
     result = await db.execute(select(AssessmentAttempt).where(
         AssessmentAttempt.assessment_id == assessment.id,
