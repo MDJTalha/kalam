@@ -640,3 +640,14 @@
 @media(max-width:760px){
   .skip-link{box-sizing:border-box;width:auto;max-width:calc(100vw - 20px);}
 }
+
+
+/* Kalam global accessibility contract: all branded motion respects user preference. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
