@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Award, ShieldCheck } from "lucide-react";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 import { KalamBrand } from "@/components/kalam-brand";
 
 type Verification = { valid: boolean; certificate_id: string; course: string; learner: string; issued_at: string; expires_at?: string | null; revoked: boolean; status: "active" | "expiring_soon" | "expired" | "revoked"; verification_code: string; template: { title: string; subtitle: string; issuer_name: string; primary_color: string; accent_color: string; footer_text: string } };
