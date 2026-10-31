@@ -118,8 +118,8 @@ async def create_role(
     if duplicate:
         raise HTTPException(status_code=409, detail="A role with this name already exists")
     requested = sorted(set(payload.permission_keys))
-    if any(key.startswith("saas.crm.") for key in requested):
-        raise HTTPException(status_code=403, detail="Kalam CRM permissions cannot be assigned to tenant roles")
+    if any(key.startswith("saas.") for key in requested):
+        raise HTTPException(status_code=403, detail="SaaS platform permissions cannot be assigned to tenant roles")
     permission_rows = list((await db.execute(select(Permission).where(Permission.key.in_(requested)))).scalars().all()) if requested else []
     found = {item.key for item in permission_rows}
     unknown = sorted(set(requested) - found)
@@ -141,7 +141,7 @@ async def list_permissions(
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Permission).order_by(Permission.key)
-    stmt = stmt.where(~Permission.key.like("saas.crm.%"))
+    stmt = stmt.where(~Permission.key.like("saas.%"))
     result = await db.execute(stmt)
     return [{"id": str(item.id), "key": item.key, "description": item.description} for item in result.scalars().all()]
 
@@ -178,8 +178,8 @@ async def update_role_permissions(
     if not is_developer:
         raise HTTPException(status_code=403, detail="Role permission changes are governed by Kalam Platform Developers")
     requested = sorted(set(payload.permission_keys))
-    if any(key.startswith("saas.crm.") for key in requested):
-        raise HTTPException(status_code=403, detail="Kalam CRM permissions are platform-only")
+    if any(key.startswith("saas.") for key in requested):
+        raise HTTPException(status_code=403, detail="SaaS platform permissions are platform-only")
     permission_result = await db.execute(select(Permission).where(Permission.key.in_(requested)))
     permissions = list(permission_result.scalars().all())
     found = {item.key for item in permissions}
