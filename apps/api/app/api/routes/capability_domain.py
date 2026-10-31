@@ -143,6 +143,37 @@ async def list_proficiency_levels(
     return [{"level": x.level, "name": x.name, "definition": x.definition} for x in rows.scalars()]
 
 
+@router.get("/objectives/page")
+async def page_objectives(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    q: str = Query(default="", max_length=160),
+    status: str | None = Query(default=None),
+    user: User = Depends(require_permission("strategic_objectives.read")),
+    db: AsyncSession = Depends(get_db),
+):
+    conditions = [StrategicObjective.tenant_id == user.tenant_id]
+    term = q.strip()
+    if term:
+        escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        conditions.append(StrategicObjective.objective.ilike(f"%{escaped}%", escape="\\"))
+    if status:
+        conditions.append(StrategicObjective.status == status)
+    total = int(await db.scalar(select(func.count()).select_from(StrategicObjective).where(*conditions)) or 0)
+    rows = (await db.scalars(
+        select(StrategicObjective).where(*conditions)
+        .order_by(StrategicObjective.priority, StrategicObjective.objective, StrategicObjective.id)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )).all()
+    return {
+        "items": [_objective_json(item) for item in rows],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
+
+
 @router.get("/objectives")
 async def list_objectives(
     user: User = Depends(require_permission("strategic_objectives.read")),
