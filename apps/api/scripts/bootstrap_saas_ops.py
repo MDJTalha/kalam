@@ -44,7 +44,8 @@ async def main() -> None:
                 await db.flush()
             permissions[key] = item
 
-        roles: dict[str, Role] = {}\n        for name, keys in PLATFORM_ROLE_PERMISSIONS.items():
+        roles: dict[str, Role] = {}
+        for name, keys in PLATFORM_ROLE_PERMISSIONS.items():
             role = await db.scalar(select(Role).where(Role.tenant_id == tenant.id, Role.name == name))
             if role is None:
                 role = Role(tenant_id=tenant.id, name=name, description=f"Kalam operator role: {name}", role_kind="platform")
