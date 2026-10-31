@@ -17,6 +17,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   });
 }
 
+// Canonical status-aware server API contract; callers must not collapse HTTP failures into an untyped null helper.
 export type ApiJsonResult<T> = {
   ok: boolean;
   status: number;
