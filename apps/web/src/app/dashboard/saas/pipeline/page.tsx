@@ -2,7 +2,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { OpportunityCreateForm, OpportunityQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type Opportunity={id:string;account_id:string;account_name:string;name:string;stage:string;currency:string;amount_minor:number;probability_percent:number;expected_close_at?:string|null};
 type Forecast={currency:string;stage:string;gross_amount_minor:number;weighted_amount_minor:number;opportunities:number};
