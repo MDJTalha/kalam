@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AssessmentRunner } from "@/components/assessment-runner";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { apiJson, requireUser } from "@/lib/server-api";
@@ -13,8 +13,11 @@ type Assessment = {
 };
 
 export default async function AssessmentPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireUser();
+  const user=await requireUser<{permissions?:string[]}>();
   const { id } = await params;
+  if(user.permissions?.includes("assessments.grade_assigned")&&!user.permissions?.includes("assessments.manage")) {
+    redirect(`/dashboard/assessments/review/${id}`);
+  }
   const assessment = await apiJson<Assessment>(`/api/v1/assessments/${id}`);
   if (!assessment) notFound();
   return (
