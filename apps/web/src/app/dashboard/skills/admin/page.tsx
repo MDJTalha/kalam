@@ -9,7 +9,7 @@ type Skill={id:string;name:string;description?:string|null;category?:string|null
 type SkillPage={items:Skill[];total:number};
 type Role={id:string;name:string};type Course={id:string;title:string};type CoursePage={items:Course[];total:number};
 type Capability={id:string;name:string;code:string};type CapabilityPage={items:Capability[];total:number};
-type Objective={id:string;objective:string;priority:number;status:string};
+type Objective={id:string;objective:string;priority:number;status:string};type ObjectivePage={items:Objective[];total:number};
 type Competency={id:string;name:string;code:string;definition:string;type:string;status:string;levels?:Array<{level:number;definition:string;behavioral_indicators?:string[]}>};
 type Level={level:number;name:string;definition:string};
 type Person={id:string;first_name:string;last_name:string;email:string;is_active:boolean};
