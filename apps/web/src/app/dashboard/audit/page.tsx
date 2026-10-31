@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { EmptyState, Section } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Audit={id:string;action:string;entity_type:string;entity_id?:string|null;actor_id?:string|null;request_id?:string|null;summary?:string|null;created_at:string};
 
