@@ -45,6 +45,7 @@ An actual PostgreSQL restore was executed against a disposable database:
 5. Restored database contained 99 public tables.
 6. Dump inventory contained 99 TABLE DATA entries.
 7. Disposable database was dropped with FORCE after verification.
+8. Timed restore duration: 9.437 seconds on the local PostgreSQL container.
 
 Backup artifact:
 `backups/recovery-drill-20261011-053831/kalam-prod-corplms-20261011-053831.dump`
