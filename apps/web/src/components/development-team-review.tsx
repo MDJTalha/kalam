@@ -24,7 +24,7 @@ async function request<T>(path: string, method = "GET", body?: Record<string, un
 
 const formatDate = (value?: string | null) => value ? new Date(value).toLocaleDateString() : "No due date";
 
-export function DevelopmentTeamReview({ members, initialSelectedId }: { members: Member[]; initialSelectedId?: string | null }) {
+export function DevelopmentTeamReview({ members, initialSelectedId, organizationWide = false }: { members: Member[]; initialSelectedId?: string | null; organizationWide?: boolean }) {
   const initial = members.some(item => item.id === initialSelectedId) ? (initialSelectedId ?? "") : (members[0]?.id ?? "");
   const [memberId, setMemberId] = useState(initial);
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -166,7 +166,7 @@ export function DevelopmentTeamReview({ members, initialSelectedId }: { members:
     <div className="section-stack">
       <section className="data-panel">
         <div className="section-heading compact">
-          <div><span className="eyebrow">Authorized team scope</span><h2>Choose a direct report</h2><p>Only employees who report directly to you are listed. The wider tenant directory is not queried.</p></div>
+          <div><span className="eyebrow">{organizationWide ? "Authorized workforce scope" : "Authorized direct-report scope"}</span><h2>{organizationWide ? "Choose an employee" : "Choose a direct report"}</h2><p>{organizationWide ? "This role has workforce-wide development responsibility. Only the first page of active employee records matching the server-side search is loaded." : "Only employees who report directly to you are listed. The wider tenant directory is not queried."}</p></div>
           <UserRound size={18} />
         </div>
         <div className="form-grid">
@@ -183,7 +183,7 @@ export function DevelopmentTeamReview({ members, initialSelectedId }: { members:
           <div className="form-actions"><button className="button button-secondary" type="button" disabled={!memberId || loadingPlans || busy} onClick={() => void refresh()}><RefreshCw size={14} /> Refresh record</button></div>
         </div>
         {selectedMember && <p className="form-help">Selected employee: <strong>{[selectedMember.first_name, selectedMember.last_name].filter(Boolean).join(" ")}</strong> · {selectedMember.job_title || selectedMember.email}</p>}
-        {!members.length && <div className="empty-state"><UserRound size={24} /><p>No direct reports are assigned to your account.</p><small>Ask People Operations to confirm your reporting line in the organization structure.</small></div>}
+        {!members.length && <div className="empty-state"><UserRound size={24} /><p>{organizationWide ? "No active employees matched this search." : "No direct reports are assigned to your account."}</p><small>{organizationWide ? "Adjust the search to locate an employee." : "Ask People Operations to confirm your reporting line in the organization structure."}</small></div>}
         {!!memberId && !loadingPlans && !plans.length && <div className="empty-state"><ClipboardList size={24} /><p>No development plan has been created for this employee yet.</p><small>The employee can create their personal plan from My Development.</small></div>}
       </section>
 
