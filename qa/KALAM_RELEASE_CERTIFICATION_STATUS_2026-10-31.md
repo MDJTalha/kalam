@@ -2,62 +2,62 @@
 Date: 2026-10-31
 Candidate baseline: `592444df15df1aa666da8cf8a1fac731334c2ab4`
 
-## Purpose
+## Executive status
 
-This document is the release-gate ledger for the current mainline candidate. A gate is only marked **CERTIFIED** when repository evidence or an independently reproducible runtime result exists. Source implementation is not treated as runtime certification.
+**Engineering-hardened / release-candidate pending runtime certification.**
 
-## Current evidence
+This ledger deliberately distinguishes source implementation from independently executed runtime evidence. Kalam must not be labelled production-certified 9.99/10 until every hard gate below has evidence tied to the exact immutable candidate.
 
-| Gate | Status | Evidence / required closure |
-|---|---|---|
-| Canonical tenant/SaaS role catalogue | IMPLEMENTED | Role catalogue is merged into mainline; separation-of-duties boundaries are encoded in the role/permission model. |
-| Tenant object isolation | IMPLEMENTED + REGRESSION COVERAGE | Cross-tenant coverage exists for governed files, capability/development data, reports, integrations and webhooks. |
-| Capability → development lifecycle | REGRESSION COVERAGE | Persisted lifecycle regression exists; live disposable-database execution remains a runtime gate. |
-| Enrollment/completion persistence | IMPLEMENTED | Learning persistence path exists; live browser/runtime proof remains required for release certification. |
-| Capability-gap recalculation | IMPLEMENTED | Recalculation is integrated into governed evidence/development flows; live lifecycle proof remains required. |
-| Authentication 401/403 semantics | SOURCE CLOSED | `requireUser()` maps 401 to sign-in and 403 to access-denied; service/network failures fail closed to service-unavailable. |
-| API error semantics | PARTIALLY CLOSED | `apiJsonResult()` preserves HTTP status and error details and has been adopted by critical screens; generic `apiJson()` callers remain and require continued migration/review. |
-| Large-list safety | HARDENED | Multiple enterprise selectors/read paths are paginated or bounded. Webhook listing is now explicitly capped at 100. Remaining broad reference-data consumers require continued audit. |
-| Backup integrity evidence | IMPLEMENTED | Backup manifest, SHA-256/size verification and pg_restore catalog inspection are implemented. Actual restore/failover execution is still an operational certification gate. |
-| CI static/build/release gates | CONFIGURED | Main CI includes API dependency/migration/fixture/static/type/test gates, web type/lint/build, production compose/Nginx/image/runtime smoke validation. A fresh successful run for this exact merge candidate must be archived before release certification. |
-| Authenticated browser E2E | NOT CERTIFIED | Requires a live disposable/staging environment and role accounts. |
-| Full API regression | NOT CERTIFIED LOCALLY | Historical local runtime instability prevented a clean full-suite certification. CI evidence must be tied to the exact candidate. |
-| Accessibility certification | PARTIALLY VERIFIED | Automated accessibility coverage exists; final role/screen responsive review and release sign-off remain required. |
-| 10k+ scale certification | NOT CERTIFIED | Requires representative resource-sized infrastructure and measured p95/CPU/memory/query/payload/concurrency evidence. |
-| Production AWS verification | NOT CERTIFIED | Requires production-authorized evidence for TLS, migrations, secrets, integrations, monitoring, backups, restore, DR and rollback. |
-| AI provider activation | NOT CERTIFIED | AI remains fail-closed/disabled by default; provider handshake, policy, grounding, safety and tenant-isolation tests are required before activation. |
+## Closed or substantially closed source gates
+
+- Canonical tenant/SaaS role catalogue is merged into mainline with separation-of-duties boundaries.
+- Cross-tenant regression coverage exists for governed files, capability/development data, reports, integrations and webhooks.
+- Enrollment/completion persistence is implemented.
+- Capability-gap recalculation is implemented.
+- `requireUser()` correctly separates 401 sign-in, 403 access-denied, and service failure handling.
+- `apiJsonResult()` preserves HTTP status and API error detail.
+- Enterprise selectors/read paths have received pagination/bounding hardening, including webhook listing.
+- Backup manifest, SHA-256/size verification and pg_restore catalog inspection are implemented.
+- Main CI is configured for API, web and release-configuration validation.
 
 ## Hard release blockers
 
-1. No clean authenticated browser run covering the role matrix on the release candidate.
-2. No independently archived full API/web regression result tied to the exact candidate.
-3. No production-authorized AWS/TLS/migration/observability/rollback evidence.
-4. No executed backup restore/failover evidence demonstrating recovery objectives.
-5. No representative 10,000+ employee performance/scale report.
-6. Remaining generic `apiJson()` callers must be reviewed and business-critical callers migrated to status-aware result handling.
-7. Remaining unbounded enterprise reference-data consumers must be closed or explicitly bounded with searchable/paginated alternatives.
-8. AI provider certification must remain a prerequisite to enabling real-provider AI.
+| Gate | Current state | Required evidence |
+|---|---|---|
+| Exact-candidate CI | NOT CERTIFIED | Fresh hosted API/Web/release-config run for the immutable candidate SHA. |
+| Full API regression | NOT CERTIFIED | Complete suite result and artifact tied to the candidate. |
+| Browser E2E | NOT CERTIFIED | Real authenticated role matrix covering admin, HR/L&D, manager, instructor, learner, auditor/compliance. |
+| Tenant isolation | SOURCE + REGRESSION COVERAGE | Execute negative A→B access matrix in a live disposable/staging environment. |
+| Learning lifecycle | IMPLEMENTED + REGRESSION COVERAGE | Browser/runtime proof: enrollment → learning → assessment → completion → capability update → gap recalculation. |
+| Accessibility | PARTIALLY VERIFIED | Automated results plus manual keyboard/screen-reader/responsive review. |
+| Scale | NOT CERTIFIED | Representative 10k+ employee load with p95/p99, DB, CPU, memory, concurrency and error evidence. |
+| Backup restore | NOT CERTIFIED | Actual clean-database restore, integrity checks and measured recovery duration. |
+| DR/failover | NOT CERTIFIED | Executed failover/recovery with measured RTO/RPO. |
+| AWS production | NOT CERTIFIED | TLS, secrets, migrations, health checks, monitoring, integrations and rollback evidence. |
+| API helper migration | PARTIALLY CLOSED | Review remaining generic `apiJson()` callers and migrate business-critical paths to status-aware handling. |
+| Reference-data bounds | HARDENING INCOMPLETE | Finish audit of broad enterprise reference-data consumers and bound/search/paginate them. |
+| AI activation | NOT CERTIFIED | Provider, grounding, safety, tenant isolation, human override and audit evidence before enabling real-provider AI. |
+
+## Exact evidence package
+
+1. Immutable candidate SHA and release tag.
+2. Hosted CI run and artifacts for that SHA.
+3. Disposable-database full regression output.
+4. Browser role matrix, including mobile/responsive checks.
+5. Cross-tenant negative matrix.
+6. Accessibility automated and manual sign-off.
+7. Performance/scale report.
+8. Migration forward/rollback evidence.
+9. Backup integrity plus actual restore evidence.
+10. DR/failover evidence with measured RTO/RPO.
+11. Production TLS/security/monitoring smoke evidence.
+12. AI certification record if AI is enabled.
+13. Independent release approval.
+
+## Environment constraint
+
+The connected Desktop Commander device **MDT** is currently offline in this session. Consequently, this ledger makes no claim that local PowerShell, Docker, PostgreSQL, browser, staging, AWS, backup/restore or DR commands have been executed here.
 
 ## Certification rule
 
-Kalam must not be labelled **production-certified 9.99/10** while any hard blocker above is unresolved. The correct state is **engineering-hardened / release-candidate pending runtime certification**.
-
-## Required evidence package
-
-- Exact candidate SHA and immutable release tag.
-- Hosted CI run URL and all job results.
-- Disposable-database full regression artifact.
-- Browser role matrix with desktop/mobile evidence.
-- Cross-tenant negative matrix results.
-- Accessibility automated + manual review record.
-- Performance/scale report.
-- Migration forward/rollback evidence.
-- Backup integrity + restore evidence.
-- DR/failover evidence with measured RTO/RPO.
-- Production TLS/security/monitoring smoke evidence.
-- AI provider certification record, if AI is enabled.
-- Independent release approval.
-
-## Important environment constraint
-
-The connected Desktop Commander device `MDT` is currently offline in this session. Therefore this document intentionally does not claim that local PowerShell, Docker, browser, database, AWS, backup-restore or staging commands were executed from this session.
+No source-only assertion, historical CI run, or developer declaration substitutes for runtime evidence. **9.99/10 production certification remains blocked until every hard gate is evidenced for the exact candidate.**
