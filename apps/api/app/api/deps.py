@@ -62,6 +62,21 @@ async def is_saas_ops_user(user: User, db: AsyncSession) -> bool:
     ) is not None
 
 
+async def is_saas_demo_user(user: User, db: AsyncSession) -> bool:
+    """Recognize the explicitly configured demo CRM identity by persisted home tenant."""
+    if not settings.saas_demo_tenant_slug or not settings.saas_demo_admin_email:
+        return False
+    home_tenant_id = await db.scalar(select(User.tenant_id).where(User.id == user.id))
+    if home_tenant_id is None:
+        return False
+    return await db.scalar(
+        select(Tenant.id).where(
+            Tenant.id == home_tenant_id,
+            Tenant.slug == settings.saas_demo_tenant_slug,
+        )
+    ) is not None and user.email.lower() == settings.saas_demo_admin_email.lower()
+
+
 async def is_saas_super_admin(user: User, db: AsyncSession) -> bool:
     """Recognize the explicit SaaS Super Admin role in its own operations tenant."""
     slug = settings.saas_ops_tenant_slug or settings.marketing_review_tenant_slug
@@ -116,10 +131,12 @@ async def user_has_permission(
     if platform_developer:
         return True
 
-    # CRM permissions are available only to identities whose persisted home
-    # tenant is the configured SaaS operations tenant. Customer tenant roles
-    # cannot gain CRM access by receiving a stale or accidentally assigned grant.
-    if permission_key.startswith("saas.crm.") and not await is_saas_ops_user(user, db):
+    # Every SaaS capability is confined to the persisted internal operations
+    # tenant, with one explicitly configured demo identity exception. Customer
+    # tenant users cannot gain SaaS access from stale or accidentally assigned grants.
+    if permission_key.startswith("saas.") and not (
+        await is_saas_ops_user(user, db) or await is_saas_demo_user(user, db)
+    ):
         return False
 
     result = await db.execute(
