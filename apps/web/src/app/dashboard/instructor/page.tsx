@@ -20,6 +20,8 @@ export default async function InstructorWorkspacePage() {
   }
   const sessions=await apiJson<LiveSession[]>("/api/v1/sessions");
   if(!sessions)return <DashboardShell title="Instructor workspace" eyebrow="Learning delivery"><EmptyState title="Session data unavailable" description="Your assigned session schedule could not be loaded."/></DashboardShell>;
+  // Session filtering is request-time logic in this Server Component.
+  // eslint-disable-next-line react-hooks/purity
   const now=Date.now();
   const ordered=[...sessions].sort((a,b)=>new Date(a.starts_at).getTime()-new Date(b.starts_at).getTime());
   const upcoming=ordered.filter(session=>new Date(session.ends_at).getTime()>=now).slice(0,6);
@@ -52,7 +54,7 @@ export default async function InstructorWorkspacePage() {
     </SectionCard>
     <div className="two-column">
       <SectionCard eyebrow="Recent delivery" title="Attendance and follow-up">
-        {analytics.length? <div className="compact-list">{analytics.map((item,index)=>item&&<div className="compact-row" key={item.session.id}><div><strong>{item.session.title}</strong><small>{new Date(item.session.starts_at).toLocaleDateString()} · {item.attendance.present+item.attendance.late} present/late of {item.attendance.total_marked} marked</small></div><StatusBadge status={item.attendance.attendance_rate>=80?"on_track":"needs_review"}/></div>)}</div>:<EmptyState title="No recent attendance analytics" description="Attendance appears here after a session has ended and records have been marked."/>}
+        {analytics.length? <div className="compact-list">{analytics.map(item=>item&&<div className="compact-row" key={item.session.id}><div><strong>{item.session.title}</strong><small>{new Date(item.session.starts_at).toLocaleDateString()} · {item.attendance.present+item.attendance.late} present/late of {item.attendance.total_marked} marked</small></div><StatusBadge status={item.attendance.attendance_rate>=80?"on_track":"needs_review"}/></div>)}</div>:<EmptyState title="No recent attendance analytics" description="Attendance appears here after a session has ended and records have been marked."/>}
       </SectionCard>
       <SectionCard eyebrow="Instructor tools" title="Your delivery responsibilities">
         <div className="role-actions"><Link href="/dashboard/sessions">Schedule and session records</Link><Link href="/dashboard/assessments">Assessments and grading</Link><Link href="/dashboard/catalog">Learning material</Link><Link href="/dashboard/notifications">Learner notifications</Link></div>
