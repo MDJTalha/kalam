@@ -209,8 +209,15 @@ async def assign_role(
         role_name = role.name.strip().lower()
         can_assign_platform_role = (
             is_developer
-            or (is_super_admin and role_name != "platform developer")
-            or (can_manage_saas_team and role_name in ASSIGNABLE_SAAS_TEAM_ROLES)
+            or (
+                is_super_admin
+                and role_name != "platform developer"
+            )
+            or (
+                can_manage_saas_team
+                and role.role_kind == "platform"
+                and role_name in ASSIGNABLE_SAAS_TEAM_ROLES
+            )
         )
         if not can_assign_platform_role:
             raise HTTPException(status_code=403, detail="This platform role cannot be assigned by your SaaS team role")
@@ -263,8 +270,15 @@ async def remove_role(
         role_name = role.name.strip().lower()
         can_remove_platform_role = (
             is_developer
-            or (is_super_admin and role_name != "platform developer")
-            or (can_manage_saas_team and role_name in ASSIGNABLE_SAAS_TEAM_ROLES)
+            or (
+                is_super_admin
+                and role_name != "platform developer"
+            )
+            or (
+                can_manage_saas_team
+                and role.role_kind == "platform"
+                and role_name in ASSIGNABLE_SAAS_TEAM_ROLES
+            )
         )
         if not can_remove_platform_role:
             raise HTTPException(status_code=403, detail="This platform role cannot be removed by your SaaS team role")
