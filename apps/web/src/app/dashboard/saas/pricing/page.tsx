@@ -11,8 +11,8 @@ type Offer={id:string;plan_id?:string|null;code:string;title:string;description?
 
 export default async function SaaSPricingPage(){
   const [plans,offers]=await Promise.all([
-    apiJson<Plan[]>("/api/v1/saas/crm/plans"),
-    apiJson<Offer[]>("/api/v1/saas/crm/offers"),
+    apiJsonResult<Plan[]>("/api/v1/saas/crm/plans").then((result) => result.ok ? result.data : null),
+    apiJsonResult<Offer[]>("/api/v1/saas/crm/offers").then((result) => result.ok ? result.data : null),
   ]);
   if(!plans||!offers)return <DashboardShell title="Pricing & Offers" eyebrow="SaaS CRM"><EmptyState title="Pricing CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const options=plans.map(p=>({id:p.id,name:p.name}));
