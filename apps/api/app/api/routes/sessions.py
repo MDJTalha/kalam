@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,11 +26,11 @@ class AttendanceUpdate(BaseModel):
     status: str = Field(pattern=r"^(present|absent|late|excused)$")
 
 @router.get("")
-async def list_sessions(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def list_sessions(\n    limit: int = Query(default=100, ge=1, le=100),\n    user: User = Depends(get_current_user),\n    db: AsyncSession = Depends(get_db),\n):
     stmt = select(LiveSession).where(LiveSession.tenant_id == user.tenant_id)
     if not await user_has_permission(user, db, "courses.manage"):
         stmt = stmt.where(LiveSession.instructor_id == user.id)
-    result = await db.execute(stmt.order_by(LiveSession.starts_at))
+    result = await db.execute(stmt.order_by(LiveSession.starts_at).limit(limit))
     return list(result.scalars().all())
 
 @router.post("", status_code=201)
