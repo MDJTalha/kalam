@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, is_saas_ops_user, is_saas_super_admin, require_permission, user_has_permission
+from app.api.deps import get_current_user, is_platform_developer, is_saas_ops_user, is_saas_super_admin, require_permission, user_has_permission
 from app.db.models import OrgUnit, Role, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
@@ -56,11 +56,20 @@ class RoleOut(BaseModel):
     role_kind: str
     model_config = {"from_attributes": True}
 
+async def _require_organization_metadata(user: User, db: AsyncSession) -> None:
+    if not (
+        await user_has_permission(user, db, "users.read")
+        or await user_has_permission(user, db, "organization.read")
+    ):
+        raise HTTPException(status_code=403, detail="Organization metadata access is restricted")
+
+
 @router.get("/units", response_model=list[OrgUnitOut])
 async def list_units(
-    user: User = Depends(require_permission("users.read")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    await _require_organization_metadata(user, db)
     result = await db.execute(
         select(OrgUnit)
         .where(OrgUnit.tenant_id == user.tenant_id)
@@ -137,6 +146,24 @@ async def create_unit(
     await db.commit()
     await db.refresh(unit)
     return unit
+
+@router.get("/roles/catalog", response_model=list[RoleOut])
+async def list_role_catalog(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Read role names for policy targeting without exposing user-role assignments."""
+    await _require_organization_metadata(user, db)
+    result = await db.execute(
+        select(Role)
+        .where(
+            Role.tenant_id == user.tenant_id,
+            Role.role_kind.in_(("predefined", "custom", "legacy")),
+        )
+        .order_by(Role.name)
+    )
+    return list(result.scalars().all())
+
 
 @router.get("/roles", response_model=list[RoleOut])
 async def list_roles(
