@@ -73,7 +73,7 @@ def test_course_detail_cannot_cross_tenant_boundary() -> None:
         asyncio.run(_delete_tenant(tenant_b_id))
 
 
-async def _seed_file_fixture() -> tuple[str, str, str, str, str, str, str]:
+async def _seed_file_fixture() -> tuple[str, str, str, str, str, str, str, str]:
     suffix = uuid4().hex[:10]
     slug_a = f"phase8-file-a-{suffix}"
     slug_b = f"phase8-file-b-{suffix}"
