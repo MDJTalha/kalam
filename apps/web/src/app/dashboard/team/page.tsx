@@ -6,9 +6,10 @@ type Member = { id: string; email: string; first_name: string; last_name: string
 export default async function TeamPage() {
   const user = await requireUser<{ permissions?: string[] }>();
   if (!user.permissions?.includes("users.read")) return <DashboardShell title="Team" eyebrow="Manager workspace"><section className="data-panel"><h2>Access restricted</h2><p>You need permission to view your direct reports.</p></section></DashboardShell>;
-  const team = await apiJson<Member[]>("/api/v1/people/team");
+  const teamResult = await apiJsonResult<Member[]>("/api/v1/people/team");
+  const team = teamResult.data;
   return <DashboardShell title="Team" eyebrow="Manager workspace" breadcrumbs={[{ label: "Overview", href: "/dashboard" }, { label: "Team" }]}>
     <section className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">People you manage</span><h2>Turn team signals into action</h2></div></div><p>Review direct reports, prioritize overdue learning and compliance, and open an individual learner to assign learning or discuss development.</p></section>
-    {team ? <TeamWorkspace team={team} /> : <section className="data-panel" role="alert"><h2>Team data unavailable</h2><p>Check your access or try again later.</p></section>}
+    {team ? <TeamWorkspace team={team} /> : <section className="data-panel" role="alert"><h2>Team data unavailable</h2><p>HTTP {teamResult.status}: {teamResult.error || "Check your access or try again later."}</p></section>}
   </DashboardShell>;
 }
