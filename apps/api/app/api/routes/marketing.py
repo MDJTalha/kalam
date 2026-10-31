@@ -178,6 +178,7 @@ async def require_marketing_read(
         await user_has_permission(user, db, "tenant.manage")
         or await user_has_permission(user, db, "saas.crm.read")
         or await user_has_permission(user, db, "saas.crm.manage")
+        or await user_has_permission(user, db, "saas.sales.read")
     ):
         raise HTTPException(status_code=403, detail="Review access restricted")
     return user
@@ -190,6 +191,7 @@ async def require_marketing_manage(
     if not (
         await user_has_permission(user, db, "tenant.manage")
         or await user_has_permission(user, db, "saas.crm.manage")
+        or await user_has_permission(user, db, "saas.sales.manage")
     ):
         raise HTTPException(status_code=403, detail="Review access restricted")
     return user
