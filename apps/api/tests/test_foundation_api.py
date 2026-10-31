@@ -1820,6 +1820,11 @@ def test_assessment_timed_attempt_resume_and_revision_lock(client: TestClient) -
     started = client.post(f"/api/v1/assessments/{assessment_id}/start")
     assert started.status_code == 201
     attempt_id = started.json()["attempt_id"]
+    # Instructor/assessment administrators cannot inspect a live attempt before
+    # submission. The learner can resume it and submit normally.
+    login(client, ADMIN)
+    assert client.get(f"/api/v1/assessments/attempts/{attempt_id}/detail").status_code == 404
+    login(client, LEARNER)
     assert client.post(f"/api/v1/assessments/{assessment_id}/start").json()["attempt_id"] == attempt_id
     assert client.post(f"/api/v1/assessments/{assessment_id}/submit", json={"answers": {question.json()["id"]: "Yes"}}).status_code == 422
     assert client.get(f"/api/v1/assessments/{assessment_id}/my-attempts").json()[0]["id"] == attempt_id
