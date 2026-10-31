@@ -3,12 +3,15 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { PlanEditForm } from "@/components/saas-crm-forms";
 import { EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 import { formatCommercialPrice } from "@/lib/public-commercial";
 
 type Plan={id:string;code:string;name:string;tagline?:string|null;description?:string|null;status:string;public_visible:boolean;billing_model:string;currency:string;monthly_price_minor?:number|null;annual_price_minor?:number|null;trial_days:number;minimum_seats:number;maximum_seats?:number|null;features:unknown[];limits:Record<string,unknown>;sort_order:number};
 
 export default async function SaaSPlanDetailPage({params}:{params:Promise<{id:string}>}){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("saas.pricing.manage")??false;
+  if(!user.permissions?.includes("saas.pricing.read"))return <DashboardShell title="Commercial plan" eyebrow="SaaS Pricing"><EmptyState title="Pricing access is restricted" description="This role does not include pricing visibility."/></DashboardShell>;
   const {id}=await params;
   const plans=await apiJson<Plan[]>("/api/v1/saas/crm/plans");
   const plan=plans?.find(item=>item.id===id);
@@ -23,7 +26,7 @@ export default async function SaaSPlanDetailPage({params}:{params:Promise<{id:st
       <div className="stat-card"><span>Trial</span><strong>{plan.trial_days?plan.trial_days+" days":"Disabled"}</strong><small>{plan.minimum_seats} minimum seats{plan.maximum_seats?" · "+plan.maximum_seats+" maximum":""}</small></div>
     </div>
     <div className="two-column">
-      <SectionCard eyebrow="Commercial control" title="Edit plan"><PlanEditForm plan={plan}/></SectionCard>
+      <SectionCard eyebrow="Commercial control" title="Edit plan">{canManage?<PlanEditForm plan={plan}/>:<p className="muted">Read-only plan details. Plan changes require pricing-management permission.</p>}</SectionCard>
       <SectionCard eyebrow="Publishing" title="Public pricing behavior">
         <div className="compact-list">
           <div className="compact-row"><div><strong>Public visibility</strong><small>The plan appears on /pricing only when status is active and public visibility is enabled.</small></div><StatusBadge status={plan.public_visible?"published":"private"}/></div>
