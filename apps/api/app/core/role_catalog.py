@@ -138,7 +138,7 @@ PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "saas.pricing.read", "saas.pricing.manage",
         "saas.finance.read", "saas.finance.manage",
         "saas.customer_success.read", "saas.customer_success.manage",
-        "saas.platform.read", "saas.platform.manage",
+        "saas.customer_users.read", "saas.platform.read", "saas.platform.manage",
         "saas.tenants.manage", "saas.roles.manage",
         "saas.team.read", "saas.team.manage",
         "saas.access.revoke", "saas.audit.read", "audit.read",
