@@ -1655,12 +1655,13 @@ class ManagedUserUpdate(BaseModel):
 @router.get("/crm/tenants/{tenant_id}/users")
 async def list_managed_tenant_users(
     tenant_id: UUID,
-    user: User = Depends(_require_ops_user),
+    user: User = Depends(require_permission("saas.team.manage")),
     db: AsyncSession = Depends(get_db),
 ):
+    await _require_ops_user(user, db)
     ops = await _ops_tenant(db)
-    if ops is None or not await _is_platform_developer(user, db):
-        raise HTTPException(status_code=403, detail="Developer access is required for tenant identity administration")
+    if ops is None or not (await _is_platform_developer(user, db) or await is_saas_super_admin(user, db)):
+        raise HTTPException(status_code=403, detail="SaaS Super Admin access is required for tenant identity administration")
     account = await db.scalar(select(CRMAccount).where(
         CRMAccount.ops_tenant_id == ops.id,
         CRMAccount.managed_tenant_id == tenant_id,
