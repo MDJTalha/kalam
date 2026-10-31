@@ -44,15 +44,7 @@ from app.services.saas_renewals import reconcile_renewal_tasks
 
 router = APIRouter()
 
-PREDEFINED_TENANT_ROLES = {
-    "Tenant Owner": ["tenant.read","reports.read","audit.read"],
-    "Tenant Administrator": ["tenant.read","tenant.manage","users.read","users.manage","reports.read","audit.read","integrations.manage"],
-    "HR / People Administrator": ["users.read","users.manage","reports.read","compliance.manage"],
-    "L&D Administrator": ["courses.read","courses.manage","learning.access","assessments.manage","certificates.manage","reports.read","skills.manage","development.manage","users.read"],
-    "Manager": ["users.read","courses.read","learning.access","reports.read","development.manage"],
-    "Instructor": ["courses.read","learning.access","assessments.manage"],
-    "Learner / Employee": ["courses.read","learning.access","development.manage"],
-}
+from app.core.role_catalog import TENANT_ROLE_PERMISSIONS as PREDEFINED_TENANT_ROLES
 
 async def _ensure_tenant_roles(db: AsyncSession, tenant_id: UUID) -> None:
     permission_rows = list((await db.execute(
