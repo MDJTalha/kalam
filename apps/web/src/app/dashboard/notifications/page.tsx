@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { NotificationCenter, type NotificationItem } from "@/components/notification-center";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 export default async function NotificationsPage(){
   const user=await requireUser<{preferences?:{timezone?:string}}>();
