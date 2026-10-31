@@ -19,6 +19,12 @@ BASIC_ASSIGNABLE_TENANT_ROLES = {
     "learner / employee",
     "employee / learner",
 }
+ASSIGNABLE_SAAS_TEAM_ROLES = {
+    "sales operations",
+    "sales viewer",
+    "saas finance administrator",
+    "customer success manager",
+}
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
     return await is_platform_developer(user, db)
@@ -140,10 +146,20 @@ async def list_roles(
     stmt = select(Role).where(Role.tenant_id == user.tenant_id)
     is_developer = await _is_platform_developer(user, db)
     is_super_admin = await is_saas_super_admin(user, db)
+    is_ops_user = await is_saas_ops_user(user, db)
     can_manage_roles = await user_has_permission(user, db, "tenant.manage")
-    if not is_developer and not is_super_admin:
+    can_manage_saas_team = is_ops_user and await user_has_permission(user, db, "saas.team.manage")
+    if not is_developer and not is_super_admin and not can_manage_saas_team:
         stmt = stmt.where(Role.role_kind.in_(["predefined", "custom"]))
-    if not can_manage_roles:
+    if can_manage_saas_team and not is_super_admin and not is_developer:
+        stmt = stmt.where(
+            (Role.role_kind.in_(["predefined", "custom"]))
+            | (
+                (Role.role_kind == "platform")
+                & func.lower(Role.name).in_(ASSIGNABLE_SAAS_TEAM_ROLES)
+            )
+        )
+    elif not can_manage_roles:
         stmt = stmt.where(
             Role.role_kind == "predefined",
             func.lower(Role.name).in_(BASIC_ASSIGNABLE_TENANT_ROLES),
@@ -185,9 +201,19 @@ async def assign_role(
     is_developer = await _is_platform_developer(user, db)
     is_super_admin = await is_saas_super_admin(user, db) and await is_saas_ops_user(user, db)
     can_manage_roles = await user_has_permission(user, db, "tenant.manage")
+    can_manage_saas_team = (
+        await is_saas_ops_user(user, db)
+        and await user_has_permission(user, db, "saas.team.manage")
+    )
     if role.role_kind not in ("predefined", "custom"):
-        if not is_developer and not (is_super_admin and role.name.strip().lower() != "platform developer"):
-            raise HTTPException(status_code=403, detail="This platform role can only be assigned by an authorized platform administrator")
+        role_name = role.name.strip().lower()
+        can_assign_platform_role = (
+            is_developer
+            or (is_super_admin and role_name != "platform developer")
+            or (can_manage_saas_team and role_name in ASSIGNABLE_SAAS_TEAM_ROLES)
+        )
+        if not can_assign_platform_role:
+            raise HTTPException(status_code=403, detail="This platform role cannot be assigned by your SaaS team role")
     elif not can_manage_roles and not (
         role.role_kind == "predefined" and role.name.strip().lower() in BASIC_ASSIGNABLE_TENANT_ROLES
     ):
@@ -229,9 +255,19 @@ async def remove_role(
     is_developer = await _is_platform_developer(user, db)
     is_super_admin = await is_saas_super_admin(user, db) and await is_saas_ops_user(user, db)
     can_manage_roles = await user_has_permission(user, db, "tenant.manage")
+    can_manage_saas_team = (
+        await is_saas_ops_user(user, db)
+        and await user_has_permission(user, db, "saas.team.manage")
+    )
     if role.role_kind not in ("predefined", "custom"):
-        if not is_developer and not (is_super_admin and role.name.strip().lower() != "platform developer"):
-            raise HTTPException(status_code=403, detail="This platform role can only be removed by an authorized platform administrator")
+        role_name = role.name.strip().lower()
+        can_remove_platform_role = (
+            is_developer
+            or (is_super_admin and role_name != "platform developer")
+            or (can_manage_saas_team and role_name in ASSIGNABLE_SAAS_TEAM_ROLES)
+        )
+        if not can_remove_platform_role:
+            raise HTTPException(status_code=403, detail="This platform role cannot be removed by your SaaS team role")
     elif not can_manage_roles and not (
         role.role_kind == "predefined" and role.name.strip().lower() in BASIC_ASSIGNABLE_TENANT_ROLES
     ):
