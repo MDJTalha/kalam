@@ -37,6 +37,7 @@ PERMISSION_DESCRIPTIONS: dict[str, str] = {
     "saas.crm.manage": "Manage consolidated Kalam SaaS commercial records",
     "saas.sales.read": "View sales accounts, contacts, opportunities, tasks and pipeline",
     "saas.sales.manage": "Manage sales accounts, contacts, opportunities, tasks and pipeline",
+    "saas.sales.export": "Export approved CRM account registers",
     "saas.pricing.read": "View SaaS plans, public pricing and commercial offers",
     "saas.pricing.manage": "Create and manage SaaS plans, pricing and offers",
     "saas.finance.read": "View subscriptions, contracts, invoices, payments and renewals",
@@ -118,7 +119,7 @@ PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     "SaaS Super Admin": (
         "tenant.read", "tenant.manage", "users.read", "users.manage", "team.read",
         "saas.crm.read", "saas.crm.manage",
-        "saas.sales.read", "saas.sales.manage",
+        "saas.sales.read", "saas.sales.manage", "saas.sales.export",
         "saas.pricing.read", "saas.pricing.manage",
         "saas.finance.read", "saas.finance.manage",
         "saas.customer_success.read", "saas.customer_success.manage",
@@ -142,8 +143,8 @@ PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "reports.read",
     ),
     "Sales Operations": (
-        "saas.sales.read", "saas.sales.manage", "saas.pricing.read",
-        "saas.customer_success.read",
+        "saas.sales.read", "saas.sales.manage", "saas.sales.export",
+        "saas.pricing.read", "saas.team.read", "saas.customer_success.read",
     ),
     "Sales Viewer": (
         "saas.sales.read", "saas.pricing.read",
