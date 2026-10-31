@@ -197,13 +197,14 @@ async def finance_overview(user: User = Depends(_require_ops_user), db: AsyncSes
 @router.get("/crm/contracts")
 async def list_contracts(
     account_id: UUID | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(CRMContract).where(CRMContract.ops_tenant_id == user.tenant_id)
     if account_id is not None:
         stmt = stmt.where(CRMContract.account_id == account_id)
-    items = (await db.execute(stmt.order_by(CRMContract.updated_at.desc()))).scalars().all()
+    items = (await db.execute(stmt.order_by(CRMContract.updated_at.desc()).limit(limit))).scalars().all()
     return [{
         "id": str(x.id), "account_id": str(x.account_id),
         "subscription_id": str(x.subscription_id) if x.subscription_id else None,
@@ -258,7 +259,7 @@ async def list_invoices(
     stmt = select(CRMInvoice).where(CRMInvoice.ops_tenant_id == user.tenant_id)
     if account_id is not None:
         stmt = stmt.where(CRMInvoice.account_id == account_id)
-    items = (await db.execute(stmt.order_by(CRMInvoice.due_at.asc().nullslast(), CRMInvoice.created_at.desc()))).scalars().all()
+    items = (await db.execute(stmt.order_by(CRMInvoice.due_at.asc().nullslast(), CRMInvoice.created_at.desc()).limit(limit))).scalars().all()
     account_name_rows = (await db.execute(select(CRMAccount.id, CRMAccount.name).where(CRMAccount.ops_tenant_id == user.tenant_id))).all()
     account_names: dict[UUID, str] = {row[0]: row[1] for row in account_name_rows}
     result = []
@@ -390,7 +391,7 @@ async def list_payments(
     stmt = select(CRMPayment).where(CRMPayment.ops_tenant_id == user.tenant_id)
     if account_id is not None:
         stmt = stmt.where(CRMPayment.account_id == account_id)
-    items = (await db.execute(stmt.order_by(CRMPayment.received_at.desc()))).scalars().all()
+    items = (await db.execute(stmt.order_by(CRMPayment.received_at.desc()).limit(limit))).scalars().all()
     account_name_rows = (await db.execute(select(CRMAccount.id, CRMAccount.name).where(CRMAccount.ops_tenant_id == user.tenant_id))).all()
     account_names: dict[UUID, str] = {row[0]: row[1] for row in account_name_rows}
     invoice_number_rows = (await db.execute(select(CRMInvoice.id, CRMInvoice.invoice_number).where(CRMInvoice.ops_tenant_id == user.tenant_id))).all()
