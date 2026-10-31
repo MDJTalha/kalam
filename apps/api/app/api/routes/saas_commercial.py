@@ -2642,7 +2642,7 @@ async def list_payments(
         stmt = stmt.where(CRMPayment.invoice_id == invoice_id)
     if account_id is not None:
         stmt = stmt.where(CRMPayment.account_id == account_id)
-    rows = (await db.execute(stmt.order_by(CRMPayment.received_at.desc()))).all()
+    rows = (await db.execute(stmt.order_by(CRMPayment.received_at.desc()).limit(limit))).all()
     return [{
         "id": str(payment.id),
         "account_id": str(account.id),
