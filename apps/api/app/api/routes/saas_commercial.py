@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, is_saas_super_admin, require_permission
+from app.api.deps import get_current_user, is_platform_developer, is_saas_super_admin, require_permission, user_has_permission
 from app.core.config import settings
 from app.core.role_catalog import TENANT_ROLE_PERMISSIONS as PREDEFINED_TENANT_ROLES
 from app.db.models import (
@@ -146,7 +146,7 @@ async def _is_demo_crm_user(user: User, db: AsyncSession) -> bool:
 
 
 async def _require_ops_user(
-    user: User = Depends(require_permission("saas.crm.read")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> User:
     tenant = await _ops_tenant(db)
@@ -166,6 +166,15 @@ async def _require_ops_user(
     if await _is_demo_crm_user(user, db):
         return user
     raise HTTPException(status_code=403, detail="SaaS CRM is restricted to authorized operations or demo administration")
+
+
+def _require_ops_permission(permission_key: str):
+    async def dependency(
+        user: User = Depends(require_permission(permission_key)),
+        db: AsyncSession = Depends(get_db),
+    ) -> User:
+        return await _require_ops_user(user, db)
+    return dependency
 
 
 async def _require_managed_tenant_link(db: AsyncSession, user: User, tenant_id: UUID, account_id: UUID | None = None) -> Tenant:
