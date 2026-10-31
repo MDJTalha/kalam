@@ -188,13 +188,18 @@ async def _calculate(user, db):
         if req.capability_id is None:
             continue
         grouped.setdefault(req.capability_id, []).append((gap, req, role))
-    return grouped, capmap, total_people, active_plan_users, certset
+    return grouped, capmap, total_people, active_plan_users, certset, allowed
 
 
 async def _build(user, db):
-    grouped, capmap, total_people, active_plan_users, certset = await _calculate(
-        user, db
-    )
+    (
+        grouped,
+        capmap,
+        total_people,
+        active_plan_users,
+        certset,
+        allowed,
+    ) = await _calculate(user, db)
     now = datetime.now(timezone.utc)
     out = []
     for cid, items in grouped.items():
