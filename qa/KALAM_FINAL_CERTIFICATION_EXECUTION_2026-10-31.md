@@ -28,6 +28,12 @@ The preflight script was executed. Compose validation passed, but the installed 
 
 The local web application responded successfully to `GET /login` with HTTP 200. This is only availability evidence for the installed local checkout, not authenticated browser certification of the exact candidate.
 
+## Exact-tree API regression
+
+Hosted PR #30 run #470 (ID `41214013410`) executed the API job against the exact application tree that was squash-merged to current main. The complete pytest suite finished with **182 passed, 0 failed**, one Starlette/httpx deprecation warning, in 80.06 seconds. Static checks, type checks, migration-head verification, seed/bootstrap fixtures and ClamAV transport checks also completed successfully in that job.
+
+This closes the full API regression gate for the exact application tree. It does not substitute for authenticated browser E2E or production runtime certification.
+
 ## Backup restore drill
 
 An actual PostgreSQL restore was executed against a disposable database:
