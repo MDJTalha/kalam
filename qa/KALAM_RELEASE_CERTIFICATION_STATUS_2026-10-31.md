@@ -25,7 +25,7 @@ This ledger distinguishes source implementation from independently executed runt
 
 | Gate | Current state | Required evidence |
 |---|---|---|
-| Exact-candidate CI | NOT CERTIFIED | Fresh hosted API/Web/release-config run for the immutable candidate SHA. Connector lookup currently exposes no PR-triggered run/status for current main. |
+| Exact-candidate CI | MERGE-EQUIVALENT TREE VERIFIED | Hosted PR run #466 passed API/Web/release-config against the exact pre-merge tree; the squash merge preserves that tree. A separate push-triggered run for the merge SHA is not surfaced by the connector. |
 | Full API regression | NOT CERTIFIED | Complete suite result and artifact tied to the candidate. |
 | Browser E2E | NOT CERTIFIED | Real authenticated role matrix covering admin, HR/L&D, manager, instructor, learner, auditor/compliance. |
 | Tenant isolation | SOURCE + REGRESSION COVERAGE | Execute negative A→B access matrix in a live disposable/staging environment. |
@@ -35,7 +35,7 @@ This ledger distinguishes source implementation from independently executed runt
 | Backup restore | NOT CERTIFIED | Actual clean-database restore, integrity checks and measured recovery duration. |
 | DR/failover | NOT CERTIFIED | Executed failover/recovery with measured RTO/RPO. |
 | AWS production | NOT CERTIFIED | TLS, secrets, migrations, health checks, monitoring, integrations and rollback evidence. |
-| API helper migration | REMEDIATED ON CERTIFICATION BRANCH | Current main contains the reintroduced helper; certification branch removes it and migrates the application callers. The migration is now merged. The hosted PR candidate CI passed; a separate push-triggered mainline run is not surfaced by the current connector. |
+| API helper migration | CLOSED | Legacy `apiJson()` helper removed and all identified application callers migrated; merged to main and covered by successful hosted PR CI #466. |
 | Reference-data bounds | SUBSTANTIALLY HARDENED / AUDIT OPEN | Compatibility organization lists are now bounded; finish systematic audit for any remaining broad enterprise consumers. |
 | AI activation | NOT CERTIFIED | Provider, grounding, safety, tenant isolation, human override and audit evidence before enabling real-provider AI. |
 
