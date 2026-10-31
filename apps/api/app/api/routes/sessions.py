@@ -26,7 +26,11 @@ class AttendanceUpdate(BaseModel):
     status: str = Field(pattern=r"^(present|absent|late|excused)$")
 
 @router.get("")
-async def list_sessions(\n    limit: int = Query(default=100, ge=1, le=100),\n    user: User = Depends(get_current_user),\n    db: AsyncSession = Depends(get_db),\n):
+async def list_sessions(
+    limit: int = Query(default=100, ge=1, le=100),
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
     stmt = select(LiveSession).where(LiveSession.tenant_id == user.tenant_id)
     if not await user_has_permission(user, db, "courses.manage"):
         stmt = stmt.where(LiveSession.instructor_id == user.id)
