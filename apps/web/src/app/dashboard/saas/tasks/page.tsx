@@ -61,7 +61,7 @@ export default async function SaaSTasksPage({searchParams}:{searchParams:Promise
           <StatusBadge key="d" status={task.priority}/>,
           <span key="e">{task.due_at?new Date(task.due_at).toLocaleDateString():"—"}</span>,
           <StatusBadge key="f" status={task.status}/>,
-          {canManage?<TaskQuickActions key="g" id={task.id} status={task.status}/>:<span key="g">Read only</span>}
+          canManage?<TaskQuickActions key="g" id={task.id} status={task.status}/>:<span key="g">Read only</span>
         ])}
       />
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Task pages">
