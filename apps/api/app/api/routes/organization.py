@@ -1,9 +1,9 @@
 from uuid import UUID
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
-from sqlalchemy import and_, select, func
+from sqlalchemy import and_, or_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import is_platform_developer, require_permission
@@ -42,6 +42,26 @@ class RoleOut(BaseModel):
     description: str | None
     role_kind: str
     model_config = {"from_attributes": True}
+
+@router.get("/units/page")
+async def page_units(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    q: str = Query(default="", max_length=160),
+    user: User = Depends(require_permission("users.read")),
+    db: AsyncSession = Depends(get_db),
+):
+    filters = [OrgUnit.tenant_id == user.tenant_id]
+    term = q.strip()
+    if term:
+        filters.append(or_(OrgUnit.name.ilike(f"%{term}%"), OrgUnit.code.ilike(f"%{term}%")))
+    total = int(await db.scalar(select(func.count()).select_from(OrgUnit).where(*filters)) or 0)
+    rows = (await db.scalars(
+        select(OrgUnit).where(*filters).order_by(OrgUnit.unit_type, OrgUnit.name, OrgUnit.id)
+        .offset((page - 1) * page_size).limit(page_size)
+    )).all()
+    return {"items": [OrgUnitOut.model_validate(row).model_dump() for row in rows], "total": total, "page": page, "page_size": page_size}
+
 
 @router.get("/units", response_model=list[OrgUnitOut])
 async def list_units(
@@ -124,6 +144,28 @@ async def create_unit(
     await db.commit()
     await db.refresh(unit)
     return unit
+
+@router.get("/roles/page")
+async def page_roles(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    q: str = Query(default="", max_length=160),
+    user: User = Depends(require_permission("users.read")),
+    db: AsyncSession = Depends(get_db),
+):
+    filters = [Role.tenant_id == user.tenant_id]
+    if not await _is_platform_developer(user, db):
+        filters.append(Role.role_kind.in_(["predefined", "custom"]))
+    term = q.strip()
+    if term:
+        filters.append(Role.name.ilike(f"%{term}%"))
+    total = int(await db.scalar(select(func.count()).select_from(Role).where(*filters)) or 0)
+    rows = (await db.scalars(
+        select(Role).where(*filters).order_by(Role.name, Role.id)
+        .offset((page - 1) * page_size).limit(page_size)
+    )).all()
+    return {"items": [RoleOut.model_validate(row).model_dump() for row in rows], "total": total, "page": page, "page_size": page_size}
+
 
 @router.get("/roles", response_model=list[RoleOut])
 async def list_roles(
