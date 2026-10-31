@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { AssessmentRunner } from "@/components/assessment-runner";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Assessment = {
   id: string;
