@@ -845,6 +845,16 @@ async def crm_lookup(
     user: User = Depends(_require_ops_user),
     db: AsyncSession = Depends(get_db),
 ):
+    required_permission = {
+        "accounts": "saas.sales.read",
+        "plans": "saas.pricing.read",
+        "offers": "saas.pricing.read",
+        "subscriptions": "saas.finance.read",
+        "contracts": "saas.finance.read",
+        "invoices": "saas.finance.read",
+    }.get(kind)
+    if required_permission is None or not await user_has_permission(user, db, required_permission):
+        raise HTTPException(status_code=403, detail="The requested lookup is outside your SaaS role scope")
     term = f"%{q.strip()}%" if q and q.strip() else None
     if kind == "accounts":
         account_stmt = select(CRMAccount).where(CRMAccount.ops_tenant_id == user.tenant_id)
@@ -1285,7 +1295,7 @@ async def update_plan(plan_id: UUID, payload: PlanUpdate, user: User = Depends(_
 
 
 @router.patch("/crm/accounts/{account_id}")
-async def update_account(account_id: UUID, payload: AccountUpdate, user: User = Depends(_require_ops_permission("saas.crm.read")), db: AsyncSession = Depends(get_db)):
+async def update_account(account_id: UUID, payload: AccountUpdate, user: User = Depends(_require_ops_permission("saas.sales.manage")), db: AsyncSession = Depends(get_db)):
     await _require_ops_user(user, db)
     item = await db.scalar(select(CRMAccount).where(CRMAccount.id == account_id, CRMAccount.ops_tenant_id == user.tenant_id))
     if item is None:
@@ -1850,7 +1860,7 @@ async def update_managed_tenant(
 @router.get("/crm/accounts/{account_id}")
 async def account_detail(
     account_id: UUID,
-    user: User = Depends(_require_ops_permission("saas.crm.read")),
+    user: User = Depends(_require_ops_permission("saas.sales.read")),
     db: AsyncSession = Depends(get_db),
 ):
     account = await db.scalar(
@@ -1906,6 +1916,10 @@ async def account_detail(
         .order_by(CRMSalesActivity.happened_at.desc())
         .limit(100)
     )).scalars().all()
+
+    # Sales users can see client and opportunity information, but finance
+    # details are omitted from this payload unless they have finance-read rights.
+    can_read_finance = await user_has_permission(user, db, "saas.finance.read")
 
     plan = await db.get(SaaSPlan, account.plan_id) if account.plan_id else None
     managed_tenant = await db.get(Tenant, account.managed_tenant_id) if account.managed_tenant_id else None
@@ -1968,7 +1982,7 @@ async def account_detail(
             "net_price_minor": item.net_price_minor,
             "renews_at": item.renews_at,
             "contract_ref": item.contract_ref,
-        } for item in subscriptions],
+        } for item in subscriptions] if can_read_finance else [],
         "opportunities": [{
             "id": str(item.id),
             "name": item.name,
@@ -1987,7 +2001,7 @@ async def account_detail(
             "starts_at": item.starts_at,
             "ends_at": item.ends_at,
             "signed_at": item.signed_at,
-        } for item in contracts],
+        } for item in contracts] if can_read_finance else [],
         "invoices": [{
             "id": str(item.id),
             "invoice_number": item.invoice_number,
@@ -1999,7 +2013,7 @@ async def account_detail(
             "issued_at": item.issued_at,
             "due_at": item.due_at,
             "paid_at": item.paid_at,
-        } for item in invoices],
+        } for item in invoices] if can_read_finance else [],
         "payments": [{
             "id": str(item.id),
             "invoice_id": str(item.invoice_id),
@@ -2009,7 +2023,7 @@ async def account_detail(
             "received_at": item.received_at,
             "method": item.method,
             "reference": item.reference,
-        } for item in payments],
+        } for item in payments] if can_read_finance else [],
         "activities": [{
             "id": str(item.id),
             "activity_type": item.activity_type,
