@@ -120,3 +120,11 @@ def test_assessment_evidence_is_idempotent_and_tenant_scoped():
         assert other.status_code == 200
         assert client.post(f"/api/v1/evidence/from-assessment/{attempt_id}").status_code in {403, 404}
         assert client.get(f"/api/v1/evidence/users/{learner_id}/summary").status_code in {403, 404}
+
+
+def test_evidence_collection_bounds_are_enforced():
+    with TestClient(app, base_url="http://localhost") as client:
+        login(client, ADMIN)
+        assert client.get("/api/v1/evidence?limit=0").status_code == 422
+        assert client.get("/api/v1/evidence?limit=101").status_code == 422
+        assert client.get("/api/v1/evidence?offset=-1").status_code == 422

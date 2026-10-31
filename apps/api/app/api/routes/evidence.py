@@ -131,6 +131,8 @@ async def list_evidence(
     target_id: UUID | None = None,
     user_id: UUID | None = None,
     status: str | None = None,
+    limit: int = Query(default=100, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -155,7 +157,13 @@ async def list_evidence(
         conditions.append(CapabilityEvidence.user_id == user_id)
     if status:
         conditions.append(CapabilityEvidence.status == status)
-    result = await db.execute(select(CapabilityEvidence).where(*conditions).order_by(CapabilityEvidence.observed_at.desc()))
+    result = await db.execute(
+        select(CapabilityEvidence)
+        .where(*conditions)
+        .order_by(CapabilityEvidence.observed_at.desc(), CapabilityEvidence.id.desc())
+        .offset(offset)
+        .limit(limit)
+    )
     return [_json(item) for item in result.scalars().all()]
 
 
