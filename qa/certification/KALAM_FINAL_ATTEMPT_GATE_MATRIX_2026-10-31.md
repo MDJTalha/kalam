@@ -1,19 +1,19 @@
 # Kalam Final Attempt — Gate Matrix
 
 Date: 2026-10-31
-Latest implementation commit: `bf735baec46bd244f8139ebda968061fb7fcfeed`
+Latest implementation commit: `565b386877308dcc22cb064f6fc4020d120e1a6b`
 Candidate branch: `work/final-production-readiness-2026-10-31`
 
 | Gate | Status | Evidence required / current evidence |
 |---|---|---|
 | C0 Candidate integrity | PARTIAL | Exact branch commits are tracked and a clean source archive was extracted locally; native Git checkout remains unresolved, so this gate is not certified. |
-| C1 Hosted CI | PENDING CURRENT RERUN | Prior exact-candidate CI passed, but the latest implementation added the deterministic release-hygiene audit and manifest metadata; current candidate must complete a fresh hosted run. |
+| C1 Hosted CI | CERTIFIED | Fresh hosted run **#498 / 41228174328** for the exact current matrix commit completed successfully. repository-hygiene, web, api and release-config all passed. |
 | C2 Authentication/session | NOT CERTIFIED | Real browser login/session matrix |
 | C3 RBAC/resource authorization | NOT CERTIFIED | Positive and negative role/action matrix |
 | C4 Tenant isolation | NOT CERTIFIED | Live A→B negative access matrix |
 | C5 Learning lifecycle | NOT CERTIFIED | Browser + persistence + completion evidence |
 | C6 Capability intelligence | NOT CERTIFIED | End-to-end recalculation and reporting evidence |
-| C7 API/data integrity | PENDING CURRENT RERUN | Prior exact-candidate CI recorded 183 pytest passes; current candidate needs fresh migration/static/type/test evidence. |
+| C7 API/data integrity | CERTIFIED | Fresh hosted API job passed dependency integrity/audit, migrations/head verification, static/type checks, ClamAV transport verification and the full test step in run **#498 / 41228174328**. |
 | C8 Accessibility | NOT CERTIFIED | Automated + manual WCAG 2.2 AA review |
 | C9 Security | NOT CERTIFIED | Final security/abuse-path assessment |
 | C10 Scale | NOT CERTIFIED | 10k+ representative load evidence |
@@ -32,9 +32,10 @@ Candidate branch: `work/final-production-readiness-2026-10-31`
 - Added `qa/scripts/final_release_hygiene.py`, a dependency-free deterministic repository audit.
 - Integrated that audit into hosted CI as a dedicated `repository-hygiene` job.
 - The first execution exposed false positives from legitimate HTML input placeholders; the detector was narrowed to unfinished-copy markers rather than generic `placeholder` text.
-- Added `apps/web/src/app/manifest.ts` with canonical Kalam PWA metadata, resolving the previously missing manifest-source control.
+- Added `apps/web/src/app/manifest.ts` with canonical Kalam PWA metadata.
+- Confirmed the corrected hygiene detector and manifest pass in fresh hosted CI run **#498 / 41228174328**.
+- Certified C1 and C7 only from this fresh exact-commit hosted evidence.
 - Preserved the rule that runtime/security/production claims require actual evidence rather than source inspection alone.
-- The first hygiene CI execution failed for the detector false positives; that failure was diagnosed from the hosted log and corrected. A fresh candidate run is required to validate the correction.
 
 ## Existing strong evidence retained
 
