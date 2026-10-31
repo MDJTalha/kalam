@@ -200,8 +200,8 @@ def upgrade() -> None:
         conn.execute(
             sa.text("""
                 INSERT INTO permissions (id, key, description)
-                SELECT :id, :key, :description
-                WHERE NOT EXISTS (SELECT 1 FROM permissions WHERE key=:key)
+                VALUES (:id, :key, :description)
+                ON CONFLICT (key) DO NOTHING
             """),
             {"id": uuid4(), "key": key, "description": description},
         )
