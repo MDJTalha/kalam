@@ -89,7 +89,8 @@ async def is_platform_developer(user: User, db: AsyncSession) -> bool:
     preventing a customer-tenant identity from gaining privileges by being
     linked to an internal role.
     """
-    if not settings.saas_ops_tenant_slug:
+    slug = settings.saas_ops_tenant_slug or settings.marketing_review_tenant_slug
+    if not slug:
         return False
     result = await db.execute(
         select(Role.id)
@@ -98,7 +99,7 @@ async def is_platform_developer(user: User, db: AsyncSession) -> bool:
         .join(Tenant, Tenant.id == Role.tenant_id)
         .where(UserRole.user_id == user.id)
         .where(User.tenant_id == Tenant.id)
-        .where(Tenant.slug == settings.saas_ops_tenant_slug)
+        .where(Tenant.slug == slug)
         .where(Role.role_kind == "platform")
         .where(Role.name.ilike("platform developer"))
     )
