@@ -47,12 +47,14 @@ export default async function ComplianceAdminPage({ searchParams }: { searchPara
   ]);
   const results = [requirementsResult, reportResult, assignmentsResult, evidenceResult, exceptionsResult, coursesResult, operationsResult];
   const failed = results.filter((item) => !item.ok);
-  const requirementsPage = requirementsResult.data;\n  const requirements = requirementsPage?.items ?? [];
+  const requirementsPage = requirementsResult.data;
+  const requirements = requirementsPage?.items ?? [];
   const report = reportResult.data;
   const assignments = assignmentsResult.data;
   const evidence = evidenceResult.data;
   const exceptions = exceptionsResult.data;
-  const coursesPage = coursesResult.data;\n  const courses = coursesPage?.items ?? [];
+  const coursesPage = coursesResult.data;
+  const courses = coursesPage?.items ?? [];
   const operations = operationsResult.data;
   const roleOptions = roleOptionsResult.data ?? [];
   const unitOptions = unitOptionsResult.data ?? [];
