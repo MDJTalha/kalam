@@ -1882,17 +1882,17 @@ async def account_detail(
         .where(CRMTrial.account_id == account.id, CRMTrial.ops_tenant_id == user.tenant_id)
         .order_by(CRMTrial.created_at.desc())
     )).scalars().all()
+    opportunities = (await db.execute(
+        select(CRMOpportunity)
+        .where(CRMOpportunity.account_id == account.id, CRMOpportunity.ops_tenant_id == user.tenant_id)
+        .order_by(CRMOpportunity.updated_at.desc())
+    )).scalars().all()
     can_read_finance = await user_has_permission(user, db, "saas.finance.read")
     if can_read_finance:
         subscriptions = (await db.execute(
             select(CRMSubscription)
             .where(CRMSubscription.account_id == account.id, CRMSubscription.ops_tenant_id == user.tenant_id)
             .order_by(CRMSubscription.created_at.desc())
-        )).scalars().all()
-        opportunities = (await db.execute(
-            select(CRMOpportunity)
-            .where(CRMOpportunity.account_id == account.id, CRMOpportunity.ops_tenant_id == user.tenant_id)
-            .order_by(CRMOpportunity.updated_at.desc())
         )).scalars().all()
         contracts = (await db.execute(
             select(CRMContract)
