@@ -27,8 +27,12 @@ class AttendanceUpdate(BaseModel):
 
 @router.get("")
 async def list_sessions(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    can_manage_all = await user_has_permission(user, db, "courses.manage")
+    can_grade_assigned = await user_has_permission(user, db, "assessments.grade_assigned")
+    if not can_manage_all and not can_grade_assigned:
+        raise HTTPException(status_code=403, detail="Session schedule access is restricted to instructors and learning administrators")
     stmt = select(LiveSession).where(LiveSession.tenant_id == user.tenant_id)
-    if not await user_has_permission(user, db, "courses.manage"):
+    if not can_manage_all:
         stmt = stmt.where(LiveSession.instructor_id == user.id)
     result = await db.execute(stmt.order_by(LiveSession.starts_at))
     return list(result.scalars().all())
@@ -101,8 +105,11 @@ async def session_roster(
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     can_manage_all = await user_has_permission(user, db, "courses.manage")
-    if not can_manage_all and session.instructor_id != user.id:
-        raise HTTPException(status_code=403, detail="Facilitator scope does not include this session")
+    can_grade_assigned = await user_has_permission(user, db, "assessments.grade_assigned")
+    if not can_manage_all and not (
+        can_grade_assigned and session.instructor_id == user.id
+    ):
+        raise HTTPException(status_code=403, detail="Assigned instructor access is required for this session")
     rows = (await db.execute(
         select(
             User.id,
