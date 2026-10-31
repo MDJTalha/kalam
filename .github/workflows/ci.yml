@@ -173,3 +173,10 @@ jobs:
       - name: Smoke built production images
         shell: pwsh
         run: ./infra/scripts/phase8-image-runtime-smoke.ps1
+
+  brand-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify canonical Kalam brand contract
+        run: node qa/brand-contract-check.mjs
