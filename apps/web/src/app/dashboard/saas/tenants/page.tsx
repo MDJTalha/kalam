@@ -3,7 +3,7 @@ import { DeveloperSupportControl } from "@/components/saas-crm-forms";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { TenantStatusControl } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult } from "@/lib/server-api";
 
 type TenantRow={
   id:string;name:string;slug:string;status:string;user_count:number;created_at:string;
