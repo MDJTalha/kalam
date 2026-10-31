@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 from sqlalchemy import delete, insert, select
 
 from app.core.security import hash_password
-from app.core.role_catalog import TENANT_ROLE_PERMISSIONS
+from app.core.role_catalog import PERMISSION_DESCRIPTIONS, TENANT_ROLE_PERMISSIONS
 from app.db.models import (
     Assessment, AssessmentAttempt, Certificate, ComplianceAssignment,
     ComplianceRequirement, ComplianceRequirementVersion, Course, CourseCategory,
@@ -72,16 +72,7 @@ def distribute(total, weights):
     return values
 
 async def get_permissions(session):
-    definitions = {
-        "tenant.read":"View tenant","tenant.manage":"Manage tenant","users.read":"View users",
-        "users.manage":"Manage users","courses.read":"View courses","courses.manage":"Manage courses",
-        "learning.access":"Access learning","assessments.manage":"Manage assessments",
-        "certificates.manage":"Manage certificates","compliance.manage":"Manage compliance",
-        "skills.manage":"Manage skills","capabilities.read":"View capability framework","capabilities.manage":"Manage capability framework","development.manage":"Manage development plans",
-        "reports.read":"View reports","reports.manage":"Manage saved reports and schedules",
-        "audit.read":"View audit logs","files.read":"View governed files","files.manage":"Manage file controls",
-        "integrations.manage":"Manage integrations","ai.manage":"Manage governed AI",
-    }
+    definitions = PERMISSION_DESCRIPTIONS
     existing = {item.key: item for item in (await session.execute(select(Permission))).scalars().all()}
     for key, description in definitions.items():
         if key not in existing:
