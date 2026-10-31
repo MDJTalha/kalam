@@ -2530,6 +2530,18 @@ async def remove_managed_tenant_role(
     return {"status": "removed"}
 
 
+@router.get("/crm/team/role-permissions")
+async def list_saas_team_role_permissions(
+    user: User = Depends(_require_ops_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    await _require_saas_platform_admin(user, db)
+    rows = (await db.execute(
+        select(Permission).where(Permission.key.in_(sorted(PLATFORM_CUSTOM_ROLE_PERMISSION_KEYS))).order_by(Permission.key)
+    )).scalars().all()
+    return [{"id": str(item.id), "key": item.key, "description": item.description} for item in rows]
+
+
 @router.get("/crm/team/roles")
 async def list_saas_team_roles(
     user: User = Depends(_require_ops_permission("saas.roles.manage")),
