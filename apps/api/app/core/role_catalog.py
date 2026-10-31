@@ -33,15 +33,22 @@ PERMISSION_DESCRIPTIONS: dict[str, str] = {
     "capability_assessments.read": "View capability assessments within authorized scope",
     "capability_assessments.execute": "Complete assigned capability assessments",
     "evidence.read": "View capability evidence within authorized scope",
-    "saas.crm.read": "View Kalam SaaS commercial CRM records",
-    "saas.crm.manage": "Manage Kalam SaaS commercial CRM records",
+    "saas.crm.read": "View consolidated Kalam SaaS business overview and full client 360",
+    "saas.crm.manage": "Manage consolidated Kalam SaaS commercial records",
+    "saas.sales.read": "View sales accounts, contacts, opportunities, tasks and pipeline",
+    "saas.sales.manage": "Manage sales accounts, contacts, opportunities, tasks and pipeline",
+    "saas.pricing.read": "View SaaS plans, public pricing and commercial offers",
+    "saas.pricing.manage": "Create and manage SaaS plans, pricing and offers",
+    "saas.finance.read": "View subscriptions, contracts, invoices, payments and renewals",
+    "saas.finance.manage": "Manage subscriptions, contracts, invoices, payments and renewals",
+    "saas.customer_success.read": "View customer onboarding, trials, tenant status and customer access",
+    "saas.customer_success.manage": "Manage customer onboarding, trials, tenant status and customer access",
     "saas.platform.read": "View SaaS platform administration",
     "saas.platform.manage": "Manage SaaS platform administration",
     "saas.tenants.manage": "Provision and administer customer tenants",
     "saas.roles.manage": "Create and govern customer-tenant roles",
-    "saas.team.manage": "Manage internal SaaS operations team members",
-    "saas.pricing.manage": "Manage SaaS plans, pricing and offers",
-    "saas.billing.manage": "Manage subscriptions, invoices and payments",
+    "saas.team.read": "View internal SaaS operations team members",
+    "saas.team.manage": "Manage internal SaaS operations team members and assignments",
     "saas.access.revoke": "Revoke customer and SaaS team account access",
     "saas.audit.read": "View SaaS platform audit activity",
 }
@@ -101,35 +108,46 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
 }
 
 PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
-    # Platform Developer is a separate engineering/support role; its elevated
-    # behavior is recognized explicitly by app.api.deps.is_platform_developer.
+    # Platform Developer is the internal engineering/support role; its elevated
+    # behavior is recognized by app.api.deps.is_platform_developer.
     "Platform Developer": (),
     "SaaS Super Admin": (
-        "tenant.read", "tenant.manage", "users.read", "users.manage",
-        "saas.crm.read", "saas.crm.manage", "saas.platform.read",
-        "saas.platform.manage", "saas.tenants.manage", "saas.roles.manage",
-        "saas.team.manage", "saas.pricing.manage", "saas.billing.manage",
+        "tenant.read", "tenant.manage", "users.read", "users.manage", "team.read",
+        "saas.crm.read", "saas.crm.manage",
+        "saas.sales.read", "saas.sales.manage",
+        "saas.pricing.read", "saas.pricing.manage",
+        "saas.finance.read", "saas.finance.manage",
+        "saas.customer_success.read", "saas.customer_success.manage",
+        "saas.platform.read", "saas.platform.manage",
+        "saas.tenants.manage", "saas.roles.manage",
+        "saas.team.read", "saas.team.manage",
         "saas.access.revoke", "saas.audit.read", "audit.read",
+        "reports.read", "integrations.manage",
     ),
     "SaaS Administrator": (
         "tenant.read", "tenant.manage", "users.read", "users.manage",
-        "saas.crm.read", "saas.crm.manage",
+        "saas.platform.read", "saas.platform.manage",
+        "saas.team.read", "saas.team.manage", "saas.roles.manage",
+        "saas.audit.read", "audit.read", "integrations.manage",
     ),
     "SaaS Business Owner": (
-        "tenant.read", "saas.crm.read", "saas.audit.read", "reports.read",
+        "tenant.read", "saas.crm.read", "saas.sales.read",
+        "saas.pricing.read", "saas.finance.read", "saas.customer_success.read",
+        "saas.platform.read", "saas.team.read", "saas.audit.read",
+        "reports.read",
     ),
     "Sales Operations": (
-        "tenant.read", "saas.crm.read", "saas.crm.manage",
+        "saas.sales.read", "saas.sales.manage", "saas.pricing.read",
+        "saas.customer_success.read", "saas.customer_success.manage",
     ),
     "Sales Viewer": (
-        "tenant.read", "saas.crm.read",
+        "saas.sales.read", "saas.pricing.read",
     ),
     "SaaS Finance Administrator": (
-        "tenant.read", "saas.crm.read", "saas.crm.manage",
-        "saas.pricing.manage", "saas.billing.manage",
+        "saas.finance.read", "saas.finance.manage", "saas.pricing.read",
     ),
     "Customer Success Manager": (
-        "tenant.read", "saas.crm.read", "saas.crm.manage",
-        "saas.tenants.manage",
+        "saas.sales.read", "saas.customer_success.read",
+        "saas.customer_success.manage",
     ),
 }
