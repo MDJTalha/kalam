@@ -42,7 +42,7 @@ export function SaaSRoleManagement({
   const [description, setDescription] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(Boolean(tenants[0]?.id));
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -58,15 +58,11 @@ export function SaaSRoleManagement({
   }, [permissions]);
 
   async function loadRoles(nextTenantId = tenantId) {
-    if (!nextTenantId) {
-      setRoles([]);
-      return;
-    }
-    setLoading(true);
-    setError("");
+    if (!nextTenantId) return;
     try {
       const rows = await requestJson(`/api/lms/saas/crm/tenants/${nextTenantId}/roles`) as RoleRow[];
       setRoles(Array.isArray(rows) ? rows : []);
+      setError("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load tenant roles.");
       setRoles([]);
