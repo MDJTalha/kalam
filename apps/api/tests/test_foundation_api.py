@@ -149,6 +149,22 @@ def test_compliance_reference_pages_are_bounded(client: TestClient) -> None:
     assert client.get("/api/v1/compliance/courses/page", params={"page_size": 101}).status_code == 422
 
 
+def test_organization_reference_pages_are_bounded(client: TestClient) -> None:
+    login(client, ADMIN)
+
+    roles = client.get("/api/v1/organization/roles/page", params={"page": 1, "page_size": 1})
+    assert roles.status_code == 200, roles.text
+    assert len(roles.json()["items"]) <= 1
+    assert roles.json()["page_size"] == 1
+    assert client.get("/api/v1/organization/roles/page", params={"page_size": 101}).status_code == 422
+
+    units = client.get("/api/v1/organization/units/page", params={"page": 1, "page_size": 1})
+    assert units.status_code == 200, units.text
+    assert len(units.json()["items"]) <= 1
+    assert units.json()["page_size"] == 1
+    assert client.get("/api/v1/organization/units/page", params={"page_size": 101}).status_code == 422
+
+
 def test_capability_framework_reference_pages_are_bounded(client: TestClient) -> None:
     login(client, ADMIN)
 
