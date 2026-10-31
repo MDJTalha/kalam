@@ -1,15 +1,16 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { FileUpload } from "@/components/file-upload";
 import { EmptyState, Section, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type FileItem={id:string;name:string;mime_type:string;size_bytes:number;status:string;created_at:string};
 
 export default async function FilesPage(){
   const user=await requireUser<{permissions?:string[]}>();
-  const rows=await apiJson<FileItem[]>("/api/v1/files");
+  const rowsResult=await apiJsonResult<FileItem[]>("/api/v1/files");
+  const rows=rowsResult.data;
   const canManage=user.permissions?.includes("files.manage")??false;
-  if (rows === null) return <DashboardShell title="Files" eyebrow="Secure learning content"><section className="data-panel" role="alert"><h2>File repository unavailable</h2><p>Secure file records could not be loaded. Refresh and try again later.</p></section></DashboardShell>;
+  if (rows === null) return <DashboardShell title="Files" eyebrow="Secure learning content"><section className="data-panel" role="alert"><h2>File repository unavailable</h2><p>HTTP {rowsResult.status}: {rowsResult.error || "Secure file records could not be loaded. Refresh and try again later."}</p></section></DashboardShell>;
   return <DashboardShell title="Files" eyebrow="Secure learning content">
     {canManage?<Section eyebrow="Upload" title="Add governed content"><FileUpload/></Section>:null}
     <Section eyebrow="Repository" title="Tenant files">

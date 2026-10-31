@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { EmptyState, Section, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { Activity, ArrowRight, CalendarDays, CheckCircle2, Cloud, Mail, Network, RefreshCw, ShieldCheck, Webhook, UsersRound } from "lucide-react";
 import { IntegrationConsole } from "@/components/integration-console";
 
@@ -20,9 +20,10 @@ const providerMeta:Record<string,{name:string;purpose:string;icon:typeof Network
 
 export default async function IntegrationsPage(){
   const user=await requireUser<{permissions?:string[]}>();
-  const rows=await apiJson<Integration[]>("/api/v1/integrations");
+  const rowsResult=await apiJsonResult<Integration[]>("/api/v1/integrations");
+  const rows=rowsResult.data;
   const canManage=user.permissions?.includes("integrations.manage")??false;
-  if (rows === null) return <DashboardShell title="Integrations" eyebrow="Enterprise connectivity"><section className="data-panel" role="alert"><h2>Integration registry unavailable</h2><p>The integration registry could not be loaded. Refresh or try again later.</p></section></DashboardShell>;
+  if (rows === null) return <DashboardShell title="Integrations" eyebrow="Enterprise connectivity"><section className="data-panel" role="alert"><h2>Integration registry unavailable</h2><p>HTTP {rowsResult.status}: {rowsResult.error || "The integration registry could not be loaded. Refresh or try again later."}</p></section></DashboardShell>;
   const connected=rows.filter(x=>x.status==="connected").length;
   const healthy=rows.filter(x=>x.last_check_status==="passed").length;
   const attention=rows.filter(x=>x.last_check_status==="failed"||x.status==="disabled").length;
