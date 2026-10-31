@@ -5,11 +5,49 @@ import socket
 import struct
 from pathlib import Path
 
+from fastapi import HTTPException
+
 from app.core.config import settings
 
 
 class FileScanError(RuntimeError):
     """Raised when the configured malware scanner cannot be reached."""
+
+
+_SIGNATURES: dict[str, tuple[bytes, ...]] = {
+    "application/pdf": (b"%PDF-",),
+    "image/png": (b"\x89PNG\r\n\x1a\n",),
+    "image/jpeg": (b"\xff\xd8\xff",),
+    "application/zip": (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": (
+        b"PK\x03\x04",
+        b"PK\x05\x06",
+        b"PK\x07\x08",
+    ),
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": (
+        b"PK\x03\x04",
+        b"PK\x05\x06",
+        b"PK\x07\x08",
+    ),
+}
+
+
+def validate_file_content_type(path: Path, mime_type: str) -> None:
+    """Reject common content-type spoofing before malware scanning.
+
+    Plain text/CSV intentionally have no fixed magic number and are validated
+    by their declared MIME type plus the malware scan pipeline.
+    """
+    signatures = _SIGNATURES.get(mime_type)
+    if not signatures:
+        return
+    try:
+        with path.open("rb") as handle:
+            header = handle.read(16)
+    except OSError as exc:
+        raise FileScanError("Uploaded file could not be read for content validation") from exc
+    if not any(header.startswith(signature) for signature in signatures):
+        raise HTTPException(status_code=415, detail="Uploaded file content does not match its declared type.")
 
 
 def _scan_clamd(path: Path) -> bool:
