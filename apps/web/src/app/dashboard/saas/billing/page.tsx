@@ -72,7 +72,7 @@ export default async function SaaSBillingPage({searchParams}:{searchParams:Promi
         <strong key="e">{money(i.outstanding_minor,i.currency)}</strong>,
         <span key="f">{i.due_at?new Date(i.due_at).toLocaleDateString():"—"}</span>,
         <StatusBadge key="g" status={i.status}/>,
-        {canManage?<InvoiceStatusControl key="h" id={i.id} status={i.status}/>:<span key="h">Read only</span>}
+        canManage?<InvoiceStatusControl key="h" id={i.id} status={i.status}/>:<span key="h">Read only</span>
       ])}/>
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Invoice pages">
         <span>Page {invoicePageNumber} of {invoicePages} · {invoices.total} invoices</span>
@@ -101,7 +101,7 @@ export default async function SaaSBillingPage({searchParams}:{searchParams:Promi
         <span key="e">{p.method||"—"}</span>,
         <span key="f">{p.reference||"—"}</span>,
         <StatusBadge key="g" status={p.status}/>,
-        {canManage?<PaymentStatusControl key="h" id={p.id} status={p.status}/>:<span key="h">Read only</span>}
+        canManage?<PaymentStatusControl key="h" id={p.id} status={p.status}/>:<span key="h">Read only</span>
       ])}/>
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Payment pages">
         <span>Page {paymentPageNumber} of {paymentPages} · {payments.total} payments</span>
