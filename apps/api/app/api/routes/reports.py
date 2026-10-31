@@ -26,6 +26,7 @@ from app.db.models import (
     UserSkill,
 )
 from app.db.session import get_db
+from app.services.audit import audit
 
 router = APIRouter()
 
@@ -341,6 +342,13 @@ async def export_people(
         ]
         for item in result.scalars().all()
     ]
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id,
+        action="report.export.people",
+        entity_type="report_export", entity_id=str(user.id),
+        metadata={"record_count": len(rows)},
+    )
+    await db.commit()
     return csv_response(
         "kognivon-people.csv",
         ["User ID", "Email", "First Name", "Last Name", "Employee Number", "Job Title", "Status", "Last Sign-in"],
@@ -377,6 +385,13 @@ async def export_enrollments(
         ]
         for item, course, learner in result.all()
     ]
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id,
+        action="report.export.enrollments",
+        entity_type="report_export", entity_id=str(user.id),
+        metadata={"record_count": len(rows)},
+    )
+    await db.commit()
     return csv_response(
         "kognivon-enrollments.csv",
         ["Enrollment ID", "Learner Email", "Learner", "Course", "Status", "Enrolled At", "Due At", "Completed At"],
@@ -386,13 +401,17 @@ async def export_enrollments(
 
 @router.get("/export/compliance")
 async def export_compliance(
-    user: User = Depends(require_permission("reports.read")),
+    user: User = Depends(require_permission("reports.export.compliance")),
     db: AsyncSession = Depends(get_db),
 ) -> StreamingResponse:
     result = await db.execute(
         select(ComplianceAssignment, ComplianceRequirement)
         .join(ComplianceRequirement, ComplianceRequirement.id == ComplianceAssignment.requirement_id)
-        .where(ComplianceAssignment.tenant_id == user.tenant_id)
+        .join(User, User.id == ComplianceAssignment.user_id)
+        .where(
+            ComplianceAssignment.tenant_id == user.tenant_id,
+            User.tenant_id == user.tenant_id,
+        )
         .order_by(ComplianceAssignment.due_at.asc().nulls_last())
     )
     rows = [
@@ -405,6 +424,13 @@ async def export_compliance(
         ]
         for item, requirement in result.all()
     ]
+    await audit(
+        db, tenant_id=user.tenant_id, actor_id=user.id,
+        action="report.export.compliance",
+        entity_type="report_export", entity_id=str(user.id),
+        metadata={"record_count": len(rows)},
+    )
+    await db.commit()
     return csv_response("corporate-lms-compliance.csv", ["Learner ID", "Requirement", "Status", "Due At", "Course ID"], rows)
 
 
