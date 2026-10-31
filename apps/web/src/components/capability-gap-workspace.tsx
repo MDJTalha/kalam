@@ -10,15 +10,17 @@ type Props={initialGaps:Gap[];initialSummary:Summary;people:Person[];canManage:b
 const label=(s:string)=>s.replaceAll("_"," ");
 const severityClass=(s:string)=>s==="critical_gap"?"status-danger":s==="major_gap"?"status-warning":s==="moderate_gap"?"status-neutral":s==="met"?"status-success":"status-neutral";
 export function CapabilityGapWorkspace({initialGaps,initialSummary,people,canManage,teamScoped,currentUserId}:Props){
- const [gaps,setGaps]=useState(initialGaps); const [summary,setSummary]=useState(initialSummary); const [personId,setPersonId]=useState(currentUserId);
+ const [gaps,setGaps]=useState(initialGaps); const [summary,setSummary]=useState(initialSummary); const [personId,setPersonId]=useState(canManage?"":currentUserId);
  const [severity,setSeverity]=useState(""); const [q,setQ]=useState(""); const [busy,setBusy]=useState(false); const [message,setMessage]=useState(""); const [error,setError]=useState("");
  const visible=useMemo(()=>gaps.filter(x=>!severity||x.severity===severity).filter(x=>!q||((x.target||"")+" "+x.role).toLowerCase().includes(q.toLowerCase())),[gaps,severity,q]);
  async function refresh(){
   setBusy(true);setError("");setMessage("");
   try{
-   if(canManage){const r=await fetch("/api/v1/capability-gaps/recalculate",{method:"POST"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||"Gap recalculation failed.");}
-   const query=canManage||teamScoped?"":("?user_id="+encodeURIComponent(personId));
-   const summaryQuery=canManage?"scope=enterprise":teamScoped?"scope=direct_reports":"scope=person&scope_id="+encodeURIComponent(personId);
+   const selectedPerson=canManage&&personId;
+   const recalcQuery=selectedPerson?"?user_id="+encodeURIComponent(personId):"";
+   if(canManage){const r=await fetch("/api/v1/capability-gaps/recalculate"+recalcQuery,{method:"POST"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||"Gap recalculation failed.");}
+   const query=canManage?(selectedPerson?"?user_id="+encodeURIComponent(personId):""):teamScoped?"":"?user_id="+encodeURIComponent(personId);
+   const summaryQuery=canManage?(selectedPerson?"scope=person&scope_id="+encodeURIComponent(personId):"scope=enterprise"):teamScoped?"scope=direct_reports":"scope=person&scope_id="+encodeURIComponent(personId);
    const [gr,sr]=await Promise.all([fetch("/api/v1/capability-gaps"+query,{cache:"no-store"}),fetch("/api/v1/capability-gaps/summary?"+summaryQuery,{cache:"no-store"})]);
    const gd=await gr.json().catch(()=>[]),sd=await sr.json().catch(()=>({}));
    if(!gr.ok)throw new Error(gd.detail||"Gap data could not be loaded.");if(!sr.ok)throw new Error(sd.detail||"Gap summary could not be loaded.");
@@ -29,7 +31,7 @@ export function CapabilityGapWorkspace({initialGaps,initialSummary,people,canMan
  return <div className="stack-lg">
   <section className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Capability exposure</span><h2>Capability Gap Engine</h2><p>Required capability versus demonstrated capability, with evidence confidence and freshness.</p></div><button className="button button-secondary" disabled={busy} onClick={()=>void refresh()}><RefreshCcw size={14}/> {busy?"Refreshing…":canManage?"Recalculate":teamScoped?"Refresh team gaps":"Refresh my gaps"}</button></div>
    {error&&<div className="form-error" role="alert"><AlertTriangle size={15}/>{error}</div>}{message&&<div className="form-success" role="status"><CheckCircle2 size={15}/>{message}</div>}
-   {canManage&&<div style={{maxWidth:420}}><PeopleLookupSelect label="Person drill-down" value={personId} onChange={id=>{setPersonId(id);void (async()=>{const r=await fetch("/api/v1/capability-gaps?user_id="+encodeURIComponent(id),{cache:"no-store"});const data=await r.json().catch(()=>[]);if(r.ok)setGaps(Array.isArray(data)?data:[])})()}} initialPeople={people}/></div>}
+   {canManage&&<div style={{maxWidth:420}}><PeopleLookupSelect label="Person drill-down" value={personId} onChange={id=>{setPersonId(id);void (async()=>{setBusy(true);setError("");const query=id?"?user_id="+encodeURIComponent(id):"";const summaryQuery=id?"scope=person&scope_id="+encodeURIComponent(id):"scope=enterprise";try{const [gr,sr]=await Promise.all([fetch("/api/v1/capability-gaps"+query,{cache:"no-store"}),fetch("/api/v1/capability-gaps/summary?"+summaryQuery,{cache:"no-store"})]);const [gd,sd]=await Promise.all([gr.json().catch(()=>[]),sr.json().catch(()=>({}))]);if(!gr.ok)throw new Error(gd.detail||"Gap records could not be loaded.");if(!sr.ok)throw new Error(sd.detail||"Gap summary could not be loaded.");setGaps(Array.isArray(gd)?gd:[]);setSummary(sd);}catch(e){setError(e instanceof Error?e.message:"Gap drill-down failed.");}finally{setBusy(false);}})()}} initialPeople={people} optional/></div>}
    <div className="metric-grid"><div className="metric-card"><span>Requirements</span><strong>{summary.total_requirements}</strong><small>role requirements evaluated</small></div><div className="metric-card"><span>Material gaps</span><strong>{summary.material_gaps}</strong><small>minor through critical</small></div><div className="metric-card"><span>Critical exposure</span><strong>{summary.critical_exposure}</strong><small>critical gap records</small></div><div className="metric-card"><span>Major exposure</span><strong>{summary.major_exposure}</strong><small>major gap records</small></div></div>
   </section>
   {personId===currentUserId ? <GovernedAIAction title="Make my gaps actionable" description="Generate a governed explanation of your persisted role-to-skill gaps using authorized learning evidence only." question="Explain my current capability gaps, identify the most important development priorities, and suggest grounded learning actions without making employment decisions." mode="skill_gap" /> : null}
