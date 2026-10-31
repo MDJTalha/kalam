@@ -42,18 +42,16 @@ export default async function SaaSClientDetailPage({params}:{params:Promise<{id:
   const {id}=await params;
   const [account,onboarding,team,contracts,invoices,payments]=await Promise.all([
     apiJson<AccountDetail>("/api/v1/saas/crm/accounts/"+id),
-    apiJson<OnboardingItem[]>("/api/v1/saas/crm/onboarding?account_id="+encodeURIComponent(id)),
-    apiJson<TeamMember[]>("/api/v1/saas/crm/team"),
-    apiJson<Contract[]>("/api/v1/saas/crm/contracts?account_id="+encodeURIComponent(id)),
-    apiJson<Invoice[]>("/api/v1/saas/crm/invoices?account_id="+encodeURIComponent(id)),
-    apiJson<Payment[]>("/api/v1/saas/crm/payments?account_id="+encodeURIComponent(id)),
+    canReadCustomerSuccess?apiJson<OnboardingItem[]>("/api/v1/saas/crm/onboarding?account_id="+encodeURIComponent(id)):Promise.resolve(null),
+    canReadTeam?apiJson<TeamMember[]>("/api/v1/saas/crm/team"):Promise.resolve([]),
+    canReadFinance?apiJson<Contract[]>("/api/v1/saas/crm/contracts?account_id="+encodeURIComponent(id)):Promise.resolve(null),
+    canReadFinance?apiJson<Invoice[]>("/api/v1/saas/crm/invoices?account_id="+encodeURIComponent(id)):Promise.resolve(null),
+    canReadFinance?apiJson<Payment[]>("/api/v1/saas/crm/payments?account_id="+encodeURIComponent(id)):Promise.resolve(null),
   ]);
   if(!account)return <DashboardShell title="Client record" eyebrow="SaaS CRM"><EmptyState title="Client record unavailable" description="The account was not found or this user does not have SaaS CRM access."/></DashboardShell>;
 
-  const activeSubscription=account.subscriptions.find(item=>item.status==="active");
   const activeTrial=account.trials.find(item=>item.status==="active");
   const openOpportunities=account.opportunities.filter(item=>!["won","lost"].includes(item.stage));
-  const openInvoices=(invoices||[]).filter(item=>item.outstanding_minor>0&&item.status!=="void");
 
   return <DashboardShell title={account.name} eyebrow="SaaS CRM · Client 360" breadcrumbs={[{label:"SaaS Operations",href:"/dashboard/saas"},{label:"Clients",href:"/dashboard/saas/clients"},{label:account.name}]}>
     <SaaSCrmNav/>
@@ -133,22 +131,25 @@ export default async function SaaSClientDetailPage({params}:{params:Promise<{id:
       </SectionCard>
     </div>
 
-    <SectionCard eyebrow="Implementation readiness" title="Customer onboarding" meta={(onboarding?.length||0)+" tasks"}>
-      <div className="section-actions saas-spaced-actions">{!onboarding?.length&&<OnboardingTemplateButton accountId={account.id}/>}<Link className="button button-secondary" href="/dashboard/saas/onboarding">Open onboarding board</Link></div>
+    {canReadCustomerSuccess&&<SectionCard eyebrow="Implementation readiness" title="Customer onboarding" meta={(onboarding?.length||0)+" tasks"}>
+      <div className="section-actions saas-spaced-actions">
+        {canManageCustomerSuccess&&!onboarding?.length&&<OnboardingTemplateButton accountId={account.id}/>}
+        <Link className="button button-secondary" href="/dashboard/saas/onboarding">Open onboarding board</Link>
+      </div>
       {onboarding?.length?<DataTable columns={["Task","Category","Due","Status","Update"]} empty={<EmptyState title="No onboarding tasks" description="Create the standard checklist when implementation begins."/>} rows={onboarding.map(item=>[
         <span key="a"><strong>{item.title}</strong>{item.notes&&<small>{item.notes}</small>}</span>,
         <span key="b">{item.category.replaceAll("_"," ")}</span>,
         <span key="c">{item.due_at?new Date(item.due_at).toLocaleDateString():"—"}</span>,
         <StatusBadge key="d" status={item.status}/>,
-        <OnboardingQuickActions key="e" id={item.id} status={item.status}/>,
-      ])}/>:<EmptyState title="No onboarding checklist yet" description="Create the standard checklist when this organization enters implementation or trial onboarding."/>) }
-    </SectionCard>
+        canManageCustomerSuccess?<OnboardingQuickActions key="e" id={item.id} status={item.status}/>:<span key="e">Read only</span>,
+      ])}/>:<EmptyState title="No onboarding checklist yet" description="Create the standard checklist when this organization enters implementation or trial onboarding."/>}
+    </SectionCard>}
 
     <div className="two-column">
       <SectionCard eyebrow="Relationship history" title="Activity timeline" meta={account.activities.length+" activities"}>
         <div className="compact-list">{account.activities.length?account.activities.map(item=><div className="compact-row" key={item.id}><div><strong>{item.subject}</strong><small>{item.activity_type} · {new Date(item.happened_at).toLocaleString()}</small>{item.body&&<p className="muted">{item.body}</p>}</div></div>):<EmptyState title="No activity yet" description="Calls, emails, meetings, proposals and notes will build the account history here."/>}</div>
       </SectionCard>
-      <SectionCard eyebrow="Log interaction" title="Add sales activity"><ActivityCreateForm accountId={account.id}/></SectionCard>
+      {canManageSales&&<SectionCard eyebrow="Log interaction" title="Add sales activity"><ActivityCreateForm accountId={account.id}/></SectionCard>}
     </div>
   </DashboardShell>;
 }
