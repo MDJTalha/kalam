@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Building2, ChevronRight, Search } from "lucide-react";
-import { apiJsonResult, requireUser  } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { AccountMenu } from "./account-menu";
 import { NotificationsCenter } from "./notifications-center";
 import { WorkspaceNav } from "./workspace-nav";
