@@ -256,6 +256,53 @@ async def list_cohorts(
         for item in result.scalars().all()
     ]
 
+
+@router.post("/{program_id}/cohorts", status_code=status.HTTP_201_CREATED)
+async def create_cohort(
+    program_id: UUID,
+    payload: CohortCreate,
+    user: User = Depends(require_permission("courses.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    program = await db.scalar(
+        select(Program).where(
+            Program.id == program_id,
+            Program.tenant_id == user.tenant_id,
+        )
+    )
+    if program is None:
+        raise HTTPException(status_code=404, detail="Program not found")
+    if payload.ends_at and payload.starts_at and payload.ends_at <= payload.starts_at:
+        raise HTTPException(status_code=422, detail="Cohort end must be after start")
+
+    duplicate = await db.scalar(
+        select(Cohort).where(
+            Cohort.tenant_id == user.tenant_id,
+            Cohort.code == payload.code,
+        )
+    )
+    if duplicate:
+        raise HTTPException(status_code=409, detail="Cohort code already exists")
+
+    cohort = Cohort(
+        tenant_id=user.tenant_id,
+        program_id=program.id,
+        **payload.model_dump(),
+    )
+    db.add(cohort)
+    await db.flush()
+    await audit(
+        db,
+        tenant_id=user.tenant_id,
+        actor_id=user.id,
+        action="cohort.created",
+        entity_type="cohort",
+        entity_id=str(cohort.id),
+    )
+    await db.commit()
+    return {"id": str(cohort.id), "program_id": str(program.id), "code": cohort.code}
+
+
 @router.post("/cohorts/{cohort_id}/members", status_code=status.HTTP_201_CREATED)
 async def add_cohort_member(
     cohort_id: UUID,
@@ -316,6 +363,7 @@ async def add_cohort_member(
         "name": f"{learner.first_name} {learner.last_name}".strip() or learner.email,
         "email": learner.email,
     }
+
 
 @router.delete("/cohorts/{cohort_id}/members/{user_id}")
 async def remove_cohort_member(
@@ -420,6 +468,7 @@ async def launch_cohort(
         "enrollments_created": created,
     }
 
+
 @router.get("/cohorts/{cohort_id}")
 async def get_cohort(
     cohort_id: UUID,
@@ -468,6 +517,7 @@ async def get_cohort(
             if can_manage or person.id == user.id
         ],
     }
+
 
 @router.get("/{program_id}")
 async def get_program(
@@ -619,6 +669,7 @@ async def add_learning_path_item(
         ))
         if prerequisite is None or prerequisite.position >= payload.position:
             raise HTTPException(status_code=422, detail="Prerequisite must be an earlier course in this path")
+
     duplicate = await db.scalar(
         select(LearningPathItem).where(
             LearningPathItem.path_id == path.id,
@@ -627,6 +678,7 @@ async def add_learning_path_item(
     )
     if duplicate:
         raise HTTPException(status_code=409, detail="Course is already in this learning path")
+
     row = LearningPathItem(path_id=path.id, **payload.model_dump())
     db.add(row)
     await audit(
@@ -640,6 +692,7 @@ async def add_learning_path_item(
     )
     await db.commit()
     return {"status": "added", "path_id": str(path.id), "course_id": str(course.id)}
+
 
 class PathPositionUpdate(BaseModel):
     position: int = Field(ge=1, le=1000)
