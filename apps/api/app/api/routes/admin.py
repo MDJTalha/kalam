@@ -8,7 +8,7 @@ from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, is_saas_super_admin, require_permission
+from app.api.deps import is_platform_developer, is_saas_super_admin, require_permission, user_has_permission
 from app.core.security import session_token_hash, utcnow
 from app.db.models import AuditLog, Invitation, OrgUnit, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
 from app.db.session import get_db
@@ -17,6 +17,13 @@ from app.services.email import send_email
 from app.services.learning_reminders import run_course_due_reminders
 
 router = APIRouter()
+
+BASIC_ASSIGNABLE_TENANT_ROLES = {
+    "manager",
+    "instructor",
+    "learner / employee",
+    "employee / learner",
+}
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
     return await is_platform_developer(user, db)
@@ -229,13 +236,18 @@ async def create_invitation(
     )
     if role is None:
         raise HTTPException(status_code=404, detail="Role not found")
+    is_developer = await _is_platform_developer(user, db)
+    is_super_admin = await is_saas_super_admin(user, db)
+    can_manage_roles = await user_has_permission(user, db, "tenant.manage")
     if role.role_kind == "platform":
-        is_developer = await _is_platform_developer(user, db)
-        is_super_admin = await is_saas_super_admin(user, db)
         if role.name.strip().lower() == "platform developer" and not is_developer:
             raise HTTPException(status_code=403, detail="SaaS Super Admin cannot provision Platform Developer identities")
         if not is_developer and not is_super_admin:
             raise HTTPException(status_code=403, detail="Platform-role invitations require platform administration rights")
+    elif not can_manage_roles and not (
+        role.role_kind == "predefined" and role.name.strip().lower() in BASIC_ASSIGNABLE_TENANT_ROLES
+    ):
+        raise HTTPException(status_code=403, detail="Inviting users into administrative or custom roles requires tenant administration permission")
     existing = await db.scalar(
         select(User).where(User.tenant_id == user.tenant_id, User.email == str(payload.email).lower())
     )
@@ -331,6 +343,20 @@ async def update_user(
     )
     if target is None:
         raise HTTPException(status_code=404, detail="User not found")
+    can_manage_roles = await user_has_permission(admin, db, "tenant.manage")
+    target_privileged_role = await db.scalar(
+        select(Role.id)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == target.id)
+        .where(Role.tenant_id == admin.tenant_id)
+        .where(
+            (Role.role_kind == "platform")
+            | (~func.lower(Role.name).in_(BASIC_ASSIGNABLE_TENANT_ROLES))
+        )
+        .limit(1)
+    )
+    if target_privileged_role is not None and not can_manage_roles:
+        raise HTTPException(status_code=403, detail="Managing accounts with administrative or platform roles requires tenant administration permission")
     target_is_platform_developer = await db.scalar(
         select(Role.id)
         .join(UserRole, UserRole.role_id == Role.id)
