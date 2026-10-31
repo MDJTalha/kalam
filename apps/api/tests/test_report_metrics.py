@@ -4,6 +4,7 @@ from app.main import app
 
 TENANT = "demo-corporation"
 ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
+LEARNER = {"email": "learner@demo.corp", "password": "DemoOnly!1234"}
 
 
 def test_phase6_metric_contracts_reconcile():
@@ -27,6 +28,15 @@ def test_phase6_metric_contracts_reconcile():
         assert "text/csv" in people_export.headers["content-type"]
         assert "User ID,Email" in people_export.text
         assert "Enrollment ID,Learner Email" in enrollment_export.text
+
+        # Read access to dashboards must not automatically grant bulk exports
+        # containing employee-identifiable records.
+        learner_login = client.post("/api/v1/auth/login", json={"tenant_slug": TENANT, **LEARNER})
+        assert learner_login.status_code == 200, learner_login.text
+        learner_people_export = client.get("/api/v1/reports/export/people")
+        learner_learning_export = client.get("/api/v1/reports/export/enrollments")
+        assert learner_people_export.status_code == 403
+        assert learner_learning_export.status_code == 403
 
         summary_data = summary.json()
         effectiveness_data = effectiveness.json()
