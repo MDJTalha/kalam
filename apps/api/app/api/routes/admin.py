@@ -229,6 +229,13 @@ async def create_invitation(
     )
     if role is None:
         raise HTTPException(status_code=404, detail="Role not found")
+    if role.role_kind == "platform":
+        is_developer = await _is_platform_developer(user, db)
+        is_super_admin = await is_saas_super_admin(user, db)
+        if role.name.strip().lower() == "platform developer" and not is_developer:
+            raise HTTPException(status_code=403, detail="SaaS Super Admin cannot provision Platform Developer identities")
+        if not is_developer and not is_super_admin:
+            raise HTTPException(status_code=403, detail="Platform-role invitations require platform administration rights")
     existing = await db.scalar(
         select(User).where(User.tenant_id == user.tenant_id, User.email == str(payload.email).lower())
     )
@@ -324,6 +331,16 @@ async def update_user(
     )
     if target is None:
         raise HTTPException(status_code=404, detail="User not found")
+    target_is_platform_developer = await db.scalar(
+        select(Role.id)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .where(UserRole.user_id == target.id)
+        .where(Role.tenant_id == admin.tenant_id)
+        .where(Role.name.ilike("platform developer"))
+        .limit(1)
+    )
+    if target_is_platform_developer is not None and not await _is_platform_developer(admin, db):
+        raise HTTPException(status_code=403, detail="Platform Developer identities cannot be changed by SaaS Super Admin")
     if payload.manager_id is not None:
         manager = await db.scalar(
             select(User).where(
