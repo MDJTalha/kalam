@@ -127,6 +127,7 @@ PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     "SaaS Administrator": (
         "tenant.read", "tenant.manage", "users.read", "users.manage",
         "saas.platform.read", "saas.platform.manage",
+        "saas.customer_success.read",
         "saas.team.read", "saas.team.manage", "saas.roles.manage",
         "saas.audit.read", "audit.read", "integrations.manage",
     ),
@@ -147,7 +148,7 @@ PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "saas.finance.read", "saas.finance.manage", "saas.pricing.read",
     ),
     "Customer Success Manager": (
-        "saas.sales.read", "saas.customer_success.read",
+        "saas.sales.read", "saas.pricing.read", "saas.customer_success.read",
         "saas.customer_success.manage",
     ),
 }
