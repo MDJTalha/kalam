@@ -4,7 +4,10 @@ import { apiFetch, requireUser } from "@/lib/server-api";
 import { InquiryQueue, type Inquiry } from "@/app/dashboard/admin/inquiries/queue";
 
 export default async function SaaSInquiriesPage() {
-  await requireUser();
+  const user=await requireUser<{permissions?:string[]}>();
+  const canRead=user.permissions?.includes("saas.sales.read")??false;
+  const canManage=user.permissions?.includes("saas.sales.manage")??false;
+  if(!canRead)return <DashboardShell title="Leads & Inquiries" eyebrow="SaaS Sales"><div className="data-panel"><h2>Sales access is restricted</h2><p>Your role does not include inquiry review.</p></div></DashboardShell>;
   const response = await apiFetch("/api/v1/marketing/inquiries");
   if (!response.ok) {
     return <DashboardShell title="Leads & Inquiries" eyebrow="SaaS CRM" breadcrumbs={[{label:"SaaS Operations",href:"/dashboard/saas"},{label:"Leads & Inquiries"}]}>
@@ -28,7 +31,7 @@ export default async function SaaSInquiriesPage() {
     </div>
     <div className="data-panel">
       <p>Review inbound requests, update their status, and convert qualified organizations into CRM accounts and opportunities without re-entering the requester data.</p>
-      <InquiryQueue initial={inquiries}/>
+      <InquiryQueue initial={inquiries} canManage={canManage}/>
     </div>
   </DashboardShell>;
 }
