@@ -1,5 +1,5 @@
 import { DashboardShell } from "@/components/dashboard-shell";
-import { apiFetch, apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { SupportOperations, type SupportCaseAdmin, type SupportMetrics, type SupportPolicy } from "@/components/support-operations";
 
 export default async function SupportOperationsPage(){
@@ -7,11 +7,14 @@ export default async function SupportOperationsPage(){
   if(!user.permissions?.includes("tenant.manage")){
     return <DashboardShell title="Support Operations" eyebrow="Platform administration"><section className="data-panel"><div className="empty-state"><h2>Support operations unavailable</h2><p>This workspace requires tenant administration permission.</p></div></section></DashboardShell>;
   }
-  const [response,policyResult,metricsResult]=await Promise.all([
-    apiFetch("/api/v1/support/admin/cases"),
+  const [casesResult,policyResult,metricsResult]=await Promise.all([
+    apiJsonResult<SupportCaseAdmin[]>("/api/v1/support/admin/cases"),
     apiJsonResult<SupportPolicy>("/api/v1/support/admin/policy"),
     apiJsonResult<SupportMetrics>("/api/v1/support/admin/metrics"),
   ]);
-  const cases=response.ok?await response.json() as SupportCaseAdmin[]:null;
-  return <DashboardShell title="Support Operations" eyebrow="Tenant support queue" breadcrumbs={[{label:"Administration",href:"/dashboard/admin"},{label:"Support Operations"}]}>{cases===null ? <section className="data-panel" role="alert"><h2>Support queue unavailable</h2><p>The support queue could not be loaded. Refresh and try again before making an operational decision.</p></section> : <SupportOperations initialCases={cases} initialPolicy={policy} initialMetrics={metrics}/>}</DashboardShell>;
+  const cases=casesResult.data;
+  const policy=policyResult.data;
+  const metrics=metricsResult.data;
+  const failed=[casesResult,policyResult,metricsResult].filter(result=>!result.ok);
+  return <DashboardShell title="Support Operations" eyebrow="Tenant support queue" breadcrumbs={[{label:"Administration",href:"/dashboard/admin"},{label:"Support Operations"}]}>{failed.length ? <section className="data-panel" role="alert"><h2>Support operations unavailable</h2><p>{failed.map(result=>`HTTP ${result.status}: ${result.error || "request failed"}`).join(" · ")}</p></section> : <SupportOperations initialCases={cases ?? []} initialPolicy={policy!} initialMetrics={metrics!}/>}</DashboardShell>;
 }
