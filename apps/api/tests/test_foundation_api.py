@@ -117,6 +117,38 @@ def test_people_directory_page_is_bounded_and_permissioned(client: TestClient) -
     assert client.get("/api/v1/people/page", params={"page_size": 101}).status_code == 422
 
 
+def test_skills_page_is_bounded_searchable_and_tenant_scoped(client: TestClient) -> None:
+    login(client, LEARNER)
+    first = client.get("/api/v1/skills/page", params={"page": 1, "page_size": 1, "q": "Ethical"})
+    assert first.status_code == 200, first.text
+    payload = first.json()
+    assert payload["page"] == 1
+    assert payload["page_size"] == 1
+    assert payload["total"] >= 1
+    assert len(payload["items"]) == 1
+    assert payload["items"][0]["name"] == "Ethical Decision Making"
+    assert client.get("/api/v1/skills/page", params={"page_size": 101}).status_code == 422
+
+
+def test_compliance_reference_pages_are_bounded(client: TestClient) -> None:
+    login(client, ADMIN)
+    requirements = client.get("/api/v1/compliance/page", params={"page": 1, "page_size": 1, "q": "Annual Ethics"})
+    assert requirements.status_code == 200, requirements.text
+    requirement_payload = requirements.json()
+    assert requirement_payload["total"] >= 1
+    assert len(requirement_payload["items"]) == 1
+    assert requirement_payload["items"][0]["name"] == "Annual Ethics Training"
+    assert client.get("/api/v1/compliance/page", params={"page_size": 101}).status_code == 422
+
+    courses = client.get("/api/v1/compliance/courses/page", params={"page": 1, "page_size": 1, "q": "Workplace"})
+    assert courses.status_code == 200, courses.text
+    course_payload = courses.json()
+    assert course_payload["total"] >= 1
+    assert len(course_payload["items"]) == 1
+    assert course_payload["items"][0]["title"] == "Workplace Ethics & Responsible Conduct"
+    assert client.get("/api/v1/compliance/courses/page", params={"page_size": 101}).status_code == 422
+
+
 def test_authenticated_profile_is_available(client: TestClient) -> None:
     login(client, LEARNER)
     response = client.get("/api/v1/auth/me")
