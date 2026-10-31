@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { GitBranch } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LearningPathEditor } from "@/components/learning-path-editor";
-import { apiJson, apiJsonResult, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 import { StateMessage } from "@/components/ui";
 
 type Item = { course_id: string; title: string; position: number; prerequisite_item_id?: string | null };
@@ -17,8 +17,8 @@ export default async function LearningPathDetail({ params }: { params: Promise<{
   const canManage = user.permissions?.includes("courses.manage") ?? false;
   const { id } = await params;
   const [path, enrollments, courses] = await Promise.all([
-    apiJson<Path>(`/api/v1/programs/paths/${id}`),
-    apiJson<Enrollment[]>("/api/v1/courses/my/enrollments"),
+    apiJsonResult<Path>(`/api/v1/programs/paths/${id}`).then((result) => result.ok ? result.data : null),
+    apiJsonResult<Enrollment[]>("/api/v1/courses/my/enrollments").then((result) => result.ok ? result.data : null),
     canManage ? apiJsonResult<CoursePage>("/api/v1/courses/page?page=1&page_size=100&manage=true") : Promise.resolve(null),
   ]);
   if (!path) notFound();
