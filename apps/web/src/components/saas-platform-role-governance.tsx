@@ -25,7 +25,7 @@ export function SaaSPlatformRoleGovernance({ enabled }: { enabled: boolean }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [keys, setKeys] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(enabled);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -48,7 +48,28 @@ export function SaaSPlatformRoleGovernance({ enabled }: { enabled: boolean }) {
     }
   }, [enabled]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    async function loadInitialRoles() {
+      try {
+        const [roleRows, permissionRows] = await Promise.all([
+          requestJson("/api/lms/saas/crm/team/roles") as Promise<CustomRole[]>,
+          requestJson("/api/lms/saas/crm/team/role-permissions") as Promise<SaaSPermission[]>,
+        ]);
+        if (!active) return;
+        setRoles(roleRows);
+        setPermissions(permissionRows);
+        setError("");
+      } catch (err) {
+        if (active) setError(err instanceof Error ? err.message : "Custom platform roles could not be loaded.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void loadInitialRoles();
+    return () => { active = false; };
+  }, [enabled]);
 
   function selectRole(role: CustomRole) {
     setSelectedId(role.id);
