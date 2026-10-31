@@ -1,12 +1,12 @@
 # Kalam — Release Certification Status
 Date: 2026-10-31
-Candidate baseline: `592444df15df1aa666da8cf8a1fac731334c2ab4`
+Current main candidate observed: `e3d8341dfb9b2980cc483e2c98259145abe3c59e`
 
 ## Executive status
 
 **Engineering-hardened / release-candidate pending runtime certification.**
 
-This ledger deliberately distinguishes source implementation from independently executed runtime evidence. Kalam must not be labelled production-certified 9.99/10 until every hard gate below has evidence tied to the exact immutable candidate.
+This ledger distinguishes source implementation from independently executed runtime evidence. Kalam must not be labelled production-certified 9.99/10 until every hard gate below has evidence tied to one exact immutable candidate.
 
 ## Closed or substantially closed source gates
 
@@ -14,9 +14,10 @@ This ledger deliberately distinguishes source implementation from independently 
 - Cross-tenant regression coverage exists for governed files, capability/development data, reports, integrations and webhooks.
 - Enrollment/completion persistence is implemented.
 - Capability-gap recalculation is implemented.
-- `requireUser()` correctly separates 401 sign-in, 403 access-denied, and service failure handling.
-- `apiJsonResult()` preserves HTTP status and API error detail.
-- Enterprise selectors/read paths have received pagination/bounding hardening, including webhook listing.
+- `requireUser()` separates 401 sign-in, 403 access-denied, and service-failure handling.
+- `apiJsonResult()` is the canonical status-aware server API contract; the legacy generic `apiJson()` helper has been removed from application code.
+- Business-critical Compliance, People, and L&D Operations pages use status-aware API handling.
+- Enterprise selectors/read paths have received bounding hardening. Current main also bounds compatibility organization unit/role lists to a validated maximum of 100 and includes regression coverage.
 - Backup manifest, SHA-256/size verification and pg_restore catalog inspection are implemented.
 - Main CI is configured for API, web and release-configuration validation.
 
@@ -24,7 +25,7 @@ This ledger deliberately distinguishes source implementation from independently 
 
 | Gate | Current state | Required evidence |
 |---|---|---|
-| Exact-candidate CI | NOT CERTIFIED | Fresh hosted API/Web/release-config run for the immutable candidate SHA. |
+| Exact-candidate CI | NOT CERTIFIED | Fresh hosted API/Web/release-config run for the immutable candidate SHA. Connector lookup currently exposes no PR-triggered run/status for current main. |
 | Full API regression | NOT CERTIFIED | Complete suite result and artifact tied to the candidate. |
 | Browser E2E | NOT CERTIFIED | Real authenticated role matrix covering admin, HR/L&D, manager, instructor, learner, auditor/compliance. |
 | Tenant isolation | SOURCE + REGRESSION COVERAGE | Execute negative A→B access matrix in a live disposable/staging environment. |
@@ -34,8 +35,8 @@ This ledger deliberately distinguishes source implementation from independently 
 | Backup restore | NOT CERTIFIED | Actual clean-database restore, integrity checks and measured recovery duration. |
 | DR/failover | NOT CERTIFIED | Executed failover/recovery with measured RTO/RPO. |
 | AWS production | NOT CERTIFIED | TLS, secrets, migrations, health checks, monitoring, integrations and rollback evidence. |
-| API helper migration | PARTIALLY CLOSED | Review remaining generic `apiJson()` callers and migrate business-critical paths to status-aware handling. |
-| Reference-data bounds | HARDENING INCOMPLETE | Finish audit of broad enterprise reference-data consumers and bound/search/paginate them. |
+| API helper migration | SOURCE CLOSED | Legacy generic helper removed; runtime regression remains part of exact-candidate certification. |
+| Reference-data bounds | SUBSTANTIALLY HARDENED / AUDIT OPEN | Compatibility organization lists are now bounded; finish systematic audit for any remaining broad enterprise consumers. |
 | AI activation | NOT CERTIFIED | Provider, grounding, safety, tenant isolation, human override and audit evidence before enabling real-provider AI. |
 
 ## Exact evidence package
@@ -56,8 +57,8 @@ This ledger deliberately distinguishes source implementation from independently 
 
 ## Environment constraint
 
-The connected Desktop Commander device **MDT** is currently offline in this session. Consequently, this ledger makes no claim that local PowerShell, Docker, PostgreSQL, browser, staging, AWS, backup/restore or DR commands have been executed here.
+The previously connected Desktop Commander device **MDT** is not available for runtime execution in this session. Consequently, this ledger makes no claim that local PowerShell, Docker, PostgreSQL, browser, staging, AWS, backup/restore or DR commands have been executed here.
 
 ## Certification rule
 
-No source-only assertion, historical CI run, or developer declaration substitutes for runtime evidence. **9.99/10 production certification remains blocked until every hard gate is evidenced for the exact candidate.**
+No source-only assertion, historical CI run, or developer declaration substitutes for runtime evidence. **9.99/10 production certification remains blocked until every hard gate is evidenced for the exact immutable candidate.**
