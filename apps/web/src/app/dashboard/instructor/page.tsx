@@ -38,7 +38,7 @@ export default async function InstructorWorkspacePage() {
       <MetricCard label="Upcoming sessions" value={upcoming.length} detail="Your next scheduled deliveries" icon={CalendarDays}/>
       <MetricCard label="Sessions delivered" value={completed.length} detail="Past sessions assigned to you" icon={Activity}/>
       <MetricCard label="Attendance" value={attendance===null?"—":attendance+"%"} detail="Present and late among marked records" icon={UsersRound}/>
-      <MetricCard label="Assessment access" value={user.permissions?.includes("assessments.manage")?"Enabled":"View only"} detail="Role-authorized assessment actions" icon={ClipboardCheck}/>
+      <MetricCard label="Assessment access" value={user.permissions?.includes("assessments.grade_assigned")?"Assigned grading":user.permissions?.includes("assessments.manage")?"Administration":"View only"} detail="Review submissions for your assigned sessions" icon={ClipboardCheck}/>
     </div>
     <SectionCard eyebrow="Delivery schedule" title="Upcoming sessions" meta={upcoming.length+" sessions"}>
       <DataTable columns={["Session","Start","End","Location","Status","Actions"]} empty={<EmptyState title="No upcoming sessions" description="No future sessions are currently assigned to your instructor account."/>} rows={upcoming.map(session=>[
