@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+
 from app.core.security import session_token_hash, utcnow
 from app.db.models import DeveloperSupportSession, Permission, Role, RolePermission, SessionRecord, Tenant, User, UserRole
 from app.db.session import get_db
@@ -48,6 +49,38 @@ async def get_current_user(
     return effective
 
 
+async def is_saas_ops_user(user: User, db: AsyncSession) -> bool:
+    """Return true only for identities whose persisted home tenant is the SaaS operations tenant."""
+    slug = settings.saas_ops_tenant_slug or settings.marketing_review_tenant_slug
+    if not slug:
+        return False
+    home_tenant_id = await db.scalar(select(User.tenant_id).where(User.id == user.id))
+    if home_tenant_id is None:
+        return False
+    return await db.scalar(
+        select(Tenant.id).where(Tenant.id == home_tenant_id, Tenant.slug == slug)
+    ) is not None
+
+
+async def is_saas_super_admin(user: User, db: AsyncSession) -> bool:
+    """Recognize the explicit SaaS Super Admin role in its own operations tenant."""
+    slug = settings.saas_ops_tenant_slug or settings.marketing_review_tenant_slug
+    if not slug:
+        return False
+    result = await db.execute(
+        select(Role.id)
+        .join(UserRole, UserRole.role_id == Role.id)
+        .join(User, User.id == UserRole.user_id)
+        .join(Tenant, Tenant.id == Role.tenant_id)
+        .where(UserRole.user_id == user.id)
+        .where(User.tenant_id == Tenant.id)
+        .where(Tenant.slug == slug)
+        .where(Role.role_kind == "platform")
+        .where(Role.name.ilike("saas super admin"))
+    )
+    return result.scalar_one_or_none() is not None
+
+
 async def is_platform_developer(user: User, db: AsyncSession) -> bool:
     """Recognize only a Kalam-owned account carrying Kalam's platform role.
 
@@ -76,18 +109,17 @@ async def user_has_permission(
     db: AsyncSession,
     permission_key: str,
 ) -> bool:
-    # CRM is a Kalam-internal capability and must never be granted to a
-    # customer-tenant identity, even if a stale role-permission row exists.
+    # Platform Developer is the internal engineering/support role and may
+    # exercise product permissions after normal authentication/session checks.
     platform_developer = await is_platform_developer(user, db)
-    if permission_key.startswith("saas.crm.") and not platform_developer:
-        return False
-
-    # Platform Developer is the internal product-development role. It must be
-    # able to exercise every product permission for support, QA and debugging.
-    # This is role-based (not tenant/customer-specific) and does not bypass the
-    # normal tenant/session boundary enforced by get_current_user().
     if platform_developer:
         return True
+
+    # CRM permissions are available only to identities whose persisted home
+    # tenant is the configured SaaS operations tenant. Customer tenant roles
+    # cannot gain CRM access by receiving a stale or accidentally assigned grant.
+    if permission_key.startswith("saas.crm.") and not await is_saas_ops_user(user, db):
+        return False
 
     result = await db.execute(
         select(Permission.id)
