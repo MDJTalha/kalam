@@ -30,7 +30,7 @@ export default async function SaaSPricingPage(){
         <span key="c">{p.trial_days?p.trial_days+" days":"No public trial"}</span>,
         <StatusBadge key="d" status={p.status}/>,
         <StatusBadge key="e" status={p.public_visible?"published":"private"}/>,
-        {canManage?<PlanQuickActions key="f" id={p.id} publicVisible={p.public_visible} status={p.status}/>:<span key="f">Read only</span>}
+        canManage?<PlanQuickActions key="f" id={p.id} publicVisible={p.public_visible} status={p.status}/>:<span key="f">Read only</span>
       ])}/>
     </SectionCard>
     <div className="two-column">
