@@ -119,6 +119,20 @@ async def main() -> None:
                 role.role_kind = "platform"
             roles[name] = role
 
+            # Revoke retired broad CRM grants from predefined operator roles.
+            # The current role catalogue is the source of truth for SaaS-domain
+            # permissions; retaining old crm.manage grants would defeat duty split.
+            current_saas_keys = {key for key in keys if key.startswith("saas.")}
+            existing_grants = (await db.execute(
+                select(RolePermission, Permission)
+                .join(Permission, Permission.id == RolePermission.permission_id)
+                .where(RolePermission.role_id == role.id)
+                .where(Permission.key.like("saas.%"))
+            )).all()
+            for assignment, permission_row in existing_grants:
+                if permission_row.key not in current_saas_keys:
+                    await db.delete(assignment)
+
             for key in keys:
                 permission = permissions[key]
                 exists = await db.scalar(
