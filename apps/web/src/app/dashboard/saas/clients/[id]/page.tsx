@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { AccountOwnerControl, AccountProfileForm, ActivityCreateForm, ContactCreateForm, OnboardingQuickActions, OnboardingTemplateButton, ProvisionTenantButton } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type OnboardingItem={id:string;account_id:string;category:string;title:string;status:string;due_at?:string|null;completed_at?:string|null;notes?:string|null};
 type TeamMember={id:string;name:string;is_active:boolean};
@@ -32,6 +32,13 @@ function money(minor:number,currency:string){
 }
 
 export default async function SaaSClientDetailPage({params}:{params:Promise<{id:string}>}){
+  const user=await requireUser<{permissions?:string[]}>();
+  const permissions=user.permissions??[];
+  const canManageSales=permissions.includes("saas.sales.manage");
+  const canManageCustomerSuccess=permissions.includes("saas.customer_success.manage");
+  const canReadFinance=permissions.includes("saas.finance.read");
+  const canReadCustomerSuccess=permissions.includes("saas.customer_success.read");
+  const canReadTeam=permissions.includes("saas.team.read");
   const {id}=await params;
   const [account,onboarding,team,contracts,invoices,payments]=await Promise.all([
     apiJson<AccountDetail>("/api/v1/saas/crm/accounts/"+id),
@@ -58,7 +65,7 @@ export default async function SaaSClientDetailPage({params}:{params:Promise<{id:
       </div>
       <div className="page-heading-actions">
         {account.website&&<a className="button button-secondary" href={account.website} target="_blank" rel="noreferrer">Website <ExternalLink size={14}/></a>}
-        <ProvisionTenantButton accountId={account.id} disabled={!!account.managed_tenant}/>
+        {canManageCustomerSuccess?<ProvisionTenantButton accountId={account.id} disabled={!!account.managed_tenant}/>:null}
       </div>
     </div>
 
@@ -66,17 +73,17 @@ export default async function SaaSClientDetailPage({params}:{params:Promise<{id:
       <MetricCard label="Lifecycle" value={<StatusBadge status={account.lifecycle_stage}/>} detail={account.account_type} icon={Building2}/>
       <MetricCard label="Contacts" value={account.contacts.length} detail="Commercial stakeholders" icon={UsersRound}/>
       <MetricCard label="Open pipeline" value={openOpportunities.length} detail="Active opportunities" icon={Handshake}/>
-      <MetricCard label="Commercial state" value={activeSubscription?"Subscribed":activeTrial?"Trial":"Pre-contract"} detail={(contracts?.length||0)+" contracts · "+openInvoices.length+" open invoices"} icon={CircleDollarSign}/>
+      <MetricCard label="Commercial state" value={activeTrial?"Trial":"Active opportunity"} detail={openOpportunities.length+" active pipeline opportunities"} icon={Handshake}/>
     </div>
 
     <div className="two-column">
-      <SectionCard eyebrow="Organization" title="Account profile"><AccountProfileForm account={account}/></SectionCard>
+      <SectionCard eyebrow="Organization" title="Account profile">{canManageSales?<AccountProfileForm account={account}/>:<div className="detail-grid"><span><b>Website</b>{account.website||"—"}</span><span><b>Industry</b>{account.industry||"—"}</span><span><b>Country</b>{account.country||"—"}</span><span><b>Employee band</b>{account.employee_band||"—"}</span><span><b>Notes</b>{account.notes||"—"}</span></div>}</SectionCard>
       <SectionCard eyebrow="Workspace linkage" title="Tenant & commercial context">
         <div className="detail-grid">
           <span><b>CRM slug</b>{account.slug}</span>
           <span><b>Lifecycle</b>{account.lifecycle_stage}</span>
           <span><b>Plan</b>{account.plan?.name||"Not assigned"}</span>
-          <span><b>Owner</b><AccountOwnerControl accountId={account.id} ownerUserId={account.owner?.id} team={team||[]}/></span>
+          <span><b>Owner</b>{canManageSales&&canReadTeam?<AccountOwnerControl accountId={account.id} ownerUserId={account.owner?.id} team={team||[]}/>:account.owner?.name||"Unassigned"}</span>
           <span><b>Tenant</b>{account.managed_tenant?.slug||"Not provisioned"}</span>
           <span><b>Tenant status</b>{account.managed_tenant?.status||"—"}</span>
           <span><b>Public showcase</b>{account.public_showcase?"Published":"Private"}</span>
@@ -92,7 +99,7 @@ export default async function SaaSClientDetailPage({params}:{params:Promise<{id:
           {account.contacts.length?account.contacts.map(contact=><div className="compact-row" key={contact.id}><div><strong>{contact.first_name} {contact.last_name}{contact.is_primary?" · Primary":""}</strong><small>{contact.job_title||"Commercial stakeholder"}</small><small>{contact.email&&<a className="text-link" href={`mailto:${contact.email}`}>{contact.email}</a>}{contact.email&&contact.phone?" · ":""}{contact.phone&&<a className="text-link" href={`tel:${contact.phone}`}>{contact.phone}</a>}</small></div></div>):<EmptyState title="No contacts recorded" description="Add commercial stakeholders for this organization."/>}
         </div>
       </SectionCard>
-      <SectionCard eyebrow="Add stakeholder" title="New contact"><ContactCreateForm accountId={account.id}/></SectionCard>
+      {canManageSales&&<SectionCard eyebrow="Add stakeholder" title="New contact"><ContactCreateForm accountId={account.id}/></SectionCard>}
     </div>
 
     <SectionCard eyebrow="Pipeline" title="Opportunities" meta={account.opportunities.length+" records"}>
@@ -106,15 +113,15 @@ export default async function SaaSClientDetailPage({params}:{params:Promise<{id:
     </SectionCard>
 
     <div className="two-column">
-      <SectionCard eyebrow="Evaluation" title="Trials" meta={account.trials.length+" records"}>
+      {canReadCustomerSuccess&&<SectionCard eyebrow="Evaluation" title="Trials" meta={account.trials.length+" records"}>
         <div className="compact-list">{account.trials.length?account.trials.map(item=><div className="compact-row" key={item.id}><div><strong>{item.seats} seats</strong><small>{item.starts_at?new Date(item.starts_at).toLocaleDateString():"No start date"} → {item.ends_at?new Date(item.ends_at).toLocaleDateString():"No end date"}</small></div><StatusBadge status={item.status}/></div>):<EmptyState title="No trials" description="Trial records for this account will appear here." icon={FlaskConical}/>}</div>
-      </SectionCard>
-      <SectionCard eyebrow="Revenue" title="Subscriptions" meta={account.subscriptions.length+" records"}>
+      </SectionCard>}
+      {canReadFinance&&<SectionCard eyebrow="Revenue" title="Subscriptions" meta={account.subscriptions.length+" records"}>
         <div className="compact-list">{account.subscriptions.length?account.subscriptions.map(item=><div className="compact-row" key={item.id}><div><strong>{money(item.net_price_minor,item.currency)} · {item.seats} seats</strong><small>{item.billing_cycle}{item.contract_ref?" · "+item.contract_ref:""}{item.renews_at?" · renews "+new Date(item.renews_at).toLocaleDateString():""}</small></div><StatusBadge status={item.status}/></div>):<EmptyState title="No subscriptions" description="Signed commercial subscriptions for this account will appear here."/>}</div>
-      </SectionCard>
+      </SectionCard>}
     </div>
 
-    <div className="two-column">
+    {canReadFinance&&<div className="two-column">
       <SectionCard eyebrow="Commercial agreements" title="Contracts" meta={(contracts?.length||0)+" records"}>
         <div className="compact-list">{contracts?.length?contracts.map(item=><div className="compact-row" key={item.id}><div><strong>{item.reference}</strong><small>{money(item.total_value_minor,item.currency)} · {item.starts_at?new Date(item.starts_at).toLocaleDateString():"No start"} → {item.ends_at?new Date(item.ends_at).toLocaleDateString():"Open end"}</small></div><StatusBadge status={item.status}/></div>):<EmptyState title="No contracts" description="Formal commercial agreements for this account will appear here."/>}</div>
         <Link className="button button-secondary" href="/dashboard/saas/contracts">Open contracts</Link>
@@ -134,7 +141,7 @@ export default async function SaaSClientDetailPage({params}:{params:Promise<{id:
         <span key="c">{item.due_at?new Date(item.due_at).toLocaleDateString():"—"}</span>,
         <StatusBadge key="d" status={item.status}/>,
         <OnboardingQuickActions key="e" id={item.id} status={item.status}/>,
-      ])}/>:<EmptyState title="No onboarding checklist yet" description="Create the standard checklist when this organization enters implementation or trial onboarding."/>}
+      ])}/>:<EmptyState title="No onboarding checklist yet" description="Create the standard checklist when this organization enters implementation or trial onboarding."/>) }
     </SectionCard>
 
     <div className="two-column">
