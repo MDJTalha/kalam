@@ -29,9 +29,9 @@ export default async function SaaSTasksPage({searchParams}:{searchParams:Promise
   const taskPage=result.data!;
   const teamMembers=team.data ?? [];
 
-  const tasks=result.items;
-  const {open,overdue,due_soon:dueSoon,completed}=result.counts;
-  const pageCount=Math.max(1,Math.ceil(result.total/result.limit));
+  const tasks=taskPage.items;
+  const {open,overdue,due_soon:dueSoon,completed}=taskPage.counts;
+  const pageCount=Math.max(1,Math.ceil(taskPage.total/taskPage.limit));
   const pageHref=(target:number)=>{const search=new URLSearchParams();if(params.status)search.set("status",params.status);if(params.type)search.set("type",params.type);search.set("page",String(target));return "/dashboard/saas/tasks?"+search.toString();};
 
   return <DashboardShell title="Tasks" eyebrow="SaaS CRM" breadcrumbs={[{label:"SaaS Operations",href:"/dashboard/saas"},{label:"Tasks"}]}>
@@ -65,11 +65,11 @@ export default async function SaaSTasksPage({searchParams}:{searchParams:Promise
       />
       <nav className="toolbar-row saas-spaced-pagination" aria-label="Task pages">
         {page>1?<Link className="button button-secondary" href={pageHref(page-1)}>Previous</Link>:null}
-        <span>Page {page} of {pageCount} · {result.total} tasks</span>
+        <span>Page {page} of {pageCount} · {taskPage.total} tasks</span>
         {page<pageCount?<Link className="button button-secondary" href={pageHref(page+1)}>Next</Link>:null}
       </nav>
     </SectionCard>
 
-    <SectionCard eyebrow="New follow-up" title="Create task"><TaskCreateForm team={team}/></SectionCard>
+    <SectionCard eyebrow="New follow-up" title="Create task"><TaskCreateForm team={teamMembers}/></SectionCard>
   </DashboardShell>;
 }
