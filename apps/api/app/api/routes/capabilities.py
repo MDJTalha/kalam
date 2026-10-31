@@ -88,6 +88,7 @@ async def _owner(db, tenant_id, owner_id):
 
 @router.get("/categories")
 async def list_categories(
+    limit: int = Query(default=100, ge=1, le=100),
     user: User = Depends(require_permission("capabilities.read")),
     db: AsyncSession = Depends(get_db),
 ):
@@ -95,6 +96,7 @@ async def list_categories(
         select(CapabilityCategory)
         .where(CapabilityCategory.tenant_id == user.tenant_id)
         .order_by(CapabilityCategory.name)
+        .limit(limit)
     )
     return [
         {
