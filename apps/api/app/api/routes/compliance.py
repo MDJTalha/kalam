@@ -444,7 +444,7 @@ async def assign_requirement_to_applicable_users(
 
 @router.get("/reports/export")
 async def export_compliance_assignments(
-    user: User = Depends(require_permission("compliance.manage")),
+    user: User = Depends(require_permission("reports.export.compliance")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
@@ -466,13 +466,24 @@ async def export_compliance_assignments(
     def safe(value: object) -> str:
         text = str(value or "")
         return "'" + text if text.lstrip().startswith(("=", "+", "-", "@")) else text
-    for assignment, requirement, version, learner, course in result.all():
+    export_rows = result.all()
+    for assignment, requirement, version, learner, course in export_rows:
         writer.writerow([safe(assignment.id), safe(version.snapshot.get("name") if version else requirement.name),
                          assignment.requirement_version,
                          safe(f"{learner.first_name} {learner.last_name}".strip()),
                          safe(learner.email), safe(course.title if course else ""),
                          safe(assignment.status), safe(assignment.due_at),
                          safe(assignment.created_at)])
+    await audit(
+        db,
+        tenant_id=user.tenant_id,
+        actor_id=user.id,
+        action="report.export.compliance.assignments",
+        entity_type="report_export",
+        entity_id=str(user.id),
+        metadata={"record_count": len(export_rows), "export_type": "compliance_assignments"},
+    )
+    await db.commit()
     return Response(output.getvalue(), media_type="text/csv",
                     headers={"Content-Disposition": 'attachment; filename="compliance-assignments.csv"'})
 
