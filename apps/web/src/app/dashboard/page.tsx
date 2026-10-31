@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Activity, AlertTriangle, ArrowRight, Award, BookOpenCheck, CalendarDays, CheckCircle2, Clock3, FileText, ShieldCheck, Target, TrendingUp, UsersRound } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LearningMomentumChart, WorkforceUnitChart } from "./dashboard-visuals";
@@ -32,13 +33,36 @@ export default async function DashboardPage(){
   const isManager = roleNames.some(name => name === "manager" || name.includes("manager")) || /manager|head of|department head/.test(jobTitle);
   const isHrBp = roleNames.some(name => name.includes("hrbp") || name.includes("hr business partner")) || /hrbp|hr business partner|human resources business partner/.test(jobTitle);
   const isLd = roleNames.some(name => name.includes("hr/l&d") || name.includes("l&d") || name.includes("learning")) || /l&d|learning and development|learning & development/.test(jobTitle);
-  // Platform Developer uses the same standardized executive dashboard experience as tenant leadership.
-  // Scope and permissions remain different; the product surface stays consistent across tenants.
-  const isExecutive = roleNames.some(name => name.includes("tenant admin") || name.includes("global executive") || name.includes("executive") || name === "platform developer") || /ceo|chief|chro|coo|president|managing director/.test(jobTitle);
+  const isPeopleAdmin = roleNames.some(name => name.includes("hr / people administrator"));
+  const isTenantAdmin = roleNames.some(name => name === "tenant administrator" || name === "tenant admin");
+  const isTenantOwner = roleNames.some(name => name === "tenant owner");
+  const isQuality = roleNames.some(name => name === "quality & compliance");
+  const isAuditor = roleNames.some(name => name === "auditor");
+  const isExecutive = roleNames.some(name => name.includes("global executive") || name === "executive") || /ceo|chief|chro|coo|president|managing director/.test(jobTitle);
+
+  // Give internal SaaS operators the workspace that matches their job, rather
+  // than sending them through learner/compliance widgets that are not theirs.
+  if (roleNames.includes("platform developer")) redirect("/dashboard/admin");
+  if (roleNames.includes("saas super admin") || roleNames.includes("saas business owner")) redirect("/dashboard/saas");
+  if (roleNames.includes("saas administrator")) redirect("/dashboard/saas/team");
+  if (roleNames.includes("saas finance administrator")) redirect("/dashboard/saas/billing");
+  if (roleNames.includes("customer success manager")) redirect("/dashboard/saas/tenants");
+  if (roleNames.includes("sales operations") || roleNames.includes("sales viewer")) redirect("/dashboard/saas/pipeline");
+
   const canReport = permissions.includes("reports.read");
   const canSeeCapability = permissions.includes("users.read");
   const canAudit = permissions.includes("audit.read");
-  const roleMode = isExecutive ? "executive" : isLd ? "ld" : isHrBp ? "hrbp" : isManager ? "manager" : isTrainer ? "trainer" : "standard";
+  const roleMode = isExecutive ? "executive"
+    : isTenantOwner ? "owner"
+    : isTenantAdmin ? "admin"
+    : isLd ? "ld"
+    : isHrBp ? "hrbp"
+    : isPeopleAdmin ? "people"
+    : isQuality ? "quality"
+    : isAuditor ? "auditor"
+    : isManager ? "manager"
+    : isTrainer ? "trainer"
+    : "standard";
   const specializedView = roleMode !== "standard";
   const executiveView = roleMode === "executive" && canReport && canSeeCapability;
   const [enrollments,compliance,summary,engagement,intelligence,trends,risk,effectiveness,organization,audit,team,queue,sessions] = await Promise.all([
@@ -118,14 +142,26 @@ export default async function DashboardPage(){
   const trainerAttendance = trainerMarked ? Math.round(trainerPresent / trainerMarked * 100) : null;
   const roleCopy = {
     executive:{eyebrow:"Workforce intelligence",title:"Lead Workforce Capability.",description:"See where capability, learning, and compliance require leadership attention—at a glance.",primary:"Open workforce analytics",href:"/dashboard/analytics"},
+    owner:{eyebrow:"Organization stewardship",title:"Govern Your Learning Organization.",description:"Review high-level workforce, learning and compliance indicators without opening individual employee records.",primary:"Open organization reports",href:"/dashboard/reports"},
+    admin:{eyebrow:"Tenant administration",title:"Keep Your Workspace Governed.",description:"Coordinate people access, organizational structure, integrations and workforce controls for this tenant.",primary:"Open tenant administration",href:"/dashboard/admin"},
     ld:{eyebrow:"Learning & capability leadership",title:"Build Capability at Scale.",description:"Connect learning performance, capability gaps and delivery operations into one view of L&D effectiveness.",primary:"Open L&D analytics",href:"/dashboard/analytics"},
-    hrbp:{eyebrow:"Workforce partnership",title:"Strengthen Your Workforce.",description:"Understand the people, capability and compliance signals across the workforce you support.",primary:"Open workforce analytics",href:"/dashboard/analytics"},
-    manager:{eyebrow:"Team leadership",title:"Lead Your Team.",description:"Focus on the people, learning, compliance and development signals that need your attention.",primary:"Open team workspace",href:"/dashboard/team"},
+    hrbp:{eyebrow:"Workforce partnership",title:"Support Your Assigned Team.",description:"Review direct-report learning and compliance signals. Broader business-unit HR portfolios remain unavailable until explicit organizational scope is assigned.",primary:"Open scoped team workspace",href:"/dashboard/team"},
+    people:{eyebrow:"People operations",title:"Keep Workforce Records Accurate.",description:"Manage employee profiles, reporting lines, access lifecycle, and people-related compliance duties.",primary:"Open people administration",href:"/dashboard/people/admin"},
+    quality:{eyebrow:"Quality & compliance",title:"Protect Compliance Readiness.",description:"Review compliance obligations, evidence decisions and audit activity. Approvals must remain independent from evidence submission.",primary:"Open compliance operations",href:"/dashboard/compliance/admin"},
+    auditor:{eyebrow:"Independent assurance",title:"Trace Evidence and Decisions.",description:"Review the audit trail and governed evidence repository. Employee-wide exports are intentionally outside the auditor role.",primary:"Open audit records",href:"/dashboard/audit"},
+    manager:{eyebrow:"Team leadership",title:"Lead Your Team.",description:"Focus on direct reports, learning, compliance and development signals that need your attention.",primary:"Open team workspace",href:"/dashboard/team"},
     trainer:{eyebrow:"Learning delivery",title:"Deliver Learning.",description:"See what you are delivering, who is attending, and where learner follow-up is needed.",primary:"Open sessions",href:"/dashboard/sessions"},
-    standard:{eyebrow:"Learning, capability and evidence",title:"Your workforce at a glance",description:"Review recorded learning and compliance work. Organization measures appear when your role has reporting access.",primary:"Explore learning",href:"/dashboard/catalog"},
+    standard:{eyebrow:"Learning, capability and evidence",title:"Your learning at a glance",description:"Review your assigned learning, assessments, development goals and compliance obligations.",primary:"Explore learning",href:"/dashboard/catalog"},
   }[roleMode];
 
-  return <DashboardShell title={roleMode === "executive" ? "Executive Overview" : roleMode === "manager" ? "Team Overview" : roleMode === "ld" ? "L&D Overview" : roleMode === "hrbp" ? "Workforce Overview" : roleMode === "trainer" ? "Delivery Overview" : "Overview"} eyebrow={roleCopy.eyebrow}>
+  const pageTitle = {
+    executive:"Executive Overview", owner:"Tenant Owner Overview", admin:"Tenant Administration",
+    ld:"L&D Overview", hrbp:"HR Business Partner", people:"People Operations",
+    quality:"Quality & Compliance", auditor:"Audit & Evidence", manager:"Team Overview",
+    trainer:"Delivery Overview", standard:"My Learning",
+  }[roleMode];
+
+  return <DashboardShell title={pageTitle} eyebrow={roleCopy.eyebrow}>
     <section className="dashboard-command-hero" aria-labelledby="dashboard-command-title">
       <div className="dashboard-command-copy">
         <h2 id="dashboard-command-title">{roleCopy.title}</h2>
