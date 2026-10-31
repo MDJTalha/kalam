@@ -192,7 +192,7 @@ export function DevelopmentTeamReview({ members, initialSelectedId, organization
 
       {selectedPlan && <section className="data-panel">
         <div className="section-heading compact">
-          <div><span className="eyebrow">Read-only plan goals</span><h2>{selectedPlan.title}</h2><p>The employee owns their plan goals. Managers and HRBPs add milestones and reviewer feedback without editing the employee's goal statements.</p></div>
+          <div><span className="eyebrow">Read-only plan goals</span><h2>{selectedPlan.title}</h2><p>The employee owns their plan goals. Managers and HRBPs add milestones and reviewer feedback without editing the employee&apos;s goal statements.</p></div>
           <StatusBadge status={selectedPlan.status} />
         </div>
         <div className="compact-list">
