@@ -21,8 +21,8 @@ export default async function SaaSClientsPage({searchParams}:{searchParams:Promi
   listQuery.set("offset",String((page-1)*25));
   const accountPath="/api/v1/saas/crm/page/accounts?"+listQuery.toString();
   const [result,plans]=await Promise.all([
-    apiJson<AccountPage>(accountPath),
-    apiJson<Plan[]>("/api/v1/saas/crm/plans"),
+    apiJsonResult<AccountPage>(accountPath).then((result) => result.ok ? result.data : null),
+    apiJsonResult<Plan[]>("/api/v1/saas/crm/plans").then((result) => result.ok ? result.data : null),
   ]);
   if(!result||!plans)return <DashboardShell title="Clients" eyebrow="SaaS CRM"><EmptyState title="Client CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const accounts=result.items;
