@@ -7,6 +7,7 @@ from app.main import app
 
 TENANT = "demo-corporation"
 ADMIN = {"email": "admin@demo.corp", "password": "DemoOnly!1234"}
+LD_REVIEWER = {"email": "ld@demo.corp", "password": "DemoOnly!1234"}
 LEARNER = {"email": "learner@demo.corp", "password": "DemoOnly!1234"}
 
 
@@ -40,11 +41,15 @@ def test_evidence_lifecycle_and_provenance_are_governed():
         assert created.status_code == 201, created.text
         evidence_id = created.json()["id"]
         assert client.post("/api/v1/evidence", json=payload).status_code == 409
+        self_review = client.post(f"/api/v1/evidence/{evidence_id}/decision", json={"decision": "verified"})
+        assert self_review.status_code == 403
+        login(client, LD_REVIEWER)
         verified = client.post(f"/api/v1/evidence/{evidence_id}/decision", json={"decision": "verified"})
         assert verified.status_code == 200
         assert verified.json()["status"] == "verified"
         immutable = client.post(f"/api/v1/evidence/{evidence_id}/decision", json={"decision": "rejected", "reason": "Changed"})
         assert immutable.status_code == 409
+        login(client, ADMIN)
         summary = client.get(f"/api/v1/evidence/users/{learner_id}/summary")
         assert summary.status_code == 200
         row = next(item for item in summary.json()["verified_current_evidence"] if item["target_id"] == competency_id)
@@ -66,7 +71,9 @@ def test_expired_verified_evidence_is_excluded_from_current_state():
         })
         assert created.status_code == 201, created.text
         evidence_id = created.json()["id"]
+        login(client, LD_REVIEWER)
         assert client.post(f"/api/v1/evidence/{evidence_id}/decision", json={"decision": "verified"}).status_code == 200
+        login(client, ADMIN)
         summary = client.get(f"/api/v1/evidence/users/{learner_id}/summary")
         assert summary.status_code == 200
         assert all(item["target_id"] != competency_id for item in summary.json()["verified_current_evidence"])
