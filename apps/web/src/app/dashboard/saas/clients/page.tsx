@@ -54,8 +54,8 @@ export default async function SaaSClientsPage({searchParams}:{searchParams:Promi
           <StatusBadge key="b" status={a.lifecycle_stage}/>,
           <span key="c">{[a.industry,a.country,a.employee_band].filter(Boolean).join(" · ")||"—"}</span>,
           <StatusBadge key="d" status={a.public_showcase?"published":"private"}/>,
-          {canProvision?<ProvisionTenantButton key="e" accountId={a.id} disabled={!!a.managed_tenant_id}/>:<span key="e">{a.managed_tenant_id?"Provisioned":"Not provisioned"}</span>},
-          {canManageSales?<AccountQuickActions key="f" id={a.id} lifecycleStage={a.lifecycle_stage} publicShowcase={a.public_showcase}/>:<span key="f">Read only</span>}
+          canProvision?<ProvisionTenantButton key="e" accountId={a.id} disabled={!!a.managed_tenant_id}/>:<span key="e">{a.managed_tenant_id?"Provisioned":"Not provisioned"}</span>,
+          canManageSales?<AccountQuickActions key="f" id={a.id} lifecycleStage={a.lifecycle_stage} publicShowcase={a.public_showcase}/>:<span key="f">Read only</span>
         ])}/>
         <nav className="toolbar-row saas-spaced-pagination" aria-label="Account pages">
           {page>1?<Link className="button button-secondary" href={pageHref(page-1)}>Previous</Link>:null}
