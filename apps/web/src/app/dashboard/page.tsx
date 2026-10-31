@@ -44,6 +44,8 @@ export default async function DashboardPage(){
   // Give internal SaaS operators the workspace that matches their job, rather
   // than sending them through learner/compliance widgets that are not theirs.
   if (roleNames.includes("platform developer")) redirect("/dashboard/admin");
+  if (roleNames.includes("manager") && !isTenantAdmin && !isPeopleAdmin && !isLd && !isExecutive) redirect("/dashboard/manager");
+  if (roleNames.includes("instructor")) redirect("/dashboard/instructor");
   if (roleNames.includes("saas super admin") || roleNames.includes("saas business owner")) redirect("/dashboard/saas");
   if (roleNames.includes("saas administrator")) redirect("/dashboard/saas/team");
   if (roleNames.includes("saas finance administrator")) redirect("/dashboard/saas/billing");
