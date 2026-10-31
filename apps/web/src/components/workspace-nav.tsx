@@ -15,13 +15,13 @@ type NavItem = {
   href: string;
   label: string;
   icon: NavIcon;
-  permission?: string;
+  permission?: string | string[];
   exact?: boolean;
 };
 type NavGroup = { label: string; items: NavItem[] };
 
-const allowed = (permissions: string[], permission?: string) =>
-  !permission || permissions.includes(permission);
+const allowed = (permissions: string[], permission?: string | string[]) =>
+  !permission || (Array.isArray(permission) ? permission.some(key => permissions.includes(key)) : permissions.includes(permission));
 
 const item = (href: string, label: string, icon: NavIcon, permission?: string, exact = false): NavItem =>
   ({ href, label, icon, permission, exact });
@@ -44,7 +44,8 @@ const baseGroups: NavGroup[] = [
   { label: "Capability", items: [
     item("/dashboard/skills", "Skills & Capabilities", Layers3, "learning.access", true),
     item("/dashboard/skills/admin", "Capability Framework", GitBranch, "skills.manage"),
-    item("/dashboard/development", "Development Plans", Target, "learning.access"),
+    item("/dashboard/development", "My Development", Target, "learning.access"),
+    item("/dashboard/development/team", "Team Development Review", UsersRound, ["team.read", "users.read"]),
     item("/dashboard/capability-gaps", "Capability Gaps", ShieldCheck, "capability_gaps.read"),
     item("/dashboard/capability-risk", "Capability Risk", ShieldAlert, "capability_risk.read"),
   ] },
