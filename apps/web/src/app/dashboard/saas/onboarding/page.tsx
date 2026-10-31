@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { OnboardingItemCreateForm, OnboardingQuickActions } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Item={
   id:string;account_id:string;account_name:string;managed_tenant_id?:string|null;owner_user_id?:string|null;
@@ -17,8 +17,10 @@ async function requestTimestamp():Promise<number>{
 }
 
 export default async function SaaSOnboardingPage(){
-  const items=await apiJson<Item[]>("/api/v1/saas/crm/onboarding");
-  if(!items)return <DashboardShell title="Onboarding" eyebrow="SaaS CRM"><EmptyState title="Onboarding CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
+  await requireUser();
+  const result=await apiJsonResult<Item[]>("/api/v1/saas/crm/onboarding");
+  if(!result.ok) return <DashboardShell title="Onboarding" eyebrow="SaaS CRM"><section className="data-panel" role="alert"><h2>Onboarding data unavailable</h2><p>HTTP ${result.status}: ${result.error || "The onboarding service could not be reached."}</p></section></DashboardShell>;
+  const items=result.data ?? [];
 
   const now=await requestTimestamp();
   const pending=items.filter(i=>i.status==="pending").length;
