@@ -47,7 +47,7 @@ export default async function InstructorWorkspacePage() {
         <span key="c">{new Date(session.ends_at).toLocaleString()}</span>,
         <span key="d">{session.location||"Not specified"}</span>,
         <StatusBadge key="e" status={session.status}/>,
-        <Link key="f" className="text-link" href={"/dashboard/sessions/"+session.id}>Open session</Link>
+        <Link key="f" className="text-link" href={"/dashboard/sessions/"+session.id}>Open register</Link>
       ])}/>
     </SectionCard>
     <div className="two-column">
