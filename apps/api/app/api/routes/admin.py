@@ -468,6 +468,28 @@ async def update_user(
             )
             if another_active_super_admin is None:
                 raise HTTPException(status_code=409, detail="The last active SaaS Super Admin cannot be deactivated")
+        has_tenant_admin_role = await db.scalar(
+            select(Role.id)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == target.id)
+            .where(Role.tenant_id == admin.tenant_id)
+            .where(func.lower(Role.name).in_(("tenant owner", "tenant administrator", "tenant admin")))
+            .limit(1)
+        )
+        if has_tenant_admin_role is not None:
+            another_active_tenant_admin = await db.scalar(
+                select(User.id)
+                .join(UserRole, UserRole.user_id == User.id)
+                .join(Role, Role.id == UserRole.role_id)
+                .where(User.tenant_id == admin.tenant_id)
+                .where(User.is_active.is_(True))
+                .where(User.id != target.id)
+                .where(Role.tenant_id == admin.tenant_id)
+                .where(func.lower(Role.name).in_(("tenant owner", "tenant administrator", "tenant admin")))
+                .limit(1)
+            )
+            if another_active_tenant_admin is None:
+                raise HTTPException(status_code=409, detail="The last active Tenant Owner or Administrator cannot be deactivated")
         active_sessions = await db.execute(
             select(SessionRecord).where(SessionRecord.user_id == target.id, SessionRecord.revoked_at.is_(None))
         )
