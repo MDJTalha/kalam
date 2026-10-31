@@ -1712,18 +1712,34 @@ async def list_managed_tenant_users(
     if account is None:
         raise HTTPException(status_code=404, detail="Tenant is not linked to this CRM")
     rows = (await db.execute(
-        select(User).where(User.tenant_id == tenant_id).order_by(User.last_name, User.first_name, User.email)
-    )).scalars().all()
-    return [{
-        "id": str(item.id),
-        "email": item.email,
-        "first_name": item.first_name,
-        "last_name": item.last_name,
-        "job_title": item.job_title,
-        "is_active": item.is_active,
-        "locked": bool(item.locked_until and item.locked_until > datetime.now(timezone.utc)),
-        "last_login_at": item.last_login_at,
-    } for item in rows]
+        select(User, Role)
+        .outerjoin(UserRole, UserRole.user_id == User.id)
+        .outerjoin(Role, and_(Role.id == UserRole.role_id, Role.tenant_id == User.tenant_id))
+        .where(User.tenant_id == tenant_id)
+        .order_by(User.last_name, User.first_name, User.email, Role.name)
+    )).all()
+    grouped: dict[UUID, dict[str, Any]] = {}
+    for item, role in rows:
+        record = grouped.setdefault(item.id, {
+            "id": str(item.id),
+            "email": item.email,
+            "first_name": item.first_name,
+            "last_name": item.last_name,
+            "job_title": item.job_title,
+            "is_active": item.is_active,
+            "locked": bool(item.locked_until and item.locked_until > datetime.now(timezone.utc)),
+            "last_login_at": item.last_login_at,
+            "roles": [],
+        })
+        if role is not None:
+            role_assignment = {
+                "id": str(role.id),
+                "name": role.name,
+                "role_kind": role.role_kind,
+            }
+            if role_assignment not in record["roles"]:
+                record["roles"].append(role_assignment)
+    return list(grouped.values())
 
 
 @router.patch("/crm/tenants/{tenant_id}/users/{user_id}")
@@ -2541,6 +2557,20 @@ async def remove_managed_tenant_role(
     )
     if assignment is None:
         raise HTTPException(status_code=404, detail="Role assignment not found")
+    if role.name.strip().lower() in {"tenant owner", "tenant administrator", "tenant admin"}:
+        another_active_admin = await db.scalar(
+            select(User.id)
+            .join(UserRole, UserRole.user_id == User.id)
+            .join(Role, Role.id == UserRole.role_id)
+            .where(User.tenant_id == tenant_id)
+            .where(User.is_active.is_(True))
+            .where(User.id != target.id)
+            .where(Role.tenant_id == tenant_id)
+            .where(func.lower(Role.name).in_(("tenant owner", "tenant administrator", "tenant admin")))
+            .limit(1)
+        )
+        if another_active_admin is None:
+            raise HTTPException(status_code=409, detail="The last active tenant owner or administrator role cannot be removed")
     await db.delete(assignment)
     await audit(
         db, tenant_id=ops.id, actor_id=user.id, action="saas.tenant.user.role.removed",
