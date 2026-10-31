@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Search, BookOpenCheck, UsersRound, Layers3, Route } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 type SearchResult = {
   query: string;
