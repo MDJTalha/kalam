@@ -2512,7 +2512,7 @@ async def list_crm_team(
     rows = (await db.execute(
         select(User, Role)
         .outerjoin(UserRole, UserRole.user_id == User.id)
-        .outerjoin(Role, Role.id == UserRole.role_id)
+        .outerjoin(Role, and_(Role.id == UserRole.role_id, Role.tenant_id == User.tenant_id))
         .where(User.tenant_id == user.tenant_id)
         .order_by(User.is_active.desc(), User.first_name, User.last_name, Role.name)
     )).all()
@@ -2525,9 +2525,14 @@ async def list_crm_team(
             "job_title": member.job_title,
             "is_active": member.is_active,
             "roles": [],
+            "role_assignments": [],
         })
-        if role is not None and role.name not in record["roles"]:
-            record["roles"].append(role.name)
+        if role is not None:
+            if role.name not in record["roles"]:
+                record["roles"].append(role.name)
+            assignment = {"id": str(role.id), "name": role.name, "role_kind": role.role_kind}
+            if assignment not in record["role_assignments"]:
+                record["role_assignments"].append(assignment)
     return list(grouped.values())
 
 
