@@ -214,7 +214,11 @@ def upgrade() -> None:
     # Customer workspaces receive the tenant role catalogue. Existing roles are
     # preserved and only missing default grants are added.
     tenant_ids = conn.execute(
-        sa.text("SELECT id FROM tenants WHERE slug <> 'kalam'")
+        sa.text("""
+            SELECT id FROM tenants
+            WHERE slug <> 'kalam'
+              AND COALESCE(settings->>'workspace_type','') <> 'saas_operations'
+        """)
     ).fetchall()
     for (tenant_id,) in tenant_ids:
         for name, keys in TENANT_ROLE_PERMISSIONS.items():
@@ -229,7 +233,13 @@ def upgrade() -> None:
 
     # Internal SaaS roles live only in the configured operations tenant.
     ops_tenant_id = conn.execute(
-        sa.text("SELECT id FROM tenants WHERE slug='kalam'")
+        sa.text("""
+            SELECT id FROM tenants
+            WHERE COALESCE(settings->>'workspace_type','') = 'saas_operations'
+               OR slug='kalam'
+            ORDER BY CASE WHEN COALESCE(settings->>'workspace_type','')='saas_operations' THEN 0 ELSE 1 END
+            LIMIT 1
+        """)
     ).scalar()
     if ops_tenant_id is not None:
         for name, keys in PLATFORM_ROLE_PERMISSIONS.items():
