@@ -2,7 +2,7 @@ import Link from "next/link";
 import { UsersRound, Layers3, ArrowRight } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ProgramCreateForm } from "@/components/program-create-form";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 type Program = {
   id: string;
