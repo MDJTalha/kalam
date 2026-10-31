@@ -107,3 +107,30 @@ def test_customer_success_cannot_read_finance():
     assert {"saas.customer_success.read", "saas.customer_success.manage"} <= grants
     assert "saas.finance.read" not in grants
     assert "saas.finance.manage" not in grants
+
+
+def test_employee_identifiable_exports_are_granted_only_to_workforce_admin_roles():
+    assert "reports.export.people" in TENANT_ROLE_PERMISSIONS["Tenant Administrator"]
+    assert "reports.export.people" in TENANT_ROLE_PERMISSIONS["HR / People Administrator"]
+    assert "reports.export.people" not in TENANT_ROLE_PERMISSIONS["Tenant Owner"]
+    assert "reports.export.people" not in TENANT_ROLE_PERMISSIONS["Global Executive"]
+    assert "reports.export.learning" in TENANT_ROLE_PERMISSIONS["L&D Administrator"]
+    assert "reports.export.learning" not in TENANT_ROLE_PERMISSIONS["Auditor"]
+
+
+def test_hrbp_and_quality_roles_are_limited_to_their_job_scope():
+    hrbp = set(TENANT_ROLE_PERMISSIONS["HR Business Partner"])
+    assert {"team.read", "development.manage"} <= hrbp
+    assert "users.read" not in hrbp
+    assert "reports.read" not in hrbp
+
+    quality = set(TENANT_ROLE_PERMISSIONS["Quality & Compliance"])
+    assert {"compliance.manage", "audit.read", "files.read", "evidence.read"} <= quality
+    assert "users.read" not in quality
+    assert "reports.read" not in quality
+
+
+def test_sales_export_is_a_separate_grant():
+    assert "saas.sales.export" in PLATFORM_ROLE_PERMISSIONS["Sales Operations"]
+    assert "saas.sales.export" in PLATFORM_ROLE_PERMISSIONS["SaaS Super Admin"]
+    assert "saas.sales.export" not in PLATFORM_ROLE_PERMISSIONS["Sales Viewer"]
