@@ -129,7 +129,7 @@ export default async function SaaSClientDetailPage({params}:{params:Promise<{id:
         <p className="muted">{payments?.filter(item=>item.status==="received").length||0} received payments recorded for this account.</p>
         <Link className="button button-secondary" href="/dashboard/saas/billing">Open billing</Link>
       </SectionCard>
-    </div>
+    </div>}
 
     {canReadCustomerSuccess&&<SectionCard eyebrow="Implementation readiness" title="Customer onboarding" meta={(onboarding?.length||0)+" tasks"}>
       <div className="section-actions saas-spaced-actions">
