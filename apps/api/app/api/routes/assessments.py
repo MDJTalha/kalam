@@ -142,6 +142,8 @@ async def list_assessments(
         .where(Assessment.tenant_id == user.tenant_id)
     )
     if not can_manage:
+        if not can_grade_assigned:
+            stmt = stmt.where(Assessment.active.is_(True))
         accessible_course_ids: set[UUID] = set()
         if can_grade_assigned:
             assigned_courses = await db.execute(
@@ -225,7 +227,9 @@ async def get_assessment(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    assessment, _scope = await _get_assessment_with_scope(assessment_id, user, db)
+    assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
+    if scope == "learner" and not assessment.active:
+        raise HTTPException(status_code=404, detail="Assessment not found")
     questions = await db.execute(
         select(Question.id, Question.question_type, Question.prompt, Question.options, Question.points, Question.position)
         .where(Question.assessment_id == assessment.id)
@@ -266,6 +270,8 @@ async def start_assessment(
     assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
     if scope != "learner":
         raise HTTPException(status_code=403, detail="Only enrolled learners can start this assessment")
+    if not assessment.active:
+        raise HTTPException(status_code=409, detail="This assessment is no longer active")
 
     question_count = await db.scalar(select(func.count(Question.id)).where(Question.assessment_id == assessment.id))
     if not question_count:
@@ -321,6 +327,8 @@ async def submit_assessment(
     assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
     if scope != "learner":
         raise HTTPException(status_code=403, detail="Only enrolled learners can submit this assessment")
+    if not assessment.active:
+        raise HTTPException(status_code=409, detail="This assessment is no longer active")
     attempts_count = await db.scalar(
         select(func.count(AssessmentAttempt.id)).where(
             AssessmentAttempt.assessment_id == assessment.id,
