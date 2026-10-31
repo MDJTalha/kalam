@@ -1,6 +1,6 @@
 # Kalam — Release Certification Status
 Date: 2026-10-31
-Current main candidate observed: `637f6b7481fb6b2b8ca43719e5c4ee924720a465`
+Current main candidate observed: `2a26dd18ad57c024d99be5216db77eb76781ca8a`
 
 ## Executive status
 
@@ -57,14 +57,14 @@ This ledger distinguishes source implementation from independently executed runt
 
 ## Environment constraint
 
-The previously connected Desktop Commander device **MDT** is not available for runtime execution in this session. Consequently, this ledger makes no claim that local PowerShell, Docker, PostgreSQL, browser, staging, AWS, backup/restore or DR commands have been executed here.
+The connected Desktop Commander device **MDT** is available for repository/runtime diagnostics. Current infrastructure checks show the AWS session has expired and the active Kubernetes context is `docker-desktop`, not a staging/production cluster. Local Docker is available. Consequently, this ledger still makes no claim of staging/production AWS deployment, production secrets injection, browser/UAT certification, backup/restore, or DR execution.
 
 ## Current mainline evidence
 
-- Merged certification candidate: `637f6b7481fb6b2b8ca43719e5c4ee924720a465`.
-- PR #29 was merged after hosted CI run #466 (`41213279219`) completed successfully against the exact pre-merge tree: API, Web, and release-config all passed, including production-image runtime smoke.
+- Merged certification candidate: `2a26dd18ad57c024d99be5216db77eb76781ca8a`.
+- PR #29 was merged previously after hosted CI run #466 (`41213279219`) completed successfully against its exact pre-merge tree. The final mainline migration reconciliation was then merged as PR #30 (`2a26dd18ad57c024d99be5216db77eb76781ca8a`) after hosted CI run #470 (`41214013410`) completed successfully against the exact PR #30 tree: API, Web, and release-config all passed, including production-image runtime smoke.
 - The merge commit is a squash of the certification branch; its diff contains the same application migration/removal changes that were exercised by the successful CI candidate.
-- The GitHub connector exposes PR-triggered runs only; no separate push-triggered run is currently surfaced for the merge SHA.
+- The GitHub connector exposes PR-triggered runs only; no separate push-triggered run is currently surfaced for the merge SHA. PR #30's hosted run #470 is the latest exact application-tree CI evidence.
 
 ## Certification rule
 
