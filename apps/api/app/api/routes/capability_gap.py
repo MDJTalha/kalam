@@ -165,9 +165,18 @@ async def _competency_fallback(
 
 
 async def _compute(
-    db, user, only_user_id=None, role_id=None, bypass_authorization=False
+    db,
+    user,
+    only_user_id=None,
+    role_id=None,
+    bypass_authorization=False,
+    forced_user_ids: set[UUID] | None = None,
 ):
-    allowed = None if bypass_authorization else await _authorized_user_ids(user, db)
+    allowed = (
+        forced_user_ids
+        if forced_user_ids is not None
+        else None if bypass_authorization else await _authorized_user_ids(user, db)
+    )
     if only_user_id:
         if allowed is not None and only_user_id not in allowed:
             raise HTTPException(403, "You may only view your own capability gaps")
@@ -435,13 +444,29 @@ async def gap_summary(
         "team",
         "role",
         "person",
+        "direct_reports",
     }:
         raise HTTPException(422, "Invalid scope")
+    forced_user_ids = None
+    if scope == "direct_reports":
+        if not await user_has_permission(user, db, "team.read"):
+            raise HTTPException(403, "Direct-report capability scope is not permitted")
+        reports = (
+            await db.execute(
+                select(User.id).where(
+                    User.tenant_id == user.tenant_id,
+                    User.manager_id == user.id,
+                    User.is_active.is_(True),
+                )
+            )
+        ).scalars().all()
+        forced_user_ids = {user.id, *reports}
     rows = await _compute(
         db,
         user,
         scope_id if scope == "person" else None,
         scope_id if scope == "role" else None,
+        forced_user_ids=forced_user_ids,
     )
     if scope in {"business_unit", "department", "team"}:
         if scope_id is None:
