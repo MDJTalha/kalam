@@ -15,7 +15,7 @@ export default async function SaaSSubscriptionsPage({searchParams}:{searchParams
   const page=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,100000):1;
   const query=new URLSearchParams({limit:"25",offset:String((page-1)*25)});
   if(params.status)query.set("status",params.status);
-  const result=await apiJson<SubscriptionPage>("/api/v1/saas/crm/page/subscriptions?"+query.toString());
+  const result=await apiJsonResult<SubscriptionPage>("/api/v1/saas/crm/page/subscriptions?"+query.toString()).then((result) => result.ok ? result.data : null);
   if(!result)return <DashboardShell title="Subscriptions" eyebrow="SaaS CRM"><EmptyState title="Subscription CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const subscriptions=result.items;
   const pageCount=Math.max(1,Math.ceil(result.total/result.limit));
