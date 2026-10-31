@@ -4,7 +4,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { GenerateRenewalTasksButton } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, MetricCard, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Renewal={
   subscription_id:string;account_id:string;account_name:string;plan_id?:string|null;plan_name?:string|null;
@@ -17,6 +17,9 @@ function money(minor:number,currency:string){
 }
 
 export default async function SaaSRenewalsPage(){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("saas.sales.manage")??false;
+  if(!user.permissions?.includes("saas.finance.read"))return <DashboardShell title="Renewals" eyebrow="SaaS Finance"><EmptyState title="Finance access is restricted" description="Contracted renewal values are finance-restricted."/></DashboardShell>;
   const renewals=await apiJson<Renewal[]>("/api/v1/saas/crm/renewals?days=180");
   if(!renewals)return <DashboardShell title="Renewals" eyebrow="SaaS CRM"><EmptyState title="Renewal CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
@@ -34,7 +37,7 @@ export default async function SaaSRenewalsPage(){
       <MetricCard label="91–180 days" value={later} detail="Longer-horizon renewals" icon={CircleDollarSign}/>
     </div>
     <SectionCard eyebrow="Renewal horizon" title="Active subscriptions renewing within 180 days" meta={renewals.length+" records"}>
-      <div className="section-actions saas-spaced-actions"><GenerateRenewalTasksButton/><Link className="button button-secondary" href="/dashboard/saas/tasks?type=renewal">Open renewal tasks</Link></div>
+      <div className="section-actions saas-spaced-actions">{canManage?<GenerateRenewalTasksButton/>:null}<Link className="button button-secondary" href="/dashboard/saas/tasks?type=renewal">Open renewal tasks</Link></div>
       <DataTable caption="Subscription renewal horizon"
         columns={["Account","Plan","Contract value","Cycle","Seats","Renewal date","Timing"]}
         empty={<EmptyState title="No renewals in this horizon" description="Active subscriptions with a configured renewal date will appear here."/>}
