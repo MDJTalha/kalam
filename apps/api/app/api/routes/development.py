@@ -212,8 +212,37 @@ async def plan_progress(plan_id: UUID, user: User = Depends(get_current_user), d
     if plan.user_id != user.id:
         await _manager_plan(plan_id, user, db)
     milestones = (await db.execute(select(DevelopmentMilestone).where(DevelopmentMilestone.plan_id == plan.id).order_by(DevelopmentMilestone.due_at.asc().nulls_last()))).scalars().all()
-    feedback = (await db.execute(select(DevelopmentFeedback).where(DevelopmentFeedback.plan_id == plan.id).order_by(DevelopmentFeedback.created_at.desc()))).scalars().all()
-    return {"plan": {"id": str(plan.id), "title": plan.title, "status": plan.status}, "milestones": [{"id": str(x.id), "title": x.title, "description": x.description, "due_at": x.due_at, "status": x.status, "completed_at": x.completed_at} for x in milestones], "feedback": [{"id": str(x.id), "reviewer_id": str(x.reviewer_id), "rating": x.rating, "strengths": x.strengths, "feedback": x.feedback, "next_steps": x.next_steps, "created_at": x.created_at} for x in feedback]}
+    feedback_rows = (await db.execute(
+        select(DevelopmentFeedback, User)
+        .join(User, User.id == DevelopmentFeedback.reviewer_id)
+        .where(
+            DevelopmentFeedback.plan_id == plan.id,
+            DevelopmentFeedback.tenant_id == user.tenant_id,
+            User.tenant_id == user.tenant_id,
+        )
+        .order_by(DevelopmentFeedback.created_at.desc())
+    )).all()
+    return {
+        "plan": {"id": str(plan.id), "title": plan.title, "status": plan.status},
+        "milestones": [
+            {"id": str(x.id), "title": x.title, "description": x.description,
+             "due_at": x.due_at, "status": x.status, "completed_at": x.completed_at}
+            for x in milestones
+        ],
+        "feedback": [
+            {
+                "id": str(item.id),
+                "reviewer_id": str(item.reviewer_id),
+                "reviewer": f"{reviewer.first_name} {reviewer.last_name}".strip() or reviewer.email,
+                "rating": item.rating,
+                "strengths": item.strengths,
+                "feedback": item.feedback,
+                "next_steps": item.next_steps,
+                "created_at": item.created_at,
+            }
+            for item, reviewer in feedback_rows
+        ],
+    }
 
 @router.post("/{plan_id}/milestones", status_code=status.HTTP_201_CREATED)
 async def create_milestone(plan_id: UUID, payload: MilestoneCreate, manager: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
