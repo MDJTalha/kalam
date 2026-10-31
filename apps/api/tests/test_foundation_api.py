@@ -149,6 +149,38 @@ def test_compliance_reference_pages_are_bounded(client: TestClient) -> None:
     assert client.get("/api/v1/compliance/courses/page", params={"page_size": 101}).status_code == 422
 
 
+def test_capability_framework_reference_pages_are_bounded(client: TestClient) -> None:
+    login(client, ADMIN)
+
+    objectives = client.get(
+        "/api/v1/capability-domain/objectives/page",
+        params={"page": 1, "page_size": 1},
+    )
+    assert objectives.status_code == 200, objectives.text
+    objective_payload = objectives.json()
+    assert objective_payload["page"] == 1
+    assert objective_payload["page_size"] == 1
+    assert len(objective_payload["items"]) <= 1
+    assert client.get(
+        "/api/v1/capability-domain/objectives/page",
+        params={"page_size": 101},
+    ).status_code == 422
+
+    capabilities = client.get(
+        "/api/v1/capabilities/page",
+        params={"page": 1, "page_size": 1},
+    )
+    assert capabilities.status_code == 200, capabilities.text
+    capability_payload = capabilities.json()
+    assert capability_payload["page"] == 1
+    assert capability_payload["page_size"] == 1
+    assert len(capability_payload["items"]) <= 1
+    assert client.get(
+        "/api/v1/capabilities/page",
+        params={"page_size": 101},
+    ).status_code == 422
+
+
 def test_authenticated_profile_is_available(client: TestClient) -> None:
     login(client, LEARNER)
     response = client.get("/api/v1/auth/me")
