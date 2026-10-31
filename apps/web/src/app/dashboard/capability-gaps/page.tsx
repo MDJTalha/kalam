@@ -28,6 +28,6 @@ export default async function CapabilityGapsPage(){
  return <DashboardShell title="Capability Gaps" eyebrow="Capability intelligence" breadcrumbs={[{label:"Overview",href:"/dashboard"},{label:"Capability Gaps"}]}>
    {failed
      ? <StateMessage tone="danger" title="Capability gap intelligence is incomplete">One or more capability datasets could not be loaded. Gap values are not replaced with zero when the service fails; refresh the workspace before making development decisions.</StateMessage>
-     : <CapabilityGapWorkspace initialGaps={gapsResult.data ?? []} initialSummary={summaryResult.data ?? fallback} people={people} canManage={canManage} currentUserId={user.id}/>}
+     : <CapabilityGapWorkspace initialGaps={gapsResult.data ?? []} initialSummary={summaryResult.data ?? fallback} people={people} canManage={canManage} teamScoped={hasTeamScope} currentUserId={user.id}/>}
  </DashboardShell>;
 }
