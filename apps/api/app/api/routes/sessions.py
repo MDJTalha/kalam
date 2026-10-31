@@ -106,8 +106,8 @@ async def session_roster(
             User.first_name,
             User.last_name,
             User.email,
-            Enrollment.status,
-            AttendanceRecord.status,
+            Enrollment.status.label("enrollment_status"),
+            AttendanceRecord.status.label("attendance_status"),
         )
         .join(Enrollment, and_(
             Enrollment.user_id == User.id,
@@ -126,8 +126,8 @@ async def session_roster(
         "user_id": str(row.id),
         "learner": " ".join(part for part in (row.first_name, row.last_name) if part),
         "email": row.email,
-        "enrollment_status": row.status_1,
-        "attendance_status": row.status_2,
+        "enrollment_status": row.enrollment_status,
+        "attendance_status": row.attendance_status,
     } for row in rows]
 
 
