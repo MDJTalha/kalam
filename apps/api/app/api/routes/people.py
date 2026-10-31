@@ -104,7 +104,7 @@ async def profile(user: User = Depends(get_current_user)):
 
 @router.get("/team")
 async def team(
-    user: User = Depends(require_permission("users.read")),
+    user: User = Depends(require_permission("team.read")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
