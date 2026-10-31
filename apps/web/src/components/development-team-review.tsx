@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/ui";
 type Member = { id: string; first_name: string; last_name: string; email: string; job_title?: string | null };
 type Plan = { id: string; title: string; status: string; goals: Array<{ title: string; status: string; target_date?: string | null; notes?: string | null }> };
 type Milestone = { id: string; title: string; description?: string | null; due_at?: string | null; status: string; completed_at?: string | null };
-type Feedback = { id: string; reviewer_id: string; rating?: number | null; strengths?: string | null; feedback: string; next_steps?: string | null; created_at: string };
+type Feedback = { id: string; reviewer_id: string; reviewer: string; rating?: number | null; strengths?: string | null; feedback: string; next_steps?: string | null; created_at: string };
 type Progress = { plan: { id: string; title: string; status: string }; milestones: Milestone[]; feedback: Feedback[] };
 
 async function request<T>(path: string, method = "GET", body?: Record<string, unknown>): Promise<T> {
@@ -232,7 +232,7 @@ export function DevelopmentTeamReview({ members, initialSelectedId, organization
           </form>
           <div className="compact-list">
             {(progress?.feedback ?? []).map(item => <article className="compact-row" key={item.id}>
-              <div><strong>Reviewer feedback {item.rating ? "· " + item.rating + "/5" : ""}</strong><small>{new Date(item.created_at).toLocaleString()}</small><p>{item.feedback}</p>{item.strengths && <small>Strengths: {item.strengths}</small>}{item.next_steps && <small>Next steps: {item.next_steps}</small>}</div>
+              <div><strong>Reviewer feedback {item.rating ? "· " + item.rating + "/5" : ""}</strong><small>{item.reviewer} · {new Date(item.created_at).toLocaleString()}</small><p>{item.feedback}</p>{item.strengths && <small>Strengths: {item.strengths}</small>}{item.next_steps && <small>Next steps: {item.next_steps}</small>}</div>
             </article>)}
             {!progress?.feedback.length && <div className="empty-state"><MessageSquare size={22} /><p>No reviewer feedback has been recorded.</p></div>}
           </div>
