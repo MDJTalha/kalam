@@ -144,7 +144,7 @@ PLATFORM_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     ),
     "Sales Operations": (
         "saas.sales.read", "saas.sales.manage", "saas.pricing.read",
-        "saas.customer_success.read", "saas.customer_success.manage",
+        "saas.customer_success.read",
     ),
     "Sales Viewer": (
         "saas.sales.read", "saas.pricing.read",
