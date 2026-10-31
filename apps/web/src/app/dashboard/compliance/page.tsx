@@ -3,17 +3,19 @@ import { ShieldCheck } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ComplianceAssignmentActions } from "@/components/compliance-assignment-actions";
 import { Section, StateMessage, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Assignment = { id: string; requirement: string; requirement_version?: number; description?: string | null; status: string; due_state?: string; due_at?: string | null; course_id?: string | null; course_title?: string | null; rejection_reason?: string | null };
 type Requirement = { id: string; name: string; description?: string | null; recurrence_days?: number | null; due_days?: number | null; active: boolean };
 
 export default async function CompliancePage() {
   const user = await requireUser<{ permissions?: string[] }>();
-  const [mine, requirements] = await Promise.all([
-    apiJson<Assignment[]>("/api/v1/compliance/my"),
-    apiJson<Requirement[]>("/api/v1/compliance"),
+  const [mineResult, requirementsResult] = await Promise.all([
+    apiJsonResult<Assignment[]>("/api/v1/compliance/my"),
+    apiJsonResult<Requirement[]>("/api/v1/compliance"),
   ]);
+  const mine = mineResult.ok ? mineResult.data : null;
+  const requirements = requirementsResult.ok ? requirementsResult.data : null;
   const openItems = mine?.filter((item) => !["completed", "excepted"].includes(item.status)).length ?? "—";
   const overdueItems = mine?.filter((item) => item.due_state === "overdue" && !["completed", "excepted"].includes(item.status)).length ?? "—";
   return (
