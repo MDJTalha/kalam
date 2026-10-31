@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { CourseAuthoring } from "@/components/course-authoring";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Course = { id: string; title: string; slug: string; description?: string | null; estimated_minutes?: number | null; status: string; category_id?: string | null; owner_id?: string | null; visibility?: "tenant" | "private"; enrollment_policy?: "open" | "approval" | "assignment_only"; capacity?: number | null; audience_org_units?: string[]; tags?: string[]; prerequisites?: string[] };
 export default async function CourseStudioDetail({ params }: { params: Promise<{ id: string }> }) {
