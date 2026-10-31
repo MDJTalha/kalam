@@ -48,7 +48,7 @@ export default async function SaaSOnboardingPage(){
           <span key="c">{item.category.replaceAll("_"," ")}</span>,
           <span key="d">{item.due_at?new Date(item.due_at).toLocaleDateString():"—"}</span>,
           <StatusBadge key="e" status={item.status}/>,
-          {canManage?<OnboardingQuickActions key="f" id={item.id} status={item.status}/>:<span key="f">Read only</span>}
+          canManage?<OnboardingQuickActions key="f" id={item.id} status={item.status}/>:<span key="f">Read only</span>
         ])}
       />
     </SectionCard>
