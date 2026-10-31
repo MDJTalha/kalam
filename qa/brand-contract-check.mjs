@@ -13,7 +13,7 @@ function walk(dir) {
   });
 }
 
-const files = [...walk(webSrc), ...walk(publicDir)].filter(p => /\.(tsx?|css|svg|json|md)$/i.test(p));
+const files = [...walk(webSrc), ...walk(publicDir)].filter(p => /\.(tsx?|css|svg|json|md|webmanifest)$/i.test(p));
 const violations = [];
 
 for (const file of files) {
@@ -47,6 +47,14 @@ for (const token of ["--kalam-navy", "--kalam-blue", "--kalam-tech", "--kalam-ic
 const homepage = fs.readFileSync(path.join(webSrc, "app", "page.tsx"), "utf8");
 for (const phrase of ["Build Capability.", "Prove Readiness.", "Expectation", "Capability", "Evidence", "Action", "Readiness"]) {
   if (!homepage.includes(phrase)) violations.push(`Homepage missing canonical brand narrative token: ${phrase}`);
+}
+
+const manifestPath = path.join(publicDir, "manifest.webmanifest");
+if (fs.existsSync(manifestPath)) {
+  const manifest = fs.readFileSync(manifestPath, "utf8");
+  if (!/"theme_color"\\s*:\\s*"#08243D"/i.test(manifest)) {
+    violations.push("PWA manifest theme_color must use Kalam Navy #08243D");
+  }
 }
 
 if (violations.length) {
