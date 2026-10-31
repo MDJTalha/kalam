@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { HelpCenter } from "@/components/help-center";
-import { apiJsonResult, requireUser  } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type SupportCase={
   id:string;case_number:string;category:string;severity:string;subject:string;status:string;route?:string|null;created_at:string;resolved_at?:string|null;
