@@ -2,7 +2,7 @@ import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { LdQueueActions } from "@/components/ld-queue-actions";
 import { LdRemindersButton } from "@/components/ld-reminders-button";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 type Item = { id: string; course_id: string; course_title: string; learner_id: string; learner_name: string; learner_email: string; status: string; requested_at: string; source: string };
 type Queue = { pending_approval: number; waitlisted: number; total: number; page: number; page_size: number; items: Item[] };
 
@@ -16,7 +16,8 @@ export default async function LdOperationsPage({ searchParams }: { searchParams:
   const status = ["all", "pending_approval", "waitlisted"].includes(params.status ?? "") ? params.status! : "all";
   const query = (params.q ?? "").trim().slice(0, 100);
   const url = `/api/v1/courses/operations/enrollment-queue?page=${page}&page_size=25&status=${status}&q=${encodeURIComponent(query)}`;
-  const queue = await apiJson<Queue>(url);
+  const queueResult = await apiJsonResult<Queue>(url);
+  const queue = queueResult.ok ? queueResult.data : null;
   const link = (target: number) => `/dashboard/ld-operations?page=${target}&status=${status}&q=${encodeURIComponent(query)}`;
   return <DashboardShell title="L&D operations" eyebrow="Learning delivery">
     <div className="stat-grid">
