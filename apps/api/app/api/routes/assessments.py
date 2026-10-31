@@ -573,9 +573,11 @@ async def override_grade(
     result = await db.execute(
         select(AssessmentAttempt, Assessment)
         .join(Assessment, Assessment.id == AssessmentAttempt.assessment_id)
+        .join(User, User.id == AssessmentAttempt.user_id)
         .where(
             AssessmentAttempt.id == attempt_id,
             Assessment.tenant_id == user.tenant_id,
+            User.tenant_id == user.tenant_id,
         )
     )
     row = result.first()
@@ -586,6 +588,10 @@ async def override_grade(
     scope = await _assessment_scope(assessment, user, db)
     if scope not in {"manage", "grade"}:
         raise HTTPException(status_code=404, detail="Assessment attempt not found")
+    if attempt.user_id == user.id:
+        raise HTTPException(status_code=403, detail="Reviewers cannot override their own assessment result")
+    if attempt.submitted_at is None:
+        raise HTTPException(status_code=409, detail="Only submitted assessment attempts can be graded")
     attempt.score = payload.score
     attempt.passed = payload.passed
     attempt.feedback = payload.feedback
@@ -737,7 +743,15 @@ async def question_analytics(
         raise HTTPException(status_code=404, detail='Assessment not found')
     q_result = await db.execute(select(Question).where(Question.assessment_id == assessment.id).order_by(Question.position.asc()))
     questions = list(q_result.scalars().all())
-    a_result = await db.execute(select(AssessmentAttempt).where(AssessmentAttempt.assessment_id == assessment.id, AssessmentAttempt.submitted_at.is_not(None)))
+    a_result = await db.execute(
+        select(AssessmentAttempt)
+        .join(User, User.id == AssessmentAttempt.user_id)
+        .where(
+            AssessmentAttempt.assessment_id == assessment.id,
+            AssessmentAttempt.submitted_at.is_not(None),
+            User.tenant_id == user.tenant_id,
+        )
+    )
     attempts = list(a_result.scalars().all())
     rows = []
     for question in questions:
@@ -761,7 +775,15 @@ async def assessment_analytics(
     assessment, scope = await _get_assessment_with_scope(assessment_id, user, db)
     if scope not in {"manage", "grade"}:
         raise HTTPException(status_code=404, detail='Assessment not found')
-    result = await db.execute(select(AssessmentAttempt).where(AssessmentAttempt.assessment_id == assessment.id).order_by(AssessmentAttempt.started_at.asc()))
+    result = await db.execute(
+        select(AssessmentAttempt)
+        .join(User, User.id == AssessmentAttempt.user_id)
+        .where(
+            AssessmentAttempt.assessment_id == assessment.id,
+            User.tenant_id == user.tenant_id,
+        )
+        .order_by(AssessmentAttempt.started_at.asc())
+    )
     attempts = list(result.scalars().all())
     submitted = [a for a in attempts if a.submitted_at is not None]
     passed = [a for a in submitted if a.passed is True]
