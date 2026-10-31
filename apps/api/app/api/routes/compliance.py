@@ -240,15 +240,17 @@ async def page_requirements(
         select(ComplianceRequirement).where(*filters).order_by(ComplianceRequirement.name).offset((page - 1) * page_size).limit(page_size)
     )
     items = list(result.scalars().all())
-    if not await user_has_permission(user, db, "compliance.manage"):
-        items = [
+    if await user_has_permission(user, db, "compliance.manage"):
+        output_items: list[ComplianceRequirement | dict[str, object]] = items
+    else:
+        output_items = [
             {
                 "id": str(item.id), "name": item.name, "description": item.description,
                 "recurrence_days": item.recurrence_days, "due_days": item.due_days, "active": item.active,
             }
             for item in items if item.active and await requirement_applies_to_user(item, user, db)
         ]
-    return {"items": items, "total": total, "page": page, "page_size": page_size}
+    return {"items": output_items, "total": total, "page": page, "page_size": page_size}
 
 
 @router.post("", status_code=201)
