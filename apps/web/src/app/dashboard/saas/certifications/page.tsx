@@ -3,9 +3,12 @@ import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { CertificationCreateForm } from "@/components/saas-crm-forms";
 import { CertificationsTable, type SaaSCertification } from "@/components/certifications-table";
 import { MetricCard, SectionCard } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 export default async function SaaSCertificationsPage() {
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("saas.platform.manage")??false;
+  if(!user.permissions?.includes("saas.platform.read"))return <DashboardShell title="Certifications" eyebrow="SaaS platform"><SectionCard eyebrow="Access control" title="Platform certification access is restricted"><p className="muted">This role does not include platform certification visibility.</p></SectionCard></DashboardShell>;
   const certifications = await apiJson<SaaSCertification[]>("/api/v1/saas/crm/certifications");
   if (!certifications) return <DashboardShell title="Certifications" eyebrow="SaaS CRM"><SectionCard eyebrow="Access control" title="Certification CRM access is restricted"><p className="muted">This page requires authorized SaaS CRM access.</p></SectionCard></DashboardShell>;
 
@@ -28,10 +31,10 @@ export default async function SaaSCertificationsPage() {
       <SectionCard eyebrow="Evidence register" title="Corporate certifications" meta={certifications.length + " records"}>
         <CertificationsTable certifications={certifications} />
       </SectionCard>
-      <SectionCard eyebrow="New evidence" title="Register certification" meta="Authoritative record">
+      {canManage&&<SectionCard eyebrow="New evidence" title="Register certification" meta="Authoritative record">
         <p className="certification-form-intro">Capture the issuer, registration reference and validity dates exactly as they appear on the source certificate.</p>
         <CertificationCreateForm />
-      </SectionCard>
+      </SectionCard>}
     </div>
   </DashboardShell>;
 }
