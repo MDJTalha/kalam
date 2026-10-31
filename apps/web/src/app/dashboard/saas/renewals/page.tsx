@@ -17,7 +17,7 @@ function money(minor:number,currency:string){
 }
 
 export default async function SaaSRenewalsPage(){
-  const renewals=await apiJson<Renewal[]>("/api/v1/saas/crm/renewals?days=180");
+  const renewals=await apiJsonResult<Renewal[]>("/api/v1/saas/crm/renewals?days=180").then((result) => result.ok ? result.data : null);
   if(!renewals)return <DashboardShell title="Renewals" eyebrow="SaaS CRM"><EmptyState title="Renewal CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
 
   const overdue=renewals.filter(r=>(r.days_until_renewal??9999)<0).length;
