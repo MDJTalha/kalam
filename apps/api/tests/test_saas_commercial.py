@@ -535,6 +535,9 @@ def test_saas_crm_collection_reads_are_bounded():
                 "/api/v1/saas/crm/onboarding",
                 "/api/v1/saas/crm/renewals",
                 "/api/v1/saas/crm/team",
+                "/api/v1/saas/crm/tasks",
+                f"/api/v1/saas/crm/tenants/{uuid4()}/users",
+                f"/api/v1/saas/crm/accounts/{uuid4()}",
             )
             for path in paths:
                 assert client.get(path, params={"limit": 101}).status_code == 422
