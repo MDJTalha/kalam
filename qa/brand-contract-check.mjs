@@ -25,7 +25,7 @@ for (const file of files) {
     if (!compatibility) violations.push(`Legacy customer-facing identity in ${rel}`);
   }
 
-  if (/(?:Expect\\s*<|Expect\\s+Build\\s+Assess\\s+Prove\\s+Know\\s+Act)/i.test(content)) {
+  if (/(?:Expect\s*<|Expect\s+Build\s+Assess\s+Prove\s+Know\s+Act)/i.test(content)) {
     violations.push(`Competing capability-loop language in ${rel}`);
   }
 
@@ -52,7 +52,7 @@ for (const phrase of ["Build Capability.", "Prove Readiness.", "Expectation", "C
 const manifestPath = path.join(publicDir, "manifest.webmanifest");
 if (fs.existsSync(manifestPath)) {
   const manifest = fs.readFileSync(manifestPath, "utf8");
-  if (!/"theme_color"\\s*:\\s*"#08243D"/i.test(manifest)) {
+  if (!/"theme_color"\s*:\s*"#08243D"/i.test(manifest)) {
     violations.push("PWA manifest theme_color must use Kalam Navy #08243D");
   }
 }
