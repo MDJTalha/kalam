@@ -7,6 +7,7 @@ apply tenant/resource scoping; a permission grant is not a substitute for it.
 PERMISSION_DESCRIPTIONS: dict[str, str] = {
     "tenant.read": "View the current tenant and its configuration",
     "tenant.manage": "Manage the current tenant configuration",
+    "organization.read": "View tenant role and organization-unit metadata without employee records",
     "users.read": "View authorized workforce profiles",
     "team.read": "View the current user's direct reports and team learning signals",
     "users.manage": "Manage authorized workforce users and invitations",
@@ -109,6 +110,7 @@ TENANT_ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "team.read", "development.manage",
     ),
     "Quality & Compliance": (
+        "tenant.read", "organization.read",
         "compliance.manage", "audit.read", "files.read", "evidence.read",
         "reports.export.compliance",
     ),
