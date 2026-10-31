@@ -6,7 +6,7 @@ import { apiJson } from "@/lib/server-api";
 
 type Trial={id:string;account_id:string;account_name:string;plan_id?:string|null;plan_name?:string|null;status:string;seats:number;starts_at?:string|null;ends_at?:string|null};
 export default async function SaaSTrialsPage(){
-  const trials=await apiJson<Trial[]>("/api/v1/saas/crm/trials");
+  const trials=await apiJsonResult<Trial[]>("/api/v1/saas/crm/trials").then((result) => result.ok ? result.data : null);
   if(!trials)return <DashboardShell title="Trials" eyebrow="SaaS CRM"><EmptyState title="Trial CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   return <DashboardShell title="Trials" eyebrow="SaaS CRM" breadcrumbs={[{label:"SaaS Operations",href:"/dashboard/saas"},{label:"Trials"}]}>
     <SaaSCrmNav/>
