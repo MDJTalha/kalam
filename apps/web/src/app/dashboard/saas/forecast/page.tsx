@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { EmptyState, MetricCard, SectionCard } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type Row={currency:string;stage:string;gross_minor:number;weighted_minor:number;opportunities:number};
 type Forecast={pipeline:Row[];open_invoices:Array<{currency:string;outstanding_minor:number;invoices:number}>};
@@ -11,6 +11,8 @@ function money(minor:number,currency:string){return new Intl.NumberFormat("en-US
 function pct(value:number,total:number){return total?Math.round(value/total*100):0;}
 
 export default async function SaaSForecastPage(){
+  const user=await requireUser<{permissions?:string[]}>();
+  if(!user.permissions?.includes("saas.finance.read"))return <DashboardShell title="Finance Forecast" eyebrow="SaaS Finance"><EmptyState title="Finance access is restricted" description="Receivables and financial forecast are restricted to finance-authorized roles."/></DashboardShell>;
   const forecast=await apiJson<Forecast>("/api/v1/saas/crm/forecast");
   if(!forecast)return <DashboardShell title="Forecast" eyebrow="SaaS CRM"><EmptyState title="Forecast access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const opportunityCount=forecast.pipeline.reduce((s,r)=>s+r.opportunities,0), invoiceCount=forecast.open_invoices.reduce((s,r)=>s+r.invoices,0);
