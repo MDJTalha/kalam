@@ -3,7 +3,7 @@ import { DeveloperSupportControl } from "@/components/saas-crm-forms";
 import { SaaSCrmNav } from "@/components/saas-crm-nav";
 import { TenantStatusControl } from "@/components/saas-crm-forms";
 import { DataTable, EmptyState, SectionCard, StatusBadge } from "@/components/ui";
-import { apiJson } from "@/lib/server-api";
+import { apiJson, requireUser } from "@/lib/server-api";
 
 type TenantRow={
   id:string;name:string;slug:string;status:string;user_count:number;created_at:string;
@@ -11,6 +11,9 @@ type TenantRow={
 };
 
 export default async function SaaSTenantsPage(){
+  const user=await requireUser<{permissions?:string[]}>();
+  const canManage=user.permissions?.includes("saas.customer_success.manage")??false;
+  if(!user.permissions?.includes("saas.customer_success.read"))return <DashboardShell title="Tenants" eyebrow="SaaS Customer Success"><EmptyState title="Customer tenant access is restricted" description="This role does not include customer tenant visibility."/></DashboardShell>;
   const tenants=await apiJson<TenantRow[]>("/api/v1/saas/crm/tenants");
   const supportTenants=await apiJson<Array<{id:string;name:string;slug:string;status:string}>>("/api/v1/support/developer/tenants");
   if(!tenants)return <DashboardShell title="Tenants" eyebrow="SaaS CRM"><EmptyState title="Tenant CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
@@ -30,7 +33,7 @@ export default async function SaaSTenantsPage(){
           t.lifecycle_stage?<StatusBadge key="c" status={t.lifecycle_stage}/>:<span key="c">—</span>,
           <span key="d">{t.user_count}</span>,
           <span key="e">{new Date(t.created_at).toLocaleDateString()}</span>,
-          <span key="f"><StatusBadge status={t.status}/><TenantStatusControl id={t.id} status={t.status}/></span>
+          <span key="f"><StatusBadge status={t.status}/>{canManage?<TenantStatusControl id={t.id} status={t.status}/>:null}</span>
         ])}
       />
     </SectionCard>
