@@ -467,8 +467,8 @@ async def attempt_detail(
 
     attempt, assessment, learner = row
     scope = await _assessment_scope(assessment, user, db)
-    if scope not in {"manage", "grade"}:
-        raise HTTPException(status_code=404, detail="Assessment attempt not found")
+    if scope not in {"manage", "grade"} or attempt.submitted_at is None:
+        raise HTTPException(status_code=404, detail="Submitted assessment attempt not found")
     questions_result = await db.execute(
         select(Question)
         .where(Question.assessment_id == assessment.id)
