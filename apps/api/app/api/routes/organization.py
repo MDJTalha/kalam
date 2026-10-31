@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, require_permission
+from app.api.deps import is_platform_developer, is_saas_ops_user, is_saas_super_admin, require_permission
 from app.db.models import OrgUnit, Role, User, UserRole
 from app.db.session import get_db
 from app.services.audit import audit
@@ -167,8 +167,15 @@ async def assign_role(
     )
     if target is None or role is None:
         raise HTTPException(status_code=404, detail="User or role not found")
-    if role.role_kind not in ("predefined", "custom") and not await _is_platform_developer(user, db):
-        raise HTTPException(status_code=403, detail="This role is managed by Kalam and cannot be assigned by tenant administrators")
+    if role.role_kind not in ("predefined", "custom"):
+        platform_developer = await _is_platform_developer(user, db)
+        saas_super_admin = (
+            role.name.strip().lower() != "platform developer"
+            and await is_saas_super_admin(user, db)
+            and await is_saas_ops_user(user, db)
+        )
+        if not platform_developer and not saas_super_admin:
+            raise HTTPException(status_code=403, detail="This platform role can only be assigned by an authorized platform administrator")
     existing = await db.scalar(
         select(UserRole).where(
             UserRole.user_id == target.id,
@@ -203,9 +210,29 @@ async def remove_role(
         raise HTTPException(status_code=404, detail="User or role not found")
     if target.id == user.id:
         raise HTTPException(status_code=422, detail="You cannot remove a role from your own account")
+    if role.role_kind not in ("predefined", "custom"):
+        platform_developer = await _is_platform_developer(user, db)
+        saas_super_admin = (
+            role.name.strip().lower() != "platform developer"
+            and await is_saas_super_admin(user, db)
+            and await is_saas_ops_user(user, db)
+        )
+        if not platform_developer and not saas_super_admin:
+            raise HTTPException(status_code=403, detail="This platform role can only be removed by an authorized platform administrator")
     assignment = await db.scalar(select(UserRole).where(UserRole.user_id == target.id, UserRole.role_id == role.id))
     if assignment is None:
         raise HTTPException(status_code=404, detail="Role assignment not found")
+    if role.name.strip().lower() == "saas super admin":
+        remaining = await db.scalar(
+            select(func.count())
+            .select_from(UserRole)
+            .join(User, User.id == UserRole.user_id)
+            .where(UserRole.role_id == role.id)
+            .where(UserRole.user_id != target.id)
+            .where(User.is_active.is_(True))
+        )
+        if not remaining:
+            raise HTTPException(status_code=409, detail="The last active SaaS Super Admin cannot be removed")
     await db.delete(assignment)
     await audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="user.role.removed",
                 entity_type="user_role", entity_id=str(target.id), metadata={"role_id": str(role.id)})
