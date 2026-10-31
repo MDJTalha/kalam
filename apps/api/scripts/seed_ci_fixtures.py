@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT))
 from sqlalchemy import select
 
 from app.core.security import hash_password
+from app.core.role_catalog import PERMISSION_DESCRIPTIONS, TENANT_ROLE_PERMISSIONS
 from app.db.models import (
     AIGovernancePolicy, Assessment, ComplianceAssignment, ComplianceRequirement,
     Course, CourseModule, Enrollment, Lesson, Permission, Question, Role,
@@ -36,10 +37,14 @@ PERMISSIONS = [
     "development.recommendations.read", "development.recommendations.manage",
 ]
 ROLE_PERMISSIONS = {
-    "Tenant Administrator": PERMISSIONS,
-    "Manager": ["users.read", "courses.read", "learning.access", "reports.read", "capabilities.read"],
-    "Instructor": ["courses.read", "courses.manage", "learning.access", "assessments.manage"],
-    "Learner": ["courses.read", "learning.access", "development.manage", "capability_assessments.read", "capability_assessments.execute"],
+    # This intentionally broad identity is a test harness only. It is not the
+    # customer-facing Tenant Administrator role used by role acceptance tests.
+    "QA Harness Administrator": PERMISSIONS,
+    "Tenant Administrator": list(TENANT_ROLE_PERMISSIONS["Tenant Administrator"]),
+    "Manager": list(TENANT_ROLE_PERMISSIONS["Manager"]),
+    "Instructor": list(TENANT_ROLE_PERMISSIONS["Instructor"]),
+    "Learner": list(TENANT_ROLE_PERMISSIONS["Learner / Employee"]),
+    "Quality & Compliance": list(TENANT_ROLE_PERMISSIONS["Quality & Compliance"]),
 }
 
 
@@ -59,12 +64,19 @@ async def seed():
             tenants[slug] = await one_or_create(session, Tenant, {"slug": slug}, {"name": name, "status": "active"})
 
         perms = {}
-        for key in PERMISSIONS:
-            perms[key] = await one_or_create(session, Permission, {"key": key}, {"description": key.replace(".", " ")})
+        for key in sorted(set(PERMISSIONS) | set(PERMISSION_DESCRIPTIONS)):
+            perms[key] = await one_or_create(
+                session,
+                Permission,
+                {"key": key},
+                {"description": PERMISSION_DESCRIPTIONS.get(key, key.replace(".", " "))},
+            )
 
         users = {}
         demo_users = [
-            ("admin@demo.corp", "Demo", "Administrator", "Tenant Administrator"),
+            ("admin@demo.corp", "Demo", "QA Harness", "QA Harness Administrator"),
+            ("tenant-admin@demo.corp", "Demo", "Tenant Administrator", "Tenant Administrator"),
+            ("quality@demo.corp", "Demo", "Quality Reviewer", "Quality & Compliance"),
             ("manager@demo.corp", "Demo", "Manager", "Manager"),
             ("instructor@demo.corp", "Demo", "Instructor", "Instructor"),
             ("learner@demo.corp", "Demo", "Learner", "Learner"),
@@ -72,7 +84,14 @@ async def seed():
         for slug, tenant in tenants.items():
             names = demo_users if slug == "demo-corporation" else [("isolated@other.corp", "Isolated", "Learner", "Learner")]
             for role_name in sorted({row[3] for row in names}):
-                role = await one_or_create(session, Role, {"tenant_id": tenant.id, "name": role_name}, {"description": f"CI fixture role: {role_name}"})
+                role_kind = "legacy" if role_name == "QA Harness Administrator" else "predefined"
+                role = await one_or_create(
+                    session,
+                    Role,
+                    {"tenant_id": tenant.id, "name": role_name},
+                    {"description": f"CI fixture role: {role_name}", "role_kind": role_kind},
+                )
+                role.role_kind = role_kind
                 for key in ROLE_PERMISSIONS[role_name]:
                     link = (await session.execute(select(RolePermission).where(RolePermission.role_id == role.id, RolePermission.permission_id == perms[key].id))).scalar_one_or_none()
                     if link is None:
