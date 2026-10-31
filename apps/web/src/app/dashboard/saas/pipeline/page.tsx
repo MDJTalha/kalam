@@ -11,8 +11,8 @@ function money(minor:number,currency:string){return new Intl.NumberFormat("en-US
 
 export default async function SaaSPipelinePage(){
   const [opportunities,forecast]=await Promise.all([
-    apiJson<Opportunity[]>("/api/v1/saas/crm/opportunities"),
-    apiJson<Forecast[]>("/api/v1/saas/crm/forecast"),
+    apiJsonResult<Opportunity[]>("/api/v1/saas/crm/opportunities").then((result) => result.ok ? result.data : null),
+    apiJsonResult<Forecast[]>("/api/v1/saas/crm/forecast").then((result) => result.ok ? result.data : null),
   ]);
   if(!opportunities||!forecast)return <DashboardShell title="Pipeline" eyebrow="SaaS CRM"><EmptyState title="Pipeline CRM access is restricted" description="This page requires authorized SaaS CRM access."/></DashboardShell>;
   const open=opportunities.filter(o=>!["won","lost"].includes(o.stage));
