@@ -26,7 +26,7 @@ This ledger distinguishes source implementation from independently executed runt
 | Gate | Current state | Required evidence |
 |---|---|---|
 | Exact-candidate CI | MERGE-EQUIVALENT TREE VERIFIED | Hosted PR run #470 (ID `41214013410`) passed API/Web/release-config against the exact PR #30 application tree, including production-image runtime smoke. The merge is a squash of that tree. |
-| Full API regression | NOT CERTIFIED | Complete suite result and artifact tied to the final candidate from a clean certification checkout. |
+| Full API regression | CERTIFIED FOR EXACT APPLICATION TREE | Hosted PR #30 run #470 (ID `41214013410`) executed the complete API suite against the exact application tree that was squash-merged to main; the API job completed successfully with **182 passed, 0 failed**, one dependency deprecation warning, in 80.06 seconds. |
 | Browser E2E | NOT CERTIFIED | Real authenticated role matrix covering admin, HR/L&D, manager, instructor, learner, auditor/compliance. |
 | Tenant isolation | SOURCE + REGRESSION COVERAGE | Execute negative A→B access matrix in a live disposable/staging environment. |
 | Learning lifecycle | IMPLEMENTED + REGRESSION COVERAGE | Browser/runtime proof: enrollment → learning → assessment → completion → capability update → gap recalculation. |
