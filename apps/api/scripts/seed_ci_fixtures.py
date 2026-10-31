@@ -92,8 +92,22 @@ async def seed():
                     {"description": f"CI fixture role: {role_name}", "role_kind": role_kind},
                 )
                 role.role_kind = role_kind
+                desired_permission_ids = {
+                    perms[key].id for key in ROLE_PERMISSIONS[role_name]
+                }
+                existing_links = list((await session.execute(
+                    select(RolePermission).where(RolePermission.role_id == role.id)
+                )).scalars().all())
+                for link in existing_links:
+                    if link.permission_id not in desired_permission_ids:
+                        await session.delete(link)
                 for key in ROLE_PERMISSIONS[role_name]:
-                    link = (await session.execute(select(RolePermission).where(RolePermission.role_id == role.id, RolePermission.permission_id == perms[key].id))).scalar_one_or_none()
+                    link = (await session.execute(
+                        select(RolePermission).where(
+                            RolePermission.role_id == role.id,
+                            RolePermission.permission_id == perms[key].id,
+                        )
+                    )).scalar_one_or_none()
                     if link is None:
                         session.add(RolePermission(role_id=role.id, permission_id=perms[key].id))
             for email, first, last, role_name in names:
