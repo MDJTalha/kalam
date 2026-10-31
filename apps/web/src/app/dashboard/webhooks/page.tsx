@@ -2,7 +2,7 @@ import { Webhook } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ResourceForm } from "@/components/resource-form";
 import { EmptyState, Section, StatusBadge } from "@/components/ui";
-import { apiJson, requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Hook={id:string;url:string;event_types:string[];active:boolean;created_at:string};
 
