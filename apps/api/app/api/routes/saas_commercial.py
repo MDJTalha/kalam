@@ -2763,7 +2763,7 @@ async def list_crm_team(
 async def export_accounts_csv(
     stage: str | None = Query(default=None, max_length=30),
     q: str | None = Query(default=None, max_length=160),
-    user: User = Depends(_require_ops_permission("saas.sales.read")),
+    user: User = Depends(_require_ops_permission("saas.sales.export")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(CRMAccount).where(CRMAccount.ops_tenant_id == user.tenant_id)
