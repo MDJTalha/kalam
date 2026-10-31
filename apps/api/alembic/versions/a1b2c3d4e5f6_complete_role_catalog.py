@@ -41,6 +41,7 @@ PERMISSION_DESCRIPTIONS = {
     "saas.sales.read": "View sales accounts, contacts, opportunities, tasks and pipeline",
     "saas.sales.manage": "Manage sales accounts, contacts, opportunities, tasks and pipeline",
     "saas.sales.export": "Export approved CRM account registers",
+    "saas.sales.export": "Export approved CRM account registers",
     "saas.pricing.read": "View SaaS plans, public pricing and commercial offers",
     "saas.pricing.manage": "Create and manage SaaS plans, pricing and offers",
     "saas.finance.read": "View subscriptions, contracts, invoices, payments and renewals",
