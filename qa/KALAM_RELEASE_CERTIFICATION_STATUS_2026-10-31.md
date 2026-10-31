@@ -1,6 +1,6 @@
 # Kalam — Release Certification Status
 Date: 2026-10-31
-Current main candidate observed: `7732dc7178eff93a956c17377c4fbebd55441130`
+Current main candidate observed: `8d4323e66adbe5e2db42edca2e9f097f3f523532`
 
 ## Executive status
 
@@ -15,7 +15,7 @@ This ledger distinguishes source implementation from independently executed runt
 - Enrollment/completion persistence is implemented.
 - Capability-gap recalculation is implemented.
 - `requireUser()` separates 401 sign-in, 403 access-denied, and service-failure handling.
-- `apiJsonResult()` is the canonical status-aware server API contract. The legacy generic `apiJson()` compatibility helper is being removed again because mainline currently contains a rollback commit that reintroduced it; the certification branch removes it and contains no application callers.
+- `apiJsonResult()` is the canonical status-aware server API contract. The legacy generic `apiJson()` compatibility helper is removed on the certification branch. All application callers identified by the repository code search were migrated to `apiJsonResult()` with explicit success/null handling; no compatibility helper remains in `server-api.ts`.
 - Business-critical Compliance, People, and L&D Operations pages use status-aware API handling.
 - Enterprise selectors/read paths have received bounding hardening. Current main also bounds compatibility organization unit/role lists to a validated maximum of 100 and includes regression coverage.
 - Backup manifest, SHA-256/size verification and pg_restore catalog inspection are implemented.
@@ -35,7 +35,7 @@ This ledger distinguishes source implementation from independently executed runt
 | Backup restore | NOT CERTIFIED | Actual clean-database restore, integrity checks and measured recovery duration. |
 | DR/failover | NOT CERTIFIED | Executed failover/recovery with measured RTO/RPO. |
 | AWS production | NOT CERTIFIED | TLS, secrets, migrations, health checks, monitoring, integrations and rollback evidence. |
-| API helper migration | REMEDIATED ON CERTIFICATION BRANCH | Current main contains a compatibility-helper rollback; certification branch removes it again. Historical QA documentation is the only remaining search hit. Merge and exact-candidate CI are required before treating this gate as closed. |
+| API helper migration | REMEDIATED ON CERTIFICATION BRANCH | Current main contains the reintroduced helper; certification branch removes it and migrates the application callers. Merge and exact-candidate CI are required before treating this gate as closed. |
 | Reference-data bounds | SUBSTANTIALLY HARDENED / AUDIT OPEN | Compatibility organization lists are now bounded; finish systematic audit for any remaining broad enterprise consumers. |
 | AI activation | NOT CERTIFIED | Provider, grounding, safety, tenant isolation, human override and audit evidence before enabling real-provider AI. |
 
@@ -58,6 +58,12 @@ This ledger distinguishes source implementation from independently executed runt
 ## Environment constraint
 
 The previously connected Desktop Commander device **MDT** is not available for runtime execution in this session. Consequently, this ledger makes no claim that local PowerShell, Docker, PostgreSQL, browser, staging, AWS, backup/restore or DR commands have been executed here.
+
+## Current certification-branch evidence
+
+- Certification branch head: `7e12b87a9785bfe6177bd665ac8ad894f41ec269`.
+- Hosted CI run #440 (`41212567887`) is queued for that exact head; it must complete successfully before merge/certification.
+- Previous run #420 proved API tests pass but exposed the web typecheck/build failures caused by removing `apiJson()` before its callers were migrated; those callers are now migrated on the certification branch.
 
 ## Certification rule
 
