@@ -2079,3 +2079,18 @@ def test_live_session_and_program_catalog_reads_are_bounded(client: TestClient) 
     assert client.get("/api/v1/programs", params={"limit": 101}).status_code == 422
     assert client.get("/api/v1/programs/cohorts", params={"limit": 101}).status_code == 422
     assert client.get("/api/v1/programs/paths/all", params={"limit": 101}).status_code == 422
+
+
+def test_saas_crm_collection_reads_are_bounded(client: TestClient) -> None:
+    login(client, ADMIN)
+    paths = (
+        "/api/v1/saas/crm/accounts",
+        "/api/v1/saas/crm/subscriptions",
+        "/api/v1/saas/crm/offers",
+        "/api/v1/saas/crm/opportunities",
+        "/api/v1/saas/crm/contracts",
+        "/api/v1/saas/crm/invoices",
+        "/api/v1/saas/crm/payments",
+    )
+    for path in paths:
+        assert client.get(path, params={"limit": 101}).status_code == 422
