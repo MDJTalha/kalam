@@ -35,8 +35,10 @@ def test_phase6_metric_contracts_reconcile():
         assert learner_login.status_code == 200, learner_login.text
         learner_people_export = client.get("/api/v1/reports/export/people")
         learner_learning_export = client.get("/api/v1/reports/export/enrollments")
+        learner_compliance_export = client.get("/api/v1/reports/export/compliance")
         assert learner_people_export.status_code == 403
         assert learner_learning_export.status_code == 403
+        assert learner_compliance_export.status_code == 403
 
         summary_data = summary.json()
         effectiveness_data = effectiveness.json()
