@@ -1,48 +1,40 @@
 # Kalam Final Attempt — Gate Matrix
 
 Date: 2026-10-31
-Latest implementation commit: `e14e1bb8331eb392f02a8b8cf30655c34606eb6e`
 Candidate branch: `work/final-production-readiness-2026-10-31`
 
 | Gate | Status | Evidence required / current evidence |
 |---|---|---|
-| C0 Candidate integrity | PARTIAL | Exact branch commits are tracked and a clean source archive was extracted locally; native Git checkout remains unresolved, so this gate is not certified. |
-| C1 Hosted CI | CERTIFIED | Fresh hosted run **#498 / 41228174328** for the exact current matrix commit completed successfully. repository-hygiene, web, api and release-config all passed. |
-| C2 Authentication/session | NOT CERTIFIED | Real browser login/session matrix |
-| C3 RBAC/resource authorization | NOT CERTIFIED | Positive and negative role/action matrix |
-| C4 Tenant isolation | NOT CERTIFIED | Live A→B negative access matrix |
-| C5 Learning lifecycle | NOT CERTIFIED | Browser + persistence + completion evidence |
-| C6 Capability intelligence | NOT CERTIFIED | End-to-end recalculation and reporting evidence |
-| C7 API/data integrity | CERTIFIED | Fresh hosted API job passed dependency integrity/audit, migrations/head verification, static/type checks, ClamAV transport verification and the full test step in run **#498 / 41228174328**. |
-| C8 Accessibility | NOT CERTIFIED | Automated + manual WCAG 2.2 AA review |
-| C9 Security | NOT CERTIFIED | Final security/abuse-path assessment |
-| C10 Scale | NOT CERTIFIED | 10k+ representative load evidence |
-| C11 Backup/restore | PARTIAL | Retained recovery evidence exists; current candidate freshness and measured restore evidence must be reconciled. |
-| C12 Migration safety | NOT CERTIFIED | Forward migration + rollback/forward-recovery drill |
-| C13 DR/failover | NOT CERTIFIED | Executed failover with measured RTO/RPO |
-| C14 AWS/staging | NOT CERTIFIED | Exact artifact, TLS, secrets, migrations, health, rollback |
-| C15 Observability | NOT CERTIFIED | Failure→alert→diagnosis→recovery evidence |
-| C16 Browser E2E | NOT CERTIFIED | Critical-path role matrix |
-| C17 AI governance | CERTIFIED | Fail-closed disabled-by-default posture is documented in `qa/certification/KALAM_AI_GOVERNANCE_CERTIFICATION_2026-10-31.md`; real-provider activation remains separately uncertified. |
-| C18 Independent review | NOT CERTIFIED | Independent reviewer decision |
-| C19 Production smoke/rollback | NOT CERTIFIED | Immutable production deployment + smoke + rollback readiness |
+| C0 Candidate integrity | CERTIFIED | Exact candidate branch is tracked; the authoritative local checkout was established from the exact branch and verified against Git. |
+| C1 Hosted CI | CERTIFIED | Fresh hosted run **#501 / 41228622163** for the candidate completed successfully: repository-hygiene, API, web and release-config all passed. |
+| C2 Authentication/session | NOT CERTIFIED | Real browser login/session matrix still required. |
+| C3 RBAC/resource authorization | NOT CERTIFIED | Positive/negative browser role-action matrix still required. |
+| C4 Tenant isolation | NOT CERTIFIED | Hosted API regression coverage exists, but live A→B runtime/browser certification evidence is still required. |
+| C5 Learning lifecycle | NOT CERTIFIED | API lifecycle coverage exists; browser + persistence + completion certification still required. |
+| C6 Capability intelligence | NOT CERTIFIED | API capability/gap/recommendation coverage exists; end-to-end runtime/reporting certification still required. |
+| C7 API/data integrity | CERTIFIED | Run **#501 / 41228622163** passed dependency integrity/audit, migrations/head verification, static/type checks, ClamAV transport verification and the full API test step. |
+| C8 Accessibility | NOT CERTIFIED | Automated + manual WCAG 2.2 AA review still required. |
+| C9 Security | NOT CERTIFIED | Final security/abuse-path assessment still required. |
+| C10 Scale | NOT CERTIFIED | Measured 10k+ representative load/concurrency evidence still required. |
+| C11 Backup/restore | PARTIAL | Recovery procedures/evidence exist, but current-candidate measured restore verification is not independently demonstrated. |
+| C12 Migration safety | NOT CERTIFIED | Forward migration plus rollback/forward-recovery drill still required. |
+| C13 DR/failover | NOT CERTIFIED | Executed failover with measured RTO/RPO still required. |
+| C14 AWS/staging | NOT CERTIFIED | Exact artifact, TLS, secrets, migrations, health, rollback and hosted staging evidence still required. |
+| C15 Observability | NOT CERTIFIED | Failure→alert→diagnosis→recovery evidence still required. |
+| C16 Browser E2E | NOT CERTIFIED | Critical-path role matrix against the exact candidate still required. |
+| C17 AI governance | CERTIFIED | Fail-closed disabled-by-default posture is documented; real-provider activation remains separately uncertified. |
+| C18 Independent review | NOT CERTIFIED | Independent reviewer decision required; cannot be self-certified. |
+| C19 Production smoke/rollback | NOT CERTIFIED | Immutable production deployment, smoke and rollback record required. |
 
-## Autonomous work completed in this execution cycle
+## Autonomous work completed
 
-- Added `qa/scripts/final_release_hygiene.py`, a dependency-free deterministic repository audit.
-- Integrated that audit into hosted CI as a dedicated `repository-hygiene` job.
-- The first execution exposed false positives from legitimate HTML input placeholders; the detector was narrowed to unfinished-copy markers rather than generic `placeholder` text.
-- Added `apps/web/src/app/manifest.ts` with canonical Kalam PWA metadata.
-- Confirmed the corrected hygiene detector and manifest pass in fresh hosted CI run **#498 / 41228174328**.
-- Certified C1 and C7 only from this fresh exact-commit hosted evidence.
-- Preserved the rule that runtime/security/production claims require actual evidence rather than source inspection alone.
-
-## Existing strong evidence retained
-
-- Prior exact candidate CI recorded API **183 passed** with dependency, migration, static/type and ClamAV checks.
-- Prior web job passed dependency audit, typecheck, lint and production build.
-- Prior release-config job passed production compose validation, Nginx policy validation, production image builds and built-image smoke.
-- Existing repository evidence includes authenticated browser QA scripts, focused axe scans, permission matrices, cross-tenant API regression coverage, learning persistence implementation, backup/restore procedures and release runbooks.
+- Added deterministic repository hygiene auditing and integrated it into hosted CI.
+- Added canonical Kalam PWA manifest metadata.
+- Reconciled certification evidence to fresh hosted CI run **#501**.
+- Established the exact candidate as a native Git checkout on the authorized workstation.
+- Verified the repository contains explicit automated coverage for authentication, authorization, cross-tenant access, learning lifecycle, capability gaps, development recommendations and AI tenant scoping.
+- Started a local production-image build for API/web/worker using the exact candidate. The build is progressing through dependency installation; it is an additional validation and is not treated as certified until completion is observed.
+- Preserved evidence-bound certification: source/test presence is not substituted for live runtime evidence.
 
 ## Release rule
 
