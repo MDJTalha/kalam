@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import require_permission
+from app.api.deps import get_current_user, require_permission, user_has_permission
 from app.db.models import (
     Capability,
     CapabilityCompetency,
@@ -222,10 +222,16 @@ async def page_competencies(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=50, ge=1, le=100),
     q: str = Query(default="", max_length=160),
-    user: User = Depends(require_permission("competencies.read")),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Tenant-scoped, searchable competency lookup with bounded level hydration."""
+    """Read-only competency metadata for capability, L&D and evidence workflows."""
+    if not (
+        await user_has_permission(user, db, "competencies.read")
+        or await user_has_permission(user, db, "capabilities.read")
+        or await user_has_permission(user, db, "skills.manage")
+    ):
+        raise HTTPException(403, "Competency metadata access is restricted")
     conditions = [Competency.tenant_id == user.tenant_id]
     term = q.strip()
     if term:
