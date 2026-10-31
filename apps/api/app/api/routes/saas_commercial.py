@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import is_platform_developer, require_permission
+from app.api.deps import is_platform_developer, is_saas_super_admin, require_permission
 from app.core.config import settings
 from app.db.models import (
     CRMAccount,
@@ -41,6 +41,21 @@ from app.db.models import (
 from app.db.session import get_db
 from app.services.audit import audit
 from app.services.saas_renewals import reconcile_renewal_tasks
+
+class TenantRoleCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+    permission_keys: list[str] = Field(default_factory=list, max_length=100)
+
+
+class TenantRoleUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+
+
+class TenantRolePermissionsUpdate(BaseModel):
+    permission_keys: list[str] = Field(default_factory=list, max_length=100)
+
 
 router = APIRouter()
 
@@ -80,6 +95,42 @@ async def _ops_tenant(db: AsyncSession) -> Tenant | None:
 
 async def _is_platform_developer(user: User, db: AsyncSession) -> bool:
     return await is_platform_developer(user, db)
+
+
+async def _require_saas_platform_admin(user: User, db: AsyncSession) -> Tenant:
+    ops = await _ops_tenant(db)
+    if ops is None:
+        raise HTTPException(status_code=503, detail="SaaS operations tenant is not configured")
+    developer = await is_platform_developer(user, db)
+    super_admin = await is_saas_super_admin(user, db)
+    if not developer and not super_admin:
+        raise HTTPException(status_code=403, detail="SaaS Super Admin access is required")
+    if not developer and user.tenant_id != ops.id:
+        raise HTTPException(status_code=403, detail="SaaS administration must run from the operations workspace")
+    return ops
+
+
+async def _require_linked_customer_tenant(
+    db: AsyncSession,
+    ops_tenant_id: UUID,
+    tenant_id: UUID,
+) -> Tenant:
+    tenant = await db.scalar(select(Tenant).where(Tenant.id == tenant_id))
+    if tenant is None or tenant.id == ops_tenant_id:
+        raise HTTPException(status_code=404, detail="Customer tenant not found")
+    if settings.saas_demo_tenant_slug:
+        demo_id = await db.scalar(select(Tenant.id).where(Tenant.slug == settings.saas_demo_tenant_slug))
+        if demo_id == tenant.id:
+            raise HTTPException(status_code=404, detail="Customer tenant not found")
+    linked = await db.scalar(
+        select(CRMAccount.id).where(
+            CRMAccount.ops_tenant_id == ops_tenant_id,
+            CRMAccount.managed_tenant_id == tenant_id,
+        )
+    )
+    if linked is None:
+        raise HTTPException(status_code=404, detail="Tenant is not linked to the SaaS CRM")
+    return tenant
 
 
 async def _is_demo_crm_user(user: User, db: AsyncSession) -> bool:
@@ -2166,6 +2217,254 @@ async def list_renewals(
             subscription.renews_at.date() - now.date()
         ).days if subscription.renews_at else None,
     } for subscription, account, plan in rows]
+
+
+@router.get("/crm/tenants/{tenant_id}/roles")
+async def list_managed_tenant_roles(
+    tenant_id: UUID,
+    user: User = Depends(require_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    ops = await _require_saas_platform_admin(user, db)
+    await _require_linked_customer_tenant(db, ops.id, tenant_id)
+    rows = (await db.execute(
+        select(Role).where(Role.tenant_id == tenant_id).order_by(Role.role_kind, Role.name)
+    )).scalars().all()
+    permission_rows = (await db.execute(
+        select(RolePermission.role_id, Permission.key)
+        .join(Permission, Permission.id == RolePermission.permission_id)
+        .join(Role, Role.id == RolePermission.role_id)
+        .where(Role.tenant_id == tenant_id)
+        .order_by(Permission.key)
+    )).all()
+    by_role: dict[UUID, list[str]] = {}
+    for role_id, key in permission_rows:
+        by_role.setdefault(role_id, []).append(key)
+    return [{
+        "id": str(role.id),
+        "name": role.name,
+        "description": role.description,
+        "role_kind": role.role_kind,
+        "permission_keys": by_role.get(role.id, []),
+    } for role in rows]
+
+
+@router.post("/crm/tenants/{tenant_id}/roles", status_code=201)
+async def create_managed_tenant_role(
+    tenant_id: UUID,
+    payload: TenantRoleCreate,
+    user: User = Depends(require_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    ops = await _require_saas_platform_admin(user, db)
+    await _require_linked_customer_tenant(db, ops.id, tenant_id)
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="Role name is required")
+    duplicate = await db.scalar(
+        select(Role.id).where(Role.tenant_id == tenant_id, Role.name.ilike(name))
+    )
+    if duplicate:
+        raise HTTPException(status_code=409, detail="A role with this name already exists")
+    requested = sorted(set(payload.permission_keys))
+    if any(key.startswith("saas.") for key in requested):
+        raise HTTPException(status_code=403, detail="SaaS platform permissions cannot be assigned to customer roles")
+    permission_rows = list((await db.execute(
+        select(Permission).where(Permission.key.in_(requested))
+    )).scalars().all()) if requested else []
+    found = {item.key for item in permission_rows}
+    unknown = sorted(set(requested) - found)
+    if unknown:
+        raise HTTPException(status_code=422, detail={"unknown_permissions": unknown})
+    role = Role(
+        tenant_id=tenant_id,
+        name=name,
+        description=payload.description,
+        role_kind="custom",
+    )
+    db.add(role)
+    await db.flush()
+    for permission in permission_rows:
+        db.add(RolePermission(role_id=role.id, permission_id=permission.id))
+    await audit(
+        db, tenant_id=ops.id, actor_id=user.id, action="saas.tenant.role.created",
+        entity_type="role", entity_id=str(role.id),
+        metadata={"managed_tenant_id": str(tenant_id), "permission_keys": requested},
+    )
+    await db.commit()
+    return {
+        "id": str(role.id), "name": role.name, "description": role.description,
+        "role_kind": role.role_kind, "permission_keys": requested,
+    }
+
+
+@router.patch("/crm/tenants/{tenant_id}/roles/{role_id}")
+async def update_managed_tenant_role(
+    tenant_id: UUID,
+    role_id: UUID,
+    payload: TenantRoleUpdate,
+    user: User = Depends(require_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    ops = await _require_saas_platform_admin(user, db)
+    await _require_linked_customer_tenant(db, ops.id, tenant_id)
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == tenant_id))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Role not found")
+    if role.role_kind != "custom":
+        raise HTTPException(status_code=403, detail="Built-in tenant roles are governed and cannot be renamed here")
+    changed = sorted(payload.model_fields_set)
+    if "name" in payload.model_fields_set:
+        name = (payload.name or "").strip()
+        if not name:
+            raise HTTPException(status_code=422, detail="Role name is required")
+        duplicate = await db.scalar(
+            select(Role.id).where(
+                Role.tenant_id == tenant_id, Role.name.ilike(name), Role.id != role.id
+            )
+        )
+        if duplicate:
+            raise HTTPException(status_code=409, detail="A role with this name already exists")
+        role.name = name
+    if "description" in payload.model_fields_set:
+        role.description = payload.description
+    await audit(
+        db, tenant_id=ops.id, actor_id=user.id, action="saas.tenant.role.updated",
+        entity_type="role", entity_id=str(role.id),
+        metadata={"managed_tenant_id": str(tenant_id), "changed_fields": changed},
+    )
+    await db.commit()
+    return {"id": str(role.id), "name": role.name, "description": role.description, "role_kind": role.role_kind}
+
+
+@router.put("/crm/tenants/{tenant_id}/roles/{role_id}/permissions")
+async def update_managed_tenant_role_permissions(
+    tenant_id: UUID,
+    role_id: UUID,
+    payload: TenantRolePermissionsUpdate,
+    user: User = Depends(require_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    ops = await _require_saas_platform_admin(user, db)
+    await _require_linked_customer_tenant(db, ops.id, tenant_id)
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == tenant_id))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Role not found")
+    if role.role_kind != "custom":
+        raise HTTPException(status_code=403, detail="Built-in tenant role permissions are governed and cannot be changed here")
+    requested = sorted(set(payload.permission_keys))
+    if any(key.startswith("saas.") for key in requested):
+        raise HTTPException(status_code=403, detail="SaaS platform permissions cannot be assigned to customer roles")
+    permission_rows = list((await db.execute(
+        select(Permission).where(Permission.key.in_(requested))
+    )).scalars().all()) if requested else []
+    found = {item.key for item in permission_rows}
+    unknown = sorted(set(requested) - found)
+    if unknown:
+        raise HTTPException(status_code=422, detail={"unknown_permissions": unknown})
+    existing = list((await db.execute(
+        select(RolePermission).where(RolePermission.role_id == role.id)
+    )).scalars().all())
+    for assignment in existing:
+        await db.delete(assignment)
+    for permission in permission_rows:
+        db.add(RolePermission(role_id=role.id, permission_id=permission.id))
+    await audit(
+        db, tenant_id=ops.id, actor_id=user.id, action="saas.tenant.role.permissions.updated",
+        entity_type="role", entity_id=str(role.id),
+        metadata={"managed_tenant_id": str(tenant_id), "permission_keys": requested},
+    )
+    await db.commit()
+    return {"role_id": str(role.id), "permission_keys": requested}
+
+
+@router.delete("/crm/tenants/{tenant_id}/roles/{role_id}")
+async def delete_managed_tenant_role(
+    tenant_id: UUID,
+    role_id: UUID,
+    user: User = Depends(require_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    ops = await _require_saas_platform_admin(user, db)
+    await _require_linked_customer_tenant(db, ops.id, tenant_id)
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == tenant_id))
+    if role is None:
+        raise HTTPException(status_code=404, detail="Role not found")
+    if role.role_kind != "custom":
+        raise HTTPException(status_code=403, detail="Built-in tenant roles cannot be deleted")
+    assigned = await db.scalar(select(UserRole.user_id).where(UserRole.role_id == role.id).limit(1))
+    if assigned is not None:
+        raise HTTPException(status_code=409, detail="Reassign users before deleting this role")
+    await audit(
+        db, tenant_id=ops.id, actor_id=user.id, action="saas.tenant.role.deleted",
+        entity_type="role", entity_id=str(role.id),
+        metadata={"managed_tenant_id": str(tenant_id), "role_name": role.name},
+    )
+    await db.delete(role)
+    await db.commit()
+    return {"status": "deleted", "role_id": str(role_id)}
+
+
+@router.post("/crm/tenants/{tenant_id}/users/{user_id}/roles/{role_id}", status_code=201)
+async def assign_managed_tenant_role(
+    tenant_id: UUID,
+    user_id: UUID,
+    role_id: UUID,
+    user: User = Depends(require_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    ops = await _require_saas_platform_admin(user, db)
+    await _require_linked_customer_tenant(db, ops.id, tenant_id)
+    target = await db.scalar(select(User).where(User.id == user_id, User.tenant_id == tenant_id))
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == tenant_id))
+    if target is None or role is None:
+        raise HTTPException(status_code=404, detail="Tenant user or role not found")
+    if role.role_kind not in {"predefined", "custom"}:
+        raise HTTPException(status_code=403, detail="Platform roles cannot be assigned to customer-tenant users")
+    existing = await db.scalar(
+        select(UserRole).where(UserRole.user_id == target.id, UserRole.role_id == role.id)
+    )
+    if existing is not None:
+        return {"status": "already_assigned"}
+    db.add(UserRole(user_id=target.id, role_id=role.id))
+    await audit(
+        db, tenant_id=ops.id, actor_id=user.id, action="saas.tenant.user.role.assigned",
+        entity_type="user_role", entity_id=str(target.id),
+        metadata={"managed_tenant_id": str(tenant_id), "role_id": str(role.id)},
+    )
+    await db.commit()
+    return {"status": "assigned"}
+
+
+@router.delete("/crm/tenants/{tenant_id}/users/{user_id}/roles/{role_id}")
+async def remove_managed_tenant_role(
+    tenant_id: UUID,
+    user_id: UUID,
+    role_id: UUID,
+    user: User = Depends(require_permission("saas.roles.manage")),
+    db: AsyncSession = Depends(get_db),
+):
+    ops = await _require_saas_platform_admin(user, db)
+    await _require_linked_customer_tenant(db, ops.id, tenant_id)
+    target = await db.scalar(select(User).where(User.id == user_id, User.tenant_id == tenant_id))
+    role = await db.scalar(select(Role).where(Role.id == role_id, Role.tenant_id == tenant_id))
+    if target is None or role is None:
+        raise HTTPException(status_code=404, detail="Tenant user or role not found")
+    if role.role_kind not in {"predefined", "custom"}:
+        raise HTTPException(status_code=403, detail="Platform roles cannot be removed from customer-tenant users")
+    assignment = await db.scalar(
+        select(UserRole).where(UserRole.user_id == target.id, UserRole.role_id == role.id)
+    )
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Role assignment not found")
+    await db.delete(assignment)
+    await audit(
+        db, tenant_id=ops.id, actor_id=user.id, action="saas.tenant.user.role.removed",
+        entity_type="user_role", entity_id=str(target.id),
+        metadata={"managed_tenant_id": str(tenant_id), "role_id": str(role.id)},
+    )
+    await db.commit()
+    return {"status": "removed"}
 
 
 @router.get("/crm/team")
