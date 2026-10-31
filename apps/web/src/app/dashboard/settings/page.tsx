@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard-shell";
 import { SettingsCenter } from "@/components/settings-center";
-import { requireUser } from "@/lib/server-api";
+import { apiJsonResult, requireUser  } from "@/lib/server-api";
 
 type Preferences={preferred_name?:string|null;density?:"comfortable"|"compact";reduce_motion?:boolean;timezone?:string};
 type User={id:string;tenant_id:string;tenant_name?:string|null;tenant_slug?:string|null;email:string;first_name:string;last_name:string;employee_number?:string|null;job_title?:string|null;org_unit_name?:string|null;manager_name?:string|null;last_login_at?:string|null;roles?:Array<{name:string}>;permissions?:string[];preferences?:Preferences};
