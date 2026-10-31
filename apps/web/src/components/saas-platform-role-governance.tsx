@@ -33,8 +33,6 @@ export function SaaSPlatformRoleGovernance({ enabled }: { enabled: boolean }) {
 
   const load = useCallback(async () => {
     if (!enabled) return;
-    setLoading(true);
-    setError("");
     try {
       const [roleRows, permissionRows] = await Promise.all([
         requestJson("/api/lms/saas/crm/team/roles") as Promise<CustomRole[]>,
@@ -42,6 +40,7 @@ export function SaaSPlatformRoleGovernance({ enabled }: { enabled: boolean }) {
       ]);
       setRoles(roleRows);
       setPermissions(permissionRows);
+      setError("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Custom platform roles could not be loaded.");
     } finally {
