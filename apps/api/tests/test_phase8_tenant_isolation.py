@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import delete, select
 
 from app.core.security import hash_password
-from app.db.models import Course, Integration, Permission, ReportSchedule, Role, RolePermission, SavedReport, Tenant, User, UserRole, WebhookEndpoint
+from app.db.models import Course, Integration, Permission , Role, RolePermission, SavedReport, Tenant, User, UserRole, WebhookEndpoint
 from app.db.session import SessionLocal
 from app.main import app
 
@@ -147,7 +147,7 @@ def test_sensitive_resources_cannot_cross_tenant_boundary() -> None:
             )
             assert other_login.status_code == 200, other_login.text
             assert all(item["id"] != integration_id for item in client.get("/api/v1/integrations").json())
-            assert client.post(f"/api/v1/integrations/email/test").status_code == 404
+            assert client.post("/api/v1/integrations/email/test").status_code == 404
             assert client.post(f"/api/v1/webhooks/{webhook_id}/rotate-secret").status_code == 404
             assert client.post(f"/api/v1/reports/saved/{report_id}/run").status_code == 404
     finally:
