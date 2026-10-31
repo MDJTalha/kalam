@@ -46,7 +46,7 @@ export default async function CapabilityFramework(){
       <div className="stat-card"><span>Unmapped roles</span><strong>{Math.max(0,(roles?.length??0)-coveredRoles)}</strong><small>System roles without requirements</small></div>
     </section>
     <section className="data-panel"><div className="section-heading compact"><div><span className="eyebrow">Phase 1 architecture</span><h2>Strategy → capability → competency → role requirement</h2></div></div><p>Phase 1 adds the canonical capability domain around the existing skills foundation. Strategic objectives define business intent; capabilities express organizational capacity; competencies describe observable human capability; role requirements govern what each role must demonstrate. Learning mappings remain supporting evidence, not capability achievement.</p></section>
-    <CapabilityDomainAdministration objectives={objectives??[]} capabilities={capabilities??[]} competencies={competencies??[]} roles={roles??[]} skills={skills??[]} levels={levels??[]}/>
+    <CapabilityDomainAdministration objectives={objectives??[]} capabilities={capabilities??[]} competencies={competencies??[]} roles={roles??[]} skills={skillPage.items??[]} levels={levels??[]}/>
     <SkillAdministration skills={skillPage.items??[]} roles={roles??[]} courses={courses??[]} people={peoplePage?.items??[]} initialGovernance={framework}/>
   </DashboardShell>;
 }
