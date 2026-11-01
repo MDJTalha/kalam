@@ -1,8 +1,17 @@
 import fs from "node:fs";
 import path from "node:path";
-import sharp from "sharp";
-
 const root = process.cwd();
+
+function pngDimensions(buffer) {
+  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  if (buffer.length < 24 || !buffer.subarray(0, 8).equals(signature) || buffer.toString("ascii", 12, 16) !== "IHDR") {
+    throw new Error("Invalid PNG signature or IHDR chunk");
+  }
+  const width = buffer.readUInt32BE(16);
+  const height = buffer.readUInt32BE(20);
+  if (!width || !height) throw new Error("PNG dimensions must be non-zero");
+  return { width, height };
+}
 const webSrc = path.join(root, "apps", "web", "src");
 const publicDir = path.join(root, "apps", "web", "public");
 
@@ -102,7 +111,7 @@ const expectedImages = new Map([
 ]);
 for (const [file, size] of expectedImages) {
   try {
-    const meta = await sharp(path.join(publicDir, file)).metadata();
+    const meta = pngDimensions(fs.readFileSync(path.join(publicDir, file)));
     const expectedHeight = file === "kalam-og.png" ? 630 : size;
     if (meta.width !== size || meta.height !== expectedHeight) {
       violations.push(file + " dimensions must be " + size + "x" + expectedHeight + " (found " + meta.width + "x" + meta.height + ")");
@@ -123,8 +132,9 @@ try {
       const height = ico.readUInt8(entry + 1) || 256;
       const bytes = ico.readUInt32LE(entry + 8);
       const offset = ico.readUInt32LE(entry + 12);
-      const meta = await sharp(ico.subarray(offset, offset + bytes)).metadata();
-      if (meta.format !== "png" || meta.width !== width || meta.height !== height) {
+      if (bytes < 24 || offset < 6 + 3 * 16 || offset + bytes > ico.length) throw new Error("ICO entry " + index + " has invalid byte bounds");
+      const meta = pngDimensions(ico.subarray(offset, offset + bytes));
+      if (meta.width !== width || meta.height !== height) {
         violations.push("App favicon.ico entry " + index + " is invalid");
       }
     }
