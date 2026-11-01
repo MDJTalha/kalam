@@ -49,6 +49,7 @@ The generator scans for:
 - legacy brand-color literals
 - placeholder/coming-soon language in source and public assets
 - unsupported-claim candidates in source, public assets and relevant documentation
+- dead-anchor (`href="#"`/`to="#"`), empty-href and empty-click-handler candidates in application source
 - route metadata candidates and inherited route states
 
 Regex matches are candidates, not automatic defects. Dead links/actions, contradictory terminology, rendered metadata, visual quality, accessibility and workflow behavior still require dedicated tests and human review.
