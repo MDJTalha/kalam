@@ -82,7 +82,7 @@ try {
       await new Promise(resolve => setTimeout(resolve, 700));
       await evaluate("(()=>{const s=document.createElement('script');s.textContent=" + JSON.stringify(axeSource) + ";document.documentElement.appendChild(s);return true})()");
       const result = await evaluate(
-        "axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}).then(r=>({url:location.href,title:document.title,violations:r.violations.map(v=>({id:v.id,impact:v.impact,help:v.help,description:v.description,node_count:v.nodes.length,nodes:v.nodes.slice(0,10).map(n=>({target:n.target,summary:(n.failureSummary||'').slice(0,260),html:(n.html||'').slice(0,1200)}))})),passes:r.passes.length,incomplete:r.incomplete.length}))",
+        "axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22a','wcag22aa']}}).then(r=>({url:location.href,title:document.title,violations:r.violations.map(v=>({id:v.id,impact:v.impact,help:v.help,description:v.description,node_count:v.nodes.length,nodes:v.nodes.slice(0,10).map(n=>({target:n.target,summary:(n.failureSummary||'').slice(0,260),html:(n.html||'').slice(0,1200)}))})),passes:r.passes.length,incomplete:r.incomplete.length}))",
         true
       );
       results.push({ route, result: "SCANNED", ...result });
