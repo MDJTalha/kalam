@@ -1,109 +1,67 @@
-# Corporate LMS — Frontend Design System Baseline
+# Kalam — Frontend Design System Baseline
 
-Version: 0.1
-Status: Phase 0 controlled UX baseline
-Date: 2026-09-24
+Version: 1.0
+Status: Active canonical frontend baseline
+Authority: `KALAM_9_9_BRAND_SURFACE_GOVERNANCE.md` and `apps/web/src/app/design-system.css`
 
 ## 1. Design decision
 
-AIVON Learning OS uses a bright blue-first enterprise workspace. Deep navy/blue is the application-shell foundation; blue is the primary product, action and visualization family; gold is a restrained AIVON identity accent. Green is reserved for semantic success states and is not a primary brand/shell color.
+Kalam is an **Enterprise Workforce Capability Platform**. The frontend uses Kalam Navy and Kalam Blue as its identity foundation, with Tech, Ice and restrained Gold accents. Green is reserved for semantic success states; it is not a competing brand or navigation identity.
 
-This resolves the two design directions in the implementation brief:
-- User requirement: bright, blueish corporate visual language.
-- Product requirement: premium dark corporate-green navigation with subtle gold accents.
-
-Blue is the primary workspace/data visualization family. Green identifies AIVON brand, active navigation and trusted/approved actions. Gold is reserved for identity emphasis and selected premium states.
+The canonical narrative is **Expectation → Capability → Evidence → Action → Readiness**. The interface should make capability visible, governable and provable.
 
 ## 2. Visual character
 
-The interface must feel:
-- enterprise SaaS
-- intelligent and data-driven
-- bright, precise and information-dense
-- calm rather than decorative
-- accessible and operational
-- suitable for CHRO, CLO, HR/L&D, capability and executive users
+The interface must feel enterprise SaaS, intelligent, data-driven, precise, calm, information-dense, accessible and operational. It must support executives, HR/L&D, capability and workforce leaders, managers, instructors, compliance owners and learners.
 
-Avoid neon, heavy gradients, excessive glassmorphism, stock photography and decorative widgets.
+Avoid neon, excessive gradients, glassmorphism, stock photography and decorative widgets.
 
-## 3. Core palette
+## 3. Canonical tokens
 
-Workspace background: cool blue-white / very light slate.
-Primary workspace blue: professional medium-deep blue.
-Primary blue dark: navigation/action hover and high-contrast states.
-AIVON brand green: deep corporate green.
-AIVON green dark: sidebar and high-emphasis brand surfaces.
-AIVON gold: restrained identity accent.
-Text: dark charcoal/navy.
-Muted text: cool slate.
-Borders: cool blue-gray.
-Surfaces: white and near-white.
+Consume the shared variables from `apps/web/src/app/design-system.css`. Do not introduce a parallel palette.
 
-Status colors remain semantic and restrained: success, warning, danger and neutral.
+| Token | Canonical value | Primary use |
+|---|---|---|
+| Kalam Navy | #08243D | Identity, hierarchy, shell |
+| Kalam Blue | #0878C9 | Primary actions, links, product emphasis |
+| Kalam Tech | #3EA9DD | Secondary emphasis and data visualization |
+| Kalam Ice | #EAF5FC | Subtle surfaces and selected states |
+| Kalam Gold | #C99732 | Restrained premium emphasis |
+| Kalam Blue Hover | #0669AE | AA-safe primary text/action on Ice |
+| Kalam Ice Ink | #52657A | AA-safe muted text on Ice |
+
+Workspace surfaces, text, borders, semantic statuses, typography, spacing, radii, shadows, focus and motion must use the shared design-system variables wherever available. Normal-size text requires at least 4.5:1 contrast. Kalam Tech and Kalam Gold are accent colors, not normal-size text on white or Ice. Use Kalam Blue Hover or Kalam Ice Ink for text on Ice.
 
 ## 4. Application shell
 
-The authenticated shell consists of a dark-green AIVON sidebar, bright blue-white workspace, consistent global header and responsive content canvas.
+The authenticated shell uses the canonical navy/blue Kalam identity, a responsive content canvas, role- and permission-aware navigation, accessible active/focus states and a consistent global header.
 
-Sidebar requirements:
-- grouped navigation
-- active state
-- role/permission-aware visibility
-- collapse behavior
-- accessible focus state
-- badges only where operationally meaningful
-
-Header requirements:
-- breadcrumbs
-- page title/context
-- organization/workspace selector
-- global search
-- notifications
-- help
-- profile and role context
+Header context includes breadcrumbs, page title, organization/workspace selector, global search, notifications, help, profile and role context as applicable.
 
 ## 5. Information hierarchy
 
-Dashboard and operational screens prioritize:
-1. decision-critical KPIs
-2. risks and gaps
-3. trends
-4. actionable work
-5. drill-down details
-6. supporting evidence
+Prioritize decision-critical signals, risks and gaps, trends, actionable work, drill-down details and supporting evidence. Every visual component must have a defined business purpose.
 
-Every visual component must have a defined business purpose.
+Decision surfaces follow **Context → Evidence → Decision → Action → Accountability**.
 
 ## 6. Data visualization
 
-Charts must use the blue/green/gold product palette consistently and remain legible without relying on color alone.
-
-Preferred patterns:
-- KPI cards
-- line/area trends where time matters
-- bars for comparison
-- rings/donuts for composition when categories are limited
-- heatmaps for capability/skill matrices
-- progress indicators for completion/readiness
-
-Charts must be data-driven and support accessible labels/tooltips.
+Use the Kalam blue family as the primary visualization family, navy for reference/baseline and gold for restrained emphasis. Semantic status colors remain distinct. Charts must remain understandable without color alone and provide accessible labels, units, provenance and summaries.
 
 ## 7. Component system
 
-Reusable components must cover buttons, cards, KPI cards, tables/data grids, forms, filters, tabs, badges, status indicators, progress, charts, modals, drawers, tooltips, breadcrumbs, pagination, empty/loading/error states and confirmations.
+Reusable components cover buttons, cards, KPI cards, tables/data grids, forms, filters, tabs, badges, status indicators, progress, charts, modals, drawers, tooltips, breadcrumbs, pagination, empty/loading/error states and confirmations.
 
-Components must share spacing, typography, radius, border, focus and interaction tokens.
+Components share spacing, typography, radius, border, focus and interaction tokens. Applicable keyboard, screen-reader, responsive and reduced-motion states must be documented and verified.
 
 ## 8. Responsive behavior
 
-Desktop is the primary enterprise workspace. Tablet and mobile layouts must reflow rather than simply scale down.
-
-Tables should support horizontal scrolling or an intentional responsive representation. Navigation should collapse. Dense dashboard grids should reduce columns while preserving priority.
+Desktop, tablet and mobile layouts reflow around task priority rather than merely scaling down. Tables use horizontal scrolling or an intentional responsive representation. Navigation collapses accessibly. Dense dashboard grids reduce columns while preserving decision-critical information.
 
 ## 9. Accessibility
 
-Target WCAG 2.2 AA. Focus visibility, keyboard navigation, semantic headings, form labels, contrast and non-color status cues are release requirements.
+Target WCAG 2.2 AA. Focus visibility, keyboard navigation, semantic headings, form labels, contrast, non-color status cues and reduced-motion support are release requirements.
 
-## 10. Phase 0 governance
+## 10. Governance
 
-This document is the visual baseline for Phase 1 frontend implementation. Changes to the primary palette, application shell or information architecture after Phase 0 require controlled change documentation.
+This is the active Kalam frontend baseline. The canonical brand governance document and implemented design-system tokens take precedence in any conflict. Historical predecessor-brand design exploration is not an active source of truth.

@@ -44,6 +44,29 @@ for (const token of ["--kalam-navy", "--kalam-blue", "--kalam-tech", "--kalam-ic
   if (!design.includes(token)) violations.push(`Design system missing ${token}`);
 }
 
+function luminance(hex) {
+  const rgb = hex.replace("#", "").match(/.{2}/g).map(v => parseInt(v, 16) / 255);
+  const linear = rgb.map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+}
+function contrastRatio(foreground, background) {
+  const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  return (values[0] + 0.05) / (values[1] + 0.05);
+}
+const contrastChecks = [
+  ["Kalam Navy on white", "#08243D", "#FFFFFF"],
+  ["Kalam Blue on white", "#0878C9", "#FFFFFF"],
+  ["Kalam Blue hover on Ice", "#0669AE", "#EAF5FC"],
+  ["Muted text on white", "#63738A", "#FFFFFF"],
+  ["Muted text on Ice", "#52657A", "#EAF5FC"]
+];
+for (const [label, foreground, background] of contrastChecks) {
+  const ratio = contrastRatio(foreground, background);
+  console.log("CONTRAST " + label + ": " + ratio.toFixed(2) + ":1");
+  if (ratio < 4.5) violations.push(label + " contrast is below WCAG AA normal-text threshold (" + ratio.toFixed(2) + ":1)");
+}
+if (!design.includes("--kalam-ice-ink: #52657A")) violations.push("Design system missing AA-safe Kalam Ice text token");
+
 const homepage = fs.readFileSync(path.join(webSrc, "app", "page.tsx"), "utf8");
 for (const phrase of ["Build Capability.", "Prove Readiness.", "Expectation", "Capability", "Evidence", "Action", "Readiness"]) {
   if (!homepage.includes(phrase)) violations.push(`Homepage missing canonical brand narrative token: ${phrase}`);
