@@ -14,7 +14,7 @@ export function CapabilityCommandCenter() {
 
       <div className={styles.commandShell}>
         <aside className={styles.commandRail} aria-hidden="true">
-          <span className={styles.commandRailMark} aria-hidden="true"><svg className={styles.commandRailIcon} viewBox="0 0 192 192" focusable="false"><g transform="translate(16 16)"><path fill="#092844" d="M24 12 H43 Q50 12 50 19 V141 Q50 148 43 148 H24 Q17 148 17 141 V19 Q17 12 24 12 Z"/><path fill="#147AC5" d="M51 77 L104 16 Q108 12 115 12 H148 Q155 12 150 18 L87 87 H51 Z"/><path fill="#63BDE8" d="M51 86 H87 L150 142 Q155 148 148 148 H115 Q108 148 104 144 L51 95 Z"/></g></svg></span>
+          <span className={styles.commandRailMark} aria-hidden="true"><svg className={styles.commandRailIcon} viewBox="0 0 192 192" focusable="false"><g transform="translate(16 16)"><path fill="#08243D" d="M24 12 H43 Q50 12 50 19 V141 Q50 148 43 148 H24 Q17 148 17 141 V19 Q17 12 24 12 Z"/><path fill="#0878C9" d="M51 77 L104 16 Q108 12 115 12 H148 Q155 12 150 18 L87 87 H51 Z"/><path fill="#3EA9DD" d="M51 86 H87 L150 142 Q155 148 148 148 H115 Q108 148 104 144 L51 95 Z"/></g></svg></span>
           <span className={styles.commandRailItem}><BarChart3 size={16}/></span>
           <span className={styles.commandRailItem}><UsersRound size={16}/></span>
           <span className={styles.commandRailItem}><Target size={16}/></span>
@@ -25,7 +25,7 @@ export function CapabilityCommandCenter() {
           <div className={styles.commandHeader}>
             <div>
               <span>EXECUTIVE VIEW</span>
-              <h3>Capability & readiness overview</h3>
+              <h2>Capability & readiness overview</h2>
               <p>Signals from learning, skills, evidence and compliance.</p>
             </div>
             <span className={styles.commandPeriod}>Q3 · GLOBAL</span>

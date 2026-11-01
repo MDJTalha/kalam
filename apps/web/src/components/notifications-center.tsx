@@ -47,11 +47,11 @@ export function NotificationsCenter() {
     <button className="header-icon-button" type="button" onClick={() => setOpen((value) => !value)} aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`} aria-haspopup="dialog" aria-expanded={open} aria-controls="notification-popover">
       <Bell size={18} aria-hidden="true"/>{unread > 0 && <span className="notification-count">{unread > 9 ? "9+" : unread}</span>}
     </button>
-    {open && <div className="notification-popover" id="notification-popover" role="dialog" aria-label="Notifications">
+    <div className="notification-popover" id="notification-popover" role="dialog" aria-label="Notifications" hidden={!open}>
       <div className="popover-heading"><div><strong>Notifications</strong><small>{unread ? `${unread} unread` : "All caught up"}</small></div><ChevronDown size={16}/></div>
       {items.length ? items.slice(0, 8).map((item) => <button key={item.id} className={`notification-row ${item.read_at ? "read" : "unread"}`} onClick={() => void markRead(item.id)}>
         <div><strong>{item.title}</strong><small>{item.body}</small><em>{new Date(item.created_at).toLocaleString()}</em></div>{item.read_at ? <Check size={14}/> : <i/>}
       </button>) : <div className="popover-empty"><Bell size={20}/><span>No notifications yet.</span></div>}
-    </div>}
+    </div>
   </div>;
 }

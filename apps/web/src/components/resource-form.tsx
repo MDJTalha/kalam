@@ -37,7 +37,15 @@ function LookupMultiField({ value, onChange, label, endpoint, required }: {
           headers: { Accept: "application/json" }, signal: controller.signal,
         });
         const payload = await response.json().catch(() => ({ items: [] }));
-        const next = Array.isArray(payload.items) ? payload.items : Array.isArray(payload) ? payload : [];
+        const raw: Array<LookupOption & { first_name?: string; last_name?: string; email?: string; job_title?: string | null }> = Array.isArray(payload.items) ? payload.items : Array.isArray(payload) ? payload : [];
+        const next = raw.map((item) => {
+          const fullName = [item.first_name, item.last_name].filter(Boolean).join(" ").trim();
+          return {
+            id: String(item.id ?? ""),
+            label: typeof item.label === "string" && item.label.trim() ? item.label : fullName || item.email || String(item.id ?? ""),
+            meta: item.meta ?? item.job_title ?? item.email ?? null,
+          };
+        }).filter((item) => item.id && item.label);
         if (response.ok) setOptions(next);
       } catch { /* Keep current options on transient lookup failures. */ }
     }, 180);
@@ -55,7 +63,7 @@ function LookupMultiField({ value, onChange, label, endpoint, required }: {
     <label><span>{label}{required ? " *" : ""}</span><input value={query} placeholder="Search people…" onChange={(event) => setQuery(event.target.value)} aria-label={label + " search"} /></label>
     {selected.length ? <div className="lookup-multi-chips" aria-label="Selected records">{selected.map((item) => <button type="button" key={item.id} onClick={() => toggle(item)}>{item.label} ×</button>)}</div> : null}
     <div className="lookup-multi-options" role={options.length ? "listbox" : undefined} aria-label={options.length ? label + " results" : undefined}>
-      {options.slice(0, 8).map((option) => <button type="button" role="option" aria-selected={selectedIds.includes(option.id)} className={selectedIds.includes(option.id) ? "lookup-multi-option selected" : "lookup-multi-option"} key={option.id} onClick={() => toggle(option)}><span>{option.label}</span>{option.meta ? <small>{option.meta}</small> : null}</button>)}
+      {options.slice(0, 8).map((option) => <button type="button" role="option" aria-label={option.label} aria-selected={selectedIds.includes(option.id)} className={selectedIds.includes(option.id) ? "lookup-multi-option selected" : "lookup-multi-option"} key={option.id} onClick={() => toggle(option)}><span>{option.label}</span>{option.meta ? <small>{option.meta}</small> : null}</button>)}
       {!options.length ? <small className="lookup-multi-empty">Search by name, email or employee number.</small> : null}
     </div>
   </div>;

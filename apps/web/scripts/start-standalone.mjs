@@ -18,7 +18,7 @@ cpSync(publicSource, publicTarget, { recursive: true });
 const server = spawn(process.execPath, [path.join(standaloneRoot, "server.js")], {
   cwd: standaloneRoot,
   stdio: "inherit",
-  env: { ...process.env, HOSTNAME: "127.0.0.1", PORT: "3000" },
+  env: { ...process.env, HOSTNAME: process.env.HOSTNAME || "127.0.0.1", PORT: process.env.PORT || "3000" },
 });
 
 server.on("exit", (code, signal) => {

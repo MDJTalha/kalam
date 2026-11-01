@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 
 export type LookupPerson = {
   id: string;
@@ -29,6 +29,7 @@ export function PeopleLookupSelect({ value, onChange, initialPeople, label, disa
   const [matches, setMatches] = useState(initialPeople);
   const [loading, setLoading] = useState(false);
   const [lookupError, setLookupError] = useState("");
+  const selectId = useId();
   const people = useMemo(() => {
     const merged = new Map<string, LookupPerson>();
     for (const person of initialPeople) merged.set(person.id, person);
@@ -58,9 +59,9 @@ export function PeopleLookupSelect({ value, onChange, initialPeople, label, disa
   }, [query, activeOnly]);
 
   return <div className="form-field">
-    <span>{label}</span>
+    <label htmlFor={selectId}>{label}</label>
     <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search name, email, employee ID…" aria-label={`${label} search`} disabled={disabled} />
-    <select value={value} onChange={event => onChange(event.target.value)} required={!optional} disabled={disabled || loading}>
+    <select id={selectId} value={value} onChange={event => onChange(event.target.value)} required={!optional} disabled={disabled || loading}>
       <option value="">{loading ? "Loading people…" : optional ? "All people" : people.length ? "Select a person" : "No matching people"}</option>
       {people.map(person => <option key={person.id} value={person.id}>{displayName(person)}</option>)}
     </select>

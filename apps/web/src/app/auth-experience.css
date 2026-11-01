@@ -186,6 +186,7 @@
 .k-back-link:hover{color:#0b5caa}
 .k-auth .auth-card>.text-link{display:inline-block;margin-top:20px}
 .k-auth :focus-visible{outline:3px solid rgba(42,135,217,.52);outline-offset:3px}
+.k-auth .auth-card .form-stack input:focus-visible,.k-auth .auth-card .form-stack select:focus-visible,.k-auth .auth-card .form-stack textarea:focus-visible{outline:3px solid var(--kalam-blue)!important;outline-offset:3px;box-shadow:0 0 0 4px rgba(8,120,201,.14)!important}
 
 @media(max-width:960px){
   .k-auth{grid-template-columns:1fr}
