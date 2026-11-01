@@ -29,6 +29,8 @@ Run from the repository root:
 
 ```powershell
 node qa/brand-surface-inventory.mjs
+# Start the web app first, then smoke-test all inventoried routes:
+node qa/brand-route-smoke.mjs http://127.0.0.1:3000
 ```
 
 The generator writes:
@@ -36,6 +38,7 @@ The generator writes:
 - `qa/generated/KALAM_BRAND_SURFACE_INVENTORY.md` — human-readable discovery summary and route-state/metadata coverage
 - `qa/generated/kalam-brand-surface-inventory.csv` — one row per discovered file
 - `qa/generated/kalam-brand-surface-findings.csv` ? line-level automated matches and their recorded dispositions
+- `qa/generated/kalam-brand-route-smoke.json` ? per-route HTTP smoke results and status distribution
 - `qa/generated/kalam-brand-surface-inventory.json` — full inventory, findings, metadata checks and inherited route-state detail
 
 The JSON file is the detailed evidence source. Generated outputs must be refreshed after source or documentation changes.
