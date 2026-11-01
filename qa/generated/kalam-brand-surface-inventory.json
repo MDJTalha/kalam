@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-01T11:43:30.796Z",
-  "commit": "b72fe8ed8d63e99232626f08f5239e7b4de344dd",
+  "generated_at": "2026-11-01T11:45:42.180Z",
+  "commit": "60f78a21efc29466132a1080dd94ec420eb42fe7",
   "working_tree": {
     "dirty": false,
     "change_count": 0
@@ -24,6 +24,15 @@
     "with_error_boundary": 92,
     "with_not_found": 92,
     "with_global_error": 92
+  },
+  "review_state": {
+    "certification_status": "NOT_CERTIFIED",
+    "manual_signoff_complete": false,
+    "inventory_items": 589,
+    "brand_items_needing_manual_review": 589,
+    "terminology_items_needing_manual_review": 589,
+    "accessibility_items_needing_verification": 181,
+    "claim_items_needing_review": 589
   },
   "limitations": [
     "Discovery inventory is not a manual brand disposition.",

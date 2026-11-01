@@ -1,7 +1,7 @@
 # Kalam Brand Surface Inventory
 
-Generated: 2026-11-01T11:43:30.796Z
-Commit: b72fe8ed8d63e99232626f08f5239e7b4de344dd
+Generated: 2026-11-01T11:45:42.180Z
+Commit: 60f78a21efc29466132a1080dd94ec420eb42fe7
 Working tree dirty: false
 Working tree change count: 0
 
@@ -18,6 +18,15 @@ Working tree change count: 0
 - customer_documentation_files: 99
 - inventory_rows: 589
 - automated_findings: 49
+
+## Certification status
+
+- Status: NOT_CERTIFIED
+- Manual sign-off complete: false
+- Inventory items awaiting manual brand disposition: 589
+- Inventory items awaiting terminology review: 589
+- Surfaces awaiting accessibility verification: 181
+- Inventory items awaiting claim review: 589
 
 ## Automated finding dispositions
 
