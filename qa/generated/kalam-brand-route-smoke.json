@@ -1,10 +1,10 @@
 {
-  "tested_at": "2026-11-01T11:49:36.130Z",
-  "base_url": "http://127.0.0.1:3010",
-  "inventory_commit": "c1e8fcf09023f436dbbb3becf93e184f5348cbb9",
+  "tested_at": "2026-11-01T12:18:17.682Z",
+  "base_url": "http://127.0.0.1:3000",
+  "inventory_commit": "5944cd54ea90e91a523ef1518c2a8c6fd12f8a33",
   "inventory_working_tree": {
-    "dirty": false,
-    "change_count": 0
+    "dirty": true,
+    "change_count": 7
   },
   "routes_discovered": 92,
   "routes_tested": 92,

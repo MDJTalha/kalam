@@ -1,0 +1,847 @@
+{
+  "tested_at": "2026-11-01T12:07:25.591Z",
+  "base_url": "http://127.0.0.1:3010",
+  "axe_core": "4.13.0",
+  "standard": "WCAG 2.2 A/AA automated rules",
+  "routes_requested": 92,
+  "routes_scanned": 92,
+  "scan_errors": 0,
+  "total_violation_instances": 0,
+  "unique_violation_rules": [],
+  "route_results": [
+    {
+      "route": "/access-denied",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/access-denied",
+      "title": "Kalam | Enterprise Workforce Capability Platform",
+      "violations": [],
+      "passes": 19,
+      "incomplete": 0
+    },
+    {
+      "route": "/clients",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/clients",
+      "title": "Customer Stories · Kalam",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 1
+    },
+    {
+      "route": "/contact-sales",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/contact-sales",
+      "title": "Contact Sales · Kalam",
+      "violations": [],
+      "passes": 28,
+      "incomplete": 4
+    },
+    {
+      "route": "/dashboard/admin/inquiries",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/admin",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/admin/support",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/ai",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/analytics",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/assessments/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample/attempts",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/assessments/admin",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/assessments",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/audit",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/capability-assessments",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/capability-gaps",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/capability-risk",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample/studio",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/catalog/categories",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/catalog/new",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/catalog",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/certificates/admin",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/certificates",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/compliance/admin",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/compliance",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/course-studio/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/course-studio",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/development",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/evidence/admin",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/files",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/help/cases/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/help",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/instructor",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/instructors",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/integrations",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/ld-operations/equivalencies",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/ld-operations",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/learning-paths/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/learning-paths/new",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/learning-paths",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/manager/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/manager",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/notifications",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/organization",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/people/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/people/admin",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/people",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/programs/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/programs/cohorts/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/programs",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/reports",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/billing",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/certifications",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/clients/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/clients",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/contracts",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/forecast",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/inquiries",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/onboarding",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/pipeline",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/pricing/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/pricing",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/renewals",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/subscriptions",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/tasks",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/team",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/tenants",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/saas/trials",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/search",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/sessions",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/settings",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/settings/sessions",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/skills/admin",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/skills",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/team",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/dashboard/webhooks",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/forgot-password",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/forgot-password",
+      "title": "Forgot password · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/free-trial",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/guided-evaluation",
+      "title": "Enterprise Evaluation · Kalam",
+      "violations": [],
+      "passes": 26,
+      "incomplete": 4
+    },
+    {
+      "route": "/guided-evaluation",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/guided-evaluation",
+      "title": "Enterprise Evaluation · Kalam",
+      "violations": [],
+      "passes": 26,
+      "incomplete": 4
+    },
+    {
+      "route": "/implementation",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/implementation",
+      "title": "Implementation · Kalam",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 1
+    },
+    {
+      "route": "/integrations",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/integrations",
+      "title": "Integrations · Kalam",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 1
+    },
+    {
+      "route": "/login/demo",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login?org=demo",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/login",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/login",
+      "title": "Sign in · Kalam",
+      "violations": [],
+      "passes": 25,
+      "incomplete": 0
+    },
+    {
+      "route": "/",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/",
+      "title": "Kalam | Enterprise Workforce Capability Platform",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 2
+    },
+    {
+      "route": "/pricing",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/pricing",
+      "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 1
+    },
+    {
+      "route": "/reset-password",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/reset-password",
+      "title": "Reset password · Kalam",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "route": "/service-unavailable",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/service-unavailable",
+      "title": "Kalam | Enterprise Workforce Capability Platform",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 1
+    },
+    {
+      "route": "/trust",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/trust",
+      "title": "Security & Trust · Kalam",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 0
+    },
+    {
+      "route": "/verify/audit-sample",
+      "result": "SCANNED",
+      "url": "http://127.0.0.1:3010/verify/audit-sample",
+      "title": "Kalam | Enterprise Workforce Capability Platform",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 1
+    }
+  ],
+  "limitations": [
+    "Automated axe results are not a complete WCAG conformance audit.",
+    "Keyboard-only, screen-reader, zoom/reflow, cognitive and manual interaction checks remain required.",
+    "Protected routes may render redirects or access states when no authenticated session is supplied.",
+    "Findings must be triaged for context and severity before being treated as defects."
+  ]
+}

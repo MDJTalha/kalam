@@ -98,3 +98,33 @@ Every route must resolve to an intentional loading, error, not-found and global-
 No audit report may claim 100% surface coverage unless every discovered route/file/surface has a recorded disposition.
 
 No brand score may be inflated to 9.9 solely because automated scans pass. Browser, accessibility and functional evidence remain required. Generated inventory rows begin in `NEEDS_MANUAL_REVIEW`; discovery does not imply approval or certification.
+
+
+## Browser accessibility smoke (axe-core)
+
+Start the production server and run the automated WCAG 2.2 A/AA rules across every inventoried application route:
+
+```powershell
+node qa/brand-accessibility-smoke.mjs http://127.0.0.1:3000 --all
+```
+
+The browser runner uses the installed axe-core version and Chrome DevTools Protocol. It records each route, axe rule results, node-level evidence and scan errors in:
+
+- `qa/generated/kalam-brand-accessibility-smoke.json`
+
+Latest recorded run: axe-core 4.13.0; 92/92 inventoried routes scanned; 0 scan errors; 0 automated WCAG 2.2 A/AA violation instances. This is automated evidence only, not a complete WCAG conformance declaration. Protected routes may render unauthenticated states, and the scan does not replace keyboard-only, screen-reader, zoom/reflow, cognitive or manual interaction testing.
+
+## Latest runtime evidence
+
+- Production build: PASS (Webpack; Next.js 16.4.3).
+- TypeScript: PASS.
+- ESLint: PASS with two existing unused-variable warnings in `apps/web/src/app/dashboard/people/admin/page.tsx`.
+- Brand contract and palette assertions: PASS.
+- HTTP smoke: 92/92 routes; 89 HTTP 200 and 3 HTTP 307 redirects; zero HTTP 5xx/request errors.
+- axe-core: 92/92 routes; zero scan errors; zero automated WCAG 2.2 A/AA violations.
+
+## Certification remains separate from automation
+
+The current generated inventory still requires manual disposition. Brand review, terminology review and claim review remain open for 589 inventory rows each; accessibility verification remains open for 181 surfaces. Automated browser scans do not clear those human-review registers. Keyboard and assistive-technology checks, visual/responsive review, authenticated workflow testing, and human brand/claim approvals remain outstanding. Do not claim 9.9 certification or 100% completion until those tasks are evidenced and signed off.
+
+The original local checkout was independently rebuilt and also passed 92/92 route smoke checks and 92/92 axe-core route scans with zero scan errors and zero automated WCAG 2.2 A/AA violation instances.

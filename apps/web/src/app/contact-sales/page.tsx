@@ -32,7 +32,7 @@ export default function ContactSalesPage() {
               <div><strong>02</strong><span>Align the conversation</span></div>
               <div><strong>03</strong><span>Define next steps</span></div>
             </div>
-            <PublicButton className={styles.salesJump} href="#sales-inquiry" variant="inverse">Tell us what you need <ArrowRight size={16} aria-hidden="true"/></PublicButton>
+            <PublicButton className={styles.salesJump} href="#sales-inquiry" variant="primary">Tell us what you need <ArrowRight size={16} aria-hidden="true"/></PublicButton>
             <div className={styles.salesConversation}>
               <div className={styles.salesConversationHead}><ClipboardList size={19} aria-hidden="true"/><h2>Bring the context that matters</h2></div>
               <ol>{conversation.map(item => <li key={item.number}><span className={styles.salesNumber}>{item.number}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></li>)}</ol>
