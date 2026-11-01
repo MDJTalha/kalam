@@ -7,9 +7,14 @@ const inventory = JSON.parse(fs.readFileSync(path.join(generated, "kalam-brand-s
 const routeSmoke = JSON.parse(fs.readFileSync(path.join(generated, "kalam-brand-route-smoke.json"), "utf8"));
 const axe = JSON.parse(fs.readFileSync(path.join(generated, "kalam-brand-accessibility-smoke.json"), "utf8"));
 const experience = JSON.parse(fs.readFileSync(path.join(generated, "kalam-brand-route-experience-smoke.json"), "utf8"));
-const routeMap = new Map(routeSmoke.routes.map(item => [item.route, item]));
-const axeMap = new Map(axe.route_results.map(item => [item.route, item]));
-const experienceMap = new Map(experience.route_results.map(item => [item.route, item]));
+const evidenceFreshness = {
+  http: routeSmoke.inventory_commit === inventory.commit && routeSmoke.build_commit === inventory.commit && routeSmoke.build_commit_matches_inventory === true,
+  axe: axe.inventory_commit === inventory.commit && axe.build_commit === inventory.commit && axe.build_commit_matches_inventory === true,
+  experience: experience.inventory_commit === inventory.commit && experience.build_commit === inventory.commit && experience.build_commit_matches_inventory === true,
+};
+const routeMap = new Map((evidenceFreshness.http ? routeSmoke.routes : []).map(item => [item.route, item]));
+const axeMap = new Map((evidenceFreshness.axe ? axe.route_results : []).map(item => [item.route, item]));
+const experienceMap = new Map((evidenceFreshness.experience ? experience.route_results : []).map(item => [item.route, item]));
 const read = file => { try { return fs.readFileSync(path.join(root, file), "utf8"); } catch { return ""; } };
 const reviewedGovernance = new Set([
   "docs/01-governance/KALAM_CLAIM_REGISTRY.md",
@@ -174,19 +179,20 @@ const report = {
   generated_at: new Date().toISOString(),
   inventory_commit: inventory.commit,
   inventory_rows: inventory.inventory.length,
+  evidence_freshness: evidenceFreshness,
   automation: {
-    http_routes_tested: routeSmoke.routes_tested,
-    responsive_routes_scanned: experience.routes_scanned,
-    responsive_viewport_checks: experience.viewport_checks,
-    responsive_overflow_findings: experience.horizontal_overflow_findings,
-    keyboard_findings: experience.keyboard_findings,
-    experience_scan_errors: experience.scan_errors,
-    http_server_errors: routeSmoke.server_errors,
+    http_routes_tested: evidenceFreshness.http ? routeSmoke.routes_tested : 0,
+    responsive_routes_scanned: evidenceFreshness.experience ? experience.routes_scanned : 0,
+    responsive_viewport_checks: evidenceFreshness.experience ? experience.viewport_checks : 0,
+    responsive_overflow_findings: evidenceFreshness.experience ? experience.horizontal_overflow_findings : null,
+    keyboard_findings: evidenceFreshness.experience ? experience.keyboard_findings : null,
+    experience_scan_errors: evidenceFreshness.experience ? experience.scan_errors : null,
+    http_server_errors: evidenceFreshness.http ? routeSmoke.server_errors : null,
     axe_version: axe.axe_core,
     axe_standard: axe.standard,
-    axe_routes_scanned: axe.routes_scanned,
-    axe_scan_errors: axe.scan_errors,
-    axe_violation_instances: axe.total_violation_instances
+    axe_routes_scanned: evidenceFreshness.axe ? axe.routes_scanned : 0,
+    axe_scan_errors: evidenceFreshness.axe ? axe.scan_errors : null,
+    axe_violation_instances: evidenceFreshness.axe ? axe.total_violation_instances : null
   },
   scope: {
     generic_flag_assets_excluded: count(x => x.brand_disposition.startsWith("EXCLUDED_GENERIC")),
@@ -227,12 +233,19 @@ const md = [
   "Generated: " + report.generated_at,
   "Inventory commit: " + report.inventory_commit,
   "",
+  "## Evidence provenance",
+  "",
+  "- HTTP route smoke: " + (evidenceFreshness.http ? "FRESH" : "STALE / UNPINNED") + " (evidence inventory commit " + (routeSmoke.inventory_commit || "missing") + "; build commit " + (routeSmoke.build_commit || "missing") + ").",
+  "- axe accessibility smoke: " + (evidenceFreshness.axe ? "FRESH" : "STALE / UNPINNED") + " (evidence inventory commit " + (axe.inventory_commit || "missing") + "; build commit " + (axe.build_commit || "missing") + ").",
+  "- Responsive and keyboard smoke: " + (evidenceFreshness.experience ? "FRESH" : "STALE / UNPINNED") + " (evidence inventory commit " + (experience.inventory_commit || "missing") + "; build commit " + (experience.build_commit || "missing") + ").",
+  "- Only evidence generated from the exact current inventory commit is accepted in route dispositions and certification counts.",
+  "",
   "## Automated evidence",
   "",
-  "- HTTP routes: " + routeSmoke.routes_tested + "; server errors: " + routeSmoke.server_errors,
+  "- HTTP routes accepted: " + report.automation.http_routes_tested + "; server errors: " + (report.automation.http_server_errors ?? "not accepted: stale/unpinned evidence"),
   "- axe-core: " + axe.axe_core + "; standard: " + axe.standard,
-  "- Routes scanned: " + axe.routes_scanned + "; scan errors: " + axe.scan_errors,
-  "- Automated accessibility violation instances: " + axe.total_violation_instances,
+  "- Routes scanned and accepted: " + report.automation.axe_routes_scanned + "; scan errors: " + (report.automation.axe_scan_errors ?? "not accepted: stale/unpinned evidence"),
+  "- Automated accessibility violation instances: " + (report.automation.axe_violation_instances ?? "not accepted: stale/unpinned evidence"),
   "",
   "## Scope-correct disposition counts",
   "",
@@ -248,10 +261,10 @@ const md = [
   "",
   "## Responsive and keyboard evidence",
   "",
-  "- Requested route paths: " + experience.routes_scanned + "; unique non-login destinations: " + new Set(experience.route_results.map(item => item.actual_url ? new URL(item.actual_url).pathname : "<unresolved>").filter(route => route !== "/login")).size + ".",
-  "- Viewport checks: " + experience.viewport_checks + " at " + experience.viewport_widths.join(", ") + " CSS pixels.",
-  "- Horizontal overflow findings: " + experience.horizontal_overflow_findings + ".",
-  "- Keyboard findings: " + experience.keyboard_findings + "; scan errors: " + experience.scan_errors + ".",
+  "- Requested route paths accepted: " + report.automation.responsive_routes_scanned + (evidenceFreshness.experience ? "; unique non-login destinations: " + new Set(experience.route_results.map(item => item.actual_url ? new URL(item.actual_url).pathname : "<unresolved>").filter(route => route !== "/login")).size + "." : "; responsive/keyboard evidence is stale or unpinned."),
+  "- Viewport checks: " + report.automation.responsive_viewport_checks + (evidenceFreshness.experience ? " at " + experience.viewport_widths.join(", ") + " CSS pixels." : "."),
+  "- Horizontal overflow findings: " + (report.automation.responsive_overflow_findings ?? "not accepted: stale/unpinned evidence") + ".",
+  "- Keyboard findings: " + (report.automation.keyboard_findings ?? "not accepted: stale/unpinned evidence") + "; scan errors: " + (report.automation.experience_scan_errors ?? "not accepted: stale/unpinned evidence") + ".",
   "- Route requests resolving to the login fallback: " + report.scope.authenticated_routes_login_fallback_only + "; these are not authenticated UI tests.",
   "",
   "## Manual gates still open",

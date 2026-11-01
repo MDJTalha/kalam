@@ -14,6 +14,11 @@ const routes = allRoutes
   : requestedRoutes.length ? requestedRoutes
   : ["/", "/clients", "/contact-sales", "/free-trial", "/guided-evaluation", "/implementation", "/integrations", "/login", "/pricing", "/trust", "/forgot-password", "/reset-password", "/dashboard", "/unknown-brand-audit-route"];
 const cdpBase = process.env.KALAM_CDP_URL || "http://127.0.0.1:9333";
+let buildCommit = null;
+try {
+  const response = await fetch(new URL("/", baseUrl));
+  buildCommit = response.headers.get("x-kalam-build-commit");
+} catch {}
 const axePath = require.resolve("axe-core/axe.min.js");
 const axeSource = fs.readFileSync(axePath, "utf8");
 const outputPath = path.join(root, "qa", "generated", "kalam-brand-accessibility-smoke.json");
@@ -101,6 +106,10 @@ const violations = results.flatMap(item => item.violations || []);
 const summary = {
   tested_at: new Date().toISOString(),
   base_url: baseUrl,
+  inventory_commit: inventory.commit,
+  inventory_working_tree: inventory.working_tree,
+  build_commit: buildCommit,
+  build_commit_matches_inventory: buildCommit === inventory.commit,
   axe_core: JSON.parse(fs.readFileSync(require.resolve("axe-core/package.json"), "utf8")).version,
   standard: "WCAG 2.2 A/AA automated rules",
   routes_requested: routes.length,
@@ -126,4 +135,4 @@ console.log(JSON.stringify({
   unique_rules: summary.unique_violation_rules,
   output: path.relative(root, outputPath)
 }, null, 2));
-if (summary.scan_errors > 0) process.exitCode = 1;
+if (summary.scan_errors > 0 || !summary.build_commit_matches_inventory) process.exitCode = 1;
