@@ -1,6 +1,10 @@
 {
-  "generated_at": "2026-11-01T11:39:22.315Z",
-  "commit": "717b3d20a88309ee0a234f001c262980309d57ff",
+  "generated_at": "2026-11-01T11:39:54.623Z",
+  "commit": "90a59d2b8b3e3b5acd778a0e820c6523ead4f2b6",
+  "working_tree": {
+    "dirty": true,
+    "change_count": 1
+  },
   "counts": {
     "discovery_files": 589,
     "routes": 92,
