@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import sharp from "sharp";
 
 const root = process.cwd();
 const webSrc = path.join(root, "apps", "web", "src");
@@ -83,6 +84,61 @@ if (fs.existsSync(manifestPath)) {
     violations.push("PWA manifest theme_color must use Kalam Navy #08243D");
   }
 }
+
+for (const file of ["kalam-logo.svg", "kalam-symbol.svg"]) {
+  const svg = fs.readFileSync(path.join(publicDir, file), "utf8");
+  if (!svg.trimStart().startsWith("<svg") || !svg.includes('xmlns="http://www.w3.org/2000/svg"')) {
+    violations.push(file + " must contain valid SVG source");
+  }
+}
+const manifest = JSON.parse(fs.readFileSync(path.join(publicDir, "manifest.webmanifest"), "utf8"));
+const expectedImages = new Map([
+  ["kalam-app-192.png", 192],
+  ["kalam-app-512.png", 512],
+  ["favicon-16.png", 16],
+  ["favicon-32.png", 32],
+  ["apple-touch-icon.png", 180],
+  ["kalam-og.png", 1200]
+]);
+for (const [file, size] of expectedImages) {
+  try {
+    const meta = await sharp(path.join(publicDir, file)).metadata();
+    const expectedHeight = file === "kalam-og.png" ? 630 : size;
+    if (meta.width !== size || meta.height !== expectedHeight) {
+      violations.push(file + " dimensions must be " + size + "x" + expectedHeight + " (found " + meta.width + "x" + meta.height + ")");
+    }
+  } catch (error) {
+    violations.push(file + " could not be decoded: " + String(error));
+  }
+}
+const faviconPath = path.join(root, "apps", "web", "src", "app", "favicon.ico");
+try {
+  const ico = fs.readFileSync(faviconPath);
+  if (ico.readUInt16LE(0) !== 0 || ico.readUInt16LE(2) !== 1 || ico.readUInt16LE(4) !== 3) {
+    violations.push("App favicon.ico must contain a valid three-size icon directory");
+  } else {
+    for (let index = 0; index < 3; index++) {
+      const entry = 6 + index * 16;
+      const width = ico.readUInt8(entry) || 256;
+      const height = ico.readUInt8(entry + 1) || 256;
+      const bytes = ico.readUInt32LE(entry + 8);
+      const offset = ico.readUInt32LE(entry + 12);
+      const meta = await sharp(ico.subarray(offset, offset + bytes)).metadata();
+      if (meta.format !== "png" || meta.width !== width || meta.height !== height) {
+        violations.push("App favicon.ico entry " + index + " is invalid");
+      }
+    }
+  }
+} catch (error) {
+  violations.push("App favicon.ico could not be validated: " + String(error));
+}
+for (const icon of manifest.icons || []) {
+  if (!fs.existsSync(path.join(publicDir, icon.src.replace(/^\//, "")))) {
+    violations.push("PWA manifest icon is missing: " + icon.src);
+  }
+  if (!icon.purpose) violations.push("PWA manifest icon must declare purpose: " + icon.src);
+}
+if (manifest.background_color !== "#F4F8FC") violations.push("PWA manifest background_color must use the Kalam canvas #F4F8FC");
 
 if (violations.length) {
   console.error("KALAM BRAND CONTRACT: FAIL");

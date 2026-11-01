@@ -1,0 +1,6006 @@
+{
+  "tested_at": "2026-11-01T12:47:23.334Z",
+  "base_url": "http://127.0.0.1:3000",
+  "routes_requested": 92,
+  "routes_scanned": 92,
+  "viewports_per_route": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "keyboard_tab_steps_per_route": 12,
+  "viewport_checks": 368,
+  "horizontal_overflow_findings": 0,
+  "keyboard_findings": 92,
+  "scan_errors": 92,
+  "failures": [
+    {
+      "route": "/access-denied",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/clients",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/contact-sales",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/admin/inquiries",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/admin",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/admin/support",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/ai",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/analytics",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/assessments/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample/attempts",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/assessments/admin",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/assessments",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/audit",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/capability-assessments",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/capability-gaps",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/capability-risk",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample/studio",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/catalog/categories",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/catalog/new",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/catalog",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/certificates/admin",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/certificates",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/compliance/admin",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/compliance",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/course-studio/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/course-studio",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/development",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/evidence/admin",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/files",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/help/cases/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/help",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/instructor",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/instructors",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/integrations",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/ld-operations/equivalencies",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/ld-operations",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/learning-paths/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/learning-paths/new",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/learning-paths",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/manager/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/manager",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/notifications",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/organization",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/people/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/people/admin",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/people",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/programs/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/programs/cohorts/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/programs",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/reports",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/billing",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/certifications",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/clients/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/clients",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/contracts",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/forecast",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/inquiries",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/onboarding",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/pipeline",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/pricing/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/pricing",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/renewals",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/subscriptions",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/tasks",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/team",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/tenants",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/saas/trials",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/search",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/sessions",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/settings",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/settings/sessions",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/skills/admin",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/skills",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/team",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/dashboard/webhooks",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/forgot-password",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/free-trial",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/guided-evaluation",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/implementation",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/integrations",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/login/demo",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/login",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/pricing",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/reset-password",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/service-unavailable",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/trust",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    },
+    {
+      "route": "/verify/audit-sample",
+      "kind": "KEYBOARD_SCAN_ERROR",
+      "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+    }
+  ],
+  "route_results": [
+    {
+      "route": "/access-denied",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/access-denied",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/access-denied",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/access-denied",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/access-denied",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/clients",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/clients",
+          "title": "Customer Stories · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 2585,
+          "focusable": 19,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/clients",
+          "title": "Customer Stories · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 2258,
+          "focusable": 19,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/clients",
+          "title": "Customer Stories · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/clients",
+          "title": "Customer Stories · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 1748,
+          "focusable": 25,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/contact-sales",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/contact-sales",
+          "title": "Contact Sales · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 3716,
+          "focusable": 34,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/contact-sales",
+          "title": "Contact Sales · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 3404,
+          "focusable": 34,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/contact-sales",
+          "title": "Contact Sales · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 2864,
+          "focusable": 36,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/contact-sales",
+          "title": "Contact Sales · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 1815,
+          "focusable": 40,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/admin/inquiries",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/admin/support",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/ai",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/analytics",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/assessments/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample/attempts",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/assessments/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/assessments",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/audit",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/capability-assessments",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/capability-gaps",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/capability-risk",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample/studio",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/catalog/categories",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/catalog/new",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/catalog",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/certificates/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/certificates",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/compliance/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/compliance",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/course-studio/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/course-studio",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/development",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/evidence/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/files",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/help/cases/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/help",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/instructor",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/instructors",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/integrations",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/ld-operations/equivalencies",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/ld-operations",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/learning-paths/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/learning-paths/new",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/learning-paths",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/manager/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/manager",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/notifications",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/organization",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/people/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/people/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/people",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/programs/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/programs/cohorts/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/programs",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/reports",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/billing",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/certifications",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/clients/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/clients",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/contracts",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/forecast",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/inquiries",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/onboarding",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/pipeline",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/pricing/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/pricing",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/renewals",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/subscriptions",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/tasks",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/team",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/tenants",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/saas/trials",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/search",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/sessions",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/settings",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/settings/sessions",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/skills/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/skills",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/team",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/dashboard/webhooks",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/forgot-password",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/forgot-password",
+          "title": "Forgot password · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 6,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/forgot-password",
+          "title": "Forgot password · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 6,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/forgot-password",
+          "title": "Forgot password · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 6,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/forgot-password",
+          "title": "Forgot password · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 6,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/free-trial",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 8863,
+          "focusable": 33,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 8330,
+          "focusable": 33,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 5640,
+          "focusable": 35,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 4214,
+          "focusable": 39,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/guided-evaluation",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 8863,
+          "focusable": 33,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 8330,
+          "focusable": 33,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 5640,
+          "focusable": 35,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 4214,
+          "focusable": 39,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/implementation",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/implementation",
+          "title": "Implementation · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 5095,
+          "focusable": 18,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/implementation",
+          "title": "Implementation · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 4554,
+          "focusable": 18,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/implementation",
+          "title": "Implementation · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 3175,
+          "focusable": 20,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/implementation",
+          "title": "Implementation · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 2510,
+          "focusable": 24,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/integrations",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/integrations",
+          "title": "Integrations · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 3936,
+          "focusable": 18,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/integrations",
+          "title": "Integrations · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 3391,
+          "focusable": 18,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/integrations",
+          "title": "Integrations · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 2610,
+          "focusable": 20,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/integrations",
+          "title": "Integrations · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 2125,
+          "focusable": 24,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/login/demo",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/login",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 11784,
+          "focusable": 24,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 10556,
+          "focusable": 24,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 7130,
+          "focusable": 26,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 5623,
+          "focusable": 30,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/pricing",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/pricing",
+          "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 2848,
+          "focusable": 21,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/pricing",
+          "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/pricing",
+          "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 2525,
+          "focusable": 23,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/pricing",
+          "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/reset-password",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/reset-password",
+          "title": "Reset password · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/reset-password",
+          "title": "Reset password · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/reset-password",
+          "title": "Reset password · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/reset-password",
+          "title": "Reset password · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/service-unavailable",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/service-unavailable",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/service-unavailable",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/service-unavailable",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/service-unavailable",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/trust",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/trust",
+          "title": "Security & Trust · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 3618,
+          "focusable": 16,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/trust",
+          "title": "Security & Trust · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/trust",
+          "title": "Security & Trust · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/trust",
+          "title": "Security & Trust · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    },
+    {
+      "route": "/verify/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/verify/audit-sample",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/verify/audit-sample",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/verify/audit-sample",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/verify/audit-sample",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ],
+      "keyboard": {
+        "error": "SyntaxError: \"[object Object]\" is not valid JSON"
+      }
+    }
+  ],
+  "limitations": [
+    "Protected routes may render unauthenticated states; this is not an authenticated role matrix.",
+    "Tab sampling tests the first 12 focus transitions per route, not every control or modal state.",
+    "This is a desktop Chrome keyboard simulation; it does not replace real keyboard, screen-reader or manual usability testing."
+  ]
+}

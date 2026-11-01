@@ -1,32 +1,37 @@
 # Kalam Brand Surface Inventory
 
-Generated: 2026-11-01T12:17:57.943Z
-Commit: 5944cd54ea90e91a523ef1518c2a8c6fd12f8a33
+Generated: 2026-11-01T13:31:27.898Z
+Commit: 459f8d6154ea8ca4c885ce7748366dda603faed7
 Working tree dirty: true
-Working tree change count: 7
+Working tree change count: 36
 
 ## Discovery counts
 
-- discovery_files: 589
+- discovery_files: 593
 - routes: 92
 - route_state_files: 6
 - components: 83
 - css_design_files: 8
-- public_assets: 279
+- public_assets: 280
 - metadata_candidates: 3
 - communication_candidates: 5
-- customer_documentation_files: 99
-- inventory_rows: 589
+- documentation_files: 99
+- historical_evidence_documents: 49
+- internal_governance_documents: 49
+- actual_customer_documents: 1
+- binary_assets: 9
+- font_assets: 2
+- inventory_rows: 593
 - automated_findings: 49
 
 ## Certification status
 
 - Status: NOT_CERTIFIED
 - Manual sign-off complete: false
-- Inventory items awaiting manual brand disposition: 589
-- Inventory items awaiting terminology review: 589
+- Inventory items awaiting manual brand disposition: 593
+- Inventory items awaiting terminology review: 593
 - Surfaces awaiting accessibility verification: 181
-- Inventory items awaiting claim review: 589
+- Inventory items awaiting claim review: 593
 
 ## Automated finding dispositions
 

@@ -123,8 +123,44 @@ Latest recorded run: axe-core 4.13.0; 92/92 inventoried routes scanned; 0 scan e
 - HTTP smoke: 92/92 routes; 89 HTTP 200 and 3 HTTP 307 redirects; zero HTTP 5xx/request errors.
 - axe-core: 92/92 routes; zero scan errors; zero automated WCAG 2.2 A/AA violations.
 
-## Certification remains separate from automation
+## Scope-correct disposition and certification status
 
-The current generated inventory still requires manual disposition. Brand review, terminology review and claim review remain open for 589 inventory rows each; accessibility verification remains open for 181 surfaces. Automated browser scans do not clear those human-review registers. Keyboard and assistive-technology checks, visual/responsive review, authenticated workflow testing, and human brand/claim approvals remain outstanding. Do not claim 9.9 certification or 100% completion until those tasks are evidenced and signed off.
+The 593-row discovery inventory is not 593 equivalent customer-facing brand surfaces. The dedicated review ledger now distinguishes actual customer-facing/rendered surfaces from generic assets and internal/historical evidence.
 
-The original local checkout was independently rebuilt and also passed 92/92 route smoke checks and 92/92 axe-core route scans with zero scan errors and zero automated WCAG 2.2 A/AA violation instances.
+Latest automated dispositions:
+- 271 generic country-flag assets excluded from Kalam brand scoring.
+- 49 dated historical delivery records retained as explicit historical exceptions; they are not active customer-facing identity.
+- 45 internal governance/delivery files excluded from customer-facing brand scoring.
+- 4 canonical source-of-truth documents read and reconciled: the claim registry, Kalam brand governance standard, global enterprise brand system, and ADR-014.
+- 2 canonical Geist font assets confirmed in use.
+- 200 active rendered/source surfaces still require human brand/visual review.
+- 177 user-facing copy/component surfaces still require terminology review.
+- 190 route/component/state/style/document surfaces still require manual accessibility review.
+- 94 content-bearing routes/communications/documents still require claim evidence review.
+- Zero high-risk unsupported-claim pattern matches remain in active customer-facing source; this is a pattern scan, not proof of claim substantiation.
+- Browser experience smoke: 92/92 route paths; 368 viewport checks at 320, 390, 768 and 1440 CSS pixels; zero horizontal overflow findings, zero keyboard findings and zero scan errors.
+- 13 distinct non-login route destinations (14 route requests) received direct responsive and keyboard coverage. 78 route requests resolved to the login fallback; authenticated dashboard screens still require authorized test sessions.
+
+New evidence:
+- qa/generated/kalam-brand-surface-review.json
+- qa/generated/kalam-brand-surface-review.csv
+- qa/generated/KALAM_BRAND_SURFACE_REVIEW.md
+- qa/generated/kalam-brand-route-experience-smoke.json
+- qa/brand-surface-review.mjs
+- qa/brand-route-experience-smoke.mjs
+
+Automated browser evidence remains: HTTP smoke 92/92 routes (89 HTTP 200, 3 HTTP 307 redirects; zero 5xx/request errors) and axe-core 4.13.0 on 92/92 routes (zero scan errors, zero automated WCAG 2.2 A/AA violation instances).
+
+## Canonical asset remediation
+
+The previous kalam-logo.svg and kalam-symbol.svg were corrupted six-byte files. They have been rebuilt as valid SVGs. PWA icons previously named 192x192 and 512x512 were actually 64x64 and 128x128; they have been regenerated at their declared dimensions. Favicon, Apple touch icon and 1200x630 Open Graph image were also regenerated. The PWA manifest now uses the Kalam canvas and declares icon purpose. Seven unreferenced legacy Kognivon raster assets and five unused framework-starter SVGs were removed after repository-wide reference checks.
+
+Verification:
+- Brand contract: PASS, including SVG source and PNG dimension validation.
+- Live asset smoke: 10 current brand asset/manifest endpoints PASS, including the multi-resolution ICO favicon; 12 removed legacy/starter URLs return 404; homepage metadata points to the canonical logo.
+- Production Webpack build: PASS (Next.js 16.4.3).
+- TypeScript: PASS.
+- ESLint: PASS with two existing unused-variable warnings in apps/web/src/app/dashboard/people/admin/page.tsx.
+- Original local checkout previously passed the 92/92 HTTP and axe route checks independently.
+
+Manual keyboard and screen-reader sign-off, authenticated workflow checks, visual sign-off, legal name clearance and human brand/claim approvals remain open. Automated results do not replace those approvals. Do not claim 9.9 certification or 100% completion until the remaining evidence and sign-offs are recorded.
