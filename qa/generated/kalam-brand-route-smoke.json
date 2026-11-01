@@ -1,0 +1,580 @@
+{
+  "tested_at": "2026-11-01T14:04:20.498Z",
+  "base_url": "http://127.0.0.1:3015",
+  "inventory_commit": "a6399efe06284f8fd3e40e6227c02047ea24924a",
+  "inventory_working_tree": {
+    "dirty": true,
+    "change_count": 94
+  },
+  "routes_discovered": 92,
+  "routes_tested": 92,
+  "status_distribution": {
+    "200": 89,
+    "307": 3
+  },
+  "successful_responses": 89,
+  "redirects": 3,
+  "client_responses_requiring_review": 0,
+  "server_errors": 0,
+  "result": "PASS",
+  "limitations": [
+    "HTTP smoke only; does not verify authenticated business workflows or data correctness.",
+    "Dynamic identifiers use a non-production sample value.",
+    "A 3xx response is recorded, not assumed to be a defect.",
+    "Visual, responsive and assistive-technology verification remains separate."
+  ],
+  "routes": [
+    {
+      "route": "/access-denied",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/clients",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/contact-sales",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/admin/inquiries",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/admin",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/admin/support",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/ai",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/analytics",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/assessments/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample/attempts",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/assessments/admin",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/assessments",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/audit",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/capability-assessments",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/capability-gaps",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/capability-risk",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample/studio",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/catalog/categories",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/catalog/new",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/catalog",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/certificates/admin",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/certificates",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/compliance/admin",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/compliance",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/course-studio/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/course-studio",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/development",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/evidence/admin",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/files",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/help/cases/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/help",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/instructor",
+      "status": 307,
+      "location": "/dashboard/sessions",
+      "result": "REDIRECT"
+    },
+    {
+      "route": "/dashboard/instructors",
+      "status": 307,
+      "location": "/dashboard/sessions",
+      "result": "REDIRECT"
+    },
+    {
+      "route": "/dashboard/integrations",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/ld-operations/equivalencies",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/ld-operations",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/learning-paths/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/learning-paths/new",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/learning-paths",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/manager/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/manager",
+      "status": 307,
+      "location": "/dashboard/team",
+      "result": "REDIRECT"
+    },
+    {
+      "route": "/dashboard/notifications",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/organization",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/people/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/people/admin",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/people",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/programs/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/programs/cohorts/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/programs",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/reports",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/billing",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/certifications",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/clients/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/clients",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/contracts",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/forecast",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/inquiries",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/onboarding",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/pipeline",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/pricing/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/pricing",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/renewals",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/subscriptions",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/tasks",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/team",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/tenants",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/saas/trials",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/search",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/sessions",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/settings",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/settings/sessions",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/skills/admin",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/skills",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/team",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/dashboard/webhooks",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/forgot-password",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/free-trial",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/guided-evaluation",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/implementation",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/integrations",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/login/demo",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/login",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/pricing",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/reset-password",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/service-unavailable",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/trust",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    },
+    {
+      "route": "/verify/audit-sample",
+      "status": 200,
+      "location": null,
+      "result": "OK"
+    }
+  ]
+}

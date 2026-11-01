@@ -1,10 +1,10 @@
-# Kognivon — Legal and Commercial Review Handoff
+# Kalam — Legal and Commercial Review Handoff
 
 Status: **OPEN — legal review has not occurred**. This is a technical inventory for qualified counsel and the commercial owner, not approved customer terms or a compliance opinion.
 
 ## Product facts to verify before drafting
 
-- Kognivon supports separate organizations/tenants, user identities, role-controlled employee and learning records, assessments, credentials, compliance evidence, skills, reports and audit events.
+- Kalam supports separate organizations/tenants, user identities, role-controlled employee and learning records, assessments, credentials, compliance evidence, skills, reports and audit events.
 - Customer users may upload files and export reports. The production Compose topology currently uses a local Docker upload volume; any managed object store or regional residency promise needs separately verified deployment evidence.
 - Notifications, SMTP, webhooks and integrations depend on configured external services. No specific provider, delivery SLA or subprocessor inventory is approved by this file.
 - Governed AI is optional and tenant controlled. Provider, model, data transfer, retention, human review and billing terms depend on the actual enabled configuration.

@@ -55,7 +55,7 @@ export default async function PricingPage() {
             </div>
           </div>
           <aside className={styles.pricingPromise}>
-            <div className={styles.promiseBrand}><span>WHAT&apos;S INCLUDED</span><KalamBrand dark compact className={styles.promiseLogo}/></div>
+            <div className={styles.promiseBrand}><span>WHAT&apos;S INCLUDED</span><KalamBrand compact className={styles.promiseLogo}/></div>
             <div className={styles.promiseIntro}><strong>One platform to turn capability investment into workforce readiness.</strong><span>Choose the level of scale and support your organization needs.</span></div>
             <div className={styles.promiseList}>
               <div><span className={styles.promiseIndex}>01</span><div><b>Learning</b><small>Courses, programs and workforce development</small></div></div>

@@ -1,4 +1,4 @@
-# Kognivon — Customer Administrator Guide (release candidate)
+# Kalam — Customer Administrator Guide (release candidate)
 
 Status: Product documentation draft for customer/UAT review. It does not certify a production deployment.
 Audience: Tenant administrators, L&D operations, compliance owners, managers and auditors.
