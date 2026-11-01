@@ -67,6 +67,10 @@ for (const [label, foreground, background] of contrastChecks) {
 }
 if (!design.includes("--kalam-ice-ink: #52657A")) violations.push("Design system missing AA-safe Kalam Ice text token");
 
+for (const stateFile of ["loading.tsx", "error.tsx", "not-found.tsx", "global-error.tsx"]) {
+  if (!fs.existsSync(path.join(webSrc, "app", stateFile))) violations.push("Root route-state experience missing: " + stateFile);
+}
+
 const homepage = fs.readFileSync(path.join(webSrc, "app", "page.tsx"), "utf8");
 for (const phrase of ["Build Capability.", "Prove Readiness.", "Expectation", "Capability", "Evidence", "Action", "Readiness"]) {
   if (!homepage.includes(phrase)) violations.push(`Homepage missing canonical brand narrative token: ${phrase}`);
