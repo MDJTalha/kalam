@@ -1,9 +1,11 @@
-# AIVON Learning OS — UI/UX 9.9 Quality Benchmark
+# Kalam — UI/UX Quality Benchmark (Historical Implementation Log)
 Date: 2026-09-25
-Status: Controlled product-quality gate
+Status: Historical implementation record; not a current certification or status source.
+
+> The dated increments below preserve historical evidence. Their progress labels and the 8.2 baseline are snapshots from 2026-09-25, not the current product state. The active brand authority is `KALAM_9_9_BRAND_SURFACE_GOVERNANCE.md`; current design tokens live in `apps/web/src/app/design-system.css`.
 
 ## 1. Product standard
-The LMS UI/UX target is 9.9/10 for every material aspect of the experience.
+The Kalam product-experience target is 9.9/10 for every material aspect of the experience.
 A screen is not considered complete because it is functional; it must also be clear, consistent, accessible, efficient, responsive and polished.
 
 ## 2. Quality dimensions
@@ -95,7 +97,7 @@ Implemented:
 - Integrated the design-system layer into the global stylesheet.
 - Extended the shared UI component library with Button, IconButton and StateMessage primitives.
 - Standardized Notice onto the shared state semantics with explicit status/alert roles.
-- Preserved the existing blue-first visual baseline and AIVON green/gold identity rules.
+- Preserved the then-current blue-first visual baseline; superseded by the canonical Kalam Navy/Blue/Tech/Ice/Gold tokens.
 
 Validation after the design-system increment:
 - TypeScript: PASS.

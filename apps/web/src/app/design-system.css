@@ -13,6 +13,7 @@
   --kalam-blue: #0878C9;
   --kalam-tech: #3EA9DD;
   --kalam-ice: #EAF5FC;
+  --kalam-ice-ink: #52657A; /* AA-safe body/muted text on Kalam Ice */
   --kalam-gold: #C99732;
   --kalam-blue-hover: #0669AE;
   --ds-color-primary: var(--kalam-blue);
@@ -639,4 +640,15 @@
 /* Phase 7: keep the accessibility skip-link inside the mobile viewport while unfocused. */
 @media(max-width:760px){
   .skip-link{box-sizing:border-box;width:auto;max-width:calc(100vw - 20px);}
+}
+
+
+/* Kalam global accessibility contract: all branded motion respects user preference. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

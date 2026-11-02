@@ -1,4 +1,4 @@
-# Kognivon — Phase 8 Release Acceptance Register
+# Kalam — Phase 8 Release Acceptance Register
 
 Status: **OPEN — production/commercial release not approved**
 Basis: `DELIVERY_ROADMAP.md`, `IMPLEMENTATION_STATUS.md`, `PHASE_8_PROGRESS_EVIDENCE.md`, security baseline and QA strategy.

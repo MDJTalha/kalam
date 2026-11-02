@@ -1,96 +1,82 @@
-# AIVON Learning OS — Bright Blue Enterprise Visual System
+# Kalam — Enterprise Visual Theme Baseline
 
-Version: 0.2
-Status: Phase 1 visual theme implementation
-Date: 2026-09-24
+Version: 1.0
+Status: Active canonical visual direction
+Supersedes: The September 2026 predecessor-brand visual exploration in this file's prior revision.
+Authority: `KALAM_9_9_BRAND_SURFACE_GOVERNANCE.md` and `apps/web/src/app/design-system.css`
 
-## Design decision
+## Canonical identity
 
-AIVON Learning OS uses a **bright blue-first enterprise SaaS visual language**. Green is no longer a primary application-shell or workspace color.
-
-Visual hierarchy:
-1. Blue — primary product, navigation, actions, data and intelligence.
-2. Cool blue-white — workspace background and surfaces.
-3. Navy — high-contrast shell/navigation foundation.
-4. Gold — restrained AIVON identity accent only.
-5. Semantic colors — success, warning, danger and neutral states.
+- Brand: **Kalam**
+- Category: **Enterprise Workforce Capability Platform**
+- Primary expression: **Build Capability. Drive Performance.**
+- Outcome: **Prove Readiness.**
+- Brand idea: Capability should be visible, governable and provable.
+- Voice: Expertise without hype.
 
 ## Visual character
 
-The interface should feel bright, blue-forward, enterprise-grade, intelligent, data-driven, modern, premium and operational. It must remain clean, information-dense and highly readable for executives, HR/L&D, capability and workforce leaders.
+The interface must feel enterprise-grade, intelligent, data-driven, calm, precise, information-dense, readable and operational. It must serve executives, HR/L&D, capability leaders, managers, instructors, compliance owners and learners.
 
-Avoid green-dominant surfaces, neon blue, excessive gradients, glassmorphism, decorative widgets, stock photography and visual noise.
+Avoid neon, excessive gradients, glassmorphism, decorative widgets, stock photography and visual noise. Every visual element must support comprehension, a task or a business decision.
 
-## Core palette
+## Canonical palette
 
-- Workspace: #F4F8FD
-- Primary blue: #1769C2
-- Primary blue dark: #0F4F99
-- Bright blue highlight: #2D8CFF
-- Blue soft: #EAF4FF
-- Navigation navy: #082B52
-- Navigation secondary: #0D3F73
-- Text navy: #14243A
-- Muted slate: #60738C
-- Border blue-gray: #D9E5F2
-- White surface: #FFFFFF
-- Gold identity accent: #D6A43A
+Use the shared design tokens in `apps/web/src/app/design-system.css`; do not create parallel brand palettes.
 
-Gold remains restrained and never competes with blue.
+- Kalam Navy: **#08243D**
+- Kalam Blue: **#0878C9**
+- Kalam Tech: **#3EA9DD**
+- Kalam Ice: **#EAF5FC**
+- Kalam Gold: **#C99732**
+- White and cool blue-white surfaces for workspace clarity.
+- Semantic success, warning, danger and neutral colors are status colors, not competing brand identities.
+
+Gold is a restrained accent. Navy establishes trust and hierarchy. Blue communicates action and product intelligence. Tech and Ice support secondary emphasis and surfaces.
+
+### Contrast guardrails (WCAG 2.2 AA)
+
+For normal-size text, use foreground/background pairs with at least 4.5:1 contrast. Verified ratios: Kalam Navy on white 15.79:1; Kalam Blue on white 4.63:1; Kalam Blue Hover (#0669AE) on Ice 5.21:1; Muted Slate (#63738A) on white 4.83:1; Kalam Ice Ink (#52657A) on Ice 5.42:1. Kalam Tech and Kalam Gold are accents, not normal-size text colors on white or Ice. Use navy or an approved AA-safe text token for labels placed over those surfaces.
 
 ## Application shell
 
-The authenticated application uses a deep navy/blue sidebar, bright blue-white workspace, white content surfaces, blue active navigation states, blue primary buttons and blue data visualization.
+The authenticated workspace uses the canonical navy/blue Kalam identity, clear navigation grouping, accessible active/focus states, a consistent global header and a responsive content canvas.
 
-The sidebar no longer uses deep corporate green as its dominant background.
+The shell should preserve:
+- role- and permission-aware navigation;
+- breadcrumbs and page context;
+- organization/workspace context;
+- global search, notifications, help and profile access;
+- responsive navigation and usable touch targets;
+- visible keyboard focus and skip navigation.
 
-## Graphics and data visualization
+## Information hierarchy
 
-Blue is the dominant visualization family:
-- blue bars for comparison
-- blue lines/areas for trends
-- blue rings for coverage/composition
-- navy for reference/baseline
-- gold for selected emphasis or executive attention
-- semantic green only for success status
-- amber/red only for warnings and risks
+Prioritize:
+1. decision-critical capability and readiness signals;
+2. evidence, risks and gaps;
+3. trends and context;
+4. actionable work;
+5. drill-down details and accountability.
 
-Charts must remain meaningful without relying on color alone.
+Decision surfaces should follow **Context → Evidence → Decision → Action → Accountability**.
 
-## Component direction
+The canonical capability model is **Expectation → Capability → Evidence → Action → Readiness**.
 
-Primary buttons: blue.
-Secondary buttons: white with blue-gray border.
-Active navigation: very light blue surface with dark blue text.
-KPI accents: blue.
-Cards: white with cool blue-gray borders.
-Tables: white with blue hover/selection treatment.
-Forms: white with blue focus rings.
-Progress: blue.
-Links: blue.
-Badges: blue family unless semantic status requires another color.
+## Data visualization
 
-## Accessibility and responsive behavior
+Charts must be data-driven, accessible and legible without relying on color alone. Use blue as the primary visualization family, navy for reference/baseline, gold for restrained emphasis and semantic colors only for status.
 
-Target WCAG 2.2 AA. Blue states must maintain sufficient contrast and status must never depend only on color.
+Preferred patterns include KPI cards, time-series trends, comparison bars, limited-category composition charts, capability/skill matrices and progress/readiness indicators. Labels, units, provenance, empty states and accessible summaries are required.
 
-Preserve the enterprise responsive shell across desktop, tablet and mobile. Dense grids should reflow while tables retain an intentional responsive representation.
+## Component system
 
-## Master design/development prompt
+Reusable components must share typography, spacing, radius, border, focus, motion and interaction tokens. Applicable states include default, hover, focus, active, selected, disabled, loading, success, warning, error, empty, permission denied, keyboard, screen-reader, responsive and reduced-motion behavior.
 
-Create a production-grade corporate Learning, Capability and Workforce Operating System named **AIVON Learning OS**.
+## Responsive and accessibility requirements
 
-Use a **bright blue-first enterprise SaaS theme**: cool blue-white workspace, deep navy application navigation, crisp white cards, professional blue primary actions, restrained gold identity accents and semantic status colors.
+Target WCAG 2.2 AA. Desktop, tablet and mobile must preserve task priority and hierarchy. Dense grids reflow; tables use intentional responsive representations; controls remain keyboard and touch accessible. Respect reduced-motion preferences.
 
-The experience must feel like a mature enterprise operating platform rather than a consumer LMS or marketing website. Prioritize workforce intelligence, capability management, learning operations, assessments, credentials, evidence, readiness and analytics.
+## Governance
 
-Design the complete authenticated product shell with navy sidebar, AIVON Learning OS branding, grouped enterprise navigation, breadcrumbs, page context, organization selector, global search, notifications, help, user profile and role, plus responsive content.
-
-Design the administrator Overview dashboard with workforce KPIs, learning KPIs, capability coverage, capability gaps, skills intelligence, learning activity trends, AI insights, readiness, credential/expiry signals, upcoming activity, recent activity and operational quick actions.
-
-Use restrained rounded corners, clear hierarchy, subtle borders, realistic enterprise data density and purposeful charts. Do not add decorative elements that do not support a business decision.
-
-The product must communicate:
-**Learning + Capability + Skills Intelligence + Workforce Intelligence + Readiness + Evidence.**
-
-This document is the visual source of truth for the bright blue theme.
+This file is subordinate to the canonical Kalam brand governance document and the implemented design tokens. If a conflict exists, the governance document and design-system tokens take precedence. Historical brand names in archived task records are evidence only and must not re-enter customer-facing surfaces.

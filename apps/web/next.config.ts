@@ -1,8 +1,19 @@
+import { execFileSync } from "node:child_process";
 import type { NextConfig } from "next";
 
 const isProduction = process.env.NODE_ENV === "production";
+const buildCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || (() => {
+  try {
+    const commit = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+    const dirty = execFileSync("git", ["status", "--porcelain"], { encoding: "utf8" }).trim().length > 0;
+    return dirty ? commit + "-dirty" : commit;
+  } catch {
+    return "unknown";
+  }
+})();
 
 const securityHeaders = [
+  { key: "X-Kalam-Build-Commit", value: buildCommit },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

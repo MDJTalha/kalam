@@ -1,0 +1,5266 @@
+{
+  "tested_at": "2026-11-01T12:47:23.334Z",
+  "base_url": "http://127.0.0.1:3000",
+  "routes_requested": 92,
+  "routes_scanned": 92,
+  "viewport_widths": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "viewport_checks": 368,
+  "horizontal_overflow_findings": 0,
+  "errors": [],
+  "route_results": [
+    {
+      "route": "/access-denied",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/access-denied",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/access-denied",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/access-denied",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/access-denied",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/clients",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/clients",
+          "title": "Customer Stories · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 2585,
+          "focusable": 19,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/clients",
+          "title": "Customer Stories · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 2258,
+          "focusable": 19,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/clients",
+          "title": "Customer Stories · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/clients",
+          "title": "Customer Stories · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 1748,
+          "focusable": 25,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/contact-sales",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/contact-sales",
+          "title": "Contact Sales · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 3716,
+          "focusable": 34,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/contact-sales",
+          "title": "Contact Sales · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 3404,
+          "focusable": 34,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/contact-sales",
+          "title": "Contact Sales · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 2864,
+          "focusable": 36,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/contact-sales",
+          "title": "Contact Sales · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 1815,
+          "focusable": 40,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/admin/inquiries",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/admin/support",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/ai",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/analytics",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/assessments/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample/attempts",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/assessments/admin/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/assessments/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/assessments",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/audit",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/capability-assessments",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/capability-gaps",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/capability-risk",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/catalog/audit-sample/studio",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/catalog/categories",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/catalog/new",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/catalog",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/certificates/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/certificates",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/compliance/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/compliance",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/course-studio/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/course-studio",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/development",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/evidence/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/files",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/help/cases/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/help",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/instructor",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/instructors",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/integrations",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/ld-operations/equivalencies",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/ld-operations",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/learning-paths/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/learning-paths/new",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/learning-paths",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/manager/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/manager",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/notifications",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/organization",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/people/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/people/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/people",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/programs/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/programs/cohorts/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/programs",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/reports",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/billing",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/certifications",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/clients/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/clients",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/contracts",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/forecast",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/inquiries",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/onboarding",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/pipeline",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/pricing/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/pricing",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/renewals",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/subscriptions",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/tasks",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/team",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/tenants",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/saas/trials",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/search",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/sessions",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/settings",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/settings/sessions",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/skills/admin",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/skills",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/team",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/dashboard/webhooks",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/forgot-password",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/forgot-password",
+          "title": "Forgot password · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 6,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/forgot-password",
+          "title": "Forgot password · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 6,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/forgot-password",
+          "title": "Forgot password · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 6,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/forgot-password",
+          "title": "Forgot password · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 6,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/free-trial",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 8863,
+          "focusable": 33,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 8330,
+          "focusable": 33,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 5640,
+          "focusable": 35,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 4214,
+          "focusable": 39,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/guided-evaluation",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 8863,
+          "focusable": 33,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 8330,
+          "focusable": 33,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 5640,
+          "focusable": 35,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/guided-evaluation",
+          "title": "Enterprise Evaluation · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 4214,
+          "focusable": 39,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/implementation",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/implementation",
+          "title": "Implementation · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 5095,
+          "focusable": 18,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/implementation",
+          "title": "Implementation · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 4554,
+          "focusable": 18,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/implementation",
+          "title": "Implementation · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 3175,
+          "focusable": 20,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/implementation",
+          "title": "Implementation · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 2510,
+          "focusable": 24,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/integrations",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/integrations",
+          "title": "Integrations · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 3936,
+          "focusable": 18,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/integrations",
+          "title": "Integrations · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 3391,
+          "focusable": 18,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/integrations",
+          "title": "Integrations · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 2610,
+          "focusable": 20,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/integrations",
+          "title": "Integrations · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 2125,
+          "focusable": 24,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/login/demo",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/login",
+          "title": "Sign in · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 9,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 11784,
+          "focusable": 24,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 390,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 375,
+          "bodyHeight": 10556,
+          "focusable": 24,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 7130,
+          "focusable": 26,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 1440,
+          "scrollWidth": 1425,
+          "bodyScrollWidth": 1425,
+          "bodyHeight": 5623,
+          "focusable": 30,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/pricing",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/pricing",
+          "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 2848,
+          "focusable": 21,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/pricing",
+          "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/pricing",
+          "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 753,
+          "bodyScrollWidth": 753,
+          "bodyHeight": 2525,
+          "focusable": 23,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/pricing",
+          "title": "Kalam Pricing | Enterprise Workforce Capability Platform · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/reset-password",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/reset-password",
+          "title": "Reset password · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/reset-password",
+          "title": "Reset password · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/reset-password",
+          "title": "Reset password · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/reset-password",
+          "title": "Reset password · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/service-unavailable",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/service-unavailable",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/service-unavailable",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/service-unavailable",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/service-unavailable",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 2,
+          "logo": false,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/trust",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/trust",
+          "title": "Security & Trust · Kalam",
+          "innerWidth": 320,
+          "scrollWidth": 305,
+          "bodyScrollWidth": 305,
+          "bodyHeight": 3618,
+          "focusable": 16,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/trust",
+          "title": "Security & Trust · Kalam",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/trust",
+          "title": "Security & Trust · Kalam",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/trust",
+          "title": "Security & Trust · Kalam",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    },
+    {
+      "route": "/verify/audit-sample",
+      "viewports": [
+        {
+          "width": 320,
+          "overflow": false,
+          "url": "/verify/audit-sample",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 320,
+          "scrollWidth": 320,
+          "bodyScrollWidth": 320,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 390,
+          "overflow": false,
+          "url": "/verify/audit-sample",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 390,
+          "scrollWidth": 390,
+          "bodyScrollWidth": 390,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 768,
+          "overflow": false,
+          "url": "/verify/audit-sample",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 768,
+          "scrollWidth": 768,
+          "bodyScrollWidth": 768,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        },
+        {
+          "width": 1440,
+          "overflow": false,
+          "url": "/verify/audit-sample",
+          "title": "Kalam | Enterprise Workforce Capability Platform",
+          "innerWidth": 1440,
+          "scrollWidth": 1440,
+          "bodyScrollWidth": 1440,
+          "bodyHeight": 900,
+          "focusable": 1,
+          "logo": true,
+          "reducedMotion": false
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "This evidence is a verified extraction of the 368 viewport records from the full-route browser run.",
+    "Responsive widths and document overflow are checked; visual layout quality still requires human screenshot review.",
+    "Protected routes may render unauthenticated states; authenticated responsive states remain untested."
+  ]
+}
