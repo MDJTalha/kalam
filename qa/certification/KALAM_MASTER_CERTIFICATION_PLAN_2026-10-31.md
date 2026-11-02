@@ -1,49 +1,54 @@
-# Kalam Master Production Certification Plan
+﻿# Kalam Master Production Certification Plan
 
-Candidate baseline: 0846b2b15e3c6ec64458804f4b35e30b43d07d0e
-Status: NOT CERTIFIED — runtime evidence gates remain open
+Candidate baseline: `main` at `5be4d6d52e9b01f3762a5a41b02bb742ffc44319` (observed 2026-11-02).
+Status: **NOT CERTIFIED** — runtime, migration, operational, and independent-review evidence gates remain open.
 
-This package operationalizes the Kalam production-certification standard. Certification is evidence-bound and candidate-bound.
+This package operationalizes the Kalam production-certification standard. Certification is evidence-bound and candidate-bound. The candidate SHA must be re-established if `main` advances.
 
-## Mandatory chain
+## Mandatory evidence chain
+
 Requirement → implementation → test → execution → evidence → review → acceptance → certification.
 
 ## Gates
-1. Candidate integrity
-2. Build and hosted CI
-3. Authentication/session
-4. RBAC/resource authorization
-5. Tenant isolation
-6. Learning lifecycle
+
+1. Candidate integrity and clean immutable checkout
+2. Build and hosted CI on the candidate
+3. Authentication/session lifecycle
+4. RBAC and resource authorization
+5. Cross-tenant isolation
+6. Learning lifecycle persistence
 7. Capability-gap recalculation
-8. Data/API integrity
-9. Accessibility/WCAG review
-10. Security assessment
+8. API/data integrity and invariants
+9. Accessibility/WCAG 2.2 AA automated and manual review
+10. Security and abuse-path assessment
 11. Performance/10k+ scale
-12. Backup/restore
-13. Migration rollback
+12. Backup freshness and restore
+13. Migration forward-upgrade and rollback
 14. DR/failover
-15. AWS production/TLS/secrets/monitoring
-16. Observability
-17. Real-browser E2E
-18. AI governance (or explicitly disabled)
+15. AWS/staging TLS, secrets, migrations, health, monitoring, and rollback
+16. Observability and failure recovery
+17. Authenticated real-browser E2E
+18. AI governance and provider activation controls (or verified disabled posture)
 19. Independent review
-20. Production smoke/rollback
+20. Production smoke and rollback
 
 ## Automatic failures
+
 Cross-tenant leakage, privilege escalation, broken authentication/authorization, material data corruption, critical security exposure, unrecoverable migration, unverifiable candidate identity, fabricated evidence, or materially broken core workflow.
 
-## Evidence rule
-Source code and historical CI may establish implementation confidence, but cannot replace live browser, staging/AWS, scale, recovery, rollback, accessibility, or independent-review evidence.
+## Evidence rules
 
-## Current known evidence
-- Hosted PR application-tree regression evidence exists: PR #30 run #470, API 182 passed / 0 failed, with Web/release-config and production-image runtime smoke.
-- PR #33 hardened legacy evidence pagination and passed hosted run #478.
-- Local disposable PostgreSQL restore has been executed successfully.
-- Current main is 0846b2b15e3c6ec64458804f4b35e30b43d07d0e.
+- Source code and historical CI establish implementation confidence, not live operational readiness.
+- Every result must name the exact candidate SHA, environment, command/workflow, timestamp, outcome, and retained artifact or log.
+- PR #36 was merged as `5be4d6d52e9b01f3762a5a41b02bb742ffc44319`. Hosted PR run #520 passed on its PR head `5e4484d98c11eee884a00f8a9c1e3a441a0f194c` across `brand-governance`, `api`, `web`, and `release-config`. This is recorded as PR-head evidence, not a separately verified post-merge workflow run.
+- The clean local mainline worktree at the merge commit passed `node qa/brand-contract-check.mjs`, scanning 485 web/public source and asset files. Dependencies were not installed in that worktree, so no local full application build is claimed.
+- Earlier disposable PostgreSQL restore drills succeeded, but archives dated 2026-09-29 do not establish current backup freshness.
+- The tested retained pre-phase8 snapshot failed forward migration due schema/Alembic-history drift (`users.preferences` existed while Alembic reported `b3c4d5e6f7g8`; a subsequent attempt encountered a pre-existing `support_cases` table). No blind Alembic stamp or speculative migration patch is accepted as a remedy. Fresh-database migration had previously reached Alembic head `s1t2u3v4w5x6`.
 
 ## Current blockers
-Browser E2E, live tenant-isolation matrix, manual accessibility, 10k+ performance, migration rollback, production AWS/TLS/observability, executed DR/failover, AI certification if enabled, and independent final approval.
+
+Authenticated browser E2E, live RBAC and tenant-isolation matrices, learning/capability lifecycle runtime proof, manual accessibility, 10k+ performance, migration remediation and rollback, current backup/RTO/RPO, executed DR/failover, AWS/staging TLS/secrets/monitoring/rollback, observability failure recovery, AI governance review, and independent final approval.
 
 ## Certification decision
-Until all mandatory evidence is tied to one immutable candidate: NOT CERTIFIED.
+
+Until all mandatory evidence is tied to one immutable candidate and independently accepted: **NOT CERTIFIED**.
