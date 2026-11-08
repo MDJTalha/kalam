@@ -14,6 +14,11 @@ if (!fs.existsSync(inventoryPath)) {
 }
 
 const inventory = JSON.parse(fs.readFileSync(inventoryPath, "utf8"));
+let buildCommit = null;
+try {
+  const response = await fetch(new URL("/", baseUrl), { redirect: "manual" });
+  buildCommit = response.headers.get("x-kalam-build-commit");
+} catch {}
 const routes = [...new Set(inventory.page_metadata.map(item => item.route))];
 const paths = routes.map(route =>
   route.replace(/:id/g, "audit-sample").replace(/:tenant/g, "demo").replace(/:code/g, "audit-sample")
@@ -55,6 +60,8 @@ const summary = {
   base_url: baseUrl,
   inventory_commit: inventory.commit,
   inventory_working_tree: inventory.working_tree,
+  build_commit: buildCommit,
+  build_commit_matches_inventory: buildCommit === inventory.commit,
   routes_discovered: routes.length,
   routes_tested: results.length,
   status_distribution: statusDistribution,
@@ -62,7 +69,7 @@ const summary = {
   redirects: results.filter(result => result.result === "REDIRECT").length,
   client_responses_requiring_review: results.filter(result => result.result === "CLIENT_RESPONSE_REVIEW").length,
   server_errors: serverErrors.length,
-  result: serverErrors.length === 0 && results.length === routes.length ? "PASS" : "FAIL",
+  result: serverErrors.length === 0 && results.length === routes.length && buildCommit === inventory.commit ? "PASS" : "FAIL",
   limitations: [
     "HTTP smoke only; does not verify authenticated business workflows or data correctness.",
     "Dynamic identifiers use a non-production sample value.",
@@ -76,6 +83,8 @@ fs.writeFileSync(outputPath, JSON.stringify(summary, null, 2) + "\n");
 console.log("KALAM ROUTE SMOKE " + summary.result);
 console.log(JSON.stringify({
   routes_tested: summary.routes_tested,
+  build_commit: summary.build_commit,
+  build_commit_matches_inventory: summary.build_commit_matches_inventory,
   status_distribution: summary.status_distribution,
   server_errors: summary.server_errors,
   output: path.relative(root, outputPath)

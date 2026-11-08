@@ -1,4 +1,5 @@
 rule,file,line,match,disposition,evidence
+"legacy-identity","docs/02-product/KALAM_9_9_BRAND_SURFACE_GOVERNANCE.md","136","Kognivon","APPROVED_LEGACY_IDENTITY_POLICY_REFERENCE","Kalam is the only customer-facing master brand. Historical Kognivon/CorpLMS identifiers may remain only where required for technical continuity, migrations, database/API compatibil"
 "legacy-identity","docs/06-delivery/KOGNIVON_LOCAL_REMAINING_TASKS_CLOSURE_2026-09-29.md","1","Kognivon","APPROVED_HISTORICAL_DELIVERY_OR_DECISION_RECORD","# Kognivon — Local Remaining Tasks Closure"
 "legacy-identity","docs/06-delivery/KOGNIVON_TASK_10_OPERATIONAL_CONTROLS_2026-09-29.md","1","Kognivon","APPROVED_HISTORICAL_DELIVERY_OR_DECISION_RECORD","# Kognivon Task 10 — Operational Controls Audit"
 "legacy-identity","docs/06-delivery/KOGNIVON_TASK_11_CAPABILITY_INTELLIGENCE_2026-09-29.md","1","Kognivon","APPROVED_HISTORICAL_DELIVERY_OR_DECISION_RECORD","# Kognivon Task 11 — Capability Intelligence"

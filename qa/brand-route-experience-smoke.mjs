@@ -4,6 +4,8 @@ import path from "node:path";
 const root=process.cwd();
 const inventory=JSON.parse(fs.readFileSync(path.join(root,"qa/generated/kalam-brand-surface-inventory.json"),"utf8"));
 const baseUrl=process.argv[2]||"http://127.0.0.1:3000";
+let buildCommit=null;
+try{const response=await fetch(new URL("/",baseUrl));buildCommit=response.headers.get("x-kalam-build-commit")}catch{}
 const cdpBase=process.env.KALAM_CDP_URL||"http://127.0.0.1:9333";
 const routes=[...new Set(inventory.page_metadata.map(x=>x.route))]
   .map(route=>route.replace(/:id/g,"audit-sample").replace(/:tenant/g,"demo").replace(/:code/g,"audit-sample"));
@@ -92,8 +94,8 @@ try{
   try{await send("Page.close")}catch{}
   ws.close();
 }
-const report={tested_at:new Date().toISOString(),base_url:baseUrl,routes_requested:routes.length,routes_scanned:results.length,viewport_widths:widths,viewport_checks:results.reduce((n,x)=>n+x.viewports.length,0),horizontal_overflow_findings:errors.filter(x=>x.kind==="HORIZONTAL_OVERFLOW").length,keyboard_findings:errors.filter(x=>x.kind!=="HORIZONTAL_OVERFLOW"&&x.kind!=="EXPERIENCE_SCAN_ERROR").length,scan_errors:errors.filter(x=>x.kind==="EXPERIENCE_SCAN_ERROR").length,errors,route_results:results,limitations:["Protected routes may redirect to /login without an authenticated session; this does not test authenticated dashboard screens.","Keyboard testing samples up to the first 12 tab stops per rendered route.","This CDP simulation does not replace physical keyboard, screen-reader or human visual review."]};
+const report={tested_at:new Date().toISOString(),base_url:baseUrl,inventory_commit:inventory.commit,inventory_working_tree:inventory.working_tree,build_commit:buildCommit,build_commit_matches_inventory:buildCommit===inventory.commit,routes_requested:routes.length,routes_scanned:results.length,viewport_widths:widths,viewport_checks:results.reduce((n,x)=>n+x.viewports.length,0),horizontal_overflow_findings:errors.filter(x=>x.kind==="HORIZONTAL_OVERFLOW").length,keyboard_findings:errors.filter(x=>x.kind!=="HORIZONTAL_OVERFLOW"&&x.kind!=="EXPERIENCE_SCAN_ERROR").length,scan_errors:errors.filter(x=>x.kind==="EXPERIENCE_SCAN_ERROR").length,errors,route_results:results,limitations:["Protected routes may redirect to /login without an authenticated session; this does not test authenticated dashboard screens.","Keyboard testing samples up to the first 12 tab stops per rendered route.","This CDP simulation does not replace physical keyboard, screen-reader or human visual review."]};
 fs.writeFileSync(path.join(root,"qa/generated/kalam-brand-route-experience-smoke.json"),JSON.stringify(report,null,2)+"\n");
 console.log("KALAM ROUTE EXPERIENCE SMOKE "+(errors.length?"REVIEW":"PASS"));
 console.log(JSON.stringify({routes_scanned:report.routes_scanned,viewport_checks:report.viewport_checks,horizontal_overflow_findings:report.horizontal_overflow_findings,keyboard_findings:report.keyboard_findings,scan_errors:report.scan_errors,output:"qa/generated/kalam-brand-route-experience-smoke.json"},null,2));
-if(report.scan_errors>0)process.exitCode=1;
+if(report.scan_errors>0||!report.build_commit_matches_inventory)process.exitCode=1;

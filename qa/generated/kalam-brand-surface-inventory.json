@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-01T13:57:37.141Z",
-  "commit": "a6399efe06284f8fd3e40e6227c02047ea24924a",
+  "generated_at": "2026-11-01T17:21:25.222Z",
+  "commit": "9b63500cd905ebb661197559df77cc2e991aa587",
   "working_tree": {
-    "dirty": true,
-    "change_count": 94
+    "dirty": false,
+    "change_count": 0
   },
   "counts": {
     "discovery_files": 593,
@@ -12,16 +12,16 @@
     "components": 83,
     "css_design_files": 8,
     "public_assets": 280,
-    "metadata_candidates": 4,
+    "metadata_candidates": 3,
     "communication_candidates": 5,
-    "documentation_files": 97,
+    "documentation_files": 99,
     "historical_evidence_documents": 49,
-    "internal_governance_documents": 47,
+    "internal_governance_documents": 49,
     "actual_customer_documents": 1,
     "binary_assets": 9,
     "font_assets": 2,
     "inventory_rows": 593,
-    "automated_findings": 48
+    "automated_findings": 49
   },
   "route_state_coverage": {
     "routes": 92,
@@ -7068,21 +7068,6 @@
       "owner": "UNASSIGNED"
     },
     {
-      "surface_id": "apps-web-src-app-manifest-ts",
-      "route_or_file": "apps/web/src/app/manifest.ts",
-      "route": "",
-      "audience": "public-or-shared",
-      "type": "metadata-structured-data",
-      "states": "not-applicable",
-      "brand_status": "NEEDS_MANUAL_REVIEW",
-      "terminology_status": "NEEDS_MANUAL_REVIEW",
-      "accessibility_status": "REVIEW_IF_APPLICABLE",
-      "claim_status": "NEEDS_CLAIM_REVIEW",
-      "test_status": "NO_SURFACE_SPECIFIC_EVIDENCE_RECORDED",
-      "evidence": "Inventory discovery only; automated detection is not certification.",
-      "owner": "UNASSIGNED"
-    },
-    {
       "surface_id": "apps-web-src-app-robots-ts",
       "route_or_file": "apps/web/src/app/robots.ts",
       "route": "",
@@ -7145,6 +7130,21 @@
     {
       "surface_id": "docs-01-governance-change-control-md",
       "route_or_file": "docs/01-governance/CHANGE_CONTROL.md",
+      "route": "",
+      "audience": "internal-governance-or-delivery",
+      "type": "internal-governance-document",
+      "states": "not-applicable",
+      "brand_status": "NEEDS_MANUAL_REVIEW",
+      "terminology_status": "NEEDS_MANUAL_REVIEW",
+      "accessibility_status": "REVIEW_IF_APPLICABLE",
+      "claim_status": "NEEDS_CLAIM_REVIEW",
+      "test_status": "NO_SURFACE_SPECIFIC_EVIDENCE_RECORDED",
+      "evidence": "Inventory discovery only; automated detection is not certification.",
+      "owner": "UNASSIGNED"
+    },
+    {
+      "surface_id": "docs-01-governance-kalam-claim-registry-md",
+      "route_or_file": "docs/01-governance/KALAM_CLAIM_REGISTRY.md",
       "route": "",
       "audience": "internal-governance-or-delivery",
       "type": "internal-governance-document",
@@ -7235,6 +7235,21 @@
     {
       "surface_id": "docs-02-product-frontend-design-system-baseline-md",
       "route_or_file": "docs/02-product/FRONTEND_DESIGN_SYSTEM_BASELINE.md",
+      "route": "",
+      "audience": "internal-governance-or-delivery",
+      "type": "internal-governance-document",
+      "states": "not-applicable",
+      "brand_status": "NEEDS_MANUAL_REVIEW",
+      "terminology_status": "NEEDS_MANUAL_REVIEW",
+      "accessibility_status": "REVIEW_IF_APPLICABLE",
+      "claim_status": "NEEDS_CLAIM_REVIEW",
+      "test_status": "NO_SURFACE_SPECIFIC_EVIDENCE_RECORDED",
+      "evidence": "Inventory discovery only; automated detection is not certification.",
+      "owner": "UNASSIGNED"
+    },
+    {
+      "surface_id": "docs-02-product-kalam-9-9-brand-surface-governance-md",
+      "route_or_file": "docs/02-product/KALAM_9_9_BRAND_SURFACE_GOVERNANCE.md",
       "route": "",
       "audience": "internal-governance-or-delivery",
       "type": "internal-governance-document",
@@ -8703,21 +8718,6 @@
       "owner": "UNASSIGNED"
     },
     {
-      "surface_id": "apps-web-src-app-api-v1-path-route-ts",
-      "route_or_file": "apps/web/src/app/api/v1/[...path]/route.ts",
-      "route": "",
-      "audience": "public-or-shared",
-      "type": "application-source",
-      "states": "not-applicable",
-      "brand_status": "NEEDS_MANUAL_REVIEW",
-      "terminology_status": "NEEDS_MANUAL_REVIEW",
-      "accessibility_status": "REVIEW_IF_APPLICABLE",
-      "claim_status": "NEEDS_CLAIM_REVIEW",
-      "test_status": "NO_SURFACE_SPECIFIC_EVIDENCE_RECORDED",
-      "evidence": "Inventory discovery only; automated detection is not certification.",
-      "owner": "UNASSIGNED"
-    },
-    {
       "surface_id": "apps-web-src-app-dashboard-admin-inquiries-queue-tsx",
       "route_or_file": "apps/web/src/app/dashboard/admin/inquiries/queue.tsx",
       "route": "",
@@ -8944,6 +8944,14 @@
     }
   ],
   "findings": [
+    {
+      "rule": "legacy-identity",
+      "file": "docs/02-product/KALAM_9_9_BRAND_SURFACE_GOVERNANCE.md",
+      "line": 136,
+      "match": "Kognivon",
+      "disposition": "APPROVED_LEGACY_IDENTITY_POLICY_REFERENCE",
+      "evidence": "Kalam is the only customer-facing master brand. Historical Kognivon/CorpLMS identifiers may remain only where required for technical continuity, migrations, database/API compatibil"
+    },
     {
       "rule": "legacy-identity",
       "file": "docs/06-delivery/KOGNIVON_LOCAL_REMAINING_TASKS_CLOSURE_2026-09-29.md",

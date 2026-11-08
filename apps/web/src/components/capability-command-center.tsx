@@ -67,7 +67,7 @@ export function CapabilityCommandCenter() {
 
           <div className={styles.commandFooter}>
             <span><Activity size={15}/> Connected operating signal</span>
-            <span>Role → Learn → Assess → Evidence → Act</span>
+            <span>Expectation → Capability → Evidence → Action → Readiness</span>
           </div>
         </div>
       </div>

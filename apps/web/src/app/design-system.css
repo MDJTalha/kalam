@@ -643,7 +643,12 @@
 }
 
 
-/* WCAG 2.2 AA: keep each daily chart selector a full-size touch target. */
-.dashboard-chart-labels{display:flex;gap:0;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin}
-.dashboard-chart-labels button{display:inline-flex;flex:0 0 24px;align-items:center;justify-content:center;min-width:24px;min-height:24px;padding:0 2px;font-size:9px;overflow:visible}
-.form-error{color:#8f2634}
+/* Kalam global accessibility contract: all branded motion respects user preference. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

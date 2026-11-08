@@ -92,7 +92,7 @@ export default function Home() {
             </div>
             <CapabilityCommandCenter/>
           </div>
-          <div className={styles.heroRail}><strong>FROM EXPECTATION TO READINESS</strong><span>Expectation <ChevronRight size={14}/> Capability <ChevronRight size={14}/> Evidence <ChevronRight size={14}/> Action <ChevronRight size={14}/> Readiness</span></div>
+          <div className={styles.heroRail} aria-label="Kalam capability model"><strong>THE KALAM CAPABILITY MODEL</strong><span>Expectation <ChevronRight size={14}/> Capability <ChevronRight size={14}/> Evidence <ChevronRight size={14}/> Action <ChevronRight size={14}/> Readiness</span></div>
         </div>
       </section>
 
