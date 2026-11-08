@@ -7,9 +7,7 @@ import { apiJsonResult, requireUser } from "@/lib/server-api";
 
 type Person = { id: string; email: string; first_name: string; last_name: string; employee_number?: string | null; job_title?: string | null; manager_id?: string | null; org_unit_id?: string | null; is_active: boolean };
 type Role = { id: string; name: string };
-type RolePage = { items: Role[]; total: number };
 type Unit = { id: string; name: string; unit_type: string };
-type UnitPage = { items: Unit[]; total: number };
 type PeoplePage = { items: Person[]; total: number; page: number; page_size: number };
 
 export default async function UserAdministrationPage({ searchParams }: { searchParams: Promise<{ person?: string; q?: string; page?: string }> }) {

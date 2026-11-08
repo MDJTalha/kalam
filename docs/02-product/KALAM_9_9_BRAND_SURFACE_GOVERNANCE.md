@@ -180,4 +180,3 @@ Leadership owns strategic exceptions and final certification.
 ## Operating rule
 
 Preserve existing implementation when it is demonstrably stronger than the written guideline; update the guideline to match. Where the canonical standard is stronger and the implementation is outdated, update implementation. Where both conflict, establish one canonical decision and remove the competing standard.
-

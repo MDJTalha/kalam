@@ -25,7 +25,7 @@ export function CapabilityCommandCenter() {
           <div className={styles.commandHeader}>
             <div>
               <span>EXECUTIVE VIEW</span>
-              <h3>Capability & readiness overview</h3>
+              <h2>Capability & readiness overview</h2>
               <p>Signals from learning, skills, evidence and compliance.</p>
             </div>
             <span className={styles.commandPeriod}>Q3 · GLOBAL</span>

@@ -56,9 +56,9 @@ export function LearningMomentumChart({ points }: { points: TrendPoint[] }) {
           <span><b>{formatNumber(totals.completions)}</b> completions</span>
           <span>{peak ? <>Peak <b>{formatDate(peak.date, { month: "short", day: "numeric" })}</b></> : "Peak —"}</span>
         </div>
-        <div className="dashboard-chart-ranges" aria-label="Learning trend range">
+        <div className="dashboard-chart-ranges" role="group" aria-label="Learning trend range">
           {[7, 14, 30].map(value => (
-            <button key={value} type="button" className={range === value ? "active" : ""} onClick={() => {
+            <button key={value} type="button" className={range === value ? "active" : ""} aria-pressed={range === value} onClick={() => {
               setRange(value as 7 | 14 | 30);
               setActiveIndex(null);
             }}>{value}d</button>
@@ -86,10 +86,10 @@ export function LearningMomentumChart({ points }: { points: TrendPoint[] }) {
             );
           })}
         </svg>
-        <div className="dashboard-chart-labels">
+        <div className="dashboard-chart-labels" role="group" aria-label="Select a day to inspect learning activity">
           {visible.map((point, index) => (
-            <button key={point.date} type="button" className={index === active ? "active" : ""} onClick={() => setActiveIndex(index)}>
-              {formatDate(point.date, { month: "short", day: "numeric" })}
+            <button key={point.date} type="button" className={index === active ? "active" : ""} aria-label={formatDate(point.date, { weekday: "long", month: "long", day: "numeric", year: "numeric" })} title={formatDate(point.date, { month: "long", day: "numeric", year: "numeric" })} aria-pressed={index === active} onClick={() => setActiveIndex(index)}>
+              {formatDate(point.date, { day: "numeric" })}
             </button>
           ))}
         </div>

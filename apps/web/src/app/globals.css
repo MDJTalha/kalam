@@ -780,3 +780,14 @@ body{background:var(--bg);color:var(--ink)}
 .kalam-readiness{color:#236b43}
 .kalam-readiness.muted{color:#0068a5}
 .table-wrap[tabindex="0"]:focus-visible{outline:3px solid #1769aa;outline-offset:3px}
+
+
+/* Keep aria-controls targets mounted while their popovers are closed. */
+.account-popover[hidden],
+.notification-popover[hidden] {
+  display: none !important;
+}
+
+
+/* WCAG 2.2 AA: lookup options remain named, comfortably tappable controls. */
+.lookup-multi-option{min-height:32px}

@@ -23,7 +23,7 @@ export async function DashboardShell({ children, title, eyebrow = "Kalam Enterpr
     <GlobalSearchShortcut />
     <a className="skip-link" href="#main-content">Skip to main content</a>
     <aside className="sidebar">
-      <KalamBrand dark compact className="brand-lockup" />
+      <KalamBrand compact className="brand-lockup" />
       <WorkspaceNav roles={roles} permissions={permissions}/>
       <div className="sidebar-footer"><div className="system-status"><i/> Kalam secure workspace</div><small>{roles.length ? roles.join(" · ") : "Enterprise Workforce Capability Platform"}</small></div>
     </aside>

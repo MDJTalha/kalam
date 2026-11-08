@@ -142,6 +142,16 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
+  repository-hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run deterministic release hygiene audit
+        run: python qa/scripts/final_release_hygiene.py
+
   release-config:
     runs-on: ubuntu-latest
     steps:

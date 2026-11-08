@@ -33,7 +33,7 @@ export function AccountMenu({ displayName, email, role, initials }: Props) {
       <div><strong>{displayName}</strong><small>{role}</small></div>
       <ChevronDown size={14} aria-hidden="true" />
     </button>
-    {open && <div className="account-popover" id="account-menu-panel" role="menu" aria-label="Account menu">
+    <div className="account-popover" id="account-menu-panel" role="menu" aria-label="Account menu" hidden={!open}>
       <div className="account-popover-heading"><strong>{displayName}</strong><small>{email}</small></div>
       <Link role="menuitem" href="/dashboard/settings" onClick={() => setOpen(false)}><Settings2 size={15} aria-hidden="true" />Settings</Link>
       <Link role="menuitem" href="/dashboard/settings/sessions" onClick={() => setOpen(false)}><KeyRound size={15} aria-hidden="true" />Active sessions</Link>
@@ -41,6 +41,6 @@ export function AccountMenu({ displayName, email, role, initials }: Props) {
       <form action="/api/auth/logout" method="post">
         <button role="menuitem" type="submit"><LogOut size={15} aria-hidden="true" />Sign out</button>
       </form>
-    </div>}
+    </div>
   </div>;
 }
